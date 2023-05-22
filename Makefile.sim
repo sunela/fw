@@ -1,0 +1,24 @@
+OBJDIR = obj-sim/
+
+include Makefile.app
+
+CFLAGS += $(shell sdl2-config --cflags)
+LDLIBS += $(shell sdl2-config --libs)
+OBJS += sim.o
+
+
+vpath sim.c main
+
+
+all::		| $(OBJDIR:%/=%)
+all::		sim
+
+$(OBJDIR:%/=%):
+		mkdir -p $@
+
+sim:		$(OBJS_IN_OBJDIR)
+		$(CC) $(LDCFLAGS) -o $@ $(OBJS_IN_OBJDIR) $(LDLIBS)
+
+spotless::
+		rm -f sim
+		rm -rf obj-sim

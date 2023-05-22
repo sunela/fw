@@ -1,0 +1,33 @@
+With the exceptions noted below, the content of this repository is distributed
+under the terms of the MIT License. A copy of the license can be found in the
+file LICENSE.MIT
+
+
+Vector fonts and polygon drawing from Espruino
+----------------------------------------------
+
+The functions in gfx/poly.c and gfx/vfont.c were extracted from Espruino:
+https://github.com/espruino/Espruino/tree/master/libs/graphics
+
+They are Copyright 2019 Gordon Williams, Pur3 Ltd, and licensed under the
+Mozilla Public License Version 2.0. See LICENSE.MPL for a copy of the license.
+
+Changes to match the coding style of the rest of the project and changes
+required for compatibility were made by Werner Almesberger.
+
+
+Citrine logo
+------------
+
+The original image used for citrine.jpg was generated with Stable Diffusion 2.1
+Demo:
+https://huggingface.co/spaces/stabilityai/stable-diffusion
+
+According to the License section,
+"The authors claim no rights on the outputs you generate, you are free to use
+ them and are accountable for their use which must not go against the
+ provisions set in this license."
+
+The AI model is covered by the CreativeML OpenRAIL++ license:
+https://huggingface.co/stabilityai/stable-diffusion-2/blob/main/LICENSE-MODEL
+

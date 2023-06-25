@@ -1,0 +1,16 @@
+Sunela Firmware
+===============
+
+This repository contains the Sunela firmware. Both a version ("fw") that runs
+on the real hardware and a simulator ("sim") that runs under Linux, using SDL,
+are built.
+
+Most of the firmware is distributed under the terms of the MIT License. See
+COPYING for more details.
+
+
+Build instructions
+------------------
+
+To do: document setting up the toolchain (we're based on OpenBouffalo, but
+there are some issues we need to work around.)

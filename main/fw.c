@@ -95,10 +95,14 @@ printf("\tUP\n");
 }
 
 
+/*
+ * @@@ why do we need to sample on both interrupt edges ?
+ */
+
 static void event_loop(void)
 {
 	unsigned uptime = 1;
-	int last_touch = -1;
+	int last_touch = 0;
 	bool button_down = 0;
 
 	while (1) {
@@ -111,13 +115,14 @@ printf("BUTTON (%u)\n", button_down);
 		}
 
 		on = !cst816_poll();
+		if (on != last_touch)
 //		if (on && !last_touch)
-if (on)
+//if (on)
 			process_touch();
 		last_touch = on;
 
 		timer_tick(uptime);
-//		msleep(1);
+		msleep(1);
 		uptime++;
 	}
 }

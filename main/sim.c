@@ -1,13 +1,17 @@
+#include <stddef.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <time.h>
 #include <assert.h>
+#include <sys/time.h>
 
 #include "SDL.h"
 
 #include "hal.h"
+#include "debug.h"
 #include "timer.h"
 #include "gfx.h"
 
@@ -16,9 +20,36 @@ static SDL_Window *win;
 static SDL_Surface *surf;
 static SDL_Renderer *rend;
 static SDL_Texture *tex;
+static bool quit = 0;
 
 
-/* --- Delays and sleping -------------------------------------------------- */
+/* --- Logging ------------------------------------------------------------- */
+
+
+void vdebug(const char *fmt, va_list ap)
+{
+	static struct timeval t0;
+	static bool first = 1;
+	struct timeval tv;
+
+	gettimeofday(&tv, NULL);
+	if (first) {
+		t0 = tv;
+		first = 0;
+	}
+	tv.tv_sec -= t0.tv_sec;
+	tv.tv_usec -= t0.tv_usec;
+	if (tv.tv_usec < 0) {
+		tv.tv_sec--;
+		tv.tv_usec += 1000 * 1000;
+	}
+	printf("[%3u.%03u] ",
+	    (unsigned) tv.tv_sec, (unsigned) tv.tv_usec / 1000);
+	vprintf(fmt, ap);
+}
+
+
+/* --- Delays and sleeping ------------------------------------------------- */
 
 
 void mdelay(unsigned ms)
@@ -47,15 +78,17 @@ static bool process_events(void)
 	SDL_Event event;
 
 	if (!SDL_PollEvent(&event))
-		return 1;
+		return 0;
 
 	switch (event.type) {
 	case SDL_QUIT:
-		return 0;
+		quit = 1;
+		return 1;
 	case SDL_KEYDOWN:
 		switch (event.key.keysym.sym) {
 		case SDLK_q:
-			return 0;
+			quit = 1;
+			return 1;
 		case SDLK_SPACE:
 			button_event(1);
 			break;
@@ -73,18 +106,21 @@ static bool process_events(void)
 	case SDL_MOUSEMOTION:
 		if (!touch_is_down)
 			return 1;
+debug("SDL_MOUSEMOTION\n");
 		if (event.motion.state & SDL_BUTTON_LMASK)
 			touch_move_event(event.motion.x, event.motion.y);
 		else
 			touch_up_event();
 		break;
 	case SDL_MOUSEBUTTONDOWN:
+debug("SDL_MOUSEBUTTONDOWN\n");
 		assert(!touch_is_down);
 		if (event.button.state == SDL_BUTTON_LEFT)
 			touch_down_event(event.motion.x, event.motion.y);
 		touch_is_down = 1;
 		break;
 	case SDL_MOUSEBUTTONUP:
+debug("SDL_MOUSEBUTTONUP\n");
 		/*
 		 * SDL sends mouse up and move events when hovering. Our touch
 		 * screen (probably) can't do this, so we filter such events.
@@ -105,10 +141,12 @@ static void event_loop(void)
 {
 	unsigned uptime = 1;
 
-	while (process_events()) {
-		timer_tick(uptime);
-		msleep(10);
-		uptime += 10;
+	while (!quit) {
+		if (!process_events()) {
+			timer_tick(uptime);
+			msleep(10);
+			uptime += 10;
+		}
 	}
 }
 
@@ -125,7 +163,7 @@ void update_display(struct gfx_drawable *da)
 		return;
 	gfx_reset(da);
 
-printf("update\n");
+debug("update\n");
 	assert(da->w == GFX_WIDTH);
 	assert(da->h == GFX_HEIGHT);
 	for (y = 0; y != GFX_HEIGHT; y++)

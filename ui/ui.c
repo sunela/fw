@@ -3,6 +3,7 @@
 #include <string.h>
 #include <assert.h>
 
+#include "debug.h"
 #include "hal.h"
 #include "timer.h"
 #include "gfx.h"
@@ -118,7 +119,7 @@ static void turn_off(void)
 
 static void toggle_on_off(void)
 {
-printf("toggle_on_off %u\n", is_on);
+debug("toggle_on_off %u\n", is_on);
 	if (is_on)
 		turn_off();
 	else
@@ -130,7 +131,7 @@ void button_event(bool down)
 {
 	static unsigned debounce  = 0;
 
-	printf("button %u\n", down);
+	debug("button %u\n", down);
 	if (now < debounce)
 		return;
 	if (!down) {
@@ -154,7 +155,7 @@ void button_event(bool down)
 
 void touch_down_event(unsigned x, unsigned y)
 {
-//	printf("mouse down %u %u\n", x, y);
+	debug("mouse down %u %u\n", x, y);
 	if (x >= GFX_WIDTH || y >= GFX_HEIGHT)
 		return;
 	if (current_ui && current_ui->events && current_ui->events->touch_tap)
@@ -165,7 +166,7 @@ void touch_down_event(unsigned x, unsigned y)
 
 void touch_move_event(unsigned x, unsigned y)
 {
-//	printf("mouse move %u %u\n", x, y);
+//	debug("mouse move %u %u\n", x, y);
 	if (x >= GFX_WIDTH || y >= GFX_HEIGHT)
 		return;
 	crosshair_show(x, y);
@@ -174,7 +175,7 @@ void touch_move_event(unsigned x, unsigned y)
 
 void touch_up_event(void)
 {
-//	printf("mouse up\n");
+	debug("mouse up\n");
 	crosshair_remove();
 }
 
@@ -184,7 +185,7 @@ void touch_up_event(void)
 
 void ui_switch(const struct ui *ui)
 {
-printf("ui_switch\n");
+debug("ui_switch\n");
 	if (current_ui) {
 		if (current_ui->close)
 			current_ui->close();

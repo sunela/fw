@@ -3,6 +3,7 @@
 #include <sys/types.h>
 
 #include "hal.h"
+#include "debug.h"
 #include "timer.h"
 #include "gfx.h"
 #include "ui.h"
@@ -169,7 +170,7 @@ static void release_button(void *user)
 {
 	unsigned n = (uintptr_t) user;
 
-printf("release_button 0x%x\n", n);
+debug("release_button 0x%x\n", n);
 	pin_button(n >> 4, n & 15,
 	    pin_len < MAX_PIN_LEN ? UP_BG : DISABLED_BG);
 	update_display(&da);
@@ -193,7 +194,7 @@ static void ui_pin_tap(unsigned x, unsigned y)
 		row = 3 - (y - BUTTON_Y0 + BUTTON_Y_SPACING / 2) /
 		    BUTTON_Y_SPACING;
 
-	printf("pin_tap %u %u -> %u %u\n", x, y, col, row);
+	debug("pin_tap X %u Y %u -> col %u row %u\n", x, y, col, row);
 	if (col == 0 && row == 0) { // cancel
 		if (pin_len == 0)
 			return;
@@ -206,6 +207,7 @@ static void ui_pin_tap(unsigned x, unsigned y)
 			draw_digits(UP_BG);
 		pin_len = 0;
 		pin = 0xffffffff;
+		update_display(&da);
 		return;
 	}
 	if (col == 2 && row == 0) { // enter
@@ -220,7 +222,7 @@ static void ui_pin_tap(unsigned x, unsigned y)
 	timer_set(&t_button, BUTTON_LINGER_MS, release_button,
 	    (void *) (uintptr_t) (col << 4 | row));
 	pin_button(col, row, DOWN_BG);
-	n = row ? (row - 1) * 3 + col + 1 : 0;
+	n = row ? (3 - row) * 3 + col + 1 : 0;
 	pin = pin << 4 | n;
 	pin_len++;
 	if (pin_len == 1)

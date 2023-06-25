@@ -1,9 +1,12 @@
+#include <stddef.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <time.h>
 #include <assert.h>
+#include <sys/time.h>
 
 #include "hw/board.h"
 #include "hw/bl808/delay.h"
@@ -16,11 +19,38 @@
 #include "hw/bl.h"
 
 #include "hal.h"
+#include "debug.h"
 #include "timer.h"
 #include "gfx.h"
 
 
-/* --- Delays and sleping -------------------------------------------------- */
+/* --- Logging ------------------------------------------------------------- */
+
+
+void vdebug(const char *fmt, va_list ap)
+{
+	static struct timeval t0;
+	static bool first = 1;
+	struct timeval tv;
+
+	gettimeofday(&tv, NULL);
+	if (first) {
+		t0 = tv;
+		first = 0;
+	}
+	tv.tv_sec -= t0.tv_sec;
+	tv.tv_usec -= t0.tv_usec;
+	if (tv.tv_usec < 0) {
+		tv.tv_sec--;
+		tv.tv_usec += 1000 * 1000;
+	}
+	printf("[%3u.%03u] ",
+	    (unsigned) tv.tv_sec, (unsigned) tv.tv_usec / 1000);
+	vprintf(fmt, ap);
+}
+
+
+/* --- Delays and sleeping ------------------------------------------------- */
 
 
 void msleep(unsigned ms)
@@ -42,7 +72,7 @@ static void process_touch(void)
 	const struct cst816_event *e = t.event;
 	static bool down = 0;
 
-printf("TOUCH\n");
+printf("TOUCH (%u)\n", down);
 mdelay(1);
 	cst816_read(&t);
 mdelay(1);
@@ -81,12 +111,13 @@ printf("BUTTON (%u)\n", button_down);
 		}
 
 		on = !cst816_poll();
-		if (on && !last_touch)
+//		if (on && !last_touch)
+if (on)
 			process_touch();
 		last_touch = on;
 
 		timer_tick(uptime);
-		msleep(1);
+//		msleep(1);
 		uptime++;
 	}
 }

@@ -1,7 +1,7 @@
-CFLAGS = -g -Wall -Wextra -Wshadow -Wno-unused-parameter \
+CFLAGS =  -g -Wall -Wextra -Wshadow -Wno-unused-parameter \
 	 -Wmissing-prototypes -Wmissing-declarations \
 	 -I$(shell pwd) -Isys -Igfx -Iui
-OBJS = ui.o timer.o basic.o poly.o vfont.o text.o ui_off.o ui_pin.o
+OBJS = ui.o timer.o debug.o basic.o poly.o vfont.o text.o ui_off.o ui_pin.o
 
 include Makefile.c-common
 
@@ -12,6 +12,7 @@ vpath vfont.c gfx
 vpath text.c gfx
 
 vpath timer.c sys
+vpath debug.c sys
 
 vpath ui.c ui
 vpath ui_pin.c ui

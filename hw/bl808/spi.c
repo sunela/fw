@@ -112,12 +112,13 @@ void spi_sync(void)
 	unsigned i;
 
 	/*
-	 * @@@ about 500 us
+	 * @@@ about 500 us (@@@ still ? - to make it work with -O9, we went
+	 * from 1000 to 10'000 ?)
 	 * If we reduce the delay to ~50 us, the LCD doesn't work.
 	 * This probably isn't an issue of SPI but of the LCD.
 	 * Maybe st7789.c needs some more delays ?
 	 */
-	for (i = 0; i != 1000; i++)
+	for (i = 0; i != 10000; i++)
 		asm("");
 }
 

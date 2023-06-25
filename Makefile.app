@@ -1,4 +1,4 @@
-CFLAGS =  -g -Wall -Wextra -Wshadow -Wno-unused-parameter \
+CFLAGS = -O9 -g -Wall -Wextra -Wshadow -Wno-unused-parameter \
 	 -Wmissing-prototypes -Wmissing-declarations \
 	 -I$(shell pwd) -Isys -Igfx -Iui
 OBJS = ui.o timer.o debug.o basic.o poly.o vfont.o text.o ui_off.o ui_pin.o

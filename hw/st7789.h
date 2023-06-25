@@ -1,5 +1,8 @@
 /*
  * st7789.h - Driver for the ST7789V TFT controller
+ *
+ * This work is licensed under the terms of the MIT License.
+ * A copy of the license can be found in the file LICENSE.MIT
  */
 
 #ifndef ST7789_H

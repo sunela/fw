@@ -1,4 +1,11 @@
 /*
+ * cst816.c - Driver for the CST816 touch screen controller
+ *
+ * This work is licensed under the terms of the MIT License.
+ * A copy of the license can be found in the file LICENSE.MIT
+ */
+
+/*
  * Reference code:
  * https://github.com/lupyuen/hynitron_i2c_cst0xxse/blob/master/cst0xx_core.c
  * Analysis and Rust code:

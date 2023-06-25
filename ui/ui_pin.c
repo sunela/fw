@@ -1,3 +1,10 @@
+/*
+ * ui_pin.c - User interface: PIN input
+ *
+ * This work is licensed under the terms of the MIT License.
+ * A copy of the license can be found in the file LICENSE.MIT
+ */
+
 #include <stdint.h>
 #include <stdio.h>
 #include <sys/types.h>

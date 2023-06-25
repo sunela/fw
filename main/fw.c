@@ -1,3 +1,10 @@
+/*
+ * fw.c - Hardware abstraction layer for running on, for now, the M1s Dock
+ *
+ * This work is licensed under the terms of the MIT License.
+ * A copy of the license can be found in the file LICENSE.MIT
+ */
+
 #include <stddef.h>
 #include <stdarg.h>
 #include <stdbool.h>

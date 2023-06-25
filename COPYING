@@ -31,3 +31,10 @@ According to the License section,
 The AI model is covered by the CreativeML OpenRAIL++ license:
 https://huggingface.co/stabilityai/stable-diffusion-2/blob/main/LICENSE-MODEL
 
+
+Makefile.c-common
+-----------------
+
+This file is originally licensed under GPLv2 or later. For compatibility with
+the rest of the Sunela project, it is now dual-licensed under the MIT License
+as well.

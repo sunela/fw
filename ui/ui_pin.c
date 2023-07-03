@@ -13,11 +13,8 @@
 #include "debug.h"
 #include "timer.h"
 #include "gfx.h"
+#include "pin.h"
 #include "ui.h"
-
-
-#define	MIN_PIN_LEN		4
-#define	MAX_PIN_LEN		8
 
 
 /* --- Keypad -------------------------------------------------------------- */
@@ -220,7 +217,14 @@ static void ui_pin_tap(unsigned x, unsigned y)
 	if (col == 2 && row == 0) { // enter
 		if (pin_len < MIN_PIN_LEN)
 			return;
-		printf("%08x\n", pin);
+debug("%08x\n", pin);
+		if (pin == DUMMY_PIN) {
+			pin_attempts = 0;
+			pin_cooldown = 0;
+			ui_switch(&ui_accounts);
+		} else {
+			ui_switch(&ui_fail);
+		}
 		return;
 	}
 	if (pin_len == MAX_PIN_LEN)
@@ -251,6 +255,8 @@ static void ui_pin_open(void)
 {
 	unsigned row, col;
 
+	pin = 0xffffffff;
+	pin_len = 0;
 	for (col = 0; col != 3; col++)
 		for (row = 0; row != 4; row++)
 			if (row > 0 || col == 1)

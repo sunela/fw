@@ -35,9 +35,16 @@ struct ui {
 
 extern struct gfx_drawable da;
 
+extern unsigned pin_cooldown; /* time when the PIN cooldown ends */
+extern unsigned pin_attempts; /* number of failed PIN entries */
+
 extern const struct ui ui_off;
 extern const struct ui ui_pin;
+extern const struct ui ui_fail;
+extern const struct ui ui_cooldown;
+extern const struct ui ui_accounts;
 
+void turn_off(void);
 
 void show_citrine(void);
 

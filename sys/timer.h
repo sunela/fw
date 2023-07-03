@@ -16,6 +16,7 @@ struct timer {
 };
 
 
+/* @@@ now counts in ms, so it will overflow 32 bits after 49 days */
 extern unsigned now;
 
 

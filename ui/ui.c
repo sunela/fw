@@ -24,6 +24,9 @@
 
 struct gfx_drawable da;
 
+unsigned pin_cooldown = 0;
+unsigned pin_attempts = 0;
+
 static gfx_color fb[GFX_WIDTH * GFX_HEIGHT];
 static const struct ui *current_ui = NULL;
 
@@ -110,11 +113,14 @@ static void turn_on(void)
 		return;
 	is_on = 1;
 	// @@@ hal_...
-	ui_switch(&ui_pin);
+	if (now < pin_cooldown)
+		ui_switch(&ui_cooldown);
+	else
+		ui_switch(&ui_pin);
 }
 
 
-static void turn_off(void)
+void turn_off(void)
 {
 	if (!is_on)
 		return;

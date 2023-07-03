@@ -66,10 +66,6 @@ void msleep(unsigned ms)
 }
 
 
-/* --- Touch screen -------------------------------------------------------- */
-
-
-
 /* --- Event loop ---------------------------------------------------------- */
 
 
@@ -144,6 +140,16 @@ void update_display(struct gfx_drawable *da)
 }
 
 
+/* --- Display on/off ------------------------------------------------------ */
+
+
+void display_on(bool on)
+{
+	/* @@@ also switch the LCD */
+	bl_on(on);
+}
+
+
 /* --- Command-line processing --------------------------------------------- */
 
 
@@ -188,7 +194,6 @@ int main(int argc, char **argv)
 	st7789_on();
 	st7789_init(LCD_SPI, LCD_RST, LCD_DnC, GFX_WIDTH, GFX_HEIGHT, 0, 20);
 	st7789_on();
-	bl_on(1);
 
 	cst816_init(TOUCH_I2C, TOUCH_I2C_ADDR, TOUCH_INT);
 

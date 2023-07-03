@@ -29,6 +29,7 @@ void mdelay(unsigned ms);
 void msleep(unsigned ms);
 
 void update_display(struct gfx_drawable *da);
+void display_on(bool on);
 
 void app_init(int param);
 

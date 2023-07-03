@@ -298,6 +298,7 @@ void app_init(int param)
 		demo_4();
 		break;
 	default:
+		ui_switch(&ui_off);
 		// @@@
 		break;
 	}

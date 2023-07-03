@@ -5,8 +5,23 @@
  * A copy of the license can be found in the file LICENSE.MIT
  */
 
+#include "hal.h"
 #include "ui.h"
 
 
+static void ui_off_open(void)
+{
+	display_on(0);
+}
+
+
+static void ui_off_close(void)
+{
+	display_on(1);
+}
+
+
 const struct ui ui_off = {
+	.open	= ui_off_open,
+	.close	= ui_off_close,
 };

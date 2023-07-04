@@ -448,7 +448,7 @@ static unsigned int vfGetCharFromPtr(struct gfx_drawable *da, int x1, int y1, in
   int w = 0;
   for (int i = 0; i < charLen; ++i) {
     short poly[86];
-    int polyLen;
+    int polyLen = 0;
     const uint8_t *p = vfGetPolyPtr(charPtr[i], &polyLen);
     for (int j = 0; j < polyLen; ++j) {
       uint8_t vertex = p[j];
@@ -472,7 +472,7 @@ unsigned int gfx_char_size(unsigned *res_w, unsigned *res_h,
   int w = 0;
   int h = 0;
   for (int i = 0; i < charLen; ++i) {
-    int polyLen;
+    int polyLen = 0;
     const uint8_t *p = vfGetPolyPtr(charPtr[i], &polyLen);
     for (int j = 0; j < polyLen; ++j) {
       uint8_t vertex = p[j];

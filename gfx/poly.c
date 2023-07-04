@@ -31,13 +31,13 @@ void gfx_poly(struct gfx_drawable *da, int points, const short *vertices,
   int miny = (int)(da->h-1);
   int maxy = 0;
   for (i=0;i<points;i++) {
-    assert(v[i].x < da->w);
+    assert(v[i].x < (int) da->w);
     // work out min and max
-    short y = v[i].y;
+    y = v[i].y;
     if (y<miny) miny=y;
     if (y>maxy) maxy=y;
   }
-  assert(maxy < da->h);
+  assert(maxy < (int) da->h);
 
   const int MAX_CROSSES = 64;
 

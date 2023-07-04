@@ -82,6 +82,9 @@ unsigned gfx_char_size(unsigned *res_w, unsigned *res_h,
     unsigned sizex, unsigned sizey, char ch);
 unsigned gfx_char(struct gfx_drawable *da, int x1, int y1,
     int sizex, int sizey, char ch, gfx_color color);
+
+void gfx_text_bbox(unsigned x, unsigned y, const char *s,
+    unsigned scale, int8_t align_x, int8_t align_y, struct gfx_rect *bb);
 void gfx_text(struct gfx_drawable *da, unsigned x, unsigned y, const char *s,
     unsigned scale, int8_t align_x, int8_t align_y, gfx_color color);
 

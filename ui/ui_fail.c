@@ -29,6 +29,7 @@ static struct timer t_tick;
 
 static void show_cooldown(void *user)
 {
+	static struct gfx_rect bb = { 0, 0, 0, 0 };
 	unsigned s = pin_cooldown < now ? 0 : (pin_cooldown - now) / 1000;
 	char buf[5];
 	char *t = buf + sizeof(buf);
@@ -43,12 +44,17 @@ static void show_cooldown(void *user)
 		*--t = '0' + s % 10;
 		s /= 10;
 	}
-	/* @@@ should get text bounding box */
-	gfx_clear(&da, GFX_BLACK);
+	if (user)
+		gfx_rect(&da, &bb, GFX_BLACK);
+
 	gfx_text(&da, GFX_WIDTH / 2, GFX_HEIGHT / 2, t, FONT_SIZE,
 	    GFX_CENTER, GFX_CENTER, GFX_RED);
 	update_display(&da);
-	timer_set(&t_tick, 1000, show_cooldown, NULL);
+
+	gfx_text_bbox(GFX_WIDTH / 2, GFX_HEIGHT / 2, t, FONT_SIZE,
+	    GFX_CENTER, GFX_CENTER, &bb);
+
+	timer_set(&t_tick, 1000, show_cooldown, show_cooldown);
 }
 
 

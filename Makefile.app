@@ -8,7 +8,7 @@
 CFLAGS = -O9 -g -Wall -Wextra -Wshadow -Wno-unused-parameter \
 	 -Wmissing-prototypes -Wmissing-declarations \
 	 -I$(shell pwd) -Isys -Igfx -Iui
-OBJS = ui.o timer.o debug.o basic.o poly.o vfont.o text.o \
+OBJS = ui.o timer.o debug.o rnd.o basic.o poly.o vfont.o text.o \
     ui_off.o ui_pin.o ui_fail.o ui_accounts.o
 
 include Makefile.c-common
@@ -21,6 +21,7 @@ vpath text.c gfx
 
 vpath timer.c sys
 vpath debug.c sys
+vpath rnd.c sys
 
 vpath ui.c ui
 vpath ui_pin.c ui

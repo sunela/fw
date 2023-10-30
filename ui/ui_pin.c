@@ -12,6 +12,7 @@
 #include "hal.h"
 #include "debug.h"
 #include "timer.h"
+#include "rnd.h"
 #include "gfx.h"
 #include "pin.h"
 #include "ui.h"
@@ -54,6 +55,7 @@
 static uint32_t pin = 0xffffffff;
 static unsigned pin_len = 0;
 static struct timer t_button;
+static uint8_t shuffle[10] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
 
 /* --- Draw input indicators ----------------------------------------------- */
@@ -138,6 +140,12 @@ static void equilateral(unsigned x, unsigned y, unsigned a)
 }
 
 
+static void pin_digit(unsigned x, unsigned y, uint8_t digit)
+{
+	pin_char(x, y, '0' + shuffle[digit]);
+}
+
+
 static void pin_button(unsigned col, unsigned row, gfx_color bg)
 {
 	unsigned x = BUTTON_X0 + BUTTON_X_SPACING * col;
@@ -145,11 +153,11 @@ static void pin_button(unsigned col, unsigned row, gfx_color bg)
 
 	gfx_disc(&da, x, y, BUTTON_R, bg);
 	if (row > 0) {
-		pin_char(x, y, '1' + (col + (3 - row) * 3));
+		pin_digit(x, y, 1 + (col + (3 - row) * 3));
 	} else if (col == 0) {	// X
 		cross(x, y, BUTTON_R * 0.8, 4);
 	} else if (col == 1) {	// "0"
-		pin_char(x, y, '0');
+		pin_digit(x, y, 0);
 	} else {	// >
 		equilateral(x, y, BUTTON_R * 1.4);
 	}
@@ -234,7 +242,7 @@ debug("%08x\n", pin);
 	    (void *) (uintptr_t) (col << 4 | row));
 	pin_button(col, row, DOWN_BG);
 	n = row ? (3 - row) * 3 + col + 1 : 0;
-	pin = pin << 4 | n;
+	pin = pin << 4 | shuffle[n];
 	pin_len++;
 	if (pin_len == 1)
 		pin_button(0, 0, SPECIAL_BG);
@@ -251,12 +259,27 @@ debug("%08x\n", pin);
 /* --- Open/close ---------------------------------------------------------- */
 
 
+static inline void swap(uint8_t *a, uint8_t *b)
+{
+	uint8_t tmp = *a;
+
+	*a = *b;
+	*b = tmp;
+}
+
+
 static void ui_pin_open(void)
 {
 	unsigned row, col;
+	uint8_t i;
 
 	pin = 0xffffffff;
 	pin_len = 0;
+	/*
+	 * @@@ use better algorithm
+	 */
+	for (i = 0; i != 10; i++)
+		swap(shuffle + i, shuffle + rnd(10));
 	for (col = 0; col != 3; col++)
 		for (row = 0; row != 4; row++)
 			if (row > 0 || col == 1)

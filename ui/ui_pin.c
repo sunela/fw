@@ -256,7 +256,7 @@ debug("%08x\n", pin);
 }
 
 
-/* --- Open/close ---------------------------------------------------------- */
+/* --- Shuffle the digit buttons ------------------------------------------- */
 
 
 static inline void swap(uint8_t *a, uint8_t *b)
@@ -268,18 +268,27 @@ static inline void swap(uint8_t *a, uint8_t *b)
 }
 
 
-static void ui_pin_open(void)
+void pin_shuffle_pad(void)
 {
-	unsigned row, col;
 	uint8_t i;
 
-	pin = 0xffffffff;
-	pin_len = 0;
 	/*
 	 * @@@ use better algorithm
 	 */
 	for (i = 0; i != 10; i++)
 		swap(shuffle + i, shuffle + rnd(10));
+}
+
+
+/* --- Open/close ---------------------------------------------------------- */
+
+
+static void ui_pin_open(void)
+{
+	unsigned row, col;
+
+	pin = 0xffffffff;
+	pin_len = 0;
 	for (col = 0; col != 3; col++)
 		for (row = 0; row != 4; row++)
 			if (row > 0 || col == 1)

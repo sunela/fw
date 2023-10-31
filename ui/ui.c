@@ -14,6 +14,7 @@
 #include "hal.h"
 #include "timer.h"
 #include "gfx.h"
+#include "pin.h"
 #include "ui.h"
 
 
@@ -113,6 +114,7 @@ static void turn_on(void)
 		return;
 	is_on = 1;
 	// @@@ hal_...
+	pin_shuffle_pad();
 	if (now < pin_cooldown)
 		ui_switch(&ui_cooldown);
 	else

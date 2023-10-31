@@ -23,4 +23,7 @@
 	(attempts) > PIN_FREE_ATTEMPTS + PIN_WAIT_LOG2 ? PIN_WAIT_MAX_S : \
 	PIN_WAIT_MIN_S << ((attempts) - PIN_FREE_ATTEMPTS))
 
+
+void pin_shuffle_pad(void);
+
 #endif /* !PIN_H */

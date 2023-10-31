@@ -7,12 +7,16 @@
 
 #include "hal.h"
 #include "gfx.h"
+#include "ui_list.h"
+#include "accounts.h"
 #include "ui.h"
 
 
 #define	HOLD_MS	(5 * 1000)
 
-#define	FONT_SIZE	24
+
+
+static struct ui_list list;
 
 
 /* --- Open/close ---------------------------------------------------------- */
@@ -20,13 +24,18 @@
 
 static void ui_accounts_open(void)
 {
-	gfx_text(&da, GFX_WIDTH / 2, GFX_HEIGHT / 2, "Accounts", FONT_SIZE,
-	    GFX_CENTER, GFX_CENTER, GFX_WHITE);
+	unsigned i;
+
+	ui_list_begin(&list);
+	for (i = 0; i != n_accounts; i++)
+		ui_list_add(&list, accounts[i].name, (void *) accounts + i);
+	ui_list_end(&list);
 }
 
 
 static void ui_accounts_close(void)
 {
+	ui_list_destroy(&list);
 }
 
 

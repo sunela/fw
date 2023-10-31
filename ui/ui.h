@@ -14,6 +14,9 @@
 
 
 #define	DEBOUNCE_MS	20
+
+#define	IDLE_S		5	/* @@@ make dynamic */
+
 //#define	LONG_MS		
 
 struct ui_events {
@@ -44,6 +47,7 @@ extern const struct ui ui_fail;
 extern const struct ui ui_cooldown;
 extern const struct ui ui_accounts;
 
+void progress(void);
 void turn_off(void);
 
 void show_citrine(void);

@@ -30,6 +30,7 @@ unsigned pin_attempts = 0;
 
 static gfx_color fb[GFX_WIDTH * GFX_HEIGHT];
 static const struct ui *current_ui = NULL;
+static struct timer idle_timer;
 
 
 /* --- Crosshair ----------------------------------------------------------- */
@@ -108,6 +109,18 @@ void show_citrine(void)
 static bool is_on = 0;
 
 
+static void idle_off(void *user)
+{
+	turn_off();
+}
+
+
+void progress(void)
+{
+	timer_set(&idle_timer, 1000 * IDLE_S, idle_off, NULL);
+}
+
+
 static void turn_on(void)
 {
 	if (is_on)
@@ -115,6 +128,7 @@ static void turn_on(void)
 	is_on = 1;
 	// @@@ hal_...
 	pin_shuffle_pad();
+	progress();
 	if (now < pin_cooldown)
 		ui_switch(&ui_cooldown);
 	else
@@ -285,6 +299,8 @@ void app_init(int param)
 {
 	gfx_da_init(&da, GFX_WIDTH, GFX_HEIGHT, fb);
 	gfx_clear(&da, gfx_hex(0));
+
+	timer_init(&idle_timer);
 
 	switch (param) {
 	case 1:

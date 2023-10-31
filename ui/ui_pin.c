@@ -210,6 +210,7 @@ static void ui_pin_tap(unsigned x, unsigned y)
 	if (col == 0 && row == 0) { // cancel
 		if (pin_len == 0)
 			return;
+		progress();
 		timer_flush(&t_button);
 		clear_indicators(pin_len);
 		clear_button(0, 0);
@@ -226,6 +227,7 @@ static void ui_pin_tap(unsigned x, unsigned y)
 		if (pin_len < MIN_PIN_LEN)
 			return;
 debug("%08x\n", pin);
+		progress();
 		if (pin == DUMMY_PIN) {
 			pin_attempts = 0;
 			pin_cooldown = 0;
@@ -237,6 +239,7 @@ debug("%08x\n", pin);
 	}
 	if (pin_len == MAX_PIN_LEN)
 		return;
+	progress();
 	timer_flush(&t_button);
 	timer_set(&t_button, BUTTON_LINGER_MS, release_button,
 	    (void *) (uintptr_t) (col << 4 | row));

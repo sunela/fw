@@ -8,6 +8,7 @@
 #include <stdlib.h>
 
 //#include "hal.h"
+#include "lib/alloc.h"
 #include "gfx.h"
 #include "ui.h"
 #include "ui_list.h"
@@ -36,7 +37,7 @@ void ui_list_add(struct ui_list *list, const char *label, void *user)
 {
 	struct ui_list_entry *e;
 
-	e = malloc(sizeof(struct ui_list));
+	e = alloc_type(struct ui_list_entry);
 	e->label = label;
 	e->user = user;
 	e->next = NULL;

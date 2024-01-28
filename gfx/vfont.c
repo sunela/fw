@@ -483,8 +483,8 @@ unsigned int gfx_char_size(unsigned *res_w, unsigned *res_h,
       if (vy>h) h=vy;
     }
   }
-  if (res_w) *res_w = (w * sizex / VF_SCALE);
-  if (res_h) *res_h = (h * sizey / VF_SCALE);
+  if (res_w) *res_w = (w * sizex / VF_SCALE) + 1;
+  if (res_h) *res_h = (h * sizey / VF_SCALE) + 1;
   return ((unsigned int)(w+1+VF_CHAR_SPACING)*sizex/VF_SCALE);
 }
 

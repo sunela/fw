@@ -88,9 +88,6 @@ void gfx_text_bbox(unsigned x, unsigned y, const char *s,
 void gfx_text(struct gfx_drawable *da, unsigned x, unsigned y, const char *s,
     unsigned scale, int8_t align_x, int8_t align_y, gfx_color color);
 
-void gfx_update(struct gfx_drawable *da);
-void gfx_display(struct gfx_drawable *da);
-
 void gfx_reset(struct gfx_drawable *da);
 void gfx_da_init(struct gfx_drawable *da, unsigned w, unsigned h,
     gfx_color *fb);

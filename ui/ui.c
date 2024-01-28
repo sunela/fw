@@ -14,6 +14,7 @@
 #include "hal.h"
 #include "timer.h"
 #include "gfx.h"
+#include "long_text.h"
 #include "pin.h"
 #include "ui.h"
 
@@ -292,6 +293,36 @@ static void demo_4(void)
 }
 
 
+/* Horizontally scrolling text */
+
+
+#define	DEMO_5_HEIGHT	32
+#define	DEMO_5_HOLD_MS	500
+#define	DEMO_5_DELAY_MS	10
+#define	DEMO_5_STEP	2
+
+
+static void demo_5(void)
+{
+	struct long_text lt;
+	unsigned i = 10;
+
+	long_text_setup(&lt, &da, 0, (GFX_HEIGHT - DEMO_5_HEIGHT) / 2,
+	    GFX_WIDTH, DEMO_5_HEIGHT, "THIS IS A SCROLLING TEXT.",
+	    DEMO_5_HEIGHT, GFX_WHITE, GFX_BLUE);
+	while (i) {
+		bool hold = long_text_scroll(&lt, &da, -DEMO_5_STEP);
+
+		update_display(&da);
+		if (hold) {
+			msleep(DEMO_5_HOLD_MS - DEMO_5_DELAY_MS);
+			i--;
+		}
+		msleep(DEMO_5_DELAY_MS);
+	}
+}
+
+
 /* --- Initialization ------------------------------------------------------ */
 
 
@@ -314,6 +345,9 @@ void app_init(int param)
 		break;
 	case 4:
 		demo_4();
+		break;
+	case 5:
+		demo_5();
 		break;
 	default:
 		ui_switch(&ui_off);

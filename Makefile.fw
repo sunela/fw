@@ -8,6 +8,8 @@
 CROSS = riscv64-unknown-linux-gnu-
 OBJDIR = obj-fw/
 
+CFLAGS = -O9
+
 include Makefile.app
 
 CFLAGS += -Ihw -Ihw/bl808

@@ -5,7 +5,7 @@
 # A copy of the license can be found in the file LICENSE.MIT
 #
 
-CFLAGS = -O9 -g -Wall -Wextra -Wshadow -Wno-unused-parameter \
+CFLAGS += -g -Wall -Wextra -Wshadow -Wno-unused-parameter \
 	 -Wmissing-prototypes -Wmissing-declarations \
 	 -I$(shell pwd) -Isys -Igfx -Iui
 OBJS = ui.o timer.o debug.o rnd.o basic.o poly.o vfont.o text.o \

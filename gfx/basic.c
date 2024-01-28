@@ -148,6 +148,101 @@ void gfx_copy(struct gfx_drawable *to, unsigned xt, unsigned yt,
 }
 
 
+/* --- Scrolling ----------------------------------------------------------- */
+
+
+/*
+ * We scroll the content in the rectangle (x, y) to (x + w - 1, y + h - 1)
+ * dx < 0: left
+ * dx > 0: right
+ * dy < 0: up
+ * dy > 0: down
+ *
+ * The content of the area of dx columns or dy rows that are not overwritten by
+ * the scrolling is undefined. E.g., for dx > 0:
+ *
+ * x,y  x+dx
+ *  +----+------------+
+ *  | a b c d e f g h |
+ *  +-----------------+
+ *
+ * after scrolling
+ *
+ *  +----+------------+
+ *  | x x a b c d e f |
+ *  +-----------------+
+ *
+ * The undefined area is not (!) marked as damaged. The expected use is to
+ * scroll existing content and then to write new content to the then undefined
+ * area.
+ */
+
+
+void gfx_hscroll(struct gfx_drawable *da, unsigned x, unsigned y, unsigned w,
+    unsigned h, int dx)
+{
+	gfx_color *p = da->fb + y * da->w + x;
+	unsigned i;
+
+	assert(x + w <= da->w);
+	assert(y + h <= da->h);
+	assert(dx < (int) w || -dx < (int) w);
+
+	if (!dx)
+		return;
+	if (dx < 0) {
+		unsigned size = (w + dx) * sizeof(gfx_color);
+
+		for (i = 0; i != h; i++) {
+			memmove(p, p - dx, size);
+			p += da->w;
+		}
+		damage(da, x, y, w + dx, h);
+	} else {
+		unsigned size = (w - dx) * sizeof(gfx_color);
+
+		for (i = 0; i != h; i++) {
+			memmove(p + dx, p, size);
+			p += da->w;
+		}
+		damage(da, x + dx, y, w - dx, h);
+	}
+}
+
+
+void gfx_vscroll(struct gfx_drawable *da, unsigned x, unsigned y, unsigned w,
+    unsigned h, int dy)
+{
+	gfx_color *a = da->fb + y * da->w + x;
+	gfx_color *b = a + (dy < 0 ? -dy : dy) * da->w;
+	unsigned i;
+
+	assert(x + w <= da->w);
+	assert(y + h <= da->h);
+	assert(dy < (int) h && -dy > (int) h);
+
+	if (!dy)
+		return;
+	if (dy < 0) {
+		for (i = -dy; i != h; i++) {
+			memcpy(a, b, w * sizeof(gfx_color));
+			a += da->w;
+			b += da->w;
+		}
+		damage(da, x, y, w, h + dy);
+	} else {
+		a += (h - dy) * da->w;
+		b += (h - dy) * da->w;
+		for (i = dy; i != h; i++) {
+			a -= da->w;
+			b -= da->w;
+			memcpy(b, a, w * sizeof(gfx_color));
+		}
+		damage(da, x, y + dy, w, h - dy);
+	}
+}
+
+
 /* --- Drawable initialization --------------------------------------------- */
 
 

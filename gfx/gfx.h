@@ -78,6 +78,11 @@ void gfx_copy(struct gfx_drawable *to, unsigned xt, unsigned yt,
 void gfx_poly(struct gfx_drawable *da, int points, const short *v,
     gfx_color color);
 
+void gfx_hscroll(struct gfx_drawable *da, unsigned x, unsigned y, unsigned w,
+    unsigned h, int dx);
+void gfx_vscroll(struct gfx_drawable *da, unsigned x, unsigned y, unsigned w,
+    unsigned h, int dy);
+
 unsigned gfx_char_size(unsigned *res_w, unsigned *res_h,
     unsigned sizex, unsigned sizey, char ch);
 unsigned gfx_char(struct gfx_drawable *da, int x1, int y1,

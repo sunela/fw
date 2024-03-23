@@ -163,7 +163,7 @@ static void event_loop(void)
 
 void update_display(struct gfx_drawable *da)
 {
-	const gfx_color *p = da->fb;
+	const gfx_color *p;
 	unsigned x, y;
 
 	if (!da->changed)
@@ -173,8 +173,11 @@ void update_display(struct gfx_drawable *da)
 debug("update\n");
 	assert(da->w == GFX_WIDTH);
 	assert(da->h == GFX_HEIGHT);
-	for (y = 0; y != GFX_HEIGHT; y++)
-		for (x = 0; x != GFX_WIDTH; x++) {
+	assert(da->damage.w <= GFX_WIDTH);
+	assert(da->damage.h <= GFX_HEIGHT);
+	for (y = da->damage.y; y != da->damage.y + da->damage.h; y++) {
+		p = da->fb + y * da->w + da->damage.x;
+		for (x = da->damage.x; x != da->damage.x + da->damage.w; x++) {
 			SDL_Rect rect = {
 				.x = x,
 				.y = y,
@@ -188,6 +191,7 @@ debug("update\n");
 			    (*p & 0x1f00) >> 5));
 			p++;
 		}
+	}
 
 	SDL_UpdateTexture(tex, NULL, surf->pixels, surf->pitch);
 	SDL_RenderClear(rend);

@@ -30,12 +30,12 @@ static void damage(struct gfx_drawable *da, unsigned x, unsigned y,
 		return;
 	}
 	if (r->x > x) {
-		r->x = x;
 		r->w += r->x - x;
+		r->x = x;
 	}
 	if (r->y > y) {
-		r->y = y;
 		r->h += r->y - y;
+		r->y = y;
 	}
 	if (r->x + r->w < x + w)
 		r->w = x + w - r->x;

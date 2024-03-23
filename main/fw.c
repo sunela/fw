@@ -136,7 +136,17 @@ printf("BUTTON (%u)\n", button_down);
 
 void update_display(struct gfx_drawable *da)
 {
+	if (!da->changed)
+		return;
+	gfx_reset(da);
+	assert(da->damage.w);
+	assert(da->damage.h);
+#if 1
+	st7789_update(da->fb, da->damage.x, da->damage.y,
+	    da->damage.x + da->damage.w - 1, da->damage.y + da->damage.h - 1);
+#else
 	st7789_update(da->fb, 0, 0, GFX_WIDTH - 1, GFX_HEIGHT - 1);
+#endif
 }
 
 

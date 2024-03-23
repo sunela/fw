@@ -19,6 +19,7 @@ static unsigned st7789_spi;
 static unsigned st7789_dnc;
 static unsigned	st7789_xoff;
 static unsigned	st7789_yoff;
+static unsigned	st7789_width;
 
 
 /* --- ST7789V commands ---------------------------------------------------- */
@@ -74,15 +75,36 @@ static void st7789_cmd32(uint8_t cmd, uint32_t value)
 }
 
 
-static void st7789_send(uint8_t cmd, const void *buf, unsigned len)
+/* --- Send a block of data ------------------------------------------------ */
+
+
+static void st7789_send_begin(uint8_t cmd)
 {
 	spi_start();
 	gpio_out(st7789_dnc, 0);
 	spi_send(&cmd, 1);
 	spi_sync();
 	gpio_out(st7789_dnc, 1);
+}
+
+
+static void st7789_send_data(const void *buf, unsigned len)
+{
 	spi_send(buf, len);
+}
+
+
+static void st7789_send_end(void)
+{
 	spi_end();
+}
+
+
+static void st7789_send(uint8_t cmd, const void *buf, unsigned len)
+{
+	st7789_send_begin(cmd);
+	st7789_send_data(buf, len);
+	st7789_send_end();
 }
 
 
@@ -97,7 +119,19 @@ void st7789_update(const void *fb, unsigned x0, unsigned y0, unsigned x1,
 	st7789_cmd32(ST7789_RASET,
 	    (y0 + st7789_yoff) << 16 | (y1 + st7789_yoff));
 
-	st7789_send(ST7789_RAMWR, fb, (x1 - x0 + 1) * (y1 - y0 + 1) * 2);
+	if (x0 == 0 && x1 == st7789_width - 1) {
+		st7789_send(ST7789_RAMWR, fb + y0 * st7789_width * 2,
+		    st7789_width * (y1 - y0 + 1) * 2);
+	} else {
+		const void *p = fb + (y0 * st7789_width + x0) * 2;
+
+		st7789_send_begin(ST7789_RAMWR);
+		for (unsigned y = y0; y <= y1; y++) {
+			st7789_send_data(p, (x1 - x0 + 1) * 2);
+			p += st7789_width * 2;
+		}
+		st7789_send_end();
+	}
 
 	/* @@@ we need a small delay between frames */
 	mdelay(1);
@@ -118,6 +152,7 @@ void st7789_init(unsigned spi, unsigned rst, unsigned dnc,
 	st7789_dnc = dnc;
 	st7789_xoff = xoff;
 	st7789_yoff = yoff;
+	st7789_width = width;
 
 	gpio_cfg_out(rst, 1, 0);
 	gpio_cfg_out(dnc, 1, 0);

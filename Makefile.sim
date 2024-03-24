@@ -11,10 +11,11 @@ include Makefile.app
 
 CFLAGS += $(shell sdl2-config --cflags)
 LDLIBS += $(shell sdl2-config --libs)
-OBJS += sim.o
+OBJS += sim.o shared.o
 
 
 vpath sim.c main
+vpath shared.c main
 
 
 all::		| $(OBJDIR:%/=%)

@@ -31,32 +31,6 @@
 #include "gfx.h"
 
 
-/* --- Logging ------------------------------------------------------------- */
-
-
-void vdebug(const char *fmt, va_list ap)
-{
-	static struct timeval t0;
-	static bool first = 1;
-	struct timeval tv;
-
-	gettimeofday(&tv, NULL);
-	if (first) {
-		t0 = tv;
-		first = 0;
-	}
-	tv.tv_sec -= t0.tv_sec;
-	tv.tv_usec -= t0.tv_usec;
-	if (tv.tv_usec < 0) {
-		tv.tv_sec--;
-		tv.tv_usec += 1000 * 1000;
-	}
-	printf("[%3u.%03u] ",
-	    (unsigned) tv.tv_sec, (unsigned) tv.tv_usec / 1000);
-	vprintf(fmt, ap);
-}
-
-
 /* --- Delays and sleeping ------------------------------------------------- */
 
 

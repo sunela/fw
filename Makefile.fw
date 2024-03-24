@@ -13,7 +13,7 @@ CFLAGS = -O9
 include Makefile.app
 
 CFLAGS += -Ihw -Ihw/bl808
-OBJS += fw.o mmio.o gpio.o spi.o i2c.o st7789.o bl.o cst816.o
+OBJS += fw.o shared.o mmio.o gpio.o spi.o i2c.o st7789.o bl.o cst816.o
 
 
 vpath mmio.c hw/bl808
@@ -26,6 +26,7 @@ vpath bl.c hw
 vpath cst816.c hw
 
 vpath fw.c main
+vpath shared.c main
 
 
 all::		| $(OBJDIR:%/=%)

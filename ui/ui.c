@@ -311,9 +311,12 @@ static void demo_5(void)
 	    GFX_WIDTH, DEMO_5_HEIGHT, "THIS IS A SCROLLING TEXT.",
 	    DEMO_5_HEIGHT, GFX_WHITE, GFX_BLUE);
 	while (i) {
-		bool hold = long_text_scroll(&lt, &da, -DEMO_5_STEP);
+		bool hold;
 
+		t0();
+		hold = long_text_scroll(&lt, &da, -DEMO_5_STEP);
 		update_display(&da);
+		t1("scroll & update");
 		if (hold) {
 			msleep(DEMO_5_HOLD_MS - DEMO_5_DELAY_MS);
 			i--;

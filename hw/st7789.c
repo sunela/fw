@@ -24,17 +24,18 @@ static unsigned	st7789_width;
 
 /* --- ST7789V commands ---------------------------------------------------- */
 
-#define	ST7789_SLPOUT	0x11
-#define	ST7789_PTLON	0x12
-#define	ST7789_NORON	0x13
-#define	ST7789_INVON	0x21
-#define	ST7789_DISPON	0x29
-#define	ST7789_CASET	0x2a
-#define	ST7789_RASET	0x2b
-#define	ST7789_RAMWR	0x2c
-#define	ST7789_MADCTL	0x36
-#define	ST7789_PTLAR	0x30
-#define	ST7789_COLMOD	0x3a
+
+#define	ST7789_SLPOUT	0x11	// Sleep Out
+#define	ST7789_PTLON	0x12	// Partial Display Mode On 
+#define	ST7789_NORON	0x13	// Normal Display Mode On 
+#define	ST7789_INVON	0x21	// Display Inversion On
+#define	ST7789_DISPON	0x29	// Display On
+#define	ST7789_CASET	0x2a	// Column Address Set
+#define	ST7789_RASET	0x2b	// Row Address Set
+#define	ST7789_RAMWR	0x2c	// Memory Write
+#define	ST7789_PTLAR	0x30	// Partial Area
+#define	ST7789_MADCTL	0x36	// Memory Data Access Control
+#define	ST7789_COLMOD	0x3a	// Interface Pixel Format
 
 
 /* --- Send commands and parameters ---------------------------------------- */
@@ -172,8 +173,15 @@ void st7789_init(unsigned spi, unsigned rst, unsigned dnc,
 
 	/* --- display organization --- */
 
-	st7789_cmd8(ST7789_COLMOD, 5 << 4 | 5);	// pixel format
+	st7789_cmd8(ST7789_COLMOD, 5 << 4 | 5);
+		// 65k RGB interface; 16 bit/pixel control interface
 	st7789_cmd8(ST7789_MADCTL, 1 << 7 | 1 << 6);
+		// MY: page address mode bottom to top
+		// MX: column address order: right to left
+		// MV: page/column order: normal
+		// ML: line address order: LCD refresh top to bottom
+		// RGB: RGB (not BGR)
+		// MH: display data latch data order: LCD refresh left to right
 	st7789_cmd(ST7789_INVON);
 //	st7789_cmd(ST7789_NORON);
 }

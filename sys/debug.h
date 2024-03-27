@@ -9,6 +9,7 @@
 #ifndef DEBUG_H
 #define	DEBUG_H
 
-void debug(const char *fmt, ...);
+void debug(const char *fmt, ...)
+    __attribute__((format(printf, 1, 2)));
 
 #endif /* !DEBUG_H */

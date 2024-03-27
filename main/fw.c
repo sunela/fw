@@ -6,14 +6,11 @@
  */
 
 #include <stddef.h>
-#include <stdarg.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <time.h>
 #include <assert.h>
-#include <sys/time.h>
 
 #include "hw/board.h"
 #include "hw/bl808/delay.h"

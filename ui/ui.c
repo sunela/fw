@@ -6,6 +6,8 @@
  */
 
 #include <stddef.h>
+#include <stdbool.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -329,14 +331,26 @@ static void demo_5(void)
 /* --- Initialization ------------------------------------------------------ */
 
 
-void app_init(int param)
+bool app_init(char *const *args, unsigned n_args)
 {
+	int param = 0;
+
 	gfx_da_init(&da, GFX_WIDTH, GFX_HEIGHT, fb);
 	gfx_clear(&da, gfx_hex(0));
 
 	timer_init(&idle_timer);
 
+	if (n_args) {
+		char *end;
+
+		param = strtoul(args[0], &end, 0);
+		if (*end)
+			return 0;
+	}
 	switch (param) {
+	case 0:
+		ui_switch(&ui_off);
+		break;
 	case 1:
 		demo_1();
 		break;
@@ -353,10 +367,9 @@ void app_init(int param)
 		demo_5();
 		break;
 	default:
-		ui_switch(&ui_off);
-		// @@@
-		break;
+		return 0;
 	}
 
 	update_display(&da);
+	return 1;
 }

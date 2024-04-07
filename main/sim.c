@@ -226,15 +226,13 @@ static void init_sdl(void)
 
 static void usage(const char *name)
 {
-	fprintf(stderr, "usage: %s [demo-number]\n", name);
+	fprintf(stderr, "usage: %s [demo-number [demo-arg ...]]\n", name);
 	exit(1);
 }
 
 
 int main(int argc, char **argv)
 {
-	int param = 0;
-	char *end;
 	int c;
 
 	while ((c = getopt(argc, argv, "")) != EOF)
@@ -242,20 +240,10 @@ int main(int argc, char **argv)
 		default:
 			usage(*argv);
 		}
-	switch (argc - optind) {
-	default:
-		case 0:
-			break;
-		case 1:
-			param = strtoul(argv[optind], &end, 0);
-			if (*end)
-				usage(*argv);
-			break;
-		usage(*argv);
-	}
 
 	init_sdl();
-	app_init(param);
+	if (!app_init(argv + optind, argc - optind))
+		usage(*argv);
 	event_loop();
 
 	return 0;

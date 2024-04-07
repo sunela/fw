@@ -136,15 +136,13 @@ void display_on(bool on)
 
 static void usage(const char *name)
 {
-	fprintf(stderr, "usage: %s [demo-number]\n", name);
+	fprintf(stderr, "usage: %s [demo-number [demo-arg ...]]\n", name);
 	exit(1);
 }
 
 
 int main(int argc, char **argv)
 {
-	int param = 0;
-	char *end;
 	int c;
 
 	while ((c = getopt(argc, argv, "")) != EOF)
@@ -152,17 +150,6 @@ int main(int argc, char **argv)
 		default:
 			usage(*argv);
 		}
-	switch (argc - optind) {
-	default:
-		case 0:
-			break;
-		case 1:
-			param = strtoul(argv[optind], &end, 0);
-			if (*end)
-				usage(*argv);
-			break;
-		usage(*argv);
-	}
 
 	mmio_init();
 	gpio_cfg_in(BUTTON_R, GPIO_PULL_UP);
@@ -178,7 +165,8 @@ int main(int argc, char **argv)
 
 	cst816_init(TOUCH_I2C, TOUCH_I2C_ADDR, TOUCH_INT);
 
-	app_init(param);
+	if (!app_init(argv + optind, argc - optind))
+		usage(*argv);
 	event_loop();
 
 	return 0;

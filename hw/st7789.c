@@ -8,18 +8,23 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <assert.h>
 
 #include "gpio.h"
 #include "spi.h"
 #include "delay.h"
 #include "st7789.h"
+#include "debug.h"
 
+
+#define	ST7789_ROWS	320
 
 static unsigned st7789_spi;
 static unsigned st7789_dnc;
 static unsigned	st7789_xoff;
 static unsigned	st7789_yoff;
 static unsigned	st7789_width;
+static unsigned	st7789_height;
 
 
 /* --- ST7789V commands ---------------------------------------------------- */
@@ -34,7 +39,9 @@ static unsigned	st7789_width;
 #define	ST7789_RASET	0x2b	// Row Address Set
 #define	ST7789_RAMWR	0x2c	// Memory Write
 #define	ST7789_PTLAR	0x30	// Partial Area
+#define	ST7789_VSCRDEF	0x33	// Vertical Scrolling Definition
 #define	ST7789_MADCTL	0x36	// Memory Data Access Control
+#define	ST7789_VSCSAD	0x37	// Vertical Scroll Start Address of RAM
 #define	ST7789_COLMOD	0x3a	// Interface Pixel Format
 
 
@@ -58,6 +65,20 @@ static void st7789_cmd8(uint8_t cmd, uint8_t value)
 	spi_sync();
 	gpio_out(st7789_dnc, 1);
 	spi_send(&value, 1);
+	spi_end();
+}
+
+
+static void st7789_cmd16(uint8_t cmd, uint16_t value)
+{
+	uint8_t tmp[] = { value >> 8, value };
+
+	spi_start();
+	gpio_out(st7789_dnc, 0);
+	spi_send(&cmd, 1);
+	spi_sync();
+	gpio_out(st7789_dnc, 1);
+	spi_send(tmp, 2);
 	spi_end();
 }
 
@@ -139,6 +160,47 @@ void st7789_update(const void *fb, unsigned x0, unsigned y0, unsigned x1,
 }
 
 
+/*
+ * Note that vertical scrolling only changes in which sequence lines are read
+ * from memory when displaying a frame, but it does not change the memory
+ * content itself.
+ */
+
+void st7789_vscroll_raw(uint16_t tfa, uint16_t vsa, uint16_t bfa, uint16_t vsp)
+{
+	uint8_t vscrdef[] = { tfa >> 8, tfa, vsa >> 8, vsa, bfa >> 8, bfa };
+
+// debug("VR tfa %u vsa %u bfa %u vsp %u\n", tfa, vsa, bfa, vsp);
+
+	assert(tfa + vsa + bfa == ST7789_ROWS);
+	st7789_send(ST7789_VSCRDEF, vscrdef, sizeof(vscrdef));
+	st7789_cmd16(ST7789_VSCSAD, vsp);
+}
+
+
+void st7789_vscroll(unsigned y0, unsigned y1, unsigned ytop)
+{
+	assert(y0 <= ytop);
+	assert(ytop <= y1);
+	assert(y1 < st7789_height);
+
+// debug("VS y0 %u y1 %u ytop %u\n", y0, y1, ytop);
+	/*
+	 * Note: TFA is _below_ BFA, since the display is reversed.
+	 *
+	 * This also means that VSP is calculated from the bottom of the
+	 * display.
+	 */
+
+	uint16_t tfa = ST7789_ROWS - (st7789_yoff + y1 + 1);
+	uint16_t vsa = y1 - y0 + 1;
+	uint16_t bfa = st7789_yoff + y0;
+	uint16_t vsp = tfa + (vsa - (ytop - y0)) % vsa;
+
+	st7789_vscroll_raw(tfa, vsa, bfa, vsp);
+}
+
+
 void st7789_on(void)
 {
 	st7789_cmd(ST7789_DISPON);
@@ -147,13 +209,14 @@ void st7789_on(void)
 
 
 void st7789_init(unsigned spi, unsigned rst, unsigned dnc,
-    unsigned width, unsigned heigth, unsigned xoff, unsigned yoff)
+    unsigned width, unsigned height, unsigned xoff, unsigned yoff)
 {
 	st7789_spi = spi;
 	st7789_dnc = dnc;
 	st7789_xoff = xoff;
 	st7789_yoff = yoff;
 	st7789_width = width;
+	st7789_height = height;
 
 	gpio_cfg_out(rst, 1, 0);
 	gpio_cfg_out(dnc, 1, 0);
@@ -165,7 +228,7 @@ void st7789_init(unsigned spi, unsigned rst, unsigned dnc,
 	gpio_out(rst, 1);
 	mdelay(120);
 
-	st7789_cmd32(ST7789_PTLAR, yoff << 16 | (heigth + yoff - 1));
+	st7789_cmd32(ST7789_PTLAR, yoff << 16 | (height + yoff - 1));
 	st7789_cmd(ST7789_PTLON);		// enable partial mode
 
 	st7789_cmd(ST7789_SLPOUT);		// exit sleep mode

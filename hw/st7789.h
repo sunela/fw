@@ -29,8 +29,18 @@ static inline uint16_t st7789_rgb(uint8_t r, uint8_t g, uint8_t b)
 
 void st7789_update(const void *fb, unsigned x0, unsigned y0, unsigned x1,
     unsigned y1);
+
+void st7789_vscroll_raw(uint16_t tfa, uint16_t vsa, uint16_t bfa, uint16_t vsp);
+
+/*
+ * st7789_vscroll scrolls (rotates) displaying of the rows y0 to y1.
+ * The row originallly at ytop is displayed at y0.
+ */
+
+void st7789_vscroll(unsigned y0, unsigned y1, unsigned ytop);
+
 void st7789_on(void);
 void st7789_init(unsigned spi, unsigned rst, unsigned dnc,
-    unsigned width, unsigned heigth, unsigned xoff, unsigned yoff);
+    unsigned width, unsigned height, unsigned xoff, unsigned yoff);
 
 #endif /* !ST7789_H */

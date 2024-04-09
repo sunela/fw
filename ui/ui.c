@@ -20,6 +20,10 @@
 #include "pin.h"
 #include "ui.h"
 
+#ifndef SIM
+#include "st7789.h"
+#endif /* !SIM */
+
 
 #define	CROSSHAIR	0
 
@@ -328,6 +332,67 @@ static void demo_5(void)
 }
 
 
+/* Vertical scrolling (only on real hw) */
+
+
+#define	DEMO_6_TOP	50
+#define	DEMO_6_BOTTOM	80
+#define	DEMO_6_MIDDLE	(GFX_HEIGHT - DEMO_6_TOP - DEMO_6_BOTTOM)
+#define	DEMO_6_SCROLL	10
+#define	DEMO_6_MARK	10
+
+
+static void demo_6_pattern(void)
+{
+	unsigned x;
+
+	gfx_rect_xy(&da, 0, 0, GFX_WIDTH, DEMO_6_TOP, GFX_GREEN);
+	gfx_rect_xy(&da, 0, DEMO_6_TOP + DEMO_6_MIDDLE, GFX_WIDTH,
+	    DEMO_6_BOTTOM, GFX_CYAN);
+	for (x = 0; x != DEMO_6_TOP; x++)
+		if (x & 1)
+			gfx_rect_xy(&da, x, x, DEMO_6_MARK, 1, GFX_BLACK);
+	for (x = 0; x != DEMO_6_MIDDLE; x++)
+		if (x & 1)
+			gfx_rect_xy(&da, x, DEMO_6_TOP + x, DEMO_6_MARK, 1,
+			    GFX_WHITE);
+	for (x = 0; x != DEMO_6_BOTTOM; x++)
+		if (x & 1)
+			gfx_rect_xy(&da, x, DEMO_6_TOP + DEMO_6_MIDDLE + x,
+			    DEMO_6_MARK, 1, GFX_BLACK);
+	gfx_rect_xy(&da, 0, DEMO_6_TOP + DEMO_6_SCROLL, GFX_WIDTH, 1,
+	    GFX_RED);
+}
+
+
+static void demo_6(void)
+{
+	demo_6_pattern();
+#ifndef SIM
+	st7789_vscroll(DEMO_6_TOP, DEMO_6_TOP + DEMO_6_MIDDLE - 1,
+	    DEMO_6_TOP + DEMO_6_SCROLL);
+#endif /* !SIM */
+}
+
+
+static void demo_6a(unsigned y0, unsigned y1, unsigned ytop)
+{
+	demo_6_pattern();
+#ifndef SIM
+	st7789_vscroll(y0, y1, ytop);
+#endif /* !SIM */
+}
+
+
+static void demo_6b(unsigned tfa, unsigned vsa, unsigned bfa, unsigned vsp)
+{
+	demo_6_pattern();
+#ifndef SIM
+	st7789_vscroll_raw(tfa, vsa, bfa, vsp);
+#endif /* !SIM */
+}
+
+
 /* --- Initialization ------------------------------------------------------ */
 
 
@@ -365,6 +430,22 @@ bool app_init(char *const *args, unsigned n_args)
 		break;
 	case 5:
 		demo_5();
+		break;
+	case 6:
+		switch (n_args) {
+		case 1:
+			demo_6();
+			break;
+		case 4:
+			demo_6a(atoi(args[1]), atoi(args[2]), atoi(args[3]));
+			break;
+		case 5:
+			demo_6b(atoi(args[1]), atoi(args[2]), atoi(args[3]),
+			    atoi(args[4]));
+			break;
+		default:
+			return 0;
+		}
 		break;
 	default:
 		return 0;

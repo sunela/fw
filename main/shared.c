@@ -9,6 +9,7 @@
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/time.h>
 
 #include "hal.h"
@@ -54,19 +55,42 @@ void vdebug(const char *fmt, va_list ap)
 
 
 static struct timeval t0_tv;
+static struct timeval t1_tv;
+static bool t1_cached = 0;
 
 
 void t0(void)
 {
 	gettimeofday(&t0_tv, NULL);
+	t1_cached = 0;
 }
 
 
-void t1(const char *s)
+double t1(const char *fmt, ...)
 {
-	struct timeval tv;
 
-	gettimeofday(&tv, NULL);
-	t_sub(&tv, &t0_tv);
-	debug("%s: %3u.%06u s\n", s, tv.tv_sec, tv.tv_usec);
+	if (!t1_cached) {
+		gettimeofday(&t1_tv, NULL);
+		t_sub(&t1_tv, &t0_tv);
+	}
+	if (fmt) {
+		char tmp[strlen(fmt) + 1];
+		va_list ap;
+		char *nl;
+
+		strcpy(tmp, fmt);
+		nl = strchr(tmp , '\n');
+		if (nl)
+			*nl = 0;
+		va_start(ap, fmt);
+		vdebug(tmp, ap);
+		va_end(ap);
+		printf(": %3u.%06u s%s",
+		    (unsigned) t1_tv.tv_sec, (unsigned) t1_tv.tv_usec,
+		    nl ? "\n" : "");
+		t1_cached = 0;
+	} else {
+		t1_cached = 1;
+	}
+	return t1_tv.tv_sec + t1_tv.tv_usec * 1e-6;
 }

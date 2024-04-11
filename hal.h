@@ -20,7 +20,8 @@
 
 void vdebug(const char *fmt, va_list ap);
 void t0(void);
-void t1(const char *s);
+double t1(const char *fmt, ...)
+    __attribute__((format(printf, 1, 2)));
 
 void button_event(bool down);
 void touch_down_event(unsigned x, unsigned y);

@@ -112,12 +112,17 @@ void update_display(struct gfx_drawable *da)
 	gfx_reset(da);
 	assert(da->damage.w);
 	assert(da->damage.h);
-#if 1
+
+	unsigned n_pix = da->damage.w * da->damage.h;
+	double dt;
+
+	t0();
 	st7789_update(da->fb, da->damage.x, da->damage.y,
 	    da->damage.x + da->damage.w - 1, da->damage.y + da->damage.h - 1);
-#else
-	st7789_update(da->fb, 0, 0, GFX_WIDTH - 1, GFX_HEIGHT - 1);
-#endif
+	dt = t1(NULL);
+	t1("D %u %u + %u %u: %u px (%.3f Mbps)\n",
+	    da->damage.x, da->damage.y, da->damage.w, da->damage.h,
+	     n_pix, n_pix / dt * 16e-6);
 }
 
 

@@ -15,6 +15,7 @@
 #include "rnd.h"
 #include "gfx.h"
 #include "pin.h"
+#include "shape.h"
 #include "ui.h"
 
 
@@ -103,43 +104,6 @@ static void pin_char(unsigned x, unsigned y, char ch)
 }
 
 
-static void cross(unsigned x, unsigned y, unsigned r, unsigned w)
-{
-	unsigned d0 = (r - w) / 1.414;
-	unsigned d1 = (r + w) / 1.414;
-	short v1[] = {
-		x + d0, y - d1,
-		x + d1, y - d0,
-		x - d0, y + d1,
-		x - d1, y + d0
-	};
-	short v2[] = {
-		x - d0, y - d1,
-		x - d1, y - d0,
-		x + d0, y + d1,
-		x + d1, y + d0
-	};
-
-	gfx_poly(&da, 4, v1, GFX_BLACK);
-	gfx_poly(&da, 4, v2, GFX_BLACK);
-}
-
-
-static void equilateral(unsigned x, unsigned y, unsigned a)
-{
-	/* R = a / sqrt(3); R = 2 r */
-	unsigned R = a / 1.732;
-	unsigned r = R / 2;
-	short v[] = {
-		x - r, y - a / 2,
-		x - r, y + a / 2,
-		x + R, y
-	};
-
-	gfx_poly(&da, 3, v, GFX_BLACK);
-}
-
-
 static void pin_digit(unsigned x, unsigned y, uint8_t digit)
 {
 	pin_char(x, y, '0' + shuffle[digit]);
@@ -155,11 +119,11 @@ static void pin_button(unsigned col, unsigned row, gfx_color bg)
 	if (row > 0) {
 		pin_digit(x, y, 1 + (col + (3 - row) * 3));
 	} else if (col == 0) {	// X
-		cross(x, y, BUTTON_R * 0.8, 4);
+		cross(x, y, BUTTON_R * 0.8, 4, GFX_BLACK);
 	} else if (col == 1) {	// "0"
 		pin_digit(x, y, 0);
 	} else {	// >
-		equilateral(x, y, BUTTON_R * 1.4);
+		equilateral(x, y, BUTTON_R * 1.4, GFX_BLACK);
 	}
 }
 

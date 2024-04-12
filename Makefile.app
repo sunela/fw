@@ -9,7 +9,7 @@ CFLAGS += -g -Wall -Wextra -Wshadow -Wno-unused-parameter \
 	 -Wmissing-prototypes -Wmissing-declarations \
 	 -I$(shell pwd) -Isys -Igfx -Iui
 OBJS = ui.o timer.o debug.o rnd.o basic.o poly.o vfont.o text.o long_text.o \
-    ui_off.o ui_pin.o ui_fail.o ui_accounts.o ui_list.o accounts.o
+    ui_off.o ui_pin.o ui_fail.o ui_accounts.o ui_list.o shape.o accounts.o
 
 include Makefile.c-common
 
@@ -30,6 +30,7 @@ vpath ui_off.c ui
 vpath ui_fail.c ui
 vpath ui_accounts.c ui
 vpath ui_list.c ui
+vpath shape.c ui
 vpath accounts.c ui
 
 vpath citrine.jpg logo

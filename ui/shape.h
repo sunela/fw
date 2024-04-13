@@ -13,6 +13,6 @@
 
 void cross(unsigned x, unsigned y, unsigned r, unsigned w,
     gfx_color color);
-void equilateral(unsigned x, unsigned y, unsigned a, gfx_color color) ;
+void equilateral(unsigned x, unsigned y, unsigned a, int dir, gfx_color color);
 
 #endif /* !SHAPE_H */

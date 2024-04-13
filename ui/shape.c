@@ -36,15 +36,15 @@ void cross(unsigned x, unsigned y, unsigned r, unsigned w,
 }
 
 
-void equilateral(unsigned x, unsigned y, unsigned a, gfx_color color)
+void equilateral(unsigned x, unsigned y, unsigned a, int dir, gfx_color color)
 {
 	/* R = a / sqrt(3); R = 2 r */
 	unsigned R = a / 1.732;
 	unsigned r = R / 2;
 	short v[] = {
-		x - r, y - a / 2,
-		x - r, y + a / 2,
-		x + R, y
+		x - dir * r, y - a / 2,
+		x - dir * r, y + a / 2,
+		x + dir * R, y
 	};
 
 	gfx_poly(&da, 3, v, color);

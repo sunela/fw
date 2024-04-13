@@ -19,6 +19,9 @@
 
 //#define	LONG_MS		
 
+#define	MAX_INPUT_LEN	32	/* for ui_entry */
+
+
 struct ui_events {
 	void (*touch_tap)(unsigned x, unsigned y);
 	void (*touch_long)(unsigned x, unsigned y);
@@ -41,11 +44,15 @@ extern struct gfx_drawable da;
 extern unsigned pin_cooldown; /* time when the PIN cooldown ends */
 extern unsigned pin_attempts; /* number of failed PIN entries */
 
+extern char ui_entry_input[MAX_INPUT_LEN + 1];
+extern bool (*ui_entry_validate)(const char *s);
+
 extern const struct ui ui_off;
 extern const struct ui ui_pin;
 extern const struct ui ui_fail;
 extern const struct ui ui_cooldown;
 extern const struct ui ui_accounts;
+extern const struct ui ui_entry;
 
 void progress(void);
 void turn_off(void);

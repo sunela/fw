@@ -467,6 +467,7 @@ static unsigned int vfGetCharFromPtr(struct gfx_drawable *da, int x1, int y1, in
 unsigned int gfx_char_size(unsigned *res_w, unsigned *res_h,
     unsigned int sizex, unsigned sizey, char ch) {
   int charLen;
+  if (ch == ' ') ch = 'X';
   const uint8_t *charPtr = vfGetCharPtr(ch, &charLen);
   if (!charPtr) return (unsigned int)(sizex/2); // space
   int w = 0;

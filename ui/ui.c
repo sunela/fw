@@ -393,6 +393,15 @@ static void demo_6b(unsigned tfa, unsigned vsa, unsigned bfa, unsigned vsp)
 }
 
 
+/* Text entry */
+
+
+static bool demo_7_validate(const char *s)
+{
+	return !strchr(s, 'x');
+}
+
+
 /* --- Initialization ------------------------------------------------------ */
 
 
@@ -412,6 +421,8 @@ bool app_init(char *const *args, unsigned n_args)
 		if (*end)
 			return 0;
 	}
+	if (param)
+		display_on(1);
 	switch (param) {
 	case 0:
 		ui_switch(&ui_off);
@@ -446,6 +457,10 @@ bool app_init(char *const *args, unsigned n_args)
 		default:
 			return 0;
 		}
+		break;
+	case 7:
+		ui_entry_validate = demo_7_validate;
+		ui_switch(&ui_entry);
 		break;
 	default:
 		return 0;

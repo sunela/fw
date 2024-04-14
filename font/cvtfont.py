@@ -10,8 +10,11 @@
 # TTF to BDF conversion:
 # https://superuser.com/a/336550
 #
-# BDF filr format:
+# BDF file format:
 # https://en.wikipedia.org/wiki/Glyph_Bitmap_Distribution_Format
+#
+# Illustration of font metrics:
+# https://imagemagick.org/Usage/text/#font_info
 #
 
 import sys, subprocess, re

@@ -5,7 +5,7 @@
  * A copy of the license can be found in the file LICENSE.MIT
  */
 
-#ifndef FONT__H
+#ifndef FONT_H
 #define	FONT_H
 
 #include <stdbool.h>

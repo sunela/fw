@@ -14,3 +14,12 @@ Build instructions
 
 To do: document setting up the toolchain (we're based on OpenBouffalo, but
 there are some issues we need to work around.)
+
+
+Prerequisites
+-------------
+
+The following packages are needed (the names given here are for Ubuntu 22.04):
+Liberation fonts: fonts-liberation
+Font configuration utility fc-list: fontconfig
+OpenType/TrueType BDF converter otf2bdf: otf2bdf

@@ -31,13 +31,13 @@ show:	show.c $(FONTS) $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $< $(OBJS)
 
 mono18.font: cvtfont.py Makefile
-	./cvtfont.py $(FONT_FILE) 18 mono18 >$@ || { rm -f $@; exit 1; }
+	./cvtfont.py $(FONT_FILE) 18 mono18 32-126 >$@ || { rm -f $@; exit 1; }
 
 mono28.font: cvtfont.py Makefile
-	./cvtfont.py $(FONT_FILE) 28 mono28 >$@ || { rm -f $@; exit 1; }
+	./cvtfont.py $(FONT_FILE) 28 mono28 32-126 >$@ || { rm -f $@; exit 1; }
 
 mono34.font: cvtfont.py Makefile
-	./cvtfont.py $(FONT_FILE) 34 mono34 >$@ || { rm -f $@; exit 1; }
+	./cvtfont.py $(FONT_FILE) 34 mono34 32-126 >$@ || { rm -f $@; exit 1; }
 
 # only decimal digits
 mono38.font: cvtfont.py Makefile
@@ -48,7 +48,7 @@ mono58.font: cvtfont.py Makefile
 	./cvtfont.py $(FONT_FILE) 58 mono58 48-57 >$@ || { rm -f $@; exit 1; }
 
 clean::
-	rm -r $(FONTS)
+	rm -f $(FONTS)
 
 spotless::
-	rm -r show
+	rm -f show

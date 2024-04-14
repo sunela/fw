@@ -17,6 +17,7 @@
 #include "timer.h"
 #include "gfx.h"
 #include "long_text.h"
+#include "ntext.h"
 #include "pin.h"
 #include "ui.h"
 
@@ -289,13 +290,22 @@ static void demo_3(void)
 
 /* Text */
 
-static void demo_4(void)
+static void demo_4(bool new)
 {
+	const struct font *fonts[] = {
+		&mono18,
+		&mono28,
+		&mono38,
+	};
 	unsigned i;
 
 	for (i = 0; i != 3; i++)
-		gfx_char(&da, 100, 50 + 50 * i, 16 << i, 16 << i, '@',
-		    GFX_WHITE);
+		if (new)
+			ntext_char(&da, 100, 50 + 50 * i, fonts[i], '5',
+			    GFX_WHITE);
+		else
+			gfx_char(&da, 100, 50 + 50 * i, 16 << i, 16 << i, '@',
+			    GFX_WHITE);
 }
 
 
@@ -437,7 +447,7 @@ bool app_init(char *const *args, unsigned n_args)
 		demo_3();
 		break;
 	case 4:
-		demo_4();
+		demo_4(n_args > 1);
 		break;
 	case 5:
 		demo_5();

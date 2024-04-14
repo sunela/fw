@@ -68,7 +68,7 @@ def character():
 
 #	print("BEST", best_bits, best)
 	print("\t  bits: " + str(best_bits) + ", start: " + str(start) + ",")
-	print("\t  data: (uint8_t []) { ", end = "")
+	print("\t  data: (const uint8_t []) { ", end = "")
 
 	v = 0
 	length = 0

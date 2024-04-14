@@ -7,8 +7,9 @@
 
 CFLAGS += -g -Wall -Wextra -Wshadow -Wno-unused-parameter \
 	 -Wmissing-prototypes -Wmissing-declarations \
-	 -I$(shell pwd) -Isys -Igfx -Iui
-OBJS = ui.o timer.o debug.o rnd.o basic.o poly.o vfont.o text.o long_text.o \
+	 -I$(shell pwd) -Isys -Igfx -Iui -Ifont
+OBJS = ui.o timer.o debug.o rnd.o basic.o poly.o \
+    vfont.o text.o long_text.o font.o ntext.o \
     ui_off.o ui_pin.o ui_fail.o ui_accounts.o ui_list.o ui_entry.o \
     shape.o accounts.o
 
@@ -20,6 +21,8 @@ vpath poly.c gfx
 vpath vfont.c gfx
 vpath text.c gfx
 vpath long_text.c gfx
+vpath font.c font
+vpath ntext.c gfx
 
 vpath timer.c sys
 vpath debug.c sys
@@ -44,5 +47,9 @@ citrine.inc:    citrine.jpg scripts/pnmtorgb.pl
 		jpegtopnm $< | scripts/pnmtorgb.pl >$@ || \
 		    { rm -f $@; exit 1; }
 
+font/%.font:	font/Makefile font/cvtfont.py
+		$(MAKE) -C font $(shell basename $@)
+
 clean::
 		rm -f citrine.inc
+		$(MAKE) -C font clean

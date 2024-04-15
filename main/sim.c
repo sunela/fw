@@ -48,6 +48,54 @@ void msleep(unsigned ms)
 }
 
 
+/* --- Display update ------------------------------------------------------ */
+
+
+static void render(void)
+{
+	SDL_RenderClear(rend);
+	SDL_RenderCopy(rend, tex, NULL, NULL);
+	SDL_RenderPresent(rend);
+}
+
+
+void update_display(struct gfx_drawable *da)
+{
+	const gfx_color *p;
+	unsigned x, y;
+
+	if (!da->changed)
+		return;
+	gfx_reset(da);
+
+debug("update\n");
+	assert(da->w == GFX_WIDTH);
+	assert(da->h == GFX_HEIGHT);
+	assert(da->damage.w <= GFX_WIDTH);
+	assert(da->damage.h <= GFX_HEIGHT);
+	for (y = da->damage.y; y != da->damage.y + da->damage.h; y++) {
+		p = da->fb + y * da->w + da->damage.x;
+		for (x = da->damage.x; x != da->damage.x + da->damage.w; x++) {
+			SDL_Rect rect = {
+				.x = x,
+				.y = y,
+				.w = 1,
+				.h = 1 
+			};
+
+			SDL_FillRect(surf, &rect, SDL_MapRGB(surf->format,
+			    *p & 0xf8,
+			    (*p & 7) << 5 | (*p & 0xe000) << 2,
+			    (*p & 0x1f00) >> 5));
+			p++;
+		}
+	}
+
+	SDL_UpdateTexture(tex, NULL, surf->pixels, surf->pitch);
+	render();
+}
+
+
 /* --- Event loop ---------------------------------------------------------- */
 
 
@@ -109,7 +157,11 @@ debug("SDL_MOUSEBUTTONUP\n");
 		touch_up_event();
 		touch_is_down = 0;
 		break;
+	case SDL_WINDOWEVENT:
+		render();
+		break;
 	default:
+//debug("event %u (0x%x)\n", event.type, event.type);
 		break;
 	}
 	return 1;
@@ -127,48 +179,6 @@ static void event_loop(void)
 			uptime += 10;
 		}
 	}
-}
-
-
-/* --- Display update ------------------------------------------------------ */
-
-
-void update_display(struct gfx_drawable *da)
-{
-	const gfx_color *p;
-	unsigned x, y;
-
-	if (!da->changed)
-		return;
-	gfx_reset(da);
-
-debug("update\n");
-	assert(da->w == GFX_WIDTH);
-	assert(da->h == GFX_HEIGHT);
-	assert(da->damage.w <= GFX_WIDTH);
-	assert(da->damage.h <= GFX_HEIGHT);
-	for (y = da->damage.y; y != da->damage.y + da->damage.h; y++) {
-		p = da->fb + y * da->w + da->damage.x;
-		for (x = da->damage.x; x != da->damage.x + da->damage.w; x++) {
-			SDL_Rect rect = {
-				.x = x,
-				.y = y,
-				.w = 1,
-				.h = 1 
-			};
-
-			SDL_FillRect(surf, &rect, SDL_MapRGB(surf->format,
-			    *p & 0xf8,
-			    (*p & 7) << 5 | (*p & 0xe000) << 2,
-			    (*p & 0x1f00) >> 5));
-			p++;
-		}
-	}
-
-	SDL_UpdateTexture(tex, NULL, surf->pixels, surf->pitch);
-	SDL_RenderClear(rend);
-	SDL_RenderCopy(rend, tex, NULL, NULL);
-	SDL_RenderPresent(rend);
 }
 
 

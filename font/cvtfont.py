@@ -12,6 +12,7 @@
 #
 # BDF file format:
 # https://en.wikipedia.org/wiki/Glyph_Bitmap_Distribution_Format
+# https://adobe-type-tools.github.io/font-tech-notes/pdfs/5005.BDF_Spec.pdf
 #
 # Illustration of font metrics:
 # https://imagemagick.org/Usage/text/#font_info

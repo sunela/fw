@@ -13,10 +13,10 @@
 #
 
 FONT_PATTERN = Liberation Mono:bold:slant=0
-FONT_FILE = $(shell fc-list '$(FONT_PATTERN)' file | grep /liberation/ | \
+FONT_FILE = $(shell fc-list '$(FONT_PATTERN)' file | grep /liberation2/ | \
     sed 's/:.*//')
 
-FONTS = mono18.font mono28.font mono34.font mono38.font mono58.font
+FONTS = mono18.font mono24.font mono34.font mono36.font mono58.font
 
 CFLAGS = -Wall -Wextra -g
 OBJS = font.o
@@ -33,15 +33,15 @@ show:	show.c $(FONTS) $(OBJS)
 mono18.font: cvtfont.py Makefile
 	./cvtfont.py $(FONT_FILE) 18 mono18 32-126 >$@ || { rm -f $@; exit 1; }
 
-mono28.font: cvtfont.py Makefile
-	./cvtfont.py $(FONT_FILE) 28 mono28 32-126 >$@ || { rm -f $@; exit 1; }
+mono24.font: cvtfont.py Makefile
+	./cvtfont.py $(FONT_FILE) 24 mono24 32-126 >$@ || { rm -f $@; exit 1; }
 
 mono34.font: cvtfont.py Makefile
 	./cvtfont.py $(FONT_FILE) 34 mono34 32-126 >$@ || { rm -f $@; exit 1; }
 
 # only decimal digits
-mono38.font: cvtfont.py Makefile
-	./cvtfont.py $(FONT_FILE) 38 mono38 48-57 >$@ || { rm -f $@; exit 1; }
+mono36.font: cvtfont.py Makefile
+	./cvtfont.py $(FONT_FILE) 36 mono36 48-57 >$@ || { rm -f $@; exit 1; }
 
 # only decimal digits
 mono58.font: cvtfont.py Makefile

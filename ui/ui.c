@@ -32,6 +32,7 @@
 
 
 struct gfx_drawable da;
+bool use_ntext = 0;
 
 unsigned pin_cooldown = 0;
 unsigned pin_attempts = 0;
@@ -294,8 +295,8 @@ static void demo_4(bool new)
 {
 	const struct font *fonts[] = {
 		&mono18,
-		&mono28,
-		&mono38,
+		&mono24,
+		&mono36,
 	};
 	unsigned i;
 
@@ -470,7 +471,11 @@ bool app_init(char *const *args, unsigned n_args)
 		break;
 	case 7:
 		ui_entry_validate = demo_7_validate;
+		use_ntext = n_args > 1;
 		ui_switch(&ui_entry);
+		break;
+	case 8:
+		use_ntext = 1;
 		break;
 	default:
 		return 0;

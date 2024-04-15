@@ -10,6 +10,7 @@
 //#include "hal.h"
 #include "lib/alloc.h"
 #include "gfx.h"
+#include "ntext.h"
 #include "ui.h"
 #include "ui_list.h"
 
@@ -17,6 +18,7 @@
 //#define	HOLD_MS	(5 * 1000)
 
 #define	FONT_SIZE	24
+#define	FONT		mono18
 
 
 struct ui_list_entry {
@@ -52,9 +54,13 @@ void ui_list_end(struct ui_list *list)
 	unsigned y = 0; // GFX_HEIGHT / 2
 
 	for (e = list->list; e; e = e->next) {
-		gfx_text(&da, 0, y, e->label, FONT_SIZE,
-		    GFX_LEFT, GFX_TOP, GFX_WHITE);
-		y += 24;
+		if (use_ntext)
+			ntext_text(&da, 0, y, e->label, &FONT,
+			    GFX_LEFT, GFX_TOP, GFX_WHITE);
+		else
+			gfx_text(&da, 0, y, e->label, FONT_SIZE,
+			    GFX_LEFT, GFX_TOP, GFX_WHITE);
+		y += FONT_SIZE;
 	}
 }
 

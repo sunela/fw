@@ -14,6 +14,7 @@
 #include "timer.h"
 #include "rnd.h"
 #include "gfx.h"
+#include "ntext.h"
 #include "pin.h"
 #include "shape.h"
 #include "ui.h"
@@ -28,6 +29,7 @@
 
 #define	BUTTON_LINGER_MS	150
 #define	FONT_SIZE		46
+#define	FONT			mono36
 
 #define	BUTTON_BOTTOM_OFFSET	3
 #define	BUTTON_R		25
@@ -38,7 +40,7 @@
 #define	BUTTON_X0		(GFX_WIDTH / 2 - BUTTON_X_SPACING)
 #define	BUTTON_Y1		(GFX_HEIGHT - BUTTON_R - BUTTON_BOTTOM_OFFSET)
 #define	BUTTON_Y0		(BUTTON_Y1 - 3 * BUTTON_Y_SPACING)
-#define	X_ADJUST(ch)		((ch) != '4')
+#define	X_ADJUST(ch)		(use_ntext ? -1 : (ch) != '4')
 #define	Y_ADJUST(ch)		1
 
 /* --- Input/progress indicators ------------------------------------------- */
@@ -99,8 +101,12 @@ static void pin_char(unsigned x, unsigned y, char ch)
 {
 	char s[] = { ch, 0 };
 
-	gfx_text(&da, x + X_ADJUST(ch), y + Y_ADJUST(ch), s, FONT_SIZE,
-	    GFX_CENTER, GFX_CENTER, GFX_BLACK);
+	if (use_ntext)
+		ntext_text(&da, x + X_ADJUST(ch), y + Y_ADJUST(ch), s,
+		    &FONT, GFX_CENTER, GFX_CENTER, GFX_BLACK);
+	else
+		gfx_text(&da, x + X_ADJUST(ch), y + Y_ADJUST(ch), s, FONT_SIZE,
+		    GFX_CENTER, GFX_CENTER, GFX_BLACK);
 }
 
 

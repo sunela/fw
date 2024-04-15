@@ -16,9 +16,9 @@
 
 
 extern const struct font mono18;
-extern const struct font mono28;
+extern const struct font mono24;
 extern const struct font mono34;
-extern const struct font mono38;
+extern const struct font mono36;
 extern const struct font mono58;
 
 
@@ -27,7 +27,7 @@ unsigned ntext_char_size(unsigned *res_w, unsigned *res_h,
 unsigned ntext_char(struct gfx_drawable *da, int x1, int y1,
     const struct font *font, uint16_t ch, gfx_color color);
 
-void ntext_text_bbox(unsigned x, unsigned y, const char *s,
+unsigned ntext_text_bbox(unsigned x, unsigned y, const char *s,
     const struct font *font, int8_t align_x, int8_t align_y,
     struct gfx_rect *bb);
 void ntext_text(struct gfx_drawable *da, unsigned x, unsigned y, const char *s,

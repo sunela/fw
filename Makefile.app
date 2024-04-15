@@ -47,9 +47,6 @@ citrine.inc:    citrine.jpg scripts/pnmtorgb.pl
 		jpegtopnm $< | scripts/pnmtorgb.pl >$@ || \
 		    { rm -f $@; exit 1; }
 
-font/%.font:	font/Makefile font/cvtfont.py
-		$(MAKE) -C font $(shell basename $@)
-
 clean::
 		rm -f citrine.inc
 		$(MAKE) -C font clean

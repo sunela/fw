@@ -20,9 +20,9 @@
 #include "font.h"
 
 #include "mono18.font"
-#include "mono28.font"
+#include "mono24.font"
 #include "mono34.font"
-#include "mono38.font"
+#include "mono36.font"
 #include "mono58.font"
 
 
@@ -34,9 +34,9 @@ struct font_ref {
 
 static struct font_ref fonts[] = {
 	{ "mono18",	&mono18 },
-	{ "mono28",	&mono28 },
+	{ "mono24",	&mono24 },
 	{ "mono34",	&mono34 },
-	{ "mono38",	&mono38 },
+	{ "mono36",	&mono36 },
 	{ "mono58",	&mono58 },
 	{ NULL }
 };

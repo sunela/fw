@@ -80,7 +80,7 @@
 				    BUTTON_BOTTOM_OFFSET)
 #define	BUTTON_Y0		(BUTTON_Y1 - 3 * BUTTON_Y_SPACING)
 
-#define	X_ADJUST(ch)		((ch) != '4')
+#define	X_ADJUST(ch)		0
 #define	Y_ADJUST(ch)		(use_ntext ? -1 : 1)
 
 
@@ -186,27 +186,18 @@ static void draw_input(void)
 }
 
 
-/* --- Draw buttons (first level) ------------------------------------------ */
+/* --- Common for all buttons ---------------------------------------------- */
 
 
-static void clear_first(unsigned col, unsigned row)
-{
-	unsigned x = BUTTON_X0 + BUTTON_X_SPACING * col;
-        unsigned y = BUTTON_Y1 - BUTTON_Y_SPACING * row;
-	
-	gfx_rect_xy(&da, x - BUTTON_W / 2, y - BUTTON_H / 2,
-	    BUTTON_W, BUTTON_H , GFX_BLACK);
-}
-
-
-static void first_base(unsigned x, unsigned y, gfx_color bg)
+static void base(unsigned x, unsigned y, gfx_color bg)
 {
 	int dx, dy;
 
 	for (dx = -1; dx <= 1; dx += 2)
 		for (dy = -1; dy <= 1; dy += 2) {
-			gfx_disc(&da, x + dx * (BUTTON_W / 2 - BUTTON_R),
-			    y + dy * (BUTTON_H / 2 - BUTTON_R),
+			gfx_disc(&da,
+			    x + dx * (BUTTON_W / 2 - BUTTON_R - (dx == 1)),
+			    y + dy * (BUTTON_H / 2 - BUTTON_R - (dy == 1)),
 			    BUTTON_R, bg);
 		}
 	gfx_rect_xy(&da, x - BUTTON_W / 2 + BUTTON_R, y - BUTTON_H / 2,
@@ -217,6 +208,9 @@ static void first_base(unsigned x, unsigned y, gfx_color bg)
 	    y + BUTTON_H / 2 - BUTTON_R,
 	    BUTTON_W - 2 * BUTTON_R, BUTTON_R, bg);
 }
+
+
+/* --- Draw buttons (first level) ------------------------------------------ */
 
 
 static void first_label(unsigned x, unsigned y, const char *s)
@@ -249,23 +243,23 @@ static void first_button(unsigned col, unsigned row, gfx_color bg)
         unsigned y = BUTTON_Y1 - BUTTON_Y_SPACING * row;
 
 	if (row > 0) {
-		first_base(x, y, bg);
+		base(x, y, bg);
 		first_label(x, y, first_map[1 + col + (3 - row) * 3]);
 	} else if (col == 0) {	// X
-		first_base(x, y, bg);
+		base(x, y, bg);
 		if (*ui_entry_input)
 			equilateral(x, y, BUTTON_H * 0.7, -1, GFX_BLACK);
 		else
 			cross(x, y, BUTTON_H * 0.4, 4, GFX_BLACK);
 	} else if (col == 1) {	// "0"
-		first_base(x, y, bg);
+		base(x, y, bg);
 		first_label(x, y, first_map[0]);
 	} else {	// >
 		if (*ui_entry_input) {
-			first_base(x, y, valid() ? bg : SPECIAL_DISABLED_BG);
+			base(x, y, valid() ? bg : SPECIAL_DISABLED_BG);
 			equilateral(x, y, BUTTON_H * 0.7, 1, GFX_BLACK);
 		} else {
-			first_base(x, y, GFX_BLACK);
+			base(x, y, GFX_BLACK);
 		}
 	}
 }
@@ -284,36 +278,6 @@ static void draw_first_text(bool enabled)
 
 
 /* --- Draw buttons (second level) ----------------------------------------- */
-
-
-static void clear_second(unsigned col, unsigned row)
-{
-	unsigned x = BUTTON_X0 + BUTTON_X_SPACING * col;
-        unsigned y = BUTTON_Y1 - BUTTON_Y_SPACING * row;
-	
-	gfx_rect_xy(&da, x - BUTTON_W / 2, y - BUTTON_H / 2,
-	    BUTTON_W, BUTTON_H , GFX_BLACK);
-}
-
-
-static void second_base(unsigned x, unsigned y, gfx_color bg)
-{
-	int dx, dy;
-
-	for (dx = -1; dx <= 1; dx += 2)
-		for (dy = -1; dy <= 1; dy += 2) {
-			gfx_disc(&da, x + dx * (BUTTON_W / 2 - BUTTON_R),
-			    y + dy * (BUTTON_H / 2 - BUTTON_R),
-			    BUTTON_R, bg);
-		}
-	gfx_rect_xy(&da, x - BUTTON_W / 2 + BUTTON_R, y - BUTTON_H / 2,
-	    BUTTON_W - 2 * BUTTON_R, BUTTON_R, bg);
-	gfx_rect_xy(&da, x - BUTTON_W / 2, y - BUTTON_H / 2 + BUTTON_R,
-	    BUTTON_W, BUTTON_H - 2 * BUTTON_R, bg);
-	gfx_rect_xy(&da, x - BUTTON_W / 2 + BUTTON_R,
-	    y + BUTTON_H / 2 - BUTTON_R,
-	    BUTTON_W - 2 * BUTTON_R, BUTTON_R, bg);
-}
 
 
 static void second_label(unsigned x, unsigned y, char ch)
@@ -340,16 +304,16 @@ static void second_button(const char *map, unsigned col, unsigned row,
 	if (row > 0 && n >= len)
 		return;
 	if (row > 0) {
-		second_base(x, y, bg);
+		base(x, y, bg);
 		second_label(x, y, map[n]);
 	} else if (col == 0) {	// X
-		second_base(x, y, SPECIAL_UP_BG);
+		base(x, y, SPECIAL_UP_BG);
 		equilateral(x, y, BUTTON_H * 0.7, -1, GFX_BLACK);
 	} else if (col == 1) {	// "0"
-		second_base(x, y, bg);
+		base(x, y, bg);
 		second_label(x, y, map[0]);
 	} else {	// >
-		second_base(x, y, GFX_BLACK);
+		base(x, y, GFX_BLACK);
 	}
 }
 

@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <math.h>
 #include <time.h>
 #include <assert.h>
 
@@ -59,6 +60,37 @@ static void render(void)
 }
 
 
+#define	CORNER_R	40
+
+
+static void hline(unsigned x0, unsigned x1, unsigned y)
+{
+	SDL_Rect rect = {
+		.x = x0,
+		.y = y,
+		.w = x1 - x0 + 1,
+		.h = 1 
+	};
+
+	SDL_FillRect(surf, &rect, SDL_MapRGB(surf->format, 30, 30, 30));
+}
+
+
+static void cut_corners(void)
+{
+	unsigned x, y;
+
+	for (y = 0; y <= CORNER_R; y++) {
+		x = sqrt(CORNER_R * CORNER_R - y * y);
+		hline(0, CORNER_R - x - 1, CORNER_R - y);
+		hline(GFX_WIDTH - CORNER_R + x, GFX_WIDTH - 1, CORNER_R - y);
+		hline(0, CORNER_R - x - 1, GFX_HEIGHT - 1 - CORNER_R + y);
+		hline(GFX_WIDTH - CORNER_R + x, GFX_WIDTH - 1,
+		    GFX_HEIGHT - 1 - CORNER_R + y);
+	}
+}
+
+
 void update_display(struct gfx_drawable *da)
 {
 	const gfx_color *p;
@@ -90,6 +122,7 @@ debug("update\n");
 			p++;
 		}
 	}
+	cut_corners();
 
 	SDL_UpdateTexture(tex, NULL, surf->pixels, surf->pitch);
 	render();

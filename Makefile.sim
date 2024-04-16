@@ -10,7 +10,7 @@ OBJDIR = obj-sim/
 include Makefile.app
 
 CFLAGS += $(shell sdl2-config --cflags) -DSIM
-LDLIBS += $(shell sdl2-config --libs)
+LDLIBS += $(shell sdl2-config --libs) -lm
 OBJS += sim.o shared.o
 
 

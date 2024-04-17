@@ -21,8 +21,8 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <strings.h>
 #include <assert.h>
-#include <stdio.h>
 
 #include "mmio.h"
 #include "gpio.h"
@@ -119,10 +119,10 @@ enum I2C_SUB_ADDR_LEN {
 	(*(volatile uint32_t *) (I2C_BASE(i2c) + 0x8c))
 
 #define	I2C_ADD(field, value) \
-	(I2C_MASK_##field & ((value) << (__builtin_ffs(I2C_MASK_##field) - 1)))
+	(I2C_MASK_##field & ((value) << (ffs(I2C_MASK_##field) - 1)))
 #define I2C_DEL(field) (~I2C_MASK_##field)
 #define I2C_GET(field, reg) \
-	(((I2C_MASK_##field) & (reg)) >> (__builtin_ffs(I2C_MASK_##field) - 1))
+	(((I2C_MASK_##field) & (reg)) >> (ffs(I2C_MASK_##field) - 1))
 
 #define	XCLK_kHz	40000	/* 40 MHz XTAL clock */
 

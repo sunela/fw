@@ -15,6 +15,7 @@
  */
 
 #include <stdint.h>
+#include <strings.h>
 
 #include "mmio.h"
 #include "gpio.h"
@@ -101,10 +102,10 @@ enum SPI_FRAME_SIZE {
 	(*(volatile uint32_t *) (SPI_BASE(spi) + 0x8c))
 
 #define	SPI_ADD(field, value) \
-	(SPI_MASK_##field & ((value) << (__builtin_ffs(SPI_MASK_##field) - 1)))
+	(SPI_MASK_##field & ((value) << (ffs(SPI_MASK_##field) - 1)))
 #define	SPI_DEL(field) (~SPI_MASK_##field)
 #define	SPI_GET(field, reg) \
-	(((SPI_MASK_##field) & (reg)) >> (__builtin_ffs(SPI_MASK_##field) - 1))
+	(((SPI_MASK_##field) & (reg)) >> (ffs(SPI_MASK_##field) - 1))
 
 
 static unsigned spi_ss;

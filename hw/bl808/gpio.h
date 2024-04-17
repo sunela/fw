@@ -10,6 +10,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <strings.h>
 
 #include "mmio.h"
 
@@ -70,8 +71,7 @@ enum GPIO_PULL {
 #define	GPIO_MASK_IE		(1 << 0)
 
 #define	GPIO_ADD(field, value) \
-	(GPIO_MASK_##field & ((value) << \
-	(__builtin_ffs(GPIO_MASK_##field) - 1)))
+	(GPIO_MASK_##field & ((value) << (ffs(GPIO_MASK_##field) - 1)))
 #define	GPIO_DEL(field) (~GPIO_MASK_##field)
 
 #define GPIO_CFG(n) \

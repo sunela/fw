@@ -413,6 +413,28 @@ static bool demo_7_validate(const char *s)
 }
 
 
+/* SHA1 hardware accelerator */
+
+
+static void demo_9(const char *s)
+{
+#ifndef SIM
+#include "sha.h"
+
+	uint8_t res[SHA1_HASH_BYTES];
+	unsigned i;
+
+	sha1_begin();
+	sha1_hash((const void *) s, strlen(s));
+	sha1_end(res);
+
+	for (i = 0; i != SHA1_HASH_BYTES; i++)
+		printf("%02x%c", res[i],
+		    i == SHA1_HASH_BYTES - 1 ? '\n' : ' ');
+#endif
+}
+
+
 /* --- Initialization ------------------------------------------------------ */
 
 
@@ -477,6 +499,10 @@ bool app_init(char *const *args, unsigned n_args)
 	case 8:
 		use_ntext = 1;
 		break;
+	case 9:
+		if (n_args > 1)
+			demo_9(args[1]);
+		exit(1);
 	default:
 		return 0;
 	}

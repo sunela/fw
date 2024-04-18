@@ -19,6 +19,7 @@
 #include "long_text.h"
 #include "ntext.h"
 #include "pin.h"
+#include "sha.h"
 #include "ui.h"
 
 #ifndef SIM
@@ -418,9 +419,6 @@ static bool demo_7_validate(const char *s)
 
 static void demo_9(const char *s)
 {
-#ifndef SIM
-#include "sha.h"
-
 	uint8_t res[SHA1_HASH_BYTES];
 	unsigned i;
 
@@ -431,7 +429,6 @@ static void demo_9(const char *s)
 	for (i = 0; i != SHA1_HASH_BYTES; i++)
 		printf("%02x%c", res[i],
 		    i == SHA1_HASH_BYTES - 1 ? '\n' : ' ');
-#endif
 }
 
 

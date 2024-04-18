@@ -8,6 +8,9 @@
 /*
  * For padding, etc.:
  * https://en.wikipedia.org/wiki/SHA-1
+ *
+ * The original specification:
+ * https://nvlpubs.nist.gov/nistpubs/Legacy/FIPS/fipspub180-1.pdf
  */
 
 #include <stddef.h>
@@ -23,8 +26,6 @@
 #include "physmem.h"
 #include "sha.h"
 
-
-#define	SHA1_BLOCK_BYTES	64	/* 512 bits */
 
 #define	SHA_BASE       		(mmio_m0_base + 0x4000)
 #define	SHA_CTRL		(*(volatile uint32_t *) SHA_BASE)

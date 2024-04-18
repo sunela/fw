@@ -1,5 +1,5 @@
 /*
- * sha.h - Driver for BL808 SHA hardware accelerator
+ * sha.h - SHA1 API
  *
  * This work is licensed under the terms of the MIT License.
  * A copy of the license can be found in the file LICENSE.MIT
@@ -12,7 +12,8 @@
 #include <sys/types.h>
 
 
-#define	SHA1_HASH_BYTES	20	/* 160 bits */
+#define	SHA1_HASH_BYTES		20	/* 160 bits */
+#define	SHA1_BLOCK_BYTES	64      /* 512 bits */
 
 
 void sha1_begin(void);

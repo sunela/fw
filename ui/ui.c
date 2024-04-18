@@ -20,6 +20,7 @@
 #include "ntext.h"
 #include "pin.h"
 #include "sha.h"
+#include "hmac.h"
 #include "ui.h"
 
 #ifndef SIM
@@ -414,7 +415,7 @@ static bool demo_7_validate(const char *s)
 }
 
 
-/* SHA1 hardware accelerator */
+/* SHA1,  hardware accelerator or gcrypt */
 
 
 static void demo_9(const char *s)
@@ -429,6 +430,21 @@ static void demo_9(const char *s)
 	for (i = 0; i != SHA1_HASH_BYTES; i++)
 		printf("%02x%c", res[i],
 		    i == SHA1_HASH_BYTES - 1 ? '\n' : ' ');
+}
+
+
+/* HMAC-SHA1 */
+
+
+static void demo_10(const char *k, const char *c)
+{
+	uint8_t res[HMAC_SHA1_BYTES];
+	unsigned i;
+
+	hmac_sha1(res, k, strlen(k), c, strlen(c));
+	for (i = 0; i != HMAC_SHA1_BYTES; i++)
+		printf("%02x%c", res[i],
+		    i == HMAC_SHA1_BYTES - 1 ? '\n' : ' ');
 }
 
 
@@ -499,6 +515,10 @@ bool app_init(char *const *args, unsigned n_args)
 	case 9:
 		if (n_args > 1)
 			demo_9(args[1]);
+		exit(1);
+	case 10:
+		if (n_args > 2)
+			demo_10(args[1], args[2]);
 		exit(1);
 	default:
 		return 0;

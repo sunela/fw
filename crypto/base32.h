@@ -1,5 +1,5 @@
 /*
- * base32.h - Base32 (RFC4648) encoder
+ * base32.h - Base32 (RFC4648) encoder/decoder
  *
  * This work is licensed under the terms of the MIT License.
  * A copy of the license can be found in the file LICENSE.MIT
@@ -32,5 +32,12 @@ static inline size_t base32_encode_size(size_t size)
 ssize_t base32_encode(char *res, size_t res_size, const void *data,
     size_t size);
 
-#endif	/* !BASE32_H */
+ssize_t base32_decode(void *res, size_t res_size, const char *s);
 
+
+static inline ssize_t base32_decode_size(const char *s)
+{
+	return base32_decode(NULL, 0, s);
+}
+
+#endif	/* !BASE32_H */

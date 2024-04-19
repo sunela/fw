@@ -492,6 +492,27 @@ static void demo_12(const char *s)
 }
 
 
+/* Base32 decoding */
+
+
+static void demo_13(const char *s)
+{
+	size_t res_size = base32_decode_size(s);
+	uint8_t res[res_size];
+	ssize_t got, i;
+
+	got = base32_decode(res, res_size, s);
+	if (got < 0) {
+		printf("ERROR\n");
+	} else {
+		printf("%d/%u", (int) got, (unsigned) res_size, res);
+		for (i = 0; i != got; i++)
+			printf(" %02x", res[i]);
+		printf("\n");
+	}
+}
+
+
 /* --- Initialization ------------------------------------------------------ */
 
 
@@ -571,6 +592,10 @@ bool app_init(char *const *args, unsigned n_args)
 	case 12:
 		if (n_args > 1)
 			demo_12(args[1]);
+		exit(1);
+	case 13:
+		if (n_args > 1)
+			demo_13(args[1]);
 		exit(1);
 	default:
 		return 0;

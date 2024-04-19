@@ -31,7 +31,7 @@ void hmac_sha1(uint8_t res[HMAC_SHA1_BYTES], const void *k, size_t k_size,
 
 	// generate key from K
 
-	if (k_size > SHA1_HASH_BYTES) {
+	if (k_size > SHA1_BLOCK_BYTES) {
 		sha1_begin();
 		sha1_hash(k, k_size);
 		sha1_end(key);
@@ -39,7 +39,7 @@ void hmac_sha1(uint8_t res[HMAC_SHA1_BYTES], const void *k, size_t k_size,
 	} else {
 		memcpy(key, k, k_size);
 	}
-	if (k_size < SHA1_HASH_BYTES)
+	if (k_size < SHA1_BLOCK_BYTES)
 		memset(key+ k_size, 0, SHA1_BLOCK_BYTES - k_size);
 
 	// h_text = H(K XOR ipad, text)

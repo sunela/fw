@@ -7,7 +7,7 @@
 
 /*
  * Specification:
- * https://datatracker.ietf.org/doc/html/rfc4648
+ * https://www.ietf.org/rfc/rfc4648.txt
  * https://en.wikipedia.org/wiki/Base32
  */
 

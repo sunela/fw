@@ -8,7 +8,7 @@
 /*
  * HMAC specification:
  *
- * https://www.rfc-editor.org/rfc/rfc2104.txt
+ * https://www.ietf.org/rfc/rfc2104.txt
  * https://en.wikipedia.org/wiki/HMAC
  */
 

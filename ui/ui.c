@@ -21,6 +21,7 @@
 #include "pin.h"
 #include "sha.h"
 #include "hmac.h"
+#include "hotp.h"
 #include "ui.h"
 
 #ifndef SIM
@@ -448,6 +449,31 @@ static void demo_10(const char *k, const char *c)
 }
 
 
+/* HOTP */
+
+
+#define	HOTP_COUNT_BYTES	8
+
+
+static void demo_11(const char *k, const char *c)
+{
+	char *end;
+	unsigned long count;
+	uint8_t c_bytes[HOTP_COUNT_BYTES];
+	unsigned i;
+
+	count = strtoul(c, &end, 10);
+	if (*end) {
+		fprintf(stderr, "bad counter \"%s\"\n", c);
+		exit(1);
+	}
+	for (i = 0; i != HOTP_COUNT_BYTES; i++)
+		c_bytes[i] = count >> 8 * (HOTP_COUNT_BYTES - i - 1);
+	printf("%06u\n",
+	    hotp(k, strlen(k), c_bytes, HOTP_COUNT_BYTES) % 1000000);
+}
+
+
 /* --- Initialization ------------------------------------------------------ */
 
 
@@ -519,6 +545,10 @@ bool app_init(char *const *args, unsigned n_args)
 	case 10:
 		if (n_args > 2)
 			demo_10(args[1], args[2]);
+		exit(1);
+	case 11:
+		if (n_args > 2)
+			demo_11(args[1], args[2]);
 		exit(1);
 	default:
 		return 0;

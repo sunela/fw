@@ -22,6 +22,7 @@
 #include "sha.h"
 #include "hmac.h"
 #include "hotp.h"
+#include "base32.h"
 #include "ui.h"
 
 #ifndef SIM
@@ -474,6 +475,23 @@ static void demo_11(const char *k, const char *c)
 }
 
 
+/* Base32 encoding */
+
+
+static void demo_12(const char *s)
+{
+	size_t res_size = base32_encode_size(strlen(s));
+	char res[res_size];
+	ssize_t got;
+
+	got = base32_encode(res, res_size, s, strlen(s));
+	if (got < 0)
+		printf("ERROR\n");
+	else
+		printf("%d/%u \"%s\"\n", (int) got, (unsigned) res_size, res);
+}
+
+
 /* --- Initialization ------------------------------------------------------ */
 
 
@@ -549,6 +567,10 @@ bool app_init(char *const *args, unsigned n_args)
 	case 11:
 		if (n_args > 2)
 			demo_11(args[1], args[2]);
+		exit(1);
+	case 12:
+		if (n_args > 1)
+			demo_12(args[1]);
 		exit(1);
 	default:
 		return 0;

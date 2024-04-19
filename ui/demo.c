@@ -321,6 +321,39 @@ static void demo_13(const char *s)
 }
 
 
+/* HOTP with base32-encoded secret */
+
+
+static void demo_14(const char *s, const char *c)
+{
+	size_t key_size = base32_decode_size(s);
+	uint8_t key[key_size];
+	ssize_t got, i;
+	char *end;
+	unsigned long count;
+	uint8_t c_bytes[HOTP_COUNT_BYTES];
+
+	count = strtoul(c, &end, 10);
+	if (*end) {
+		fprintf(stderr, "bad counter \"%s\"\n", c);
+		exit(1);
+	}
+	got = base32_decode(key, key_size, s);
+	if (got < 0) {
+		printf("ERROR\n");
+	} else {
+		printf("%d/%u", (int) got, (unsigned) key_size);
+		for (i = 0; i != got; i++)
+			printf(" %02x", key[i]);
+		printf("\n");
+	}
+	for (i = 0; i != HOTP_COUNT_BYTES; i++)
+		c_bytes[i] = count >> 8 * (HOTP_COUNT_BYTES - i - 1);
+	printf("%06u\n", hotp(key, got, c_bytes, HOTP_COUNT_BYTES) % 1000000);
+
+}
+
+
 /* --- Initialization ------------------------------------------------------ */
 
 
@@ -388,6 +421,10 @@ void demo(unsigned param, char *const *args, unsigned n_args)
 	case 13:
 		if (n_args)
 			demo_13(args[0]);
+		exit(1);
+	case 14:
+		if (n_args > 1)
+			demo_14(args[0], args[1]);
 		exit(1);
 	default:
 		break;

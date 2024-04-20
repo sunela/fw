@@ -33,7 +33,11 @@ struct ui_list_entry {
 };
 
 
-void *ui_list_pick(const struct ui_list *list, unsigned x, unsigned y)
+/* --- Item selection ------------------------------------------------------ */
+
+
+const struct ui_list_entry *ui_list_pick(const struct ui_list *list,
+    unsigned x, unsigned y)
 {
 	const struct ui_list_entry *e;
 	unsigned pos = list->style->y0;
@@ -43,10 +47,19 @@ void *ui_list_pick(const struct ui_list *list, unsigned x, unsigned y)
 	for (e = list->list; e; e = e->next) {
 		pos += Y_STEP;
 		if (y < pos)
-			return e->user;
+			return e;
 	}
 	return NULL;
 }
+
+
+void *ui_list_user(const struct ui_list_entry *entry)
+{
+	return entry->user;
+}
+
+
+/* --- List construction, display, destruction ----------------------------- */
 
 
 void ui_list_begin(struct ui_list *list, const struct ui_list_style *style)

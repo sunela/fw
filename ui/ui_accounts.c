@@ -43,12 +43,12 @@ static struct ui_list list;
 
 static void ui_accounts_tap(unsigned x, unsigned y)
 {
-	struct account *acc;
+	const struct ui_list_entry *entry;
 
-	acc = ui_list_pick(&list, x, y);
-	if (!acc)
+	entry = ui_list_pick(&list, x, y);
+	if (!entry)
 		return;
-	selected_account = acc;
+	selected_account = ui_list_user(entry);
 	ui_switch(&ui_account);
 }
 

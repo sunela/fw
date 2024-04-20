@@ -13,6 +13,6 @@
 
 
 uint32_t hotp(const void *k, size_t k_size, const void *c, size_t c_size);
+uint32_t hotp64(const void *k, size_t k_size, uint64_t c);
 
 #endif	/* !HOTP_H */
-

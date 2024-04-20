@@ -54,3 +54,21 @@ printf("\n");
 	memset(hash, 0, sizeof(hash));
 	return res;
 }
+
+
+static uint32_t hotp_n(const void *k, size_t k_size, uint64_t count,
+    unsigned bytes)
+{
+	uint8_t c_bytes[8];
+	unsigned i;
+
+	for (i = 0; i != bytes; i++)
+		c_bytes[i] = count >> 8 * (bytes - i - 1);
+	return hotp(k, k_size, c_bytes, bytes);
+}
+
+
+uint32_t hotp64(const void *k, size_t k_size, uint64_t count)
+{
+	return hotp_n(k, k_size, count, 8);
+}

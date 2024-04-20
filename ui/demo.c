@@ -261,25 +261,17 @@ static void demo_10(const char *k, const char *c)
 /* HOTP */
 
 
-#define	HOTP_COUNT_BYTES	8
-
-
 static void demo_11(const char *k, const char *c)
 {
 	char *end;
 	unsigned long count;
-	uint8_t c_bytes[HOTP_COUNT_BYTES];
-	unsigned i;
 
 	count = strtoul(c, &end, 10);
 	if (*end) {
 		fprintf(stderr, "bad counter \"%s\"\n", c);
 		exit(1);
 	}
-	for (i = 0; i != HOTP_COUNT_BYTES; i++)
-		c_bytes[i] = count >> 8 * (HOTP_COUNT_BYTES - i - 1);
-	printf("%06u\n",
-	    hotp(k, strlen(k), c_bytes, HOTP_COUNT_BYTES) % 1000000);
+	printf("%06u\n", hotp64(k, strlen(k), count) % 1000000);
 }
 
 
@@ -328,10 +320,9 @@ static void demo_14(const char *s, const char *c)
 {
 	size_t key_size = base32_decode_size(s);
 	uint8_t key[key_size];
-	ssize_t got, i;
+	ssize_t got;
 	char *end;
 	unsigned long count;
-	uint8_t c_bytes[HOTP_COUNT_BYTES];
 
 	count = strtoul(c, &end, 10);
 	if (*end) {
@@ -342,14 +333,14 @@ static void demo_14(const char *s, const char *c)
 	if (got < 0) {
 		printf("ERROR\n");
 	} else {
+		ssize_t i;
+
 		printf("%d/%u", (int) got, (unsigned) key_size);
 		for (i = 0; i != got; i++)
 			printf(" %02x", key[i]);
 		printf("\n");
 	}
-	for (i = 0; i != HOTP_COUNT_BYTES; i++)
-		c_bytes[i] = count >> 8 * (HOTP_COUNT_BYTES - i - 1);
-	printf("%06u\n", hotp(key, got, c_bytes, HOTP_COUNT_BYTES) % 1000000);
+	printf("%06u\n", hotp64(key, got, count) % 1000000);
 
 }
 

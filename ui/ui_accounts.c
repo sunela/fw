@@ -5,18 +5,52 @@
  * A copy of the license can be found in the file LICENSE.MIT
  */
 
+#include <stddef.h>
+
 #include "hal.h"
 #include "gfx.h"
+#include "ntext.h"
 #include "ui_list.h"
 #include "accounts.h"
+#include "ui_account.h"
 #include "ui.h"
 
+
+#define	FONT_TOP_SIZE		22
+#define	FONT_TOP		mono18
+
+#define	TOP_BG			gfx_hex(0x30ff50)
+
+#define	TOP_H			30
+#define	TOP_LINE_WIDTH		2
+#define	LIST_Y0			(TOP_H + TOP_LINE_WIDTH + 1)
 
 #define	HOLD_MS	(5 * 1000)
 
 
+static const struct ui_list_style style = {
+	y0:	LIST_Y0,
+	y1:	GFX_HEIGHT - 1,
+	fg:	{ GFX_WHITE, GFX_WHITE },
+	bg:	{ GFX_BLACK, GFX_HEX(0x202020) },
+};
 
 static struct ui_list list;
+
+
+/* --- Event handling ------------------------------------------------------ */
+
+
+static void ui_accounts_tap(unsigned x, unsigned y)
+{
+	struct account *acc;
+
+	acc = ui_list_pick(&list, x, y);
+	if (!acc)
+		return;
+	selected_account = acc;
+	ui_switch(&ui_account);
+}
 
 
 /* --- Open/close ---------------------------------------------------------- */
@@ -26,9 +60,17 @@ static void ui_accounts_open(void)
 {
 	unsigned i;
 
-	ui_list_begin(&list);
+	gfx_rect_xy(&da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH, GFX_WHITE);
+	if (use_ntext)
+		ntext_text(&da, GFX_WIDTH / 2, TOP_H / 2, "Accounts",
+		    &FONT_TOP, GFX_CENTER, GFX_CENTER, GFX_WHITE);
+	else
+		gfx_text(&da, GFX_WIDTH / 2, TOP_H / 2, "Accounts",
+		    FONT_TOP_SIZE, GFX_CENTER, GFX_CENTER, GFX_WHITE);
+	ui_list_begin(&list, &style);
 	for (i = 0; i != n_accounts; i++)
-		ui_list_add(&list, accounts[i].name, (void *) accounts + i);
+		ui_list_add(&list, accounts[i].name, NULL,
+		    (void *) accounts + i);
 	ui_list_end(&list);
 }
 
@@ -39,7 +81,15 @@ static void ui_accounts_close(void)
 }
 
 
+/* --- Interface ----------------------------------------------------------- */
+
+
+static const struct ui_events ui_accounts_events = {
+	.touch_tap	= ui_accounts_tap,
+};
+
 const struct ui ui_accounts = {
 	.open = ui_accounts_open,
         .close = ui_accounts_close,
+	.events = &ui_accounts_events,
 };

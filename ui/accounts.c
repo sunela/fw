@@ -9,9 +9,24 @@
 
 
 static const struct account dummy_accounts[] = {
-	{ "demo", 	"user@mail.com", 	"Geheim" },
-	{ "2nd",	"account name",		"password" },
-	{ "more",	"something",		"else" },
+	{
+		name:	"demo",
+		user: 	"user@mail.com",
+		pw: 	"Geheim",
+		token:	{ 0 }
+	},
+	{
+		name:	"2nd",
+		user:	"account name",
+		pw:	"password",
+		token:	{ 0 }
+	},
+	{
+		name:	"more",
+		user:	"something",
+		pw:	"else",
+		token:	{ 0 }
+	 },
 };
 
 const struct account *accounts = dummy_accounts;

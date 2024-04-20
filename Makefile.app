@@ -10,8 +10,8 @@ CFLAGS += -g -Wall -Wextra -Wshadow -Wno-unused-parameter \
 	 -I$(shell pwd) -Isys -Igfx -Iui -Ifont -Icrypto
 OBJS = ui.o demo.o timer.o debug.o rnd.o hmac.o hotp.o base32.o \
     basic.o poly.o vfont.o text.o long_text.o font.o ntext.o \
-    ui_off.o ui_pin.o ui_fail.o ui_accounts.o ui_list.o ui_entry.o \
-    shape.o accounts.o
+    ui_off.o ui_pin.o ui_fail.o ui_accounts.o ui_account.o ui_list.o \
+    ui_entry.o shape.o accounts.o
 
 include Makefile.c-common
 
@@ -37,6 +37,7 @@ vpath ui_pin.c ui
 vpath ui_off.c ui
 vpath ui_fail.c ui
 vpath ui_accounts.c ui
+vpath ui_account.c ui
 vpath ui_list.c ui
 vpath ui_entry.c ui
 vpath shape.c ui

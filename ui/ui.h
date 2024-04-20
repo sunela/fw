@@ -53,6 +53,7 @@ extern const struct ui ui_pin;
 extern const struct ui ui_fail;
 extern const struct ui ui_cooldown;
 extern const struct ui ui_accounts;
+extern const struct ui ui_account;
 extern const struct ui ui_entry;
 
 void progress(void);

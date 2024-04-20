@@ -37,6 +37,16 @@ struct gfx_drawable {
 };
 
 
+/*
+ * GFX_RGB and GFX_HEX macros are for constant expressions in static
+ * initializers.
+ * Note that some of the arguments are evaluated more than once.
+ */
+
+#define	GFX_RGB(r, g, b) \
+	(((r) & 0xf8) | ((g) & 0xe0) >> 5 | ((g) & 0x1c) << 11 | \
+	    ((b) & 0xf8) << 5)
+
 static inline gfx_color gfx_rgb(uint8_t r, uint8_t g, uint8_t b)
 {
 	return (r & 0xf8) | (g & 0xe0) >> 5 | (g & 0x1c) << 11 |
@@ -47,20 +57,22 @@ static inline gfx_color gfx_rgb(uint8_t r, uint8_t g, uint8_t b)
 
 /* Encoding: 0xrrggbb */
 
+#define	GFX_HEX(hex) GFX_RGB((hex) >> 16, (hex) >> 8, (hex))
+
 static inline gfx_color gfx_hex(uint32_t hex)
 {
 	return gfx_rgb(hex >> 16, hex >> 8, hex);
 }
 
 
-#define	GFX_BLACK	gfx_hex(0x000000)
-#define	GFX_WHITE	gfx_hex(0xffffff)
-#define	GFX_RED		gfx_hex(0xff0000)
-#define	GFX_GREEN	gfx_hex(0x00ff00)
-#define	GFX_BLUE	gfx_hex(0x0000ff)
-#define	GFX_YELLOW	gfx_hex(0xffff00)
-#define	GFX_MAGENTA	gfx_hex(0xff00ff)
-#define	GFX_CYAN	gfx_hex(0x00ffff)
+#define	GFX_BLACK	GFX_HEX(0x000000)
+#define	GFX_WHITE	GFX_HEX(0xffffff)
+#define	GFX_RED		GFX_HEX(0xff0000)
+#define	GFX_GREEN	GFX_HEX(0x00ff00)
+#define	GFX_BLUE	GFX_HEX(0x0000ff)
+#define	GFX_YELLOW	GFX_HEX(0xffff00)
+#define	GFX_MAGENTA	GFX_HEX(0xff00ff)
+#define	GFX_CYAN	GFX_HEX(0x00ffff)
 
 
 void gfx_rect(struct gfx_drawable *da, const struct gfx_rect *r,

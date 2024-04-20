@@ -39,7 +39,7 @@ struct gfx_drawable {
 
 static inline gfx_color gfx_rgb(uint8_t r, uint8_t g, uint8_t b)
 {
-	return (r & 0xf8) | (g & 0xe0) >> 5 | (g & 0x1c) << 12 |
+	return (r & 0xf8) | (g & 0xe0) >> 5 | (g & 0x1c) << 11 |
 	    (b & 0xf8) << 5;
 //	return st7789_rgb(r, g, b);
 }

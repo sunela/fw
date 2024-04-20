@@ -426,6 +426,10 @@ void demo(unsigned param, char *const *args, unsigned n_args)
 		if (n_args > 1)
 			demo_14(args[0], args[1]);
 		exit(1);
+	case 15:
+		use_ntext = n_args;
+		ui_switch(&ui_accounts);
+		break;
 	default:
 		break;
 	}

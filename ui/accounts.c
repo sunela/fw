@@ -8,7 +8,7 @@
 #include "accounts.h"
 
 
-static const struct account dummy_accounts[] = {
+static struct account dummy_accounts[] = {
 	{
 		name:	"demo",
 		user: 	"user@mail.com",
@@ -26,9 +26,19 @@ static const struct account dummy_accounts[] = {
 		user:	"something",
 		pw:	"else",
 		token:	{ 0 }
-	 },
+	},
+	{
+		name:	"HOTP",
+		token:	{
+			secret_size:	20,
+			secret:		(uint8_t *) "12345678901234567890",
+			type:		tt_hotp,
+			algo:		ta_sha1,
+			counter:	0,
+		},
+	},
 };
 
-const struct account *accounts = dummy_accounts;
+struct account *accounts = dummy_accounts;
 
 unsigned n_accounts = sizeof(dummy_accounts) / sizeof(struct account);

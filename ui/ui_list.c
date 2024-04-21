@@ -7,6 +7,8 @@
 
 #include <stddef.h>
 #include <stdlib.h>
+#include <string.h>
+#include <assert.h>
 
 #include "hal.h"
 #include "lib/alloc.h"
@@ -33,19 +35,29 @@ struct ui_list_entry {
 };
 
 
+/* --- Helper functions ---------------------------------------------------- */
+
+
+static unsigned entry_height(const struct ui_list *list,
+    const struct ui_list_entry *e)
+{
+	return 2 * Y_PAD + (e->second ? 2 * Y_STEP + Y_PAD : Y_STEP);
+}
+
+
 /* --- Item selection ------------------------------------------------------ */
 
 
-const struct ui_list_entry *ui_list_pick(const struct ui_list *list,
+struct ui_list_entry *ui_list_pick(const struct ui_list *list,
     unsigned x, unsigned y)
 {
-	const struct ui_list_entry *e;
+	struct ui_list_entry *e;
 	unsigned pos = list->style->y0;
 
 	if (y < pos)
 		return NULL;
 	for (e = list->list; e; e = e->next) {
-		pos += Y_STEP;
+		pos += entry_height(list, e);
 		if (y < pos)
 			return e;
 	}
@@ -75,6 +87,7 @@ void ui_list_add(struct ui_list *list, const char *first, const char *second,
 {
 	struct ui_list_entry *e;
 
+	assert(first);
 	e = alloc_type(struct ui_list_entry);
 	e->first = first;
 	e->second = second;
@@ -85,36 +98,70 @@ void ui_list_add(struct ui_list *list, const char *first, const char *second,
 }
 
 
+static unsigned draw_entry(const struct ui_list *list,
+    const struct ui_list_entry *e, unsigned y, bool even)
+{
+	const struct ui_list_style *style = list->style;
+	unsigned h = entry_height(list, e);
+
+	gfx_rect_xy(&da, 0, y, GFX_WIDTH, h, style->bg[even]);
+	if (use_ntext)
+		ntext_text(&da, 0, y + Y_PAD + Y_STEP / 2,
+		    e->first, &FONT, GFX_LEFT, GFX_CENTER,
+		    style->fg[even]);
+	else
+		gfx_text(&da, 0, y + Y_PAD + Y_STEP / 2,
+		    e->first, FONT_SIZE, GFX_LEFT, GFX_CENTER,
+		    style->fg[even]);
+	if (!e->second)
+		return h;
+	if (use_ntext)
+		ntext_text(&da, 0, y + 2 * Y_PAD + 1.5 * Y_STEP,
+		    e->second, &FONT, GFX_LEFT, GFX_CENTER,
+		    style->fg[even]);
+	else
+		gfx_text(&da, 0, y + 2 * Y_PAD + 1.5 * Y_STEP,
+		    e->second, FONT_SIZE, GFX_LEFT, GFX_CENTER,
+		    style->fg[even]);
+	return h;
+}
+
+
+void ui_list_update_entry(struct ui_list *list, struct ui_list_entry *entry,
+    const char *first, const char *second, void *user)
+{
+	bool changed = (first ? !entry->first || strcmp(first, entry->first) :
+	    !!entry->first) ||
+	    (second ? !entry->second || strcmp(second, entry->second) :
+	    !!entry->second);
+	const struct ui_list_entry *e;
+	unsigned y = list->style->y0;
+	int even = 0;
+
+	entry->first = first;
+	entry->second = second;
+	entry->user = user;
+	if (!changed)
+		return;
+	
+	for (e = list->list; e != entry; e = e->next) {
+		y += entry_height(list, e);
+		even = !even;
+	}
+	draw_entry(list, entry, y, even);
+}
+
+
 void ui_list_end(struct ui_list *list)
 {
 	const struct ui_list_entry *e;
-	const struct ui_list_style *style = list->style;
 	unsigned y = list->style->y0;
 	unsigned i = 0;
 
 	for (e = list->list; e; e = e->next) {
-		unsigned h = 2 * Y_PAD +
-		    (e->second ? 2 * Y_STEP + Y_PAD : Y_STEP);
+		unsigned h;
 
-		gfx_rect_xy(&da, 0, y, GFX_WIDTH, h, style->bg[i & 1]);
-		if (use_ntext)
-			ntext_text(&da, 0, y + Y_PAD + Y_STEP / 2,
-			    e->first, &FONT, GFX_LEFT, GFX_CENTER,
-			    style->fg[i & 1]);
-		else
-			gfx_text(&da, 0, y + Y_PAD + Y_STEP / 2,
-			    e->first, FONT_SIZE, GFX_LEFT, GFX_CENTER,
-			    style->fg[i & 1]);
-		if (e->second) {
-			if (use_ntext)
-				ntext_text(&da, 0, y + 2 * Y_PAD + 1.5 * Y_STEP,
-				    e->first, &FONT, GFX_LEFT, GFX_CENTER,
-				    style->fg[i & 1]);
-			else
-				gfx_text(&da, 0, y + 2 * Y_PAD + 1.5 * Y_STEP,
-				    e->first, FONT_SIZE, GFX_LEFT, GFX_CENTER,
-				    style->fg[i & 1]);
-		}
+		h = draw_entry(list, e, y, i & 1);
 		i++;
 		y += h;
 	}

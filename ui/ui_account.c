@@ -23,8 +23,6 @@
 #define	FONT_TOP_SIZE		22
 #define	FONT_TOP		mono18
 
-#define	TOP_BG			gfx_hex(0x30ff50)
-
 #define	TOP_H			30
 #define	TOP_LINE_WIDTH		2
 #define	LIST_Y0			(TOP_H + TOP_LINE_WIDTH + 1)
@@ -35,7 +33,7 @@
 struct account *selected_account = NULL;
 
 static const struct ui_list_style style = {
-	y0:	0,
+	y0:	LIST_Y0,
 	y1:	GFX_HEIGHT - 1,
 	fg:	{ GFX_WHITE, GFX_WHITE },
 	bg:	{ GFX_BLACK, GFX_HEX(0x202020) },
@@ -49,13 +47,29 @@ static struct ui_list list;
 
 static void ui_account_tap(unsigned x, unsigned y)
 {
-        const struct ui_list_entry *entry;
+        struct ui_list_entry *entry;
+	struct account *a;
+	/* @@@ ugly. should have list entries that strdup */
+	static char s[6 + 1];
+	uint32_t code;
 
         entry = ui_list_pick(&list, x, y);
         if (!entry)
                 return;
-	/* for revealing HOTP codes */
+	a = ui_list_user(entry);
+	if (!a)
+		return;
+	if (!a->token.secret_size || a->token.type != tt_hotp)
+		return;
+
+	/* @@@ make it harder to update the counter ? */
+	a->token.counter++;
+	code = hotp64(a->token.secret, a->token.secret_size, a->token.counter);
+	sprintf(s, "%06u", (unsigned) code % 1000000);
+	ui_list_update_entry(&list, entry, "HOTP", s, a);
+	update_display(&da);
 }
+
 
 /* --- Open/close ---------------------------------------------------------- */
 
@@ -64,29 +78,23 @@ static void ui_account_open(void)
 {
 	struct account *a = selected_account;
 
-	ui_list_begin(&list, &style);
-	ui_list_add(&list, a->name, NULL, NULL);
-	if (a->user) {
-		ui_list_add(&list, "User", NULL, NULL);
-		ui_list_add(&list, a->user, NULL, NULL);
-	}
-	if (a->pw) {
-		ui_list_add(&list, "Password", NULL, NULL);
-		ui_list_add(&list, a->pw, NULL, NULL);
-	}
-	if (a->token.secret_size) {
-		/* @@@ ugly. should have list entries that strdup */
-		static char s[6 + 1];
-		uint32_t code;
+	gfx_rect_xy(&da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH, GFX_WHITE);
+	if (use_ntext)
+		ntext_text(&da, GFX_WIDTH / 2, TOP_H / 2, a->name,
+		    &FONT_TOP, GFX_CENTER, GFX_CENTER, GFX_YELLOW);
+	else
+		gfx_text(&da, GFX_WIDTH / 2, TOP_H / 2, a->name,
+		    FONT_TOP_SIZE, GFX_CENTER, GFX_CENTER, GFX_YELLOW);
 
+	ui_list_begin(&list, &style);
+	if (a->user)
+		ui_list_add(&list, "User", a->user, NULL);
+	if (a->pw)
+		ui_list_add(&list, "Password", a->pw, NULL);
+	if (a->token.secret_size) {
 		switch (a->token.type) {
 		case tt_hotp:
-			code = hotp64(a->token.secret, a->token.secret_size,
-			    a->token.counter);
-			sprintf(s, "%06u", (unsigned) code);
-			ui_list_add(&list, "HOTP", s, NULL);
-			/* @@@ increment needs to be user-triggered */
-			a->token.counter++;
+			ui_list_add(&list, "HOTP", "------", a);
 			break;		
 		default:
 			abort();

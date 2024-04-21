@@ -19,8 +19,6 @@
 #define	FONT_TOP_SIZE		22
 #define	FONT_TOP		mono18
 
-#define	TOP_BG			gfx_hex(0x30ff50)
-
 #define	TOP_H			30
 #define	TOP_LINE_WIDTH		2
 #define	LIST_Y0			(TOP_H + TOP_LINE_WIDTH + 1)
@@ -69,8 +67,7 @@ static void ui_accounts_open(void)
 		    FONT_TOP_SIZE, GFX_CENTER, GFX_CENTER, GFX_WHITE);
 	ui_list_begin(&list, &style);
 	for (i = 0; i != n_accounts; i++)
-		ui_list_add(&list, accounts[i].name, NULL,
-		    (void *) accounts + i);
+		ui_list_add(&list, accounts[i].name, NULL, accounts + i);
 	ui_list_end(&list);
 }
 

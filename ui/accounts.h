@@ -29,7 +29,7 @@ struct account {
 };
 
 
-extern const struct account *accounts;
+extern struct account *accounts;
 extern unsigned n_accounts;
 
 #endif /* !ACCOUNTS_H */

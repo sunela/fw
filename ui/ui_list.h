@@ -26,13 +26,15 @@ struct ui_list {
 };
 
 
-const struct ui_list_entry *ui_list_pick(const struct ui_list *list,
+struct ui_list_entry *ui_list_pick(const struct ui_list *list,
     unsigned x, unsigned y);
 void *ui_list_user(const struct ui_list_entry *entry);
 
 void ui_list_begin(struct ui_list *ctx, const struct ui_list_style *style);
 void ui_list_add(struct ui_list *ctx, const char *label, const char *content,
     void *user);
+void ui_list_update_entry(struct ui_list *list, struct ui_list_entry *entry,
+    const char *first, const char *second, void *user);
 void ui_list_end(struct ui_list *ctx);
 
 void ui_list_destroy(struct ui_list *ctx);

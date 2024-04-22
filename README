@@ -9,6 +9,15 @@ Most of the firmware is distributed under the terms of the MIT License. See
 COPYING for more details.
 
 
+WARNING
+-------
+
+This firmware is under development and not yet intended for real-life use !
+Among other issues, test coverage is very poor (there aren't even proper
+regression tests), some code needs major cleanup, and "secrets" are not hidden
+at all.
+
+
 Build instructions
 ------------------
 

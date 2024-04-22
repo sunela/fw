@@ -20,7 +20,7 @@
 
 /* @@@ move font, etc. to style after we drop the vector fonts */
 
-#define	FONT_SIZE	24
+#define	FONT_SIZE	24	// @@@
 #define	FONT		mono18
 
 #define	Y_PAD		1
@@ -105,24 +105,12 @@ static unsigned draw_entry(const struct ui_list *list,
 	unsigned h = entry_height(list, e);
 
 	gfx_rect_xy(&da, 0, y, GFX_WIDTH, h, style->bg[even]);
-	if (use_ntext)
-		ntext_text(&da, 0, y + Y_PAD + Y_STEP / 2,
-		    e->first, &FONT, GFX_LEFT, GFX_CENTER,
-		    style->fg[even]);
-	else
-		gfx_text(&da, 0, y + Y_PAD + Y_STEP / 2,
-		    e->first, FONT_SIZE, GFX_LEFT, GFX_CENTER,
-		    style->fg[even]);
+	ntext_text(&da, 0, y + Y_PAD + Y_STEP / 2, e->first, &FONT,
+	    GFX_LEFT, GFX_CENTER, style->fg[even]);
 	if (!e->second)
 		return h;
-	if (use_ntext)
-		ntext_text(&da, 0, y + 2 * Y_PAD + 1.5 * Y_STEP,
-		    e->second, &FONT, GFX_LEFT, GFX_CENTER,
-		    style->fg[even]);
-	else
-		gfx_text(&da, 0, y + 2 * Y_PAD + 1.5 * Y_STEP,
-		    e->second, FONT_SIZE, GFX_LEFT, GFX_CENTER,
-		    style->fg[even]);
+	ntext_text(&da, 0, y + 2 * Y_PAD + 1.5 * Y_STEP, e->second, &FONT,
+	    GFX_LEFT, GFX_CENTER, style->fg[even]);
 	return h;
 }
 

@@ -17,6 +17,8 @@
 #include <stdbool.h>
 
 #include "gfx.h"
+#include "font.h"
+#include "ntext.h"
 
 
 #define	MAX_W	1000
@@ -40,8 +42,8 @@ struct long_text {
  */
 
 void long_text_setup(struct long_text *lt, struct gfx_drawable *da,
-    unsigned x, int y, unsigned w, unsigned h, const char *s, unsigned scale,
-    gfx_color color, gfx_color bg);
+    unsigned x, int y, unsigned w, unsigned h, const char *s,
+    const struct font *font, gfx_color color, gfx_color bg);
 
 /*
  * long_text_scroll returns 1 if we're at the beginning or the end of the text

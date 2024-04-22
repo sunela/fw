@@ -8,21 +8,23 @@
 #include <assert.h>
 
 #include "gfx.h"
+#include "font.h"
+#include "ntext.h"
 #include "long_text.h"
 
 
-static void prepare(struct long_text *lt, const char *s, unsigned scale,
-    gfx_color color, gfx_color bg)
+static void prepare(struct long_text *lt, const char *s,
+    const struct font *font, gfx_color color, gfx_color bg)
 {
 	struct gfx_rect bb;
 
-	gfx_text_bbox(0, 0, s, scale, GFX_LEFT, GFX_TOP, &bb);
+	ntext_text_bbox(0, 0, s, font, GFX_LEFT, GFX_TOP, &bb);
 	assert(bb.w <= MAX_W);
 	assert(bb.h <= MAX_H);
 
 	gfx_da_init(&lt->buf, bb.w, bb.h, lt->fb);
 	gfx_clear(&lt->buf, bg);
-	gfx_text(&lt->buf, 0, 0, s, scale, GFX_LEFT, GFX_TOP, color);
+	ntext_text(&lt->buf, 0, 0, s, font, GFX_LEFT, GFX_TOP, color);
 }
 
 
@@ -59,8 +61,8 @@ static void draw(struct long_text *lt, struct gfx_drawable *da,
 
 
 void long_text_setup(struct long_text *lt, struct gfx_drawable *da,
-    unsigned x, int y, unsigned w, unsigned h, const char *s, unsigned scale,
-    gfx_color color, gfx_color bg)
+    unsigned x, int y, unsigned w, unsigned h, const char *s,
+    const struct font *font, gfx_color color, gfx_color bg)
 {
 	assert(x < da->w);
 	assert(x + w <= da->h);
@@ -75,7 +77,7 @@ void long_text_setup(struct long_text *lt, struct gfx_drawable *da,
 	lt->bg = bg;
 	lt->offset = 0;
 
-	prepare(lt, s, scale, color, bg);
+	prepare(lt, s, font, color, bg);
 
 	/* we only need to draw the text once */
 	if (w >= lt->buf.w)

@@ -29,9 +29,6 @@
 #endif /* !SIM */
 
 
-bool use_ntext = 0;
-
-
 /* Simple rectangles and colors. */
 
 static void demo_1(void)
@@ -103,7 +100,7 @@ static void demo_3(void)
 
 /* Text */
 
-static void demo_4(bool new)
+static void demo_4(void)
 {
 	const struct font *fonts[] = {
 		&mono18,
@@ -113,18 +110,14 @@ static void demo_4(bool new)
 	unsigned i;
 
 	for (i = 0; i != 3; i++)
-		if (new)
-			ntext_char(&da, 100, 50 + 50 * i, fonts[i], '5',
-			    GFX_WHITE);
-		else
-			gfx_char(&da, 100, 50 + 50 * i, 16 << i, 16 << i, '@',
-			    GFX_WHITE);
+		ntext_char(&da, 100, 50 + 50 * i, fonts[i], '5', GFX_WHITE);
 }
 
 
 /* Horizontally scrolling text */
 
 
+#define	DEMO_5_FONT	mono34
 #define	DEMO_5_HEIGHT	32
 #define	DEMO_5_HOLD_MS	500
 #define	DEMO_5_DELAY_MS	10
@@ -138,7 +131,7 @@ static void demo_5(void)
 
 	long_text_setup(&lt, &da, 0, (GFX_HEIGHT - DEMO_5_HEIGHT) / 2,
 	    GFX_WIDTH, DEMO_5_HEIGHT, "THIS IS A SCROLLING TEXT.",
-	    DEMO_5_HEIGHT, GFX_WHITE, GFX_BLUE);
+	    &DEMO_5_FONT, GFX_WHITE, GFX_BLUE);
 	while (i) {
 		bool hold;
 
@@ -364,7 +357,7 @@ void demo(unsigned param, char *const *args, unsigned n_args)
 		demo_3();
 		break;
 	case 4:
-		demo_4(n_args);
+		demo_4();
 		break;
 	case 5:
 		demo_5();
@@ -387,11 +380,10 @@ void demo(unsigned param, char *const *args, unsigned n_args)
 		break;
 	case 7:
 		ui_entry_validate = demo_7_validate;
-		use_ntext = n_args;
 		ui_switch(&ui_entry);
 		break;
 	case 8:
-		use_ntext = 1;
+		/* @@@ was used to switch from vector fonts to ntext */
 		break;
 	case 9:
 		if (n_args)
@@ -418,7 +410,6 @@ void demo(unsigned param, char *const *args, unsigned n_args)
 			demo_14(args[0], args[1]);
 		exit(1);
 	case 15:
-		use_ntext = n_args;
 		ui_switch(&ui_accounts);
 		break;
 	default:

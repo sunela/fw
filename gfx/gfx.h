@@ -95,16 +95,6 @@ void gfx_hscroll(struct gfx_drawable *da, unsigned x, unsigned y, unsigned w,
 void gfx_vscroll(struct gfx_drawable *da, unsigned x, unsigned y, unsigned w,
     unsigned h, int dy);
 
-unsigned gfx_char_size(unsigned *res_w, unsigned *res_h,
-    unsigned sizex, unsigned sizey, char ch);
-unsigned gfx_char(struct gfx_drawable *da, int x1, int y1,
-    int sizex, int sizey, char ch, gfx_color color);
-
-void gfx_text_bbox(unsigned x, unsigned y, const char *s,
-    unsigned scale, int8_t align_x, int8_t align_y, struct gfx_rect *bb);
-void gfx_text(struct gfx_drawable *da, unsigned x, unsigned y, const char *s,
-    unsigned scale, int8_t align_x, int8_t align_y, gfx_color color);
-
 void gfx_reset(struct gfx_drawable *da);
 void gfx_da_init(struct gfx_drawable *da, unsigned w, unsigned h,
     gfx_color *fb);

@@ -55,12 +55,9 @@
  * the font size since since we have only one small descender (for Q).
  */
 
-#define	FONT_1_TOP_SIZE		32
-#define	FONT_1_BOTTOM_SIZE	22
 #define	FONT_1_TOP		mono24
 #define	FONT_1_BOTTOM		mono18
 
-#define	FONT_2_SIZE		42
 #define	FONT_2			mono34
 
 #define	LABEL_TOP_OFFSET	-11
@@ -81,7 +78,7 @@
 #define	BUTTON_Y0		(BUTTON_Y1 - 3 * BUTTON_Y_SPACING)
 
 #define	X_ADJUST(ch)		0
-#define	Y_ADJUST(ch)		(use_ntext ? -1 : 1)
+#define	Y_ADJUST(ch)		(-1)
 
 
 /* --- First page ---------------------------------------------------------- */
@@ -158,22 +155,14 @@ static void draw_input(void)
 
 	if (!*ui_entry_input)
 		return;
-	if (use_ntext)
-		ntext_text_bbox(0, 0, ui_entry_input, &INPUT_FONT,
-		    GFX_LEFT, GFX_TOP, &bb);
-	else
-		gfx_text_bbox(0, 0, ui_entry_input, INPUT_FONT_SIZE,
-		    GFX_LEFT, GFX_TOP, &bb);
+	ntext_text_bbox(0, 0, ui_entry_input, &INPUT_FONT, GFX_LEFT, GFX_TOP,
+	    &bb);
 	assert(bb.w <= MAX_INPUT_LEN * INPUT_FONT_SIZE);
 	assert(bb.h <= INPUT_H);
 	gfx_da_init(&buf, bb.w, bb.h, fb);
         gfx_clear(&buf, valid() ? INPUT_VALID_BG : INPUT_INVALID_BG);
-	if (use_ntext)
-	        ntext_text(&buf, 0, 0, ui_entry_input, &INPUT_FONT,
-		    GFX_LEFT, GFX_TOP, GFX_WHITE);
-	else
-	        gfx_text(&buf, 0, 0, ui_entry_input, INPUT_FONT_SIZE,
-		    GFX_LEFT, GFX_TOP, GFX_WHITE);
+        ntext_text(&buf, 0, 0, ui_entry_input, &INPUT_FONT, GFX_LEFT, GFX_TOP,
+	    GFX_WHITE);
 	if ((GFX_WIDTH + bb.w) / 2 < INPUT_MAX_X)
 		gfx_copy(&da, (GFX_WIDTH - bb.w) / 2, INPUT_Y0, &buf, 0, 0,
 		    bb.w, bb.h, -1);
@@ -217,23 +206,12 @@ static void first_label(unsigned x, unsigned y, const char *s)
 {
 	char top[] = { *s, 0 };
 
-	if (use_ntext) {
-		ntext_text(&da,
-		    x + X_ADJUST(*s), y + Y_ADJUST(*s) + LABEL_TOP_OFFSET,
-		    top, &FONT_1_TOP, GFX_CENTER, GFX_CENTER, GFX_BLACK);
-		ntext_text(&da, x + X_ADJUST('X'),
-		    y + Y_ADJUST('A') + LABEL_BOTTOM_OFFSET,
-		    s + 1, &FONT_1_BOTTOM, GFX_CENTER, GFX_CENTER,
-		    GFX_BLACK);
-	} else {
-		gfx_text(&da,
-		    x + X_ADJUST(*s), y + Y_ADJUST(*s) + LABEL_TOP_OFFSET,
-		    top, FONT_1_TOP_SIZE, GFX_CENTER, GFX_CENTER, GFX_BLACK);
-		gfx_text(&da, x + X_ADJUST('X'),
-		    y + Y_ADJUST('A') + LABEL_BOTTOM_OFFSET,
-		    s + 1, FONT_1_BOTTOM_SIZE, GFX_CENTER, GFX_CENTER,
-		    GFX_BLACK);
-	}
+	ntext_text(&da, x + X_ADJUST(*s), y + Y_ADJUST(*s) + LABEL_TOP_OFFSET,
+	    top, &FONT_1_TOP, GFX_CENTER, GFX_CENTER, GFX_BLACK);
+	ntext_text(&da, x + X_ADJUST('X'),
+	    y + Y_ADJUST('A') + LABEL_BOTTOM_OFFSET,
+	    s + 1, &FONT_1_BOTTOM, GFX_CENTER, GFX_CENTER,
+	    GFX_BLACK);
 }
 
 
@@ -284,12 +262,8 @@ static void second_label(unsigned x, unsigned y, char ch)
 {
 	char s[] = { ch, 0 };
 
-	if (use_ntext)
-		ntext_text(&da, x + X_ADJUST(ch), y + Y_ADJUST(ch),
-		    s, &FONT_2, GFX_CENTER, GFX_CENTER, GFX_BLACK);
-	else
-		gfx_text(&da, x + X_ADJUST(ch), y + Y_ADJUST(ch),
-		    s, FONT_2_SIZE, GFX_CENTER, GFX_CENTER, GFX_BLACK);
+	ntext_text(&da, x + X_ADJUST(ch), y + Y_ADJUST(ch), s, &FONT_2,
+	    GFX_CENTER, GFX_CENTER, GFX_BLACK);
 }
 
 

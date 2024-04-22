@@ -20,7 +20,6 @@
 #include "ui.h"
 
 
-#define	FONT_TOP_SIZE		22
 #define	FONT_TOP		mono18
 
 #define	TOP_H			30
@@ -79,12 +78,8 @@ static void ui_account_open(void)
 	struct account *a = selected_account;
 
 	gfx_rect_xy(&da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH, GFX_WHITE);
-	if (use_ntext)
-		ntext_text(&da, GFX_WIDTH / 2, TOP_H / 2, a->name,
-		    &FONT_TOP, GFX_CENTER, GFX_CENTER, GFX_YELLOW);
-	else
-		gfx_text(&da, GFX_WIDTH / 2, TOP_H / 2, a->name,
-		    FONT_TOP_SIZE, GFX_CENTER, GFX_CENTER, GFX_YELLOW);
+	ntext_text(&da, GFX_WIDTH / 2, TOP_H / 2, a->name,
+	    &FONT_TOP, GFX_CENTER, GFX_CENTER, GFX_YELLOW);
 
 	ui_list_begin(&list, &style);
 	if (a->user)

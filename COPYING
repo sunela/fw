@@ -3,17 +3,17 @@ under the terms of the MIT License. A copy of the license can be found in the
 file LICENSE.MIT
 
 
-Vector fonts and polygon drawing from Espruino
-----------------------------------------------
+Polygon drawing from Espruino
+-----------------------------
 
-The functions in gfx/poly.c and gfx/vfont.c were extracted from Espruino:
+The function gfx_poly (in gfx/poly.c) was extracted from Espruino:
 https://github.com/espruino/Espruino/tree/master/libs/graphics
 
-They are Copyright 2019 Gordon Williams, Pur3 Ltd, and licensed under the
+It is Copyright 2019 Gordon Williams, Pur3 Ltd, and licensed under the
 Mozilla Public License Version 2.0. See LICENSE.MPL for a copy of the license.
 
-Changes to match the coding style of the rest of the project and changes
-required for compatibility were made by Werner Almesberger.
+Small Changes to the coding style and changes required for compatibility were
+made by Werner Almesberger.
 
 
 Citrine logo

@@ -18,7 +18,6 @@
 
 #define	HOLD_MS	(5 * 1000)
 
-#define	FONT_SIZE	72
 #define	FONT		mono58
 
 
@@ -49,17 +48,10 @@ static void show_cooldown(void *user)
 	if (user)
 		gfx_rect(&da, &bb, GFX_BLACK);
 
-	if (use_ntext) {
-		ntext_text(&da, GFX_WIDTH / 2, GFX_HEIGHT / 2, t, &FONT,
-		    GFX_CENTER, GFX_CENTER, GFX_RED);
-		ntext_text_bbox(GFX_WIDTH / 2, GFX_HEIGHT / 2, t, &FONT,
-		    GFX_CENTER, GFX_CENTER, &bb);
-	} else {
-		gfx_text(&da, GFX_WIDTH / 2, GFX_HEIGHT / 2, t, FONT_SIZE,
-		    GFX_CENTER, GFX_CENTER, GFX_RED);
-		gfx_text_bbox(GFX_WIDTH / 2, GFX_HEIGHT / 2, t, FONT_SIZE,
-		    GFX_CENTER, GFX_CENTER, &bb);
-	}
+	ntext_text(&da, GFX_WIDTH / 2, GFX_HEIGHT / 2, t, &FONT,
+	    GFX_CENTER, GFX_CENTER, GFX_RED);
+	ntext_text_bbox(GFX_WIDTH / 2, GFX_HEIGHT / 2, t, &FONT,
+	    GFX_CENTER, GFX_CENTER, &bb);
 	update_display(&da);
 
 	timer_set(&t_tick, 1000, show_cooldown, show_cooldown);

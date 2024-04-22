@@ -16,7 +16,6 @@
 #include "ui.h"
 
 
-#define	FONT_TOP_SIZE		22
 #define	FONT_TOP		mono18
 
 #define	TOP_H			30
@@ -59,12 +58,9 @@ static void ui_accounts_open(void)
 	unsigned i;
 
 	gfx_rect_xy(&da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH, GFX_WHITE);
-	if (use_ntext)
-		ntext_text(&da, GFX_WIDTH / 2, TOP_H / 2, "Accounts",
-		    &FONT_TOP, GFX_CENTER, GFX_CENTER, GFX_WHITE);
-	else
-		gfx_text(&da, GFX_WIDTH / 2, TOP_H / 2, "Accounts",
-		    FONT_TOP_SIZE, GFX_CENTER, GFX_CENTER, GFX_WHITE);
+	ntext_text(&da, GFX_WIDTH / 2, TOP_H / 2, "Accounts",
+	    &FONT_TOP, GFX_CENTER, GFX_CENTER, GFX_WHITE);
+
 	ui_list_begin(&list, &style);
 	for (i = 0; i != n_accounts; i++)
 		ui_list_add(&list, accounts[i].name, NULL, accounts + i);

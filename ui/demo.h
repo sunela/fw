@@ -8,6 +8,6 @@
 #ifndef DEMO_H
 #define	DEMO_H
 
-void demo(unsigned param, char *const *args, unsigned n_args);
+void demo(char *const *args, unsigned n_args);
 
 #endif /* !DEMO_H */

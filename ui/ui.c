@@ -7,7 +7,6 @@
 
 #include <stddef.h>
 #include <stdbool.h>
-#include <stdlib.h>
 
 #include "debug.h"
 #include "hal.h"
@@ -210,8 +209,6 @@ debug("ui_switch\n");
 
 bool app_init(char *const *args, unsigned n_args)
 {
-	int param = 0;
-
 	gfx_da_init(&da, GFX_WIDTH, GFX_HEIGHT, fb);
 	gfx_clear(&da, gfx_hex(0));
 
@@ -220,13 +217,10 @@ bool app_init(char *const *args, unsigned n_args)
 	if (n_args) {
 		char *end;
 
-		param = strtoul(args[0], &end, 0);
-		if (*end)
-			return 0;
-	}
-	if (param) {
 		display_on(1);
-		demo(param, args + 1, n_args - 1);
+		demo(args, n_args);
+	} else {
+//		ui_switch(&ui_off);
 	}
 
 	update_display(&da);

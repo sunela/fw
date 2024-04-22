@@ -151,18 +151,18 @@ unsigned text_text_bbox(unsigned x, unsigned y, const char *s,
 		bb->h -= headroom;
 	}
 //printf("\ttotal_w %u max_h %u\n", total_w, max_h);
-	if (align_x == 0) {
+	if ((align_x & GFX_ALIGN_MASK) == GFX_CENTER) {
 		assert(x >= bb->w / 2);
 		bb->x = x - bb->w / 2;
-	} else if (align_x > 0) {
+	} else if ((align_x & GFX_ALIGN_MASK) == GFX_RIGHT) {
 		assert(x >= bb->w);
 		bb->x = x - bb->w;
 	}
 
-	if (align_y == 0) {
+	if ((align_y & GFX_ALIGN_MASK) == GFX_CENTER) {
 		assert(y >= bb->h / 2);
 		bb->y = y - bb->h / 2;
-	} else if (align_y > 0) {
+	} else if ((align_y & GFX_ALIGN_MASK) == GFX_BOTTOM) {
 		assert(y >= bb->h);
 		bb->y = y - bb->h;
 	}

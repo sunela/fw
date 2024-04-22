@@ -14,11 +14,12 @@
 //#include "st7789.h"
 
 
-#define	GFX_LEFT	-1
-#define	GFX_TOP		-1
-#define	GFX_CENTER	0
-#define	GFX_RIGHT	1
-#define	GFX_BOTTOM	1
+#define	GFX_ALIGN_MASK		3
+#define		GFX_LEFT	0
+#define		GFX_TOP		0
+#define		GFX_CENTER	1
+#define		GFX_RIGHT	2
+#define		GFX_BOTTOM	2
 
 
 typedef uint16_t gfx_color;

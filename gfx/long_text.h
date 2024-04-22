@@ -18,7 +18,6 @@
 
 #include "gfx.h"
 #include "font.h"
-#include "ntext.h"
 
 
 #define	MAX_W	1000

@@ -1,5 +1,5 @@
 /*
- * ntext.c - New text drawing
+ * text.c - Text drawing
  *
  * This work is licensed under the terms of the MIT License.
  * A copy of the license can be found in the file LICENSE.MIT
@@ -10,7 +10,7 @@
 
 #include "gfx.h"
 #include "font.h"
-#include "ntext.h"
+#include "text.h"
 
 #include "mono18.font"
 #include "mono24.font"
@@ -29,7 +29,7 @@ static inline unsigned char_offset(const struct font *font,
 }
 
 
-unsigned ntext_char_size(unsigned *res_w, unsigned *res_h,
+unsigned text_char_size(unsigned *res_w, unsigned *res_h,
     const struct font *font, uint16_t ch)
 {
 	const struct character *c;
@@ -42,7 +42,7 @@ unsigned ntext_char_size(unsigned *res_w, unsigned *res_h,
 }
 
 
-static unsigned ntext_char_size_offset(unsigned *res_w, unsigned *res_h,
+static unsigned text_char_size_offset(unsigned *res_w, unsigned *res_h,
     unsigned *res_oy, const struct font *font, uint16_t ch)
 {
 	const struct character *c;
@@ -59,7 +59,7 @@ static unsigned ntext_char_size_offset(unsigned *res_w, unsigned *res_h,
 }
 
 
-unsigned ntext_char(struct gfx_drawable *da, int x1, int y1,
+unsigned text_char(struct gfx_drawable *da, int x1, int y1,
     const struct font *font, uint16_t ch, gfx_color color)
 {
 	const struct character *c = font_find_char(font, ch);
@@ -123,7 +123,7 @@ unsigned ntext_char(struct gfx_drawable *da, int x1, int y1,
 /* --- Text strings -------------------------------------------------------- */
 
 
-unsigned ntext_text_bbox(unsigned x, unsigned y, const char *s,
+unsigned text_text_bbox(unsigned x, unsigned y, const char *s,
     const struct font *font, int8_t align_x, int8_t align_y, 
     struct gfx_rect *bb)
 {
@@ -136,7 +136,7 @@ unsigned ntext_text_bbox(unsigned x, unsigned y, const char *s,
 
 //printf("\"%s\" ", s);
 	while (*s) {
-		next = ntext_char_size_offset(&w, &h, &oy, font, *s);
+		next = text_char_size_offset(&w, &h, &oy, font, *s);
 		if (headroom == -1 || (unsigned) headroom > oy)
 			headroom = oy;
 		h += oy;
@@ -171,19 +171,19 @@ unsigned ntext_text_bbox(unsigned x, unsigned y, const char *s,
 }
 
 
-void ntext_text(struct gfx_drawable *da, unsigned x, unsigned y, const char *s,
+void text_text(struct gfx_drawable *da, unsigned x, unsigned y, const char *s,
     const struct font *font, int8_t align_x, int8_t align_y, gfx_color color)
 {
 	unsigned headroom;
 	struct gfx_rect bb;
 
-	headroom = ntext_text_bbox(x, y, s, font, align_x, align_y, &bb);
+	headroom = text_text_bbox(x, y, s, font, align_x, align_y, &bb);
 	x = bb.x;
 	y = bb.y - headroom;
 
 	while (*s)
 {
 //printf("\t%u %u '%c'\n", x, y, *s);
-		x += ntext_char(da, x, y, font, *s++, color);
+		x += text_char(da, x, y, font, *s++, color);
 }
 }

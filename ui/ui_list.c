@@ -13,7 +13,7 @@
 #include "hal.h"
 #include "lib/alloc.h"
 #include "gfx.h"
-#include "ntext.h"
+#include "text.h"
 #include "ui.h"
 #include "ui_list.h"
 
@@ -105,11 +105,11 @@ static unsigned draw_entry(const struct ui_list *list,
 	unsigned h = entry_height(list, e);
 
 	gfx_rect_xy(&da, 0, y, GFX_WIDTH, h, style->bg[even]);
-	ntext_text(&da, 0, y + Y_PAD + Y_STEP / 2, e->first, &FONT,
+	text_text(&da, 0, y + Y_PAD + Y_STEP / 2, e->first, &FONT,
 	    GFX_LEFT, GFX_CENTER, style->fg[even]);
 	if (!e->second)
 		return h;
-	ntext_text(&da, 0, y + 2 * Y_PAD + 1.5 * Y_STEP, e->second, &FONT,
+	text_text(&da, 0, y + 2 * Y_PAD + 1.5 * Y_STEP, e->second, &FONT,
 	    GFX_LEFT, GFX_CENTER, style->fg[even]);
 	return h;
 }

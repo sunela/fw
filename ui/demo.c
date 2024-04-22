@@ -15,7 +15,7 @@
 #include "hal.h"
 #include "gfx.h"
 #include "long_text.h"
-#include "ntext.h"
+#include "text.h"
 #include "pin.h"
 #include "sha.h"
 #include "hmac.h"
@@ -110,7 +110,7 @@ static void demo_4(void)
 	unsigned i;
 
 	for (i = 0; i != 3; i++)
-		ntext_char(&da, 100, 50 + 50 * i, fonts[i], '5', GFX_WHITE);
+		text_char(&da, 100, 50 + 50 * i, fonts[i], '5', GFX_WHITE);
 }
 
 

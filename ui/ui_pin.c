@@ -14,7 +14,7 @@
 #include "timer.h"
 #include "rnd.h"
 #include "gfx.h"
-#include "ntext.h"
+#include "text.h"
 #include "pin.h"
 #include "shape.h"
 #include "ui.h"
@@ -100,7 +100,7 @@ static void pin_char(unsigned x, unsigned y, char ch)
 {
 	char s[] = { ch, 0 };
 
-	ntext_text(&da, x + X_ADJUST(ch), y + Y_ADJUST(ch), s, &FONT,
+	text_text(&da, x + X_ADJUST(ch), y + Y_ADJUST(ch), s, &FONT,
 	    GFX_CENTER, GFX_CENTER, GFX_BLACK);
 }
 

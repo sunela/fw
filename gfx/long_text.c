@@ -9,7 +9,7 @@
 
 #include "gfx.h"
 #include "font.h"
-#include "ntext.h"
+#include "text.h"
 #include "long_text.h"
 
 
@@ -18,13 +18,13 @@ static void prepare(struct long_text *lt, const char *s,
 {
 	struct gfx_rect bb;
 
-	ntext_text_bbox(0, 0, s, font, GFX_LEFT, GFX_TOP, &bb);
+	text_text_bbox(0, 0, s, font, GFX_LEFT, GFX_TOP, &bb);
 	assert(bb.w <= MAX_W);
 	assert(bb.h <= MAX_H);
 
 	gfx_da_init(&lt->buf, bb.w, bb.h, lt->fb);
 	gfx_clear(&lt->buf, bg);
-	ntext_text(&lt->buf, 0, 0, s, font, GFX_LEFT, GFX_TOP, color);
+	text_text(&lt->buf, 0, 0, s, font, GFX_LEFT, GFX_TOP, color);
 }
 
 

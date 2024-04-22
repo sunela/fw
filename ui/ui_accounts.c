@@ -9,7 +9,7 @@
 
 #include "hal.h"
 #include "gfx.h"
-#include "ntext.h"
+#include "text.h"
 #include "ui_list.h"
 #include "accounts.h"
 #include "ui_account.h"
@@ -58,7 +58,7 @@ static void ui_accounts_open(void)
 	unsigned i;
 
 	gfx_rect_xy(&da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH, GFX_WHITE);
-	ntext_text(&da, GFX_WIDTH / 2, TOP_H / 2, "Accounts",
+	text_text(&da, GFX_WIDTH / 2, TOP_H / 2, "Accounts",
 	    &FONT_TOP, GFX_CENTER, GFX_CENTER, GFX_WHITE);
 
 	ui_list_begin(&list, &style);

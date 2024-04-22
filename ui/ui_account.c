@@ -13,7 +13,7 @@
 #include "hal.h"
 #include "hotp.h"
 #include "gfx.h"
-#include "ntext.h"
+#include "text.h"
 #include "accounts.h"
 #include "ui_account.h"
 #include "ui_list.h"
@@ -78,8 +78,8 @@ static void ui_account_open(void)
 	struct account *a = selected_account;
 
 	gfx_rect_xy(&da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH, GFX_WHITE);
-	ntext_text(&da, GFX_WIDTH / 2, TOP_H / 2, a->name,
-	    &FONT_TOP, GFX_CENTER, GFX_CENTER, GFX_YELLOW);
+	text_text(&da, GFX_WIDTH / 2, TOP_H / 2, a->name, &FONT_TOP,
+	    GFX_CENTER, GFX_CENTER, GFX_YELLOW);
 
 	ui_list_begin(&list, &style);
 	if (a->user)

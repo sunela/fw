@@ -11,7 +11,7 @@
 #include "hal.h"
 #include "timer.h"
 #include "gfx.h"
-#include "ntext.h"
+#include "text.h"
 #include "pin.h"
 #include "ui.h"
 
@@ -48,9 +48,9 @@ static void show_cooldown(void *user)
 	if (user)
 		gfx_rect(&da, &bb, GFX_BLACK);
 
-	ntext_text(&da, GFX_WIDTH / 2, GFX_HEIGHT / 2, t, &FONT,
+	text_text(&da, GFX_WIDTH / 2, GFX_HEIGHT / 2, t, &FONT,
 	    GFX_CENTER, GFX_CENTER, GFX_RED);
-	ntext_text_bbox(GFX_WIDTH / 2, GFX_HEIGHT / 2, t, &FONT,
+	text_text_bbox(GFX_WIDTH / 2, GFX_HEIGHT / 2, t, &FONT,
 	    GFX_CENTER, GFX_CENTER, &bb);
 	update_display(&da);
 

@@ -27,10 +27,23 @@ unsigned text_char_size(unsigned *res_w, unsigned *res_h,
 unsigned text_char(struct gfx_drawable *da, int x1, int y1,
     const struct font *font, uint16_t ch, gfx_color color);
 
+/*
+ * text_text_bbox returns the headroom, the space above the top that is empty,
+ * but would be used by other characters of this font. (May be zero.)
+ */
+
 unsigned text_text_bbox(unsigned x, unsigned y, const char *s,
     const struct font *font, int8_t align_x, int8_t align_y,
     struct gfx_rect *bb);
-void text_text(struct gfx_drawable *da, unsigned x, unsigned y, const char *s,
-    const struct font *font, int8_t align_x, int8_t align_y, gfx_color color);
+
+/*
+ * text_text returns the x position of the next character cell. (If a character
+ * is drawn there, its actual leftmost pixel may be at a different place, since
+ * it may not begin at the left edge of the character cell.)
+ */
+
+unsigned text_text(struct gfx_drawable *da, unsigned x, unsigned y,
+    const char *s, const struct font *font, int8_t align_x, int8_t align_y,
+    gfx_color color);
 
 #endif /* !TEXT_H */

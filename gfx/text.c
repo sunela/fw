@@ -171,8 +171,9 @@ unsigned text_text_bbox(unsigned x, unsigned y, const char *s,
 }
 
 
-void text_text(struct gfx_drawable *da, unsigned x, unsigned y, const char *s,
-    const struct font *font, int8_t align_x, int8_t align_y, gfx_color color)
+unsigned text_text(struct gfx_drawable *da, unsigned x, unsigned y,
+    const char *s, const struct font *font, int8_t align_x, int8_t align_y,
+    gfx_color color)
 {
 	unsigned headroom;
 	struct gfx_rect bb;
@@ -182,8 +183,6 @@ void text_text(struct gfx_drawable *da, unsigned x, unsigned y, const char *s,
 	y = bb.y - headroom;
 
 	while (*s)
-{
-//printf("\t%u %u '%c'\n", x, y, *s);
 		x += text_char(da, x, y, font, *s++, color);
-}
+	return x;
 }

@@ -22,6 +22,12 @@
 #include "mono58.font"
 
 
+struct text_area {
+	int x0, x1, y0, y1; /* bbox for origin (0, 0), with Y+ pointing up */
+	int next;	/* x position of next character */
+};
+
+
 /* --- Characters ---------------------------------------------------------- */
 
 
@@ -88,12 +94,6 @@ unsigned text_char(struct gfx_drawable *da, int x1, int y1,
 /* --- Bounding boxes and alignment ---------------------------------------- */
 
 
-struct text_area {
-	int x0, x1, y0, y1; /* bbox for origin (0, 0), with Y+ pointing up */
-	int next;	/* x position of next character */
-};
-
-
 static void area_rendered(struct text_area *a, const char *s,
     const struct font *font)
 {
@@ -136,11 +136,11 @@ static void area_max(struct text_area *a, unsigned len,
 				max_adv = c->advance;
 		a->x0 = font->ox;
 		a->x1 = font->ox + max_adv * (len - 1) + font->w - 1;
-		a->y0 = font->oy;
-		a->y1 = font->oy + font->h - 1;
 	} else {
-		a->x0 = a->x1 = a->y0 = a->y1 = a->next = 0;
+		a->x0 = a->x1 = a->next = 0;
 	}
+	a->y0 = font->oy;
+	a->y1 = font->oy + font->h - 1;
 }
 
 
@@ -150,7 +150,7 @@ static void text_align(struct text_query *q, const struct text_area *a,
 #ifdef DEBUG
 	printf("A ll %d %d ur %d %d\n", a->x0, a->y0, a->x1, a->y1);
 #endif
-	if (a->next) {
+	if (a->next || (align_y & GFX_MAX)) {
 		q->w = a->x1 - a->x0 + 1;
 		q->h = a->y1 - a->y0 + 1;
 	} else {

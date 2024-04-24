@@ -45,14 +45,6 @@ void text_text_bbox(unsigned x, unsigned y, const char *s,
     const struct font *font, int8_t align_x, int8_t align_y,
     struct gfx_rect *bb);
 
-void text_query_rendered(unsigned x, unsigned y, const char *s,
-    const struct font *font, int8_t align_x, int8_t align_y,
-    struct text_query *q);
-
-void text_query_max(unsigned x, unsigned y, unsigned len,
-    const struct font *font, int8_t align_x, int8_t align_y,
-    struct text_query *q);
-
 /*
  * text_text returns the x position of the next character cell. (If a character
  * is drawn there, its actual leftmost pixel may be at a different place, since

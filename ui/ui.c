@@ -215,8 +215,6 @@ bool app_init(char *const *args, unsigned n_args)
 	timer_init(&idle_timer);
 
 	if (n_args) {
-		char *end;
-
 		display_on(1);
 		demo(args, n_args);
 	} else {

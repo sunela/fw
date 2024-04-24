@@ -14,12 +14,19 @@
 //#include "st7789.h"
 
 
+/*
+ * Alignment options. Currently only used for text.
+ */
+
 #define	GFX_ALIGN_MASK		3
-#define		GFX_LEFT	0
-#define		GFX_TOP		0
-#define		GFX_CENTER	1
-#define		GFX_RIGHT	2
-#define		GFX_BOTTOM	2
+#define		GFX_LEFT	0	/* x is left edge of object */
+#define		GFX_TOP		0	/* y is top edge of object */
+#define		GFX_CENTER	1	/* x and y are at center of object */
+#define		GFX_RIGHT	2	/* x is right edge of object */
+#define		GFX_BOTTOM	2	/* y is bottom edge of object */
+#define		GFX_ORIGIN	3	/* x and y are at origin of object */
+
+#define	GFX_MAX		4	/* use maximum character size of font */
 
 
 typedef uint16_t gfx_color;

@@ -18,13 +18,9 @@
 #include "ui_list.h"
 
 
-/* @@@ move font, etc. to style after we drop the vector fonts */
-
-#define	FONT_SIZE	24	// @@@
-#define	FONT		mono18
+#define	DEFAULT_FONT	mono18
 
 #define	Y_PAD		1
-#define	Y_STEP		(FONT_SIZE + 2 * Y_PAD)
 
 
 struct ui_list_entry {
@@ -41,7 +37,14 @@ struct ui_list_entry {
 static unsigned entry_height(const struct ui_list *list,
     const struct ui_list_entry *e)
 {
-	return 2 * Y_PAD + (e->second ? 2 * Y_STEP + Y_PAD : Y_STEP);
+	return 2 * Y_PAD + (e->second ? 2 * list->text_height + Y_PAD :
+	    list->text_height);
+}
+
+
+static const struct font *list_font(const struct ui_list *list)
+{
+	return list->style->font ? list->style->font : &DEFAULT_FONT;
 }
 
 
@@ -76,9 +79,17 @@ void *ui_list_user(const struct ui_list_entry *entry)
 
 void ui_list_begin(struct ui_list *list, const struct ui_list_style *style)
 {
+	struct text_query q;
+
+	list->style = style;
+
+	text_query(0, 0, "", list_font(list),
+	    GFX_TOP | GFX_MAX, GFX_TOP | GFX_MAX, &q);
+	list->text_height = q.h;
+printf("height %d\n", q.h);
+
 	list->list = NULL;
 	list->anchor = &list->list;
-	list->style = style;
 }
 
 
@@ -105,12 +116,12 @@ static unsigned draw_entry(const struct ui_list *list,
 	unsigned h = entry_height(list, e);
 
 	gfx_rect_xy(&da, 0, y, GFX_WIDTH, h, style->bg[even]);
-	text_text(&da, 0, y + Y_PAD + Y_STEP / 2, e->first, &FONT,
-	    GFX_LEFT, GFX_CENTER, style->fg[even]);
+	text_text(&da, 0, y + Y_PAD, e->first, list_font(list),
+	    GFX_LEFT, GFX_TOP | GFX_MAX, style->fg[even]);
 	if (!e->second)
 		return h;
-	text_text(&da, 0, y + 2 * Y_PAD + 1.5 * Y_STEP, e->second, &FONT,
-	    GFX_LEFT, GFX_CENTER, style->fg[even]);
+	text_text(&da, 0, y + 2 * Y_PAD + list->text_height, e->second,
+	    list_font(list), GFX_LEFT, GFX_TOP | GFX_MAX, style->fg[even]);
 	return h;
 }
 

@@ -39,7 +39,7 @@
 #define	BUTTON_X0		(GFX_WIDTH / 2 - BUTTON_X_SPACING)
 #define	BUTTON_Y1		(GFX_HEIGHT - BUTTON_R - BUTTON_BOTTOM_OFFSET)
 #define	BUTTON_Y0		(BUTTON_Y1 - 3 * BUTTON_Y_SPACING)
-#define	X_ADJUST(ch)		(-1)
+#define	X_ADJUST(ch)		(-(ch == '4'))
 #define	Y_ADJUST(ch)		1
 
 /* --- Input/progress indicators ------------------------------------------- */

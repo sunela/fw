@@ -31,9 +31,8 @@
 #define	INPUT_VALID_BG		gfx_hex(0x002060)
 #define	INPUT_INVALID_BG	gfx_hex(0x800000)
 
-#define	INPUT_H			54
-#define	INPUT_Y0		5
-#define	INPUT_FONT_SIZE		42
+#define	INPUT_PAD_TOP		5
+#define	INPUT_PAD_BOTTOM	2
 #define	INPUT_FONT		mono34
 #define INPUT_MAX_X		210
 
@@ -121,6 +120,7 @@ static const char *second_maps[] = {
 char ui_entry_input[MAX_INPUT_LEN + 1] = { 0, };
 bool (*ui_entry_validate)(const char *s) = NULL;
 
+static unsigned input_max_height;
 static const char *second = NULL;
 static struct timer t_button;
 
@@ -142,7 +142,8 @@ static bool valid(void)
 
 static void clear_input(void)
 {
-	gfx_rect_xy(&da, 0, 0, GFX_WIDTH, INPUT_H,
+	gfx_rect_xy(&da, 0, 0, GFX_WIDTH,
+	    INPUT_PAD_TOP + input_max_height + INPUT_PAD_BOTTOM,
 	    valid() ? INPUT_VALID_BG : INPUT_INVALID_BG);
 }
 
@@ -150,27 +151,27 @@ static void clear_input(void)
 static void draw_input(void)
 {
 	struct gfx_drawable buf;
-	gfx_color fb[MAX_INPUT_LEN * INPUT_FONT_SIZE * INPUT_H];
+	gfx_color fb[MAX_INPUT_LEN * input_max_height * input_max_height];
 	struct gfx_rect bb;
 
 	if (!*ui_entry_input)
 		return;
-	text_text_bbox(0, 0, ui_entry_input, &INPUT_FONT, GFX_LEFT, GFX_TOP,
-	    &bb);
-	assert(bb.w <= MAX_INPUT_LEN * INPUT_FONT_SIZE);
-	assert(bb.h <= INPUT_H);
+	text_text_bbox(0, 0, ui_entry_input, &INPUT_FONT,
+	    GFX_LEFT, GFX_TOP | GFX_MAX, &bb);
+	assert(bb.w <= MAX_INPUT_LEN * input_max_height);
+	assert(bb.h <= INPUT_PAD_TOP + input_max_height + INPUT_PAD_BOTTOM);
 	gfx_da_init(&buf, bb.w, bb.h, fb);
         gfx_clear(&buf, valid() ? INPUT_VALID_BG : INPUT_INVALID_BG);
-        text_text(&buf, 0, 0, ui_entry_input, &INPUT_FONT, GFX_LEFT, GFX_TOP,
-	    GFX_WHITE);
+        text_text(&buf, 0, 0, ui_entry_input, &INPUT_FONT,
+	    GFX_LEFT, GFX_TOP | GFX_MAX, GFX_WHITE);
 	if ((GFX_WIDTH + bb.w) / 2 < INPUT_MAX_X)
-		gfx_copy(&da, (GFX_WIDTH - bb.w) / 2, INPUT_Y0, &buf, 0, 0,
+		gfx_copy(&da, (GFX_WIDTH - bb.w) / 2, INPUT_PAD_TOP, &buf, 0, 0,
 		    bb.w, bb.h, -1);
 	else if (bb.w < INPUT_MAX_X)
-		gfx_copy(&da, INPUT_MAX_X - bb.w, INPUT_Y0, &buf, 0, 0,
+		gfx_copy(&da, INPUT_MAX_X - bb.w, INPUT_PAD_TOP, &buf, 0, 0,
 		    bb.w, bb.h, -1);
 	else
-		gfx_copy(&da, 0, INPUT_Y0, &buf, bb.w - INPUT_MAX_X, 0,
+		gfx_copy(&da, 0, INPUT_PAD_TOP, &buf, bb.w - INPUT_MAX_X, 0,
 		    INPUT_MAX_X, bb.h, -1);
 }
 
@@ -262,8 +263,17 @@ static void second_label(unsigned x, unsigned y, char ch)
 {
 	char s[] = { ch, 0 };
 
+	/*
+	 * Characters that are hard to recognize if vertically centered, e.g.,
+	 * minus and underscore would look the same. Some lower-case letters
+	 * also look a little odd when centered, but they still are easily
+	 * recognizable, so we probably don't need to do anything about them.
+	 */
+	bool tricky = strchr("'\"`_,.", ch);
+
 	text_text(&da, x + X_ADJUST(ch), y + Y_ADJUST(ch), s, &FONT_2,
-	    GFX_CENTER, GFX_CENTER, GFX_BLACK);
+	    GFX_CENTER, tricky ? GFX_CENTER | GFX_MAX : GFX_CENTER,
+	    GFX_BLACK);
 }
 
 
@@ -401,7 +411,13 @@ static void ui_entry_tap(unsigned x, unsigned y)
 
 static void ui_entry_open(void)
 {
+	struct text_query q;
+
 	assert(strlen(ui_entry_input) <= MAX_INPUT_LEN);
+
+	text_query(0, 0, "", &INPUT_FONT,
+	    GFX_TOP | GFX_MAX, GFX_TOP | GFX_MAX, &q);
+	input_max_height = q.h;
 
 	clear_input();
 	draw_input();

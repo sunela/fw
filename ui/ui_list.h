@@ -9,20 +9,23 @@
 #define	UI_LIST_H
 
 #include "gfx.h"
+#include "text.h"
 
 
 struct ui_list_entry;
 
 struct ui_list_style {
-	unsigned	y0, y1;
-	gfx_color	fg[2];	/* even and odd entries */
-	gfx_color	bg[2];	/* even and odd entries */
+	unsigned			y0, y1;
+	gfx_color			fg[2];	/* even and odd entries */
+	gfx_color			bg[2];	/* even and odd entries */
+	const struct font *font;	/* NULL for default */
 };
 
 struct ui_list {
 	struct ui_list_entry		*list;
 	struct ui_list_entry		**anchor;
 	const struct ui_list_style	*style;
+	unsigned			text_height;
 };
 
 

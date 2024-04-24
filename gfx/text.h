@@ -29,23 +29,26 @@ extern const struct font mono36;
 extern const struct font mono58;
 
 
-unsigned text_char_size(unsigned *res_w, unsigned *res_h,
-    const struct font *font, uint16_t ch);
+/*
+ * next_char draws a character with the left edge of the "character box" at x,
+ * and the baseline at y.
+ */
+
 unsigned text_char(struct gfx_drawable *da, int x1, int y1,
     const struct font *font, uint16_t ch, gfx_color color);
 
-/*
- * text_text_bbox returns the headroom, the space above the top that is empty,
- * but would be used by other characters of this font. (May be zero.)
- */
+void text_query(unsigned x, unsigned y, const char *s,
+    const struct font *font, int8_t align_x, int8_t align_y,
+    struct text_query *q);
 
-unsigned text_text_bbox(unsigned x, unsigned y, const char *s,
+void text_text_bbox(unsigned x, unsigned y, const char *s,
     const struct font *font, int8_t align_x, int8_t align_y,
     struct gfx_rect *bb);
 
 void text_query_rendered(unsigned x, unsigned y, const char *s,
     const struct font *font, int8_t align_x, int8_t align_y,
     struct text_query *q);
+
 void text_query_max(unsigned x, unsigned y, unsigned len,
     const struct font *font, int8_t align_x, int8_t align_y,
     struct text_query *q);
@@ -57,25 +60,6 @@ void text_query_max(unsigned x, unsigned y, unsigned len,
  */
 
 unsigned text_text(struct gfx_drawable *da, unsigned x, unsigned y,
-    const char *s, const struct font *font, int8_t align_x, int8_t align_y,
-    gfx_color color);
-
-
-/*
- * next_char draws a character with the left edge of the "character box" at x,
- * and the baseline at y.
- */
-
-unsigned ntext_char(struct gfx_drawable *da, int x1, int y1,
-    const struct font *font, uint16_t ch, gfx_color color);
-
-void ntext_query(unsigned x, unsigned y, const char *s,
-    const struct font *font, int8_t align_x, int8_t align_y,
-    struct text_query *q);
-void ntext_text_bbox(unsigned x, unsigned y, const char *s,
-    const struct font *font, int8_t align_x, int8_t align_y,
-    struct gfx_rect *bb);
-unsigned ntext_text(struct gfx_drawable *da, unsigned x, unsigned y,
     const char *s, const struct font *font, int8_t align_x, int8_t align_y,
     gfx_color color);
 

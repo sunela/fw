@@ -422,7 +422,6 @@ static bool demo_acc(char *const *args, unsigned n_args)
 
 /* Text alignment */
 
-
 #define	DEMO_ALIGN_FONT		mono34
 
 #define	DEMO_ALIGN_BG		gfx_hex(0x404040)
@@ -457,68 +456,15 @@ static bool demo_align(char *const *args, unsigned n_args)
 	const unsigned ox = GFX_WIDTH / 2;
 	const unsigned oy = GFX_HEIGHT / 2;
 	struct gfx_rect bb;
-	unsigned i, headroom, next;
+	unsigned i, next;
 
-	headroom = text_text_bbox(ox, oy, s, &DEMO_ALIGN_FONT, ax, ay, &bb);
+	text_text_bbox(ox, oy, s, &DEMO_ALIGN_FONT, ax, ay, &bb);
 
 	/*
 	 * Draw text once for the next character position, which we want to
 	 * draw below everything else, then draw it again later.
 	 */
 	next = text_text(&da, ox, oy, s, &DEMO_ALIGN_FONT,
-	    ax, ay, DEMO_ALIGN_TEXT_FG);
-	gfx_rect_xy(&da, next, oy - DEMO_ALIGN_NEXT_H,
-	    DEMO_ALIGN_NEXT_W, bb.h + 2 * DEMO_ALIGN_NEXT_H,
-	    DEMO_ALIGN_NEXT_FG);
-
-	gfx_rect_xy(&da, ox - DEMO_ALIGN_HEADROOM_W, oy - headroom,
-	    bb.w + 2 * DEMO_ALIGN_HEADROOM_W, 1, DEMO_ALIGN_HEADROOM_FG);
-	
-	gfx_rect(&da, &bb, DEMO_ALIGN_BG);
-
-	for (i = 0; i != DEMO_ALIGN_ORIGIN_R; i++) {
-		gfx_rect_xy(&da, ox + i, oy + i, 1, 1, DEMO_ALIGN_ORIGIN_FG);
-		gfx_rect_xy(&da, ox + i, oy - i, 1, 1, DEMO_ALIGN_ORIGIN_FG);
-		gfx_rect_xy(&da, ox - i, oy + i, 1, 1, DEMO_ALIGN_ORIGIN_FG);
-		gfx_rect_xy(&da, ox - i, oy - i, 1, 1, DEMO_ALIGN_ORIGIN_FG);
-	}
-
-	text_text(&da, ox, oy, s, &DEMO_ALIGN_FONT,
-	    ax, ay, DEMO_ALIGN_TEXT_FG);
-
-	return 1;
-}
-
-
-static bool demo_ntext(char *const *args, unsigned n_args)
-{
-	if (n_args != 3)
-		return 0;
-
-	const char *s = args[0];
-	char *end;
-	const unsigned ax = strtoul(args[1], &end, 0);
-
-	if (*end)
-		return 0;
-
-	const unsigned ay = strtoul(args[2], &end, 0);
-
-	if (*end)
-		return 0;
-
-	const unsigned ox = GFX_WIDTH / 2;
-	const unsigned oy = GFX_HEIGHT / 2;
-	struct gfx_rect bb;
-	unsigned i, next;
-
-	ntext_text_bbox(ox, oy, s, &DEMO_ALIGN_FONT, ax, ay, &bb);
-
-	/*
-	 * Draw text once for the next character position, which we want to
-	 * draw below everything else, then draw it again later.
-	 */
-	next = ntext_text(&da, ox, oy, s, &DEMO_ALIGN_FONT,
 	    ax, ay, DEMO_ALIGN_TEXT_FG);
 	gfx_rect_xy(&da, next, bb.y - DEMO_ALIGN_NEXT_H,
 	    DEMO_ALIGN_NEXT_W, bb.h + 2 * DEMO_ALIGN_NEXT_H,
@@ -533,7 +479,7 @@ static bool demo_ntext(char *const *args, unsigned n_args)
 		gfx_rect_xy(&da, ox - i, oy - i, 1, 1, DEMO_ALIGN_ORIGIN_FG);
 	}
 
-	ntext_text(&da, ox, oy, s, &DEMO_ALIGN_FONT,
+	text_text(&da, ox, oy, s, &DEMO_ALIGN_FONT,
 	    ax, ay, DEMO_ALIGN_TEXT_FG);
 
 	return 1;
@@ -567,7 +513,6 @@ static const struct demo {
 							// 14
 	{ "acc",	demo_acc,	"" },		// 15
 	{ "align",	demo_align,	"text x-align y-align" },
-	{ "ntext",	demo_ntext,	"text x-align y-align" },
 };
 
 

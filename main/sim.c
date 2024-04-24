@@ -26,6 +26,7 @@ static SDL_Window *win;
 static SDL_Surface *surf;
 static SDL_Renderer *rend;
 static SDL_Texture *tex;
+static unsigned zoom = 1;
 static bool quit = 0;
 
 
@@ -66,10 +67,10 @@ static void render(void)
 static void hline(unsigned x0, unsigned x1, unsigned y)
 {
 	SDL_Rect rect = {
-		.x = x0,
-		.y = y,
-		.w = x1 - x0 + 1,
-		.h = 1 
+		.x = x0 * zoom,
+		.y = y * zoom,
+		.w = (x1 - x0 + 1) * zoom,
+		.h = zoom 
 	};
 
 	SDL_FillRect(surf, &rect, SDL_MapRGB(surf->format, 30, 30, 30));
@@ -109,10 +110,10 @@ debug("update\n");
 		p = da->fb + y * da->w + da->damage.x;
 		for (x = da->damage.x; x != da->damage.x + da->damage.w; x++) {
 			SDL_Rect rect = {
-				.x = x,
-				.y = y,
-				.w = 1,
-				.h = 1 
+				.x = x * zoom,
+				.y = y * zoom,
+				.w = zoom,
+				.h = zoom 
 			};
 
 			SDL_FillRect(surf, &rect, SDL_MapRGB(surf->format,
@@ -168,7 +169,8 @@ static bool process_events(void)
 			return 1;
 debug("SDL_MOUSEMOTION\n");
 		if (event.motion.state & SDL_BUTTON_LMASK)
-			touch_move_event(event.motion.x, event.motion.y);
+			touch_move_event(event.motion.x / zoom,
+			    event.motion.y / zoom);
 		else
 			touch_up_event();
 		break;
@@ -176,7 +178,8 @@ debug("SDL_MOUSEMOTION\n");
 debug("SDL_MOUSEBUTTONDOWN\n");
 		assert(!touch_is_down);
 		if (event.button.state == SDL_BUTTON_LEFT)
-			touch_down_event(event.motion.x, event.motion.y);
+			touch_down_event(event.motion.x / zoom,
+			    event.motion.y / zoom);
 		touch_is_down = 1;
 		break;
 	case SDL_MOUSEBUTTONUP:
@@ -234,7 +237,7 @@ static void init_sdl(void)
 	}
 	atexit(SDL_Quit);
 
-	surf = SDL_CreateRGBSurface(0, GFX_WIDTH, GFX_HEIGHT, 16,
+	surf = SDL_CreateRGBSurface(0, GFX_WIDTH * zoom, GFX_HEIGHT * zoom, 16,
 	    0x1f << 11, 0x3f << 5, 0x1f, 0);
 	if (!surf) {
 		fprintf(stderr, "SDL_CreateRGBSurface: %s\n", SDL_GetError());
@@ -269,7 +272,7 @@ static void init_sdl(void)
 
 static void usage(const char *name)
 {
-	fprintf(stderr, "usage: %s [demo-number [demo-arg ...]]\n", name);
+	fprintf(stderr, "usage: %s [-2] [demo-number [demo-arg ...]]\n", name);
 	exit(1);
 }
 
@@ -278,8 +281,11 @@ int main(int argc, char **argv)
 {
 	int c;
 
-	while ((c = getopt(argc, argv, "")) != EOF)
+	while ((c = getopt(argc, argv, "2")) != EOF)
 		switch (c) {
+		case '2':
+			zoom = 2;
+			break;
 		default:
 			usage(*argv);
 		}

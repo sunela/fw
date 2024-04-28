@@ -32,9 +32,23 @@ The AI model is covered by the CreativeML OpenRAIL++ license:
 https://huggingface.co/stabilityai/stable-diffusion-2/blob/main/LICENSE-MODEL
 
 
-Makefile.c-common
------------------
+Makefile.c-common, tools/usbdev.[ch]
+------------------------------------
 
-This file is originally licensed under GPLv2 or later. For compatibility with
-the rest of the Sunela project, it is now dual-licensed under the MIT License
-as well.
+These files were originally licensed under GPLv2 or later. For compatibility
+with the rest of the Sunela project, they are now dual-licensed under the MIT
+License as well.
+
+
+Bouffalo SDK
+------------
+
+The sdk/ directory of the firmware contains the following files from the HID
+example (bouffalo_sdk/examples/peripherals/usbdev/usbd_hid_keyboard/) of the
+Bouffalo SDK: CMakeLists.txt Makefile flash_prog_cfg.ini proj.conf usb_config.h
+
+With the exception of usb_config.h, all files were modified for the Sunela
+project. Furthermore, sdk-main.c is based on main.c and sdk-usb.c is based on hid_keyboard_template.c
+
+The Bouffalo SDK is licensed under the Apache 2.0 license. See LICENSE.Apache
+for a copy of the license.

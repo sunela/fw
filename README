@@ -24,7 +24,6 @@ Build instructions
 To do: document setting up the toolchain (we're based on OpenBouffalo, but
 there are some issues we need to work around.)
 
-
 Prerequisites
 -------------
 
@@ -32,3 +31,55 @@ The following packages are needed (the names given here are for Ubuntu 22.04):
 Liberation fonts: fonts-liberation
 Font configuration utility fc-list: fontconfig
 OpenType/TrueType BDF converter otf2bdf: otf2bdf
+
+
+Running on the Sipeed M1s Dock
+------------------------------
+
+We run the Sunela firmware on the M0 (RV32) core of the Bouffalo BL808. The
+Bouffalo SDK provides the USB stack.
+
+Prerequisites:
+
+Toolchain: riscv64-unknown-elf
+Probable source (for Ubuntu): apt install gcc-riscv64-unknown-elf
+
+Bouffalo SDK (for BL616, BL618, BL808, and others):
+git clone https://github.com/bouffalolab/bouffalo_sdk.git
+
+Check out the Bouffalo SDK at the same level as the fw/ directory.
+
+Build:
+
+cd sdk
+make
+
+Transfer to on-board Flash:
+
+If the left USB port ("OTG") is connect to anything, disconnect it.
+Connect the right USB port ("UART") to the PC from which you will flash.
+If the serial console (e.g., picocom) is connected, disconnect it (e.g., with
+^A^Q).
+
+If the USB-serial device of the M0 core is at /dev/ttyACM1, just run
+
+make flash
+
+If the device is elsewhere, use
+
+make flash COMX=/dev/ttyelsewhere
+
+To test the code:
+
+- Connect the right USB port of the M1s to a PC, for power and, optionally, the
+  serial console:
+  picocom -b 2000000 /dev/ttyACM1
+
+- reset the M1s by pressing the RST button (under the board)
+
+- Connect the left USB port of the M1s to a PC
+  Note: USB power of both ports of the M1s Dock is directly connected to the
+  board's VBUS rail. If connected to different PCs, power can flow from one,
+  through the M1s, to the other.
+
+The device should now enumerate as "Qi Hardware Sunela BL808" (20b7:ae72).

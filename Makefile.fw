@@ -14,7 +14,7 @@ include Makefile.app
 
 CFLAGS += -Ihw -Ihw/bl808
 OBJS += fw.o shared.o mmio.o gpio.o spi.o i2c.o trng.o sha.o physmem.o \
-	st7789.o bl.o cst816.o
+	st7789.o backlight.o cst816.o
 
 
 vpath mmio.c hw/bl808
@@ -26,7 +26,7 @@ vpath sha.c hw/bl808
 vpath physmem.c hw/bl808
 
 vpath st7789.c hw
-vpath bl.c hw
+vpath backlight.c hw
 vpath cst816.c hw
 
 vpath fw.c main

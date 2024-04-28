@@ -20,7 +20,7 @@
 #include "hw/bl808/i2c.h"
 #include "hw/st7789.h"
 #include "hw/cst816.h"
-#include "hw/bl.h"
+#include "hw/backlight.h"
 
 #include "hal.h"
 #include "debug.h"
@@ -132,7 +132,7 @@ void update_display(struct gfx_drawable *da)
 void display_on(bool on)
 {
 	/* @@@ also switch the LCD */
-	bl_on(on);
+	backlight_on(on);
 }
 
 
@@ -161,7 +161,7 @@ int main(int argc, char **argv)
 
 	spi_init(LCD_MOSI, LCD_SCLK, LCD_CS, 15);
 	i2c_init(0, I2C0_SDA, I2C0_SCL, 100);
-	bl_init(LCD_BL);
+	backlight_init(LCD_BL);
 
 	// @@@ no on-off control yet
 	st7789_on();

@@ -1,5 +1,5 @@
 /*
- * fw.c - Hardware abstraction layer for running on the M1s Dock under Linux
+ * sdk.c - Hardware abstraction layer for the M1s Dock on the Bouffalo SDK
  *
  * This work is licensed under the terms of the MIT License.
  * A copy of the license can be found in the file LICENSE.MIT
@@ -23,18 +23,10 @@
 #include "hw/bl.h"
 
 #include "hal.h"
+#include "sdk-hal.h"
 #include "debug.h"
 #include "timer.h"
 #include "gfx.h"
-
-
-/* --- Delays and sleeping ------------------------------------------------- */
-
-
-void msleep(unsigned ms)
-{
-	mdelay(ms);
-}
 
 
 /* --- Event loop ---------------------------------------------------------- */
@@ -75,9 +67,9 @@ printf("\tUP\n");
 
 static void event_loop(void)
 {
-	unsigned uptime = 1;
-	int last_touch = 0;
-	bool button_down = 0;
+	static unsigned uptime = 1;
+	static int last_touch = 0;
+	static bool button_down = 0;
 
 	while (1) {
 		bool on;
@@ -90,8 +82,6 @@ printf("BUTTON (%u)\n", button_down);
 
 		on = !cst816_poll();
 		if (on != last_touch)
-//		if (on && !last_touch)
-//if (on)
 			process_touch();
 		last_touch = on;
 
@@ -139,24 +129,10 @@ void display_on(bool on)
 /* --- Command-line processing --------------------------------------------- */
 
 
-static void usage(const char *name)
+void sdk_main(void)
 {
-	fprintf(stderr, "usage: %s [demo-number [demo-arg ...]]\n", name);
-	exit(1);
-}
-
-
-int main(int argc, char **argv)
-{
-	int c;
-
-	while ((c = getopt(argc, argv, "")) != EOF)
-		switch (c) {
-		default:
-			usage(*argv);
-		}
-
 	mmio_init();
+
 	gpio_cfg_in(BUTTON_R, GPIO_PULL_UP);
 
 	spi_init(LCD_MOSI, LCD_SCLK, LCD_CS, 15);
@@ -170,9 +146,5 @@ int main(int argc, char **argv)
 
 	cst816_init(TOUCH_I2C, TOUCH_I2C_ADDR, TOUCH_INT);
 
-	if (!app_init(argv + optind, argc - optind))
-		usage(*argv);
 	event_loop();
-
-	return 0;
 }

@@ -44,7 +44,7 @@ YYFLAGS = -v
 
 CC_normal	:= $(CROSS)$(CC)
 AS_normal	:= $(CROSS)$(AS)
-CPP_normal	:= $(CPP)
+CPP_normal	:= $(CROSS)$(CPP)
 LEX_normal	:= $(LEX)
 YACC_normal	:= $(YACC)
 DEPEND_normal	= $(CPP_normal) $(CFLAGS) $(CFLAGS_DEPEND) -MM -MG

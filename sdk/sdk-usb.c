@@ -7,6 +7,8 @@
 
 #include "usbd_core.h"
 
+#include "../sdk-hal.h"
+
 #include "sdk-usb.h"
 
 
@@ -106,28 +108,6 @@ void usbd_event_handler(uint8_t event)
 	default:
 		break;
 	}
-}
-
-
-static bool usb_query(uint8_t req, uint8_t **data, uint32_t *len)
-{
-	static char hello[] = "hello";
-
-	printf("query\r\n");
-	*data = (uint8_t *) hello;
-	*len = strlen(hello);
-	return 1;
-}
-
-
-static bool usb_arrival(uint8_t req, const void *data, uint32_t len)
-{
-	unsigned i;
-
-	for (i = 0; i != len; i++)
-		printf("%02x%s", ((const uint8_t *) data)[i],
-		    i < len - 1 ? " ": "\r\n");
-	return 1;
 }
 
 

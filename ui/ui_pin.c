@@ -191,7 +191,7 @@ static void ui_pin_tap(unsigned x, unsigned y)
 	if (col == 2 && row == 0) { // enter
 		if (pin_len < MIN_PIN_LEN)
 			return;
-debug("%08x\n", pin);
+debug("%08lx\n", (unsigned long) pin);
 		progress();
 		if (pin == DUMMY_PIN) {
 			pin_attempts = 0;

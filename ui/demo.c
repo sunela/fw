@@ -315,7 +315,7 @@ static bool demo_hotp(char *const *args, unsigned n_args)
 		fprintf(stderr, "bad counter \"%s\"\n", c);
 		exit(1);
 	}
-	printf("%06u\n", hotp64(k, strlen(k), count) % 1000000);
+	printf("%06lu\n", hotp64(k, strlen(k), count) % 1000000UL);
 
 	return 1;
 }
@@ -401,7 +401,7 @@ static bool demo_hotp2(char *const *args, unsigned n_args)
 			printf(" %02x", key[i]);
 		printf("\n");
 	}
-	printf("%06u\n", hotp64(key, got, count) % 1000000);
+	printf("%06lu\n", hotp64(key, got, count) % 1000000UL);
 
 	return 1;
 }

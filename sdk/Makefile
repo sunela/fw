@@ -1,6 +1,8 @@
-BL_SDK_BASE ?= $(shell pwd)/../../bouffalo_sdk
+TOP = $(shell pwd)/..
+BL_SDK_BASE = $(TOP)/../bouffalo_sdk
 
 export BL_SDK_BASE
+export TOP
 
 CHIP = bl808
 BOARD = bl808dk

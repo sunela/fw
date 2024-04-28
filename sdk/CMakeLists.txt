@@ -7,6 +7,7 @@ find_package(bouffalo_sdk REQUIRED HINTS $ENV{BL_SDK_BASE})
 sdk_add_include_directories(.)
 
 target_sources(app PRIVATE sdk-usb.c)
+target_link_libraries(app libsunela.a -L$ENV{TOP}/obj-sdk/)
 sdk_set_main_file(sdk-main.c)
 
 project(sunela)

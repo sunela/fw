@@ -26,7 +26,7 @@ $(OBJDIR:%/=%):
 		mkdir -p $@
 
 sim:		$(OBJS_IN_OBJDIR)
-		$(CC) $(LDCFLAGS) -o $@ $(OBJS_IN_OBJDIR) $(LDLIBS)
+		$(CC) $(LDFLAGS) -o $@ $(OBJS_IN_OBJDIR) $(LDLIBS)
 
 spotless::
 		rm -f sim

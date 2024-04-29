@@ -30,11 +30,11 @@ void add_char(void *user, char c)
 }
 
 
-static uint8_t do_print_number(char *s, uint32_t v, uint8_t len, uint8_t base,
-    const char *alphabet)
+static uint8_t do_print_number(char *s, unsigned long long v, uint8_t len,
+    uint8_t base, const char *alphabet)
 {
 	uint8_t digits = 0;
-	uint32_t tmp;
+	unsigned long long tmp;
 	uint8_t res = len;
 
 	if (!v) {
@@ -59,7 +59,7 @@ static uint8_t do_print_number(char *s, uint32_t v, uint8_t len, uint8_t base,
 }
 
 
-uint8_t print_number(char *s, uint32_t v, uint8_t len, uint8_t base)
+uint8_t print_number(char *s, unsigned long long v, uint8_t len, uint8_t base)
 {
 	return do_print_number(s, v, len, base, "0123456789abcdef");
 }
@@ -72,6 +72,30 @@ static void string(void (*out)(void *user, char c), void *user, const char *s)
 }
 
 
+#define	GET_xINT(signed)						\
+	({								\
+		signed long long int _tmp;				\
+									\
+		switch (longer) {					\
+		case 0:							\
+			_tmp = sn = va_arg(ap, signed int);		\
+			break;						\
+		case 1:							\
+			_tmp = sn = va_arg(ap, signed long int);	\
+			break;						\
+		default:						\
+			_tmp = va_arg(ap, signed long long int);	\
+			break;						\
+		}							\
+		_tmp;							\
+	})
+
+
+#define	GET_UINT GET_xINT(unsigned)
+
+#define	GET_INT GET_xINT()
+
+
 void vformat(void (*out)(void *user, char c), void *user,
     const char *fmt, va_list ap)
 
@@ -79,11 +103,12 @@ void vformat(void (*out)(void *user, char c), void *user,
 	char buf[20]; /* @@@ ugly */
 	bool percent = 0;
 	uint8_t pad = 0; /* pacify gcc */
+	unsigned longer;
 	const char *s;
 	char ch;
 	void *p;
-	unsigned n;
-	int sn;
+	unsigned long long n;
+	int long long sn;
 
 	while (*fmt) {
 		if (percent) {
@@ -97,7 +122,7 @@ void vformat(void (*out)(void *user, char c), void *user,
 				string(out, user, s);
 				break;
 			case 'd':
-				sn = va_arg(ap, int);
+				sn = GET_INT;
 				if (sn < 0) {
 					out(user, '-');
 					n = -sn;
@@ -105,19 +130,23 @@ void vformat(void (*out)(void *user, char c), void *user,
 					n = sn;
 				}
 				goto decimal;
+			case 'l':
+				longer++;
+				fmt++;
+				continue;
 			case 'u':
-				n = va_arg(ap, unsigned);
+				n = GET_UINT;
 decimal:
 				print_number(buf, n, pad, 10);
 				string(out, user, buf);
 				break;
 			case 'x':
-				n = va_arg(ap, unsigned);
+				n = GET_UINT;
 				print_number(buf, n, pad, 16);
 				string(out, user, buf);
 				break;
 			case 'X':
-				n = va_arg(ap, unsigned);
+				n = GET_UINT;
 				do_print_number(buf, n, pad, 16,
 				    "0123456789ABCDEF");
 				string(out, user, buf);
@@ -144,6 +173,7 @@ decimal:
 			case '%':
 				percent = 1;
 				pad = 0;
+				longer = 0;
 				break;
 			default:
 				out(user, *fmt);

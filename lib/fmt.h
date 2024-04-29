@@ -23,7 +23,7 @@
 
 void add_char(void *user, char c);
 
-uint8_t print_number(char *s, uint32_t v, uint8_t len, uint8_t base);
+uint8_t print_number(char *s, unsigned long long v, uint8_t len, uint8_t base);
 
 void vformat(void (*out)(void *user, char c), void *user,
     const char *fmt, va_list ap);

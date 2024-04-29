@@ -37,13 +37,19 @@ uint64_t time_us(void)
 /* --- Logging ------------------------------------------------------------- */
 
 
-static void console_char(void *user, char c)
+#ifndef SDK
+
+void console_char(char c)
 {
-#ifdef SDK
-	if (c == '\n')
-		write(1, "\r", 1);
-#endif
 	write(1, &c, 1);
+}
+
+#endif /* !SDK */
+
+
+static void console_cb(void *user, char c)
+{
+	console_char(c);
 }
 
 
@@ -58,9 +64,9 @@ void vdebug(const char *fmt, va_list ap)
 		first = 0;
 	}
 	t -= t_start;
-	format(console_char, NULL, "[%3llu.%03llu] ",
+	format(console_cb, NULL, "[%3llu.%03llu] ",
 	    (unsigned long long) t / 1000000, (unsigned long long) t % 1000000);
-	vformat(console_char, NULL, fmt, ap);
+	vformat(console_cb, NULL, fmt, ap);
 }
 
 
@@ -95,7 +101,7 @@ double t1(const char *fmt, ...)
 		va_start(ap, fmt);
 		vdebug(tmp, ap);
 		va_end(ap);
-		format(console_char, NULL, ": %3llu.%06llu s%s",
+		format(console_cb, NULL, ": %3llu.%06llu s%s",
 		    (unsigned long long) t_t1 / 1000000,
 		    (unsigned long long) t_t1 % 1000000,
 		    nl ? "\n" : "");

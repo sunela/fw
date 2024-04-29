@@ -19,6 +19,8 @@
 #define GFX_HEIGHT	280
 
 
+void console_char(char c);
+
 void vdebug(const char *fmt, va_list ap);
 void t0(void);
 double t1(const char *fmt, ...)

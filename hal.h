@@ -10,6 +10,7 @@
 
 #include <stdarg.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "gfx.h"
 
@@ -30,6 +31,8 @@ void touch_up_event(void);
 
 void mdelay(unsigned ms);
 void msleep(unsigned ms);
+
+uint64_t time_us(void);
 
 void update_display(struct gfx_drawable *da);
 void display_on(bool on);

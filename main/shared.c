@@ -8,6 +8,7 @@
 #include <stddef.h>
 #include <stdarg.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/time.h>
@@ -16,18 +17,20 @@
 #include "debug.h"
 
 
-/* --- Subtract time ------------------------------------------------------- */
+/* --- gettimeofday wrapper ------------------------------------------------ */
 
 
-static void t_sub(struct timeval *a, const struct timeval *b)
+#ifndef SDK
+
+uint64_t time_us(void)
 {
-	a->tv_sec -= b->tv_sec;
-	a->tv_usec -= b->tv_usec;
-	if (a->tv_usec < 0) {
-		a->tv_sec--;
-		a->tv_usec += 1000 * 1000;
-	}
+	struct timeval tv;
+
+	gettimeofday(&tv, NULL);
+	return (uint64_t) tv.tv_sec * 1000000UL + tv.tv_usec;
 }
+
+#endif /* !SDK */
 
 
 /* --- Logging ------------------------------------------------------------- */
@@ -35,18 +38,17 @@ static void t_sub(struct timeval *a, const struct timeval *b)
 
 void vdebug(const char *fmt, va_list ap)
 {
-	static struct timeval t_start;
+	static uint64_t t_start;
 	static bool first = 1;
-	struct timeval tv;
+	uint64_t t = time_us();
 
-	gettimeofday(&tv, NULL);
 	if (first) {
-		t_start = tv;
+		t_start = t;
 		first = 0;
 	}
-	t_sub(&tv, &t_start);
-	printf("[%3u.%03u] ",
-	    (unsigned) tv.tv_sec, (unsigned) tv.tv_usec / 1000);
+	t -= t_start;
+	printf("[%3llu.%03llu] ",
+	    (unsigned long long) t / 1000000, (unsigned long long) t % 1000000);
 	vprintf(fmt, ap);
 }
 
@@ -54,25 +56,22 @@ void vdebug(const char *fmt, va_list ap)
 /* --- Delta time measurement ---------------------------------------------- */
 
 
-static struct timeval t0_tv;
-static struct timeval t1_tv;
+static uint64_t t_t0;
+static uint64_t t_t1;
 static bool t1_cached = 0;
 
 
 void t0(void)
 {
-	gettimeofday(&t0_tv, NULL);
+	t_t0 = time_us();
 	t1_cached = 0;
 }
 
 
 double t1(const char *fmt, ...)
 {
-
-	if (!t1_cached) {
-		gettimeofday(&t1_tv, NULL);
-		t_sub(&t1_tv, &t0_tv);
-	}
+	if (!t1_cached)
+		t_t1 = time_us() - t_t0;
 	if (fmt) {
 		char tmp[strlen(fmt) + 1];
 		va_list ap;
@@ -85,12 +84,13 @@ double t1(const char *fmt, ...)
 		va_start(ap, fmt);
 		vdebug(tmp, ap);
 		va_end(ap);
-		printf(": %3u.%06u s%s",
-		    (unsigned) t1_tv.tv_sec, (unsigned) t1_tv.tv_usec,
+		printf(": %3llu.%06llu s%s",
+		    (unsigned long long) t_t1 / 1000000,
+		    (unsigned long long) t_t1 % 1000000,
 		    nl ? "\n" : "");
 		t1_cached = 0;
 	} else {
 		t1_cached = 1;
 	}
-	return t1_tv.tv_sec + t1_tv.tv_usec * 1e-6;
+	return t_t1 * 1e-6;
 }

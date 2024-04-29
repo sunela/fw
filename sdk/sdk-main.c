@@ -9,7 +9,7 @@ void sunela_usb_init(void);
 
 void msleep(unsigned ms)
 {
-	bflb_mtimer_delay_ms(1000 * ms);
+	bflb_mtimer_delay_ms(ms);
 }
 
 

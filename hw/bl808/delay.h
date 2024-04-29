@@ -8,16 +8,23 @@
 #ifndef DELAY_H
 #define	DELAY_H
 
+#include "hal.h"
+
+
 #define DELAY_LOOP	239	/* cycles per us */
 
 
-static inline void mdelay(unsigned ms)
+inline void mdelay(unsigned ms)
 {
+#ifdef SDK
+	msleep(ms);
+#else /* SDK */
 	unsigned i;
 
 	while (ms--)
 		for (i = 0; i != 1000 * DELAY_LOOP; i++)
 			asm("");
+#endif /* !SDK */
 }
 
 #endif /* !DELAY_H */

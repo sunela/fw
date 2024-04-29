@@ -17,3 +17,13 @@ COMX = /dev/ttyACM1
 #cmake_definition+=-Dxxx=sss
 
 include $(BL_SDK_BASE)/project.build
+
+# Cmake always says "Built target sunela_bl808_m0.elf", even if it did nothing.
+# We therefore have to explicitly force linking when libsunela.a may have
+# changed.
+
+.PHONY:	redo
+
+redo:
+	rm -f build/build_out/sunela_bl808_m0.elf
+	$(MAKE)

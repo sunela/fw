@@ -146,5 +146,6 @@ void sdk_main(void)
 
 	cst816_init(TOUCH_I2C, TOUCH_I2C_ADDR, TOUCH_INT);
 
+	app_init(NULL, 0);
 	event_loop();
 }

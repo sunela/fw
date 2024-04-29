@@ -21,7 +21,7 @@ fw:
 
 sdk:
 	$(MAKE) -f Makefile.sdk
-	$(MAKE) -C sdk
+	$(MAKE) -C sdk redo
 
 flash:
 	$(MAKE) -C sdk flash

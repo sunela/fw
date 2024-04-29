@@ -13,7 +13,6 @@
 #include <assert.h>
 
 #include "hw/board.h"
-#include "hw/bl808/delay.h"
 #include "hw/bl808/mmio.h"
 #include "hw/bl808/gpio.h"
 #include "hw/bl808/spi.h"

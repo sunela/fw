@@ -1,12 +1,9 @@
 /*
- * delay.h - Delay loops
+ * delay.c - Delay loops
  *
  * This work is licensed under the terms of the MIT License.
  * A copy of the license can be found in the file LICENSE.MIT
  */
-
-#ifndef DELAY_H
-#define	DELAY_H
 
 #include "hal.h"
 
@@ -14,7 +11,7 @@
 #define DELAY_LOOP	239	/* cycles per us */
 
 
-inline void mdelay(unsigned ms)
+void mdelay(unsigned ms)
 {
 #ifdef SDK
 	msleep(ms);
@@ -26,5 +23,3 @@ inline void mdelay(unsigned ms)
 			asm("");
 #endif /* !SDK */
 }
-
-#endif /* !DELAY_H */

@@ -17,8 +17,8 @@
 #include <stdint.h>
 #include <sys/types.h>
 
+#include "hal.h"
 #include "mmio.h"
-#include "delay.h"
 #include "trng.h"
 
 

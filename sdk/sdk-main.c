@@ -7,9 +7,15 @@
 void sunela_usb_init(void);
 
 
-void msleep(unsigned ms)
+void mdelay(unsigned ms)
 {
 	bflb_mtimer_delay_ms(ms);
+}
+
+
+void msleep(unsigned ms)
+{
+	mdelay(ms);
 }
 
 

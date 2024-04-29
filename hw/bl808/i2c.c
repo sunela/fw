@@ -24,10 +24,10 @@
 #include <strings.h>
 #include <assert.h>
 
+#include "hal.h"
 #include "mmio.h"
 #include "gpio.h"
 #include "i2c.h"
-#include "delay.h"
 
 
 #define	I2C_BASE(i2c) \

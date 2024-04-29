@@ -10,9 +10,9 @@
 #include <stdint.h>
 #include <assert.h>
 
+#include "hal.h"
 #include "gpio.h"
 #include "spi.h"
-#include "delay.h"
 #include "st7789.h"
 #include "debug.h"
 

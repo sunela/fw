@@ -9,11 +9,12 @@
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 #include <sys/time.h>
 
 #include "hal.h"
+#include "fmt.h"
 #include "debug.h"
 
 
@@ -36,6 +37,16 @@ uint64_t time_us(void)
 /* --- Logging ------------------------------------------------------------- */
 
 
+static void console_char(void *user, char c)
+{
+#ifdef SDK
+	if (c == '\n')
+		write(1, "\r", 1);
+#endif
+	write(1, &c, 1);
+}
+
+
 void vdebug(const char *fmt, va_list ap)
 {
 	static uint64_t t_start;
@@ -47,9 +58,9 @@ void vdebug(const char *fmt, va_list ap)
 		first = 0;
 	}
 	t -= t_start;
-	printf("[%3llu.%03llu] ",
+	format(console_char, NULL, "[%3llu.%03llu] ",
 	    (unsigned long long) t / 1000000, (unsigned long long) t % 1000000);
-	vprintf(fmt, ap);
+	vformat(console_char, NULL, fmt, ap);
 }
 
 
@@ -84,7 +95,7 @@ double t1(const char *fmt, ...)
 		va_start(ap, fmt);
 		vdebug(tmp, ap);
 		va_end(ap);
-		printf(": %3llu.%06llu s%s",
+		format(console_char, NULL, ": %3llu.%06llu s%s",
 		    (unsigned long long) t_t1 / 1000000,
 		    (unsigned long long) t_t1 % 1000000,
 		    nl ? "\n" : "");

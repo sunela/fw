@@ -8,11 +8,11 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 #include <assert.h>
 
 #include "hal.h"
+#include "debug.h"
 #include "gfx.h"
 #include "long_text.h"
 #include "text.h"
@@ -270,7 +270,7 @@ static bool demo_sha1(char *const *args, unsigned n_args)
 	sha1_end(res);
 
 	for (i = 0; i != SHA1_HASH_BYTES; i++)
-		printf("%02x%c", res[i],
+		debug("%02x%c", res[i],
 		    i == SHA1_HASH_BYTES - 1 ? '\n' : ' ');
 
 	return 1;
@@ -291,7 +291,7 @@ static bool demo_hmac(char *const *args, unsigned n_args)
 
 	hmac_sha1(res, k, strlen(k), m, strlen(m));
 	for (i = 0; i != HMAC_SHA1_BYTES; i++)
-		printf("%02x%c", res[i],
+		debug("%02x%c", res[i],
 		    i == HMAC_SHA1_BYTES - 1 ? '\n' : ' ');
 
 	return 1;
@@ -312,10 +312,10 @@ static bool demo_hotp(char *const *args, unsigned n_args)
 
 	count = strtoul(c, &end, 10);
 	if (*end) {
-		fprintf(stderr, "bad counter \"%s\"\n", c);
+		debug("bad counter \"%s\"\n", c);
 		exit(1);
 	}
-	printf("%06lu\n", hotp64(k, strlen(k), count) % 1000000UL);
+	debug("%06lu\n", hotp64(k, strlen(k), count) % 1000000UL);
 
 	return 1;
 }
@@ -335,9 +335,9 @@ static bool demo_b32enc(char *const *args, unsigned n_args)
 
 	got = base32_encode(res, res_size, s, strlen(s));
 	if (got < 0)
-		printf("ERROR\n");
+		debug("ERROR\n");
 	else
-		printf("%d/%u \"%s\"\n", (int) got, (unsigned) res_size, res);
+		debug("%d/%u \"%s\"\n", (int) got, (unsigned) res_size, res);
 
 	return 1;
 }
@@ -357,12 +357,12 @@ static bool demo_b32dec(char *const *args, unsigned n_args)
 
 	got = base32_decode(res, res_size, s);
 	if (got < 0) {
-		printf("ERROR\n");
+		debug("ERROR\n");
 	} else {
-		printf("%d/%u", (int) got, (unsigned) res_size);
+		debug("%d/%u", (int) got, (unsigned) res_size);
 		for (i = 0; i != got; i++)
-			printf(" %02x", res[i]);
-		printf("\n");
+			debug(" %02x", res[i]);
+		debug("\n");
 	}
 
 	return 1;
@@ -387,21 +387,21 @@ static bool demo_hotp2(char *const *args, unsigned n_args)
 
 	count = strtoul(c, &end, 10);
 	if (*end) {
-		fprintf(stderr, "bad counter \"%s\"\n", c);
+		debug("bad counter \"%s\"\n", c);
 		exit(1);
 	}
 	got = base32_decode(key, key_size, s);
 	if (got < 0) {
-		printf("ERROR\n");
+		debug("ERROR\n");
 	} else {
 		ssize_t i;
 
-		printf("%d/%u", (int) got, (unsigned) key_size);
+		debug("%d/%u", (int) got, (unsigned) key_size);
 		for (i = 0; i != got; i++)
-			printf(" %02x", key[i]);
-		printf("\n");
+			debug(" %02x", key[i]);
+		debug("\n");
 	}
-	printf("%06lu\n", hotp64(key, got, count) % 1000000UL);
+	debug("%06lu\n", hotp64(key, got, count) % 1000000UL);
 
 	return 1;
 }
@@ -518,7 +518,7 @@ static const struct demo {
 
 static void help(const struct demo *d)
 {
-	fprintf(stderr, "%s%s%s\n", d->name, *d->help ? " " : "", d->help);
+	debug("%s%s%s\n", d->name, *d->help ? " " : "", d->help);
 }
 
 

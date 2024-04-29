@@ -21,7 +21,7 @@
 //#define DEBUG
 
 #ifdef DEBUG
-#include <stdio.h>
+#include "debug.h"
 #endif
 
 
@@ -32,21 +32,21 @@ uint32_t hotp(const void *k, size_t k_size, const void *c, size_t c_size)
 	uint32_t res;
 
 #ifdef DEBUG
-printf("K");
-for (i = 0; i != k_size; i++)
-    printf(" %02x", ((const uint8_t *) k)[i]);
-printf("\n");
-printf("C");
-for (i = 0; i != c_size; i++)
-    printf(" %02x", ((const uint8_t *) c)[i]);
-printf("\n");
+	debug("K");
+	for (i = 0; i != k_size; i++)
+		debug(" %02x", ((const uint8_t *) k)[i]);
+	debug("\n");
+	debug("C");
+	for (i = 0; i != c_size; i++)
+		debug(" %02x", ((const uint8_t *) c)[i]);
+	debug("\n");
 #endif
 	hmac_sha1(hash, k, k_size, c, c_size);
 #ifdef DEBUG
-printf("H");
-for (i = 0; i != HMAC_SHA1_BYTES; i++)
-    printf(" %02x", hash[i]);
-printf("\n");
+	debug("H");
+	for (i = 0; i != HMAC_SHA1_BYTES; i++)
+		debug(" %02x", hash[i]);
+	debug("\n");
 #endif
 	i = hash[HMAC_SHA1_BYTES - 1] & 15;
 	res = (hash[i] & 0x7f) << 24 | hash[i + 1] << 16 | hash[i + 2] << 8 |

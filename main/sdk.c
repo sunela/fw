@@ -37,14 +37,14 @@ static void process_touch(void)
 	const struct cst816_event *e = t.event;
 	static bool down = 0;
 
-printf("TOUCH (%u)\n", down);
-mdelay(1);
+	debug("TOUCH (%u)\n", down);
+	mdelay(1);
 	cst816_read(&t);
-mdelay(1);
-if (t.events)
-printf("\t%u %u %u\n", e->action, e->x, e->y);
-else
-printf("\tUP\n");
+	mdelay(1);
+	if (t.events)
+		debug("\t%u %u %u\n", e->action, e->x, e->y);
+	else
+		debug("\tUP\n");
 	if (t.events && e->action != cst816_up) {
 		if (down)
 			return;
@@ -75,7 +75,7 @@ static void event_loop(void)
 
 		if (button_down != !gpio_in(BUTTON_R)) {
 			button_down = !button_down;
-printf("BUTTON (%u)\n", button_down);
+			debug("BUTTON (%u)\n", button_down);
 			button_event(button_down);
 		}
 

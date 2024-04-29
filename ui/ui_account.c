@@ -8,9 +8,9 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <stdio.h>
 
 #include "hal.h"
+#include "fmt.h"
 #include "hotp.h"
 #include "gfx.h"
 #include "text.h"
@@ -50,6 +50,7 @@ static void ui_account_tap(unsigned x, unsigned y)
 	struct account *a;
 	/* @@@ ugly. should have list entries that strdup */
 	static char s[6 + 1];
+	char *p = s;
 	uint32_t code;
 
         entry = ui_list_pick(&list, x, y);
@@ -64,7 +65,7 @@ static void ui_account_tap(unsigned x, unsigned y)
 	/* @@@ make it harder to update the counter ? */
 	a->token.counter++;
 	code = hotp64(a->token.secret, a->token.secret_size, a->token.counter);
-	sprintf(s, "%06u", (unsigned) code % 1000000);
+	format(add_char, &p, "%06u", (unsigned) code % 1000000);
 	ui_list_update_entry(&list, entry, "HOTP", s, a);
 	update_display(&da);
 }

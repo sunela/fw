@@ -7,6 +7,7 @@
 
 #include "usbd_core.h"
 
+#include "../sys/debug.h"
 #include "../sdk-hal.h"
 
 #include "sdk-usb.h"
@@ -82,28 +83,28 @@ void usbd_event_handler(uint8_t event)
 {
 	switch (event) {
 	case USBD_EVENT_RESET:
-		printf("RESET\r\n");
+		debug("RESET\n");
 		break;
 	case USBD_EVENT_CONNECTED:
-		printf("CONNECTED\r\n");
+		debug("CONNECTED\n");
 		break;
 	case USBD_EVENT_DISCONNECTED:
-		printf("DISCONNECTED\r\n");
+		debug("DISCONNECTED\n");
 		break;
 	case USBD_EVENT_RESUME:
-		printf("RESUME\r\n");
+		debug("RESUME\n");
 		break;
 	case USBD_EVENT_SUSPEND:
-		printf("SUSPEND\r\n");
+		debug("SUSPEND\n");
 		break;
 	case USBD_EVENT_CONFIGURED:
-		printf("CONFIGURED\r\n");
+		debug("CONFIGURED\n");
 		break;
 	case USBD_EVENT_SET_REMOTE_WAKEUP:
-		printf("SET WAKEUP\r\n");
+		debug("SET WAKEUP\n");
 		break;
 	case USBD_EVENT_CLR_REMOTE_WAKEUP:
-		printf("CLR WAKEUP\r\n");
+		debug("CLR WAKEUP\n");
 		break;
 	default:
 		break;
@@ -114,7 +115,7 @@ void usbd_event_handler(uint8_t event)
 static int ep0_handler(struct usb_setup_packet *setup, uint8_t **data,
     uint32_t *len)
 {
-	printf("EP0 bReq 0x%02x wInd %u\r\n", setup->bRequest, setup->wIndex);
+	debug("EP0 bReq 0x%02x wInd %u\r\n", setup->bRequest, setup->wIndex);
 	switch (setup->bmRequestType) {
 	case FROM_DEV:
 		if (usb_query(setup->bRequest, data, len))

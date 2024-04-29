@@ -6,14 +6,15 @@
  */
 
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 #include <assert.h>
 
+#include "debug.h"
 #include "gfx.h"
 #include "font.h"
 #include "text.h"
 
+//#define DEBUG
 
 #include "mono18.font"
 #include "mono24.font"
@@ -42,7 +43,7 @@ unsigned text_char(struct gfx_drawable *da, int x1, int y1,
 	bool on;
 	unsigned x, y;
 
-//printf("C%x %u\n", ch, ch);
+//debug("C%x %u\n", ch, ch);
 	assert(c);
 	if (c->bits == 0)
 		return c->advance;
@@ -72,7 +73,7 @@ unsigned text_char(struct gfx_drawable *da, int x1, int y1,
 				break;
 			more--;
 		}
-//printf("%u %u %u:%u (w %u)\n", x, y, on, more, c->w);
+//debug("%u %u %u:%u (w %u)\n", x, y, on, more, c->w);
 		while (x + more >= c->w) {
 			unsigned d = c->w - x;
 
@@ -105,7 +106,7 @@ static void area_rendered(struct text_area *a, const char *s,
 		const struct character *c = font_find_char(font, ch);
 
 		if (!c) {
-			fprintf(stderr, "character '%c' not found\n", ch);
+			debug("character '%c' not found\n", ch);
 			continue;
 		}
 		if (first) {
@@ -148,7 +149,7 @@ static void text_align(struct text_query *q, const struct text_area *a,
     unsigned x, unsigned y, int8_t align_x, int8_t align_y)
 {
 #ifdef DEBUG
-	printf("A ll %d %d ur %d %d\n", a->x0, a->y0, a->x1, a->y1);
+	debug("A ll %d %d ur %d %d\n", a->x0, a->y0, a->x1, a->y1);
 #endif
 	if (a->next || (align_y & GFX_MAX)) {
 		q->w = a->x1 - a->x0 + 1;
@@ -199,7 +200,7 @@ static void text_align(struct text_query *q, const struct text_area *a,
 	}
 	q->next = q->ox + a->next;
 #ifdef DEBUG
-	printf("Q x %d y %d w %d h %d ox %d oy %d next %d\n",
+	debug("Q x %d y %d w %d h %d ox %d oy %d next %d\n",
 	    q->x, q->y, q->w, q->h, q->ox, q->oy, q->next);
 #endif
 }

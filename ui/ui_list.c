@@ -11,7 +11,8 @@
 #include <assert.h>
 
 #include "hal.h"
-#include "lib/alloc.h"
+#include "debug.h"
+#include "alloc.h"
 #include "gfx.h"
 #include "text.h"
 #include "ui.h"
@@ -86,7 +87,7 @@ void ui_list_begin(struct ui_list *list, const struct ui_list_style *style)
 	text_query(0, 0, "", list_font(list),
 	    GFX_TOP | GFX_MAX, GFX_TOP | GFX_MAX, &q);
 	list->text_height = q.h;
-printf("height %d\n", q.h);
+	debug("height %d\n", q.h);
 
 	list->list = NULL;
 	list->anchor = &list->list;

@@ -8,11 +8,11 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 #include <gcrypt.h>
 #include <sys/types.h>
 
+#include "debug.h"
 #include "sha.h"
 
 
@@ -30,7 +30,7 @@ static void sha1_init(void)
 	gcry_control(GCRYCTL_INITIALIZATION_FINISHED, 0);
 	err = gcry_md_open(&h, GCRY_MD_SHA1, 0);
         if (err) {
-		fprintf(stderr, "gcry_md_open: %s\n", gcry_strerror(err));
+		debug("gcry_md_open: %s\n", gcry_strerror(err));
 		exit(1);
 	}
 	initialized = 1;

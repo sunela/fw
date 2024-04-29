@@ -20,11 +20,16 @@
 #include <strings.h>
 #include <assert.h>
 
-#include "stdio.h"
-
 #include "mmio.h"
 #include "physmem.h"
 #include "sha.h"
+
+
+//#define DEBUG
+
+#ifdef DEBUG
+#include "debug.h"
+#endif
 
 
 #define	SHA_BASE       		(mmio_m0_base + 0x4000)
@@ -69,8 +74,6 @@ static volatile void *buf = NULL;
 static unsigned long buf_paddr;
 static unsigned got = 0;
 static uint64_t length = 0;
-
-//#define	DEBUG
 
 #ifdef DEBUG
 #include <unistd.h>
@@ -125,11 +128,11 @@ void sha1_begin(void)
 	    SHA_ADD(MODE, SHA_MODE_SHA1);
 	SHA_CTRL = ctrl;
 	SHA_CTRL |= SHA_MASK_EN;
-//printf("virt %p phys 0x%llx\n", buf, (unsigned long long) buf_paddr);
+//debug("virt %p phys 0x%llx\n", buf, (unsigned long long) buf_paddr);
 	SHA_MSA = buf_paddr;
 	got = 0;
 #ifdef DEBUG
-check = peek(buf_paddr);
+	check = peek(buf_paddr);
 #endif
 	length = 0;
 }
@@ -175,16 +178,16 @@ void sha1_hash(const uint8_t *data, size_t size)
 		size -= this;
 		if (got == SHA1_BLOCK_BYTES) {
 #ifdef DEBUG
-unsigned i;
+	unsigned i;
 
-printf("V");
-for (i = 0; i != SHA1_BLOCK_BYTES; i++)
-	printf(" %02x", ((uint8_t *) buf)[i]);
-printf("\n");
-printf("P");
-for (i = 0; i != SHA1_BLOCK_BYTES; i++)
-	printf(" %02x", check[i]);
-printf("\n");
+	debug("V");
+	for (i = 0; i != SHA1_BLOCK_BYTES; i++)
+		debug(" %02x", ((uint8_t *) buf)[i]);
+	debug("\n");
+	debug("P");
+	for (i = 0; i != SHA1_BLOCK_BYTES; i++)
+		debug(" %02x", check[i]);
+	debug("\n");
 #endif
 			SHA_CTRL |= SHA_MASK_TRIG;
 			while (SHA_CTRL & SHA_MASK_BUSY);

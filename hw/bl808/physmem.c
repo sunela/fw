@@ -27,6 +27,7 @@
 #include <sys/types.h>
 #include <sys/mman.h>
 
+#include "debug.h"
 #include "physmem.h"
 
 
@@ -99,19 +100,19 @@ static unsigned long xlat_one(int fd, unsigned long vaddr)
 		exit(1);
 	}
 	if (got != 8) {
-		fprintf(stderr, "bad read: got %d instead of 8\n", (int) got);
+		debug("bad read: got %d instead of 8\n", (int) got);
 		exit(1);
 	}
 	if (!((map >> PM_PRESENT) & 1)) {
-		fprintf(stderr, "page %lu is not present\n", page);
+		debug("page %lu is not present\n", page);
 		abort();
 	}
 	if ((map >> PM_SWAPPED) & 1) {
-		fprintf(stderr, "page %lu is swapped\n", page);
+		debug("page %lu is swapped\n", page);
 		abort();
 	}
 	paddr = ((map & 0x7fffffffffffffULL) * PAGE_SIZE) | offset;
-//	fprintf(stderr, "0x%lx -> 0x%lx\n", vaddr, paddr);
+//	debug("0x%lx -> 0x%lx\n", vaddr, paddr);
 	return paddr;
 }
 

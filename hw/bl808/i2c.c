@@ -156,10 +156,10 @@ static void i2c_setup(unsigned i2c, unsigned addr, unsigned reg, bool rd,
 	    I2C_ADD(CFG_SCL_SYNC_EN, 1) |
 	    I2C_ADD(CFG_DEG_EN, 1) | I2C_ADD(CFG_RnW, rd);
 	I2C_CONFIG(i2c) = cfg;
-//printf("CFG(0) 0x%08x\n", cfg);
+//debug("CFG(0) 0x%08x\n", cfg);
 	cfg |= I2C_ADD(CFG_M_EN, 1);
 	I2C_CONFIG(i2c) = cfg;
-//printf("CFG(1) 0x%08x\n", cfg);
+//debug("CFG(1) 0x%08x\n", cfg);
 }
 
 
@@ -215,7 +215,7 @@ unsigned i2c_write(unsigned i2c, unsigned addr, unsigned reg,
 			break;
 		}
 		while (!I2C_GET(CFG1_TX_FIFO_CNT, I2C_CFG1(0)));
-//printf("  %08x\n", word);
+//debug("  %08x\n", word);
 		I2C_WDATA(i2c) = word;
 		if (left <= 4)
 			break;
@@ -240,15 +240,15 @@ bool i2c_read(unsigned i2c, unsigned addr, unsigned reg,
 {
 	uint8_t *d = data;
 
-//printf("F0: 0x%08x\n", I2C_CFG1(0));
+//debug("F0: 0x%08x\n", I2C_CFG1(0));
 	i2c_setup(i2c, addr, reg, 1, len);
 	while (1) {
 		uint32_t word;
 
-//printf("F1: 0x%08x\n", I2C_CFG1(0));
+//debug("F1: 0x%08x\n", I2C_CFG1(0));
 		while (!I2C_GET(CFG1_RX_FIFO_CNT, I2C_CFG1(0)));
 		word = I2C_RDATA(i2c);
-//printf("D: 0x%08x\n", word);
+//debug("D: 0x%08x\n", word);
 
 		switch (len) {
 		default:

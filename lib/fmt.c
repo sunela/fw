@@ -18,6 +18,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
+#include <assert.h>
 
 #include "fmt.h"
 
@@ -79,10 +80,10 @@ static void string(void (*out)(void *user, char c), void *user, const char *s)
 									\
 		switch (longer) {					\
 		case 0:							\
-			_tmp = sn = va_arg(ap, signed int);		\
+			_tmp = va_arg(ap, signed int);		\
 			break;						\
 		case 1:							\
-			_tmp = sn = va_arg(ap, signed long int);	\
+			_tmp = va_arg(ap, signed long int);	\
 			break;						\
 		default:						\
 			_tmp = va_arg(ap, signed long long int);	\
@@ -102,15 +103,17 @@ bool vformat(void (*out)(void *user, char c), void *user,
 
 {
 	static bool nl = 1;
-	char buf[20]; /* @@@ ugly */
+	char buf[30]; /* @@@ ugly */
 	bool percent = 0;
-	uint8_t pad = 0; /* pacify gcc */
+	uint8_t pad = 0;	/* pacify gcc */
+	uint8_t pad_int = 0;	/* pacify gcc */
 	unsigned longer;
 	const char *s;
 	char ch;
 	void *p;
 	unsigned long long n;
 	int long long sn;
+	double dn;
 
 	while (*fmt) {
 		if (percent) {
@@ -135,6 +138,28 @@ bool vformat(void (*out)(void *user, char c), void *user,
 					n = sn;
 				}
 				goto decimal;
+			case 'f':
+				assert(!longer);
+				dn = va_arg(ap, double);
+				if (dn < 0) {
+					out(user, '-');		
+					dn = -dn;
+				}
+				print_number(buf, dn, pad_int, 10);
+				string(out, user, buf);
+				if (pad) {
+					double tmp;
+					unsigned i;
+
+					out(user, '.');		
+					tmp = dn - (unsigned) dn;
+					for (i = 0; i != pad; i++)
+						tmp *= 10;
+					print_number(buf, tmp, pad, 10);
+					string(out, user, buf);
+				}
+				pad = nl = 0;
+				break;
 			case 'l':
 				longer++;
 				fmt++;
@@ -144,29 +169,34 @@ bool vformat(void (*out)(void *user, char c), void *user,
 decimal:
 				print_number(buf, n, pad, 10);
 				string(out, user, buf);
-				nl = 0;
+				pad = nl = 0;
 				break;
 			case 'x':
 				n = GET_UINT;
 				print_number(buf, n, pad, 16);
 				string(out, user, buf);
-				nl = 0;
+				pad = nl = 0;
 				break;
 			case 'X':
 				n = GET_UINT;
 				do_print_number(buf, n, pad, 16,
 				    "0123456789ABCDEF");
 				string(out, user, buf);
-				nl = 0;
+				pad = nl = 0;
 				break;
 			case 'p':
 				p = va_arg(ap, void *);
 				print_number(buf, (unsigned long) p, 8, 16);
 				string(out, user, buf);
-				nl = 0;
+				pad = nl = 0;
 				break;
 			case '0'...'9':
 				pad = pad * 10 + *fmt - '0';
+				fmt++;
+				continue;
+			case '.':
+				pad_int = pad;
+				pad = 0;
 				fmt++;
 				continue;
 			case '%':

@@ -8,7 +8,7 @@
 CFLAGS += -g -Wall -Wextra -Wshadow -Wno-unused-parameter \
 	 -Wmissing-prototypes -Wmissing-declarations \
 	 -I$(shell pwd) -Isys -Ilib -Igfx -Iui -Ifont -Icrypto
-OBJS = ui.o demo.o timer.o debug.o rnd.o hmac.o hotp.o base32.o \
+OBJS = ui.o demo.o timer.o debug.o mbox.o rnd.o hmac.o hotp.o base32.o \
     fmt.o \
     basic.o poly.o long_text.o font.o text.o \
     ui_off.o ui_pin.o ui_fail.o ui_accounts.o ui_account.o ui_list.o \
@@ -27,6 +27,7 @@ vpath text.c gfx
 
 vpath timer.c sys
 vpath debug.c sys
+vpath mbox.c sys
 vpath rnd.c sys
 vpath hmac.c crypto
 vpath hotp.c crypto

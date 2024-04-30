@@ -57,6 +57,7 @@ void vdebug(const char *fmt, va_list ap)
 {
 	static uint64_t t_start;
 	static bool first = 1;
+	static bool nl = 1;
 	uint64_t t = time_us();
 
 	if (first) {
@@ -64,9 +65,11 @@ void vdebug(const char *fmt, va_list ap)
 		first = 0;
 	}
 	t -= t_start;
-	format(console_cb, NULL, "[%3llu.%03llu] ",
-	    (unsigned long long) t / 1000000, (unsigned long long) t % 1000000);
-	vformat(console_cb, NULL, fmt, ap);
+	if (nl)
+		format(console_cb, NULL, "[%3llu.%03llu] ",
+		    (unsigned long long) t / 1000000,
+		    (unsigned long long) t % 1000000);
+	nl = vformat(console_cb, NULL, fmt, ap);
 }
 
 

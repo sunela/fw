@@ -1,8 +1,8 @@
 /*
  * fmt/fmt.h - Number formatting
  *
- * Written 2013-2015 by Werner Almesberger
- * Copyright 2013-2015 Werner Almesberger
+ * Written 2013-2015, 2024 by Werner Almesberger
+ * Copyright 2013-2015, 2024 Werner Almesberger
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,16 +18,26 @@
 #define	FMT_H
 
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stdint.h>
 
 
 void add_char(void *user, char c);
 
+/*
+ * print_number returns the number of characters printed/output.
+ */
+
 uint8_t print_number(char *s, unsigned long long v, uint8_t len, uint8_t base);
 
-void vformat(void (*out)(void *user, char c), void *user,
+/*
+ * format and vformat return 1 if the last character printed/output was a
+ * newline, 0 if not.
+ */
+
+bool vformat(void (*out)(void *user, char c), void *user,
     const char *fmt, va_list ap);
-void format(void (*out)(void *user, char c), void *user, const char *fmt, ...)
+bool format(void (*out)(void *user, char c), void *user, const char *fmt, ...)
     __attribute__((format(printf, 3, 4)));
 
 #endif /* !FMT_H */

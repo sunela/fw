@@ -1,8 +1,8 @@
 /*
  * lib/fmt.c - Number formatting
  *
- * Written 2013-2015 by Werner Almesberger
- * Copyright 2013-2015 Werner Almesberger
+ * Written 2013-2015, 2024 by Werner Almesberger
+ * Copyright 2013-2015, 2024 Werner Almesberger
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,8 +15,9 @@
 
 
 #include <stdarg.h>
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
+#include <string.h>
 
 #include "fmt.h"
 
@@ -96,10 +97,11 @@ static void string(void (*out)(void *user, char c), void *user, const char *s)
 #define	GET_INT GET_xINT()
 
 
-void vformat(void (*out)(void *user, char c), void *user,
+bool vformat(void (*out)(void *user, char c), void *user,
     const char *fmt, va_list ap)
 
 {
+	static bool nl = 1;
 	char buf[20]; /* @@@ ugly */
 	bool percent = 0;
 	uint8_t pad = 0; /* pacify gcc */
@@ -116,10 +118,13 @@ void vformat(void (*out)(void *user, char c), void *user,
 			case 'c':
 				ch = va_arg(ap, int);
 				out(user, ch);
+				nl = ch == '\n';
 				break;
 			case 's':
 				s = va_arg(ap, const char *);
 				string(out, user, s);
+				if (*s)
+					nl = strchr(s, 0)[-1] == '\n';
 				break;
 			case 'd':
 				sn = GET_INT;
@@ -139,22 +144,26 @@ void vformat(void (*out)(void *user, char c), void *user,
 decimal:
 				print_number(buf, n, pad, 10);
 				string(out, user, buf);
+				nl = 0;
 				break;
 			case 'x':
 				n = GET_UINT;
 				print_number(buf, n, pad, 16);
 				string(out, user, buf);
+				nl = 0;
 				break;
 			case 'X':
 				n = GET_UINT;
 				do_print_number(buf, n, pad, 16,
 				    "0123456789ABCDEF");
 				string(out, user, buf);
+				nl = 0;
 				break;
 			case 'p':
 				p = va_arg(ap, void *);
 				print_number(buf, (unsigned long) p, 8, 16);
 				string(out, user, buf);
+				nl = 0;
 				break;
 			case '0'...'9':
 				pad = pad * 10 + *fmt - '0';
@@ -162,9 +171,11 @@ decimal:
 				continue;
 			case '%':
 				out(user, '%');
+				nl = 0;
 				break;
 			default:
 				string(out, user, "%?");
+				nl = 0;
 				break;
 			}
 			percent = 0;
@@ -174,21 +185,26 @@ decimal:
 				percent = 1;
 				pad = 0;
 				longer = 0;
+				nl = 0;
 				break;
 			default:
 				out(user, *fmt);
+				nl = *fmt == '\n';
 			}
 		}
 		fmt++;
 	}
+	return nl;
 }
 
 
-void format(void (*out)(void *user, char c), void *user, const char *fmt, ...)
+bool format(void (*out)(void *user, char c), void *user, const char *fmt, ...)
 {
 	va_list ap;
+	bool res;
 
 	va_start(ap, fmt);
-	vformat(out, user, fmt, ap);
+	res = vformat(out, user, fmt, ap);
 	va_end(ap);
+	return res;
 }

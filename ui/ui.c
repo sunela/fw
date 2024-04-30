@@ -125,7 +125,7 @@ void turn_off(void)
 
 static void toggle_on_off(void)
 {
-debug("toggle_on_off %u\n", is_on);
+	debug("toggle_on_off %u\n", is_on);
 	if (is_on)
 		turn_off();
 	else
@@ -137,7 +137,7 @@ void button_event(bool down)
 {
 	static unsigned debounce  = 0;
 
-	debug("button %u\n", down);
+	debug("button %u (%u < %u)\n", down, debounce, (unsigned) now);
 	if (now < debounce)
 		return;
 	if (!down) {
@@ -191,7 +191,7 @@ void touch_up_event(void)
 
 void ui_switch(const struct ui *ui)
 {
-debug("ui_switch\n");
+	debug("ui_switch (%p -> %p)\n", current_ui, ui);
 	if (current_ui) {
 		if (current_ui->close)
 			current_ui->close();
@@ -218,7 +218,7 @@ bool app_init(char *const *args, unsigned n_args)
 		display_on(1);
 		demo(args, n_args);
 	} else {
-//		ui_switch(&ui_off);
+		ui_switch(&ui_off);
 	}
 
 	update_display(&da);

@@ -11,6 +11,7 @@
 
 #include "debug.h"
 #include "demo.h"
+#include "ui.h"
 #include "mbox.h"
 #include "sdk-hal.h"
 
@@ -28,6 +29,11 @@ bool usb_query(uint8_t req, uint8_t **data, uint32_t *len)
 }
 
 
+/*
+ * @@@ If we return false (0) if there is a problem, and ep0_handler thus
+ * returns -1 to the USB stack, things seem to get messed up.
+ */
+
 bool usb_arrival(uint8_t req, const void *data, uint32_t len)
 {
 	unsigned i;
@@ -36,6 +42,9 @@ bool usb_arrival(uint8_t req, const void *data, uint32_t len)
 		debug("%02x%s", ((const uint8_t *) data)[i],
 			i < len - 1 ? " ": "\r\n");
 	switch (req) {
+	case SUNELA_TIME:
+		mbox_deposit(&time_mbox, data, len);
+		break;
 	case SUNELA_DEMO:
 		mbox_deposit(&demo_mbox, data, len);
 		break;

@@ -11,6 +11,7 @@
 #include <stdbool.h>
 
 #include "gfx.h"
+#include "mbox.h"
 
 
 #define	DEBOUNCE_MS	20
@@ -44,6 +45,8 @@ extern struct gfx_drawable da;
 
 extern unsigned pin_cooldown; /* time when the PIN cooldown ends */
 extern unsigned pin_attempts; /* number of failed PIN entries */
+
+extern struct mbox time_mbox;
 
 extern char ui_entry_input[MAX_INPUT_LEN + 1];
 extern bool (*ui_entry_validate)(const char *s);

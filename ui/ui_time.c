@@ -5,6 +5,18 @@
  * A copy of the license can be found in the file LICENSE.MIT
  */
 
+/*
+ * @@@ To do:
+ * - also support time setting from BTLE
+ * - we should only silently accept time changes that don't deviate from a
+ *   long-term projection by more than ~20 ppm. For larger changes, ask for
+ *   confirmation.
+ * - needs a way to enter time and date manually
+ * - needs a way to set the time zone. Should also take it from USB.
+ * - needs a way to exit
+ * - the Manual/USB entry is difficult to tap
+ */
+
 #include <stddef.h>
 #include <time.h>
 
@@ -38,6 +50,8 @@ enum sync_mode {
 	sm_usb,
 	sm_end		/* must be last */
 };
+
+struct mbox time_mbox = MBOX_INIT;
 
 static struct ui_list list;
 static struct ui_list_entry *entry_time, *entry_date, *entry_sync;
@@ -77,6 +91,17 @@ static void show_time(void)
 }
 
 
+/* --- Set time ----------------------------------------------------------- */
+
+
+static void set_time(uint64_t t)
+{
+	t_offset = t - time_us() / 1000000;
+	show_time();
+	update_display(&da);
+}
+
+
 /* --- Sync mode ----------------------------------------------------------- */
 
 
@@ -89,9 +114,16 @@ static void show_sync_mode(void)
 
 static void change_sync_mode(void)
 {
+	static uint64_t time_buf;
+
 	sync_mode = (sync_mode + 1) % sm_end;
 	show_sync_mode();
 	update_display(&da);
+
+	if (sync_mode == sm_usb)
+		mbox_enable_buf(&time_mbox, &time_buf, sizeof(time_buf));
+	else
+		mbox_disable(&time_mbox);
 }
 
 
@@ -127,6 +159,7 @@ static void ui_time_open(void)
 	ui_list_add(&list, "Time zone", "UTC", NULL);
 	entry_sync = ui_list_add(&list, "", NULL, NULL);
 	ui_list_end(&list);
+	show_time();
 	show_sync_mode();
 }
 
@@ -134,6 +167,8 @@ static void ui_time_open(void)
 static void ui_time_close(void)
 {
 	ui_list_destroy(&list);
+	if (sync_mode == sm_usb)
+		mbox_disable(&time_mbox);
 }
 
 
@@ -144,7 +179,10 @@ static void ui_time_tick(void)
 {
 	static int64_t last_tick = -1;
 	int64_t this_tick = time_us() / 1000000;
+	uint64_t new_time;
 
+	if (mbox_retrieve(&time_mbox, &new_time, sizeof(new_time)))
+		set_time(new_time);
 	if (last_tick == this_tick)
 		return;
 	last_tick = this_tick;

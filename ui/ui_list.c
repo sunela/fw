@@ -94,8 +94,8 @@ void ui_list_begin(struct ui_list *list, const struct ui_list_style *style)
 }
 
 
-void ui_list_add(struct ui_list *list, const char *first, const char *second,
-    void *user)
+struct ui_list_entry *ui_list_add(struct ui_list *list,
+    const char *first, const char *second, void *user)
 {
 	struct ui_list_entry *e;
 
@@ -107,6 +107,7 @@ void ui_list_add(struct ui_list *list, const char *first, const char *second,
 	e->next = NULL;
 	*list->anchor = e;
 	list->anchor = &e->next;
+	return e;
 }
 
 

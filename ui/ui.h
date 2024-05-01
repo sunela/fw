@@ -21,12 +21,32 @@
 #define	MAX_INPUT_LEN	32	/* for ui_entry */
 
 
+/*
+ * Possible touch sequences:
+ * down-top			small movements are suppressed
+ * down-long			small movements are suppressed
+ * down-cancel			ambiguous gesture
+ * down-(moving-...)-to
+ * down-(moving-...)-cancel	movement ended near beginning
+ */
+
+enum ui_swipe {
+	us_none	= 0,
+	us_left,
+	us_right,
+	us_up,
+	us_down
+};
+
 struct ui_events {
+	void (*touch_down)(unsigned x, unsigned y);
 	void (*touch_tap)(unsigned x, unsigned y);
 	void (*touch_long)(unsigned x, unsigned y);
-	void (*touch_from)(unsigned x, unsigned y);
-	void (*touch_moving)(unsigned x, unsigned y);
-	void (*touch_to)(unsigned x, unsigned y);
+	void (*touch_moving)(unsigned from_x, unsigned from_y,
+	    unsigned to_x, unsigned to_y);
+	void (*touch_to)(unsigned from_x, unsigned from_y,
+	    unsigned to_x, unsigned to_y, enum ui_swipe swipe);
+	void (*touch_cancel)(void);
 	void (*button_down)(void);
 	void (*button_up)(void);
 	void (*tick)(void);	/* called every ~10 ms */

@@ -155,10 +155,39 @@ void button_event(bool down)
 }
 
 
+/* --- Swipe classifier ---------------------------------------------------- */
+
+
+#define	SWIPE_R		(GFX_WIDTH / 3)	/* minimum swipe distance */
+#define	SWIPE_F		2		/* minimum directional dominance */
+
+
+static enum ui_swipe classify_swipe(unsigned ax, unsigned ay,
+    unsigned bx, unsigned by)
+{
+	int dx = (int) bx - (int) ax;
+	int dy = (int) by - (int) ay;
+
+	if (dx * dx + dy * dy < SWIPE_R * SWIPE_R)
+		return us_none;
+	if (dx * dx > SWIPE_F * SWIPE_F * dy * dy)
+		return dx < 0 ? us_left : us_right;
+	if (dy * dy > SWIPE_F * SWIPE_F * dx * dx)
+		return dy < 0 ? us_up : us_down;
+	return us_none;
+}
+
+
 /* --- Touch screen / mouse ------------------------------------------------ */
 
 
-//static unsigned touch_down_start = 0;
+#define	DRAG_R		10	/* minimum distance to indicate draggig */
+#define	LONG_MS		200
+
+static unsigned touch_start_ms = 0;
+static unsigned touch_start_x, touch_start_y;
+static unsigned touch_last_x, touch_last_y;
+static bool touch_dragging = 0;
 
 
 void touch_down_event(unsigned x, unsigned y)
@@ -166,17 +195,33 @@ void touch_down_event(unsigned x, unsigned y)
 	debug("mouse down %u %u\n", x, y);
 	if (x >= GFX_WIDTH || y >= GFX_HEIGHT)
 		return;
-	if (current_ui && current_ui->events && current_ui->events->touch_tap)
-		current_ui->events->touch_tap(x, y);
+	if (current_ui && current_ui->events && current_ui->events->touch_down)
+		current_ui->events->touch_down(x, y);
+	touch_start_ms = now;
+	touch_start_x = touch_last_x = x;
+	touch_start_y = touch_last_y = y;
+	touch_dragging = 0;
 	crosshair_show(x, y);
 }
 
 
 void touch_move_event(unsigned x, unsigned y)
 {
+	int dx = (int) x - (int) touch_start_x;
+	int dy = (int) y - (int) touch_start_y;
+
 //	debug("mouse move %u %u\n", x, y);
 	if (x >= GFX_WIDTH || y >= GFX_HEIGHT)
 		return;
+	touch_last_x = x;
+	touch_last_y = y;
+	if (dx * dx + dy * dy >= DRAG_R * DRAG_R) {
+		if (current_ui && current_ui->events &&
+		    current_ui->events->touch_moving)
+			current_ui->events->touch_moving(touch_start_x,
+			    touch_start_y, x, y);
+		touch_dragging = 1;
+	}
 	crosshair_show(x, y);
 }
 
@@ -184,6 +229,32 @@ void touch_move_event(unsigned x, unsigned y)
 void touch_up_event(void)
 {
 	debug("mouse up\n");
+	if (current_ui && current_ui->events) {
+		const struct ui_events *e = current_ui->events;
+		int dx = (int) touch_last_x - (int) touch_start_x;
+		int dy = (int) touch_last_y - (int) touch_start_y;
+
+		if (dx * dx + dy * dy >= DRAG_R * DRAG_R) {
+			if (e->touch_to)
+				e->touch_to(touch_start_x,
+				    touch_start_y, touch_last_x, touch_last_y,
+				    classify_swipe(touch_start_x, touch_start_y,
+				    touch_last_x, touch_last_y));
+		} else 	{
+			if (touch_dragging) {
+				if (e->touch_cancel)
+					e->touch_cancel();
+			} else if (now - touch_start_ms > LONG_MS) {
+				if (e->touch_long)
+					e->touch_long(touch_start_x,
+					    touch_start_y);
+			} else {
+				if (e->touch_tap)
+					e->touch_tap(touch_start_x,
+					    touch_start_y);
+			}
+		}
+	}
 	crosshair_remove();
 }
 

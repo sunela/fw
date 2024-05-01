@@ -193,6 +193,7 @@ void tick_event(void)
 {
 	if (current_ui && current_ui->events && current_ui->events->tick)
 		current_ui->events->tick();
+	poll_demo_mbox();
 }
 
 
@@ -215,19 +216,18 @@ void ui_switch(const struct ui *ui)
 /* --- Initialization ------------------------------------------------------ */
 
 
-bool app_init(char *const *args, unsigned n_args)
+bool app_init(char **args, unsigned n_args)
 {
 	gfx_da_init(&da, GFX_WIDTH, GFX_HEIGHT, fb);
 	gfx_clear(&da, gfx_hex(0));
 
 	timer_init(&idle_timer);
+	demo_init();
 
-	if (n_args) {
-		display_on(1);
+	if (n_args)
 		demo(args, n_args);
-	} else {
+	else
 		ui_switch(&ui_off);
-	}
 
 	update_display(&da);
 	return 1;

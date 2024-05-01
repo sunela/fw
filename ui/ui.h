@@ -55,6 +55,7 @@ extern const struct ui ui_cooldown;
 extern const struct ui ui_accounts;
 extern const struct ui ui_account;
 extern const struct ui ui_entry;
+extern const struct ui ui_time;
 
 void progress(void);
 void turn_off(void);

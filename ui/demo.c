@@ -9,10 +9,12 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
 #include <assert.h>
 
 #include "hal.h"
 #include "debug.h"
+#include "mbox.h"
 #include "gfx.h"
 #include "long_text.h"
 #include "text.h"
@@ -27,6 +29,9 @@
 #ifndef SIM
 #include "st7789.h"
 #endif /* !SIM */
+
+
+struct mbox demo_mbox;
 
 
 /* Simple rectangles and colors. */
@@ -522,11 +527,12 @@ static void help(const struct demo *d)
 }
 
 
-void demo(char *const *args, unsigned n_args)
+void demo(char **args, unsigned n_args)
 {
 	unsigned n, i;
 	char *end;
 
+	display_on(1);
 	n = strtoul(args[0], &end, 0);
 	if (*end)
 		n = 0;
@@ -546,3 +552,41 @@ void demo(char *const *args, unsigned n_args)
 			help(demos + i);
 	exit(1);
 }
+
+
+void poll_demo_mbox(void)
+{
+	char buf[256];
+	size_t got;
+	char *args[10];
+	unsigned n_args = 0;
+	char *p = buf;
+
+	got = mbox_retrieve(&demo_mbox, buf, sizeof(buf));
+	if (!got)
+		return;
+	if (buf[got - 1]) {
+		debug("poll_demo_mbox: no NUL\n");
+		return;
+	}
+	while (p != buf + got) {
+		if (n_args == sizeof(args) / sizeof(*args)) {
+			debug("poll_demo_mbox: too many arguments\n");
+			return;
+		}
+		args[n_args++] = p;
+		p = strchr(p, 0) + 1;
+	}
+	assert(n_args);
+	demo(args, n_args);
+}
+
+
+void demo_init(void)
+{
+	static char demo_buf[256];
+
+        mbox_init(&demo_mbox, demo_buf, sizeof(demo_buf));
+	mbox_enable(&demo_mbox);
+}
+

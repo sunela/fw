@@ -40,6 +40,6 @@ uint64_t time_us(void);
 void update_display(struct gfx_drawable *da);
 void display_on(bool on);
 
-bool app_init(char *const *args, unsigned n_args);
+bool app_init(char **args, unsigned n_args);
 
 #endif /* !HAL_H */

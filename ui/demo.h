@@ -8,6 +8,14 @@
 #ifndef DEMO_H
 #define	DEMO_H
 
-void demo(char *const *args, unsigned n_args);
+#include "mbox.h"
+
+
+extern struct mbox demo_mbox;
+
+
+void demo(char **args, unsigned n_args);
+void poll_demo_mbox(void);
+void demo_init(void);
 
 #endif /* !DEMO_H */

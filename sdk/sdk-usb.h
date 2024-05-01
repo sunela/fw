@@ -42,6 +42,7 @@
 enum sunela_requests {
 	SUNELA_TIME	= 1,
 	SUNELA_QUERY	= 2,
+	SUNELA_DEMO	= 3,
 };
 
 #endif /* !USB_H */

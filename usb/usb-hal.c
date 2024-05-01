@@ -10,7 +10,11 @@
 #include <string.h>
 
 #include "debug.h"
+#include "demo.h"
+#include "mbox.h"
 #include "sdk-hal.h"
+
+#include "../sdk/sdk-usb.h"
 
 
 bool usb_query(uint8_t req, uint8_t **data, uint32_t *len)
@@ -31,5 +35,12 @@ bool usb_arrival(uint8_t req, const void *data, uint32_t len)
 	for (i = 0; i != len; i++)
 		debug("%02x%s", ((const uint8_t *) data)[i],
 			i < len - 1 ? " ": "\r\n");
+	switch (req) {
+	case SUNELA_DEMO:
+		mbox_deposit(&demo_mbox, data, len);
+		break;
+	default:
+		break;
+	}
 	return 1;
 }

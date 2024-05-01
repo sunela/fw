@@ -52,13 +52,36 @@ static void query(usb_dev_handle *dev)
 }
 
 
+static void demo(usb_dev_handle *dev, char *const *argv, int args)
+{
+	char buf[1024] = "";
+	unsigned n = 0;
+	int i;
+
+	for (i = 0; i != args; i++) {
+		strcpy(buf+ n, argv[i]);
+		n += strlen(argv[i]) + 1;
+	}
+	int res;
+
+	res = usb_control_msg(dev, TO_DEV, SUNELA_DEMO, 0, 0, buf, n,
+	    TIMEOUT_MS);
+	if (res < 0) {
+		fprintf(stderr, "SUNELA_DEMO: %d\n", res);
+		exit(1);
+	}
+}
+
+
 static void usage(const char *name)
 {
 	fprintf(stderr,
 "usage: %s [-d vid:pid] [command [args ...]]\n\n"
 "Commands:\n"
 "  time\n"
-"  query\n", name);
+"  query\n"
+"  demo name [args ...]\n"
+    , name);
 	exit(1);
 }
 
@@ -66,7 +89,7 @@ static void usage(const char *name)
 int main(int argc, char *const *argv)
 {
 	usb_dev_handle *dev;
-	int c;
+	int c, n_args;
 
 	while ((c = getopt(argc, argv, "")) != EOF)
 		switch (c) {
@@ -85,10 +108,13 @@ int main(int argc, char *const *argv)
 		exit(1);
 	}
 
-	if (argc == 2 && !strcmp(argv[optind], "time"))
+	n_args = argc - optind;
+	if (n_args == 1 && !strcmp(argv[optind], "time"))
 		set_time(dev);
-	else if (argc == 2 && !strcmp(argv[optind], "query"))
+	else if (n_args == 1 && !strcmp(argv[optind], "query"))
 		query(dev);
+	else if (n_args > 1 && !strcmp(argv[optind], "demo"))
+		demo(dev, argv + optind + 1, n_args - 1);
 	else
 		usage(*argv);
 	return 0;

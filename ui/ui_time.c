@@ -18,7 +18,7 @@
 
 #define	FONT_TOP		mono24
 
-#define	TOP_H			30
+#define	TOP_H			31
 #define	TOP_LINE_WIDTH		2
 #define	LIST_Y0			(TOP_H + TOP_LINE_WIDTH + 1)
 
@@ -30,6 +30,7 @@ static const struct ui_list_style style = {
 	y1:	GFX_HEIGHT - 1,
 	fg:	{ GFX_WHITE, GFX_WHITE },
 	bg:	{ GFX_BLACK, GFX_HEX(0x202020) },
+	opad:	3,
 };
 
 enum sync_mode {
@@ -123,7 +124,7 @@ static void ui_time_open(void)
 	ui_list_begin(&list, &style);
 	entry_time = ui_list_add(&list, "Time", "--:--:--", NULL);
 	entry_date = ui_list_add(&list, "Date", "****-**-**", NULL);
-	ui_list_add(&list, "Time Zone", "UTC", NULL);
+	ui_list_add(&list, "Time zone", "UTC", NULL);
 	entry_sync = ui_list_add(&list, "", NULL, NULL);
 	ui_list_end(&list);
 	show_sync_mode();

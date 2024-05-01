@@ -12,7 +12,6 @@
 #include "text.h"
 #include "ui_list.h"
 #include "accounts.h"
-#include "ui_account.h"
 #include "ui.h"
 
 
@@ -45,15 +44,14 @@ static void ui_accounts_tap(unsigned x, unsigned y)
 	entry = ui_list_pick(&list, x, y);
 	if (!entry)
 		return;
-	selected_account = ui_list_user(entry);
-	ui_switch(&ui_account);
+	ui_call(&ui_account, ui_list_user(entry));
 }
 
 
 /* --- Open/close ---------------------------------------------------------- */
 
 
-static void ui_accounts_open(void)
+static void ui_accounts_open(void *params)
 {
 	unsigned i;
 

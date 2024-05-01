@@ -253,7 +253,7 @@ static bool demo_entry(char *const *args, unsigned n_args)
 		return 0;
 
 	ui_entry_validate = demo_entry_validate;
-	ui_switch(&ui_entry);
+	ui_switch(&ui_entry, NULL);
 
 	return 1;
 }
@@ -419,7 +419,7 @@ static bool demo_acc(char *const *args, unsigned n_args)
 	if (n_args)
 		return 0;
 
-	ui_switch(&ui_accounts);
+	ui_switch(&ui_accounts, NULL);
 
 	return 1;
 }
@@ -498,7 +498,7 @@ static bool demo_time(char *const *args, unsigned n_args)
 	if (n_args)
 		return 0;
 
-	ui_switch(&ui_time);
+	ui_switch(&ui_time, NULL);
 
 	return 1;
 }

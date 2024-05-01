@@ -36,7 +36,7 @@ static void show_cooldown(void *user)
 	char *t = buf + sizeof(buf);
 
 	if (pin_cooldown < now) {
-		ui_switch(&ui_pin);
+		ui_switch(&ui_pin, NULL);
 		return;
 	}
 	assert(s < 10000);
@@ -67,13 +67,13 @@ static void end_hold(void *user)
 /* --- Open/close ---------------------------------------------------------- */
 
 
-static void ui_fail_open(void)
+static void ui_fail_open(void *params)
 {
 	timer_init(&t_hold);
 	timer_init(&t_tick);
 	pin_attempts++;
 	if (pin_attempts < PIN_FREE_ATTEMPTS) {
-		ui_switch(&ui_pin);
+		ui_switch(&ui_pin, NULL);
 		return;
 	}
 	timer_set(&t_hold, HOLD_MS, end_hold, NULL);
@@ -82,7 +82,7 @@ static void ui_fail_open(void)
 }
 
 
-static void ui_cooldown_open(void)
+static void ui_cooldown_open(void *params)
 {
 	timer_init(&t_hold);
 	timer_init(&t_tick);

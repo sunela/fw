@@ -356,7 +356,7 @@ static void ui_entry_tap(unsigned x, unsigned y)
 			return;
 		}
 		if (!*ui_entry_input) {
-			ui_switch(&ui_accounts);
+			ui_return();
 			return;
 		}
 		timer_flush(&t_button);
@@ -379,7 +379,7 @@ static void ui_entry_tap(unsigned x, unsigned y)
 		if (second || !*ui_entry_input)
 			return;
 		if (valid())
-			ui_switch(&ui_accounts);
+			ui_return();
 		return;
 	}
 	if (end - ui_entry_input == MAX_INPUT_LEN)
@@ -409,7 +409,7 @@ static void ui_entry_tap(unsigned x, unsigned y)
 /* --- Open/close ---------------------------------------------------------- */
 
 
-static void ui_entry_open(void)
+static void ui_entry_open(void *params)
 {
 	struct text_query q;
 

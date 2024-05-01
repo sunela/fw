@@ -9,7 +9,7 @@
 #include "ui.h"
 
 
-static void ui_off_open(void)
+static void ui_off_open(void *params)
 {
 	display_on(0);
 }

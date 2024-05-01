@@ -33,8 +33,9 @@ struct ui_events {
 };
 
 struct ui {
-	void (*open)(void);
+	void (*open)(void *params);
 	void (*close)(void);
+	void (*resume)(void);
 	const struct ui_events *events;
 };
 
@@ -63,6 +64,9 @@ void turn_off(void);
 
 void show_citrine(void);
 
-void ui_switch(const struct ui *ui);
+void ui_switch(const struct ui *ui, void *params);
+void ui_call(const struct ui *ui, void *params);
+void ui_return(void);
+void ui_empty_stack(void);
 
 #endif /* !UI_H */

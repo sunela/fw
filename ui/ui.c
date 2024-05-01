@@ -7,6 +7,7 @@
 
 #include <stddef.h>
 #include <stdbool.h>
+#include <assert.h>
 
 #include "debug.h"
 #include "hal.h"
@@ -107,9 +108,9 @@ static void turn_on(void)
 	pin_shuffle_pad();
 	progress();
 	if (now < pin_cooldown)
-		ui_switch(&ui_cooldown);
+		ui_switch(&ui_cooldown, NULL);
 	else
-		ui_switch(&ui_pin);
+		ui_switch(&ui_pin, NULL);
 }
 
 
@@ -119,7 +120,8 @@ void turn_off(void)
 		return;
 	is_on = 0;
 	// @@@ hal_...
-	ui_switch(&ui_off);
+	ui_empty_stack();
+	ui_switch(&ui_off, NULL);
 }
 
 
@@ -200,7 +202,19 @@ void tick_event(void)
 /* --- UI page selection --------------------------------------------------- */
 
 
-void ui_switch(const struct ui *ui)
+#define	UI_STACK_SIZE	5
+
+
+struct stack {
+	const struct ui *ui;
+};
+
+
+static struct stack stack[UI_STACK_SIZE];
+static unsigned sp = 0;
+
+
+void ui_switch(const struct ui *ui, void *params)
 {
 	debug("ui_switch (%p -> %p)\n", current_ui, ui);
 	if (current_ui && current_ui->close)
@@ -208,8 +222,54 @@ void ui_switch(const struct ui *ui)
 	gfx_clear(&da, GFX_BLACK);
 	current_ui = ui;
 	if (ui->open)
-		ui->open();
+		ui->open(params);
 	update_display(&da);
+}
+
+
+void ui_call(const struct ui *ui, void *params)
+{
+	debug("ui_call(%p -> %p)\n", current_ui, ui);
+	assert(sp != UI_STACK_SIZE);
+	stack[sp].ui = current_ui;
+	sp++;
+	gfx_clear(&da, GFX_BLACK);
+	current_ui = ui;
+	if (ui->open)
+		ui->open(params);
+	update_display(&da);
+}
+
+
+void ui_return(void)
+{
+	assert(sp);
+	if (current_ui && current_ui->close)
+		current_ui->close();
+	gfx_clear(&da, GFX_BLACK);
+	sp--;
+	current_ui = stack[sp].ui;
+	assert(current_ui->resume);
+	current_ui->resume();
+	update_display(&da);
+}
+
+
+void ui_empty_stack(void)
+{
+	if (!sp)
+		return;
+	while (sp) {
+		const struct ui *ui;
+
+		sp--;
+		ui = stack[sp].ui;
+		if (ui->close)
+			ui->close();
+		current_ui = ui;
+	}
+	assert(current_ui->resume);
+	current_ui->resume();
 }
 
 
@@ -227,7 +287,7 @@ bool app_init(char **args, unsigned n_args)
 	if (n_args)
 		demo(args, n_args);
 	else
-		ui_switch(&ui_off);
+		ui_switch(&ui_off, NULL);
 
 	update_display(&da);
 	return 1;

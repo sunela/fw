@@ -196,9 +196,9 @@ debug("%08lx\n", (unsigned long) pin);
 		if (pin == DUMMY_PIN) {
 			pin_attempts = 0;
 			pin_cooldown = 0;
-			ui_switch(&ui_accounts);
+			ui_switch(&ui_accounts, NULL);
 		} else {
-			ui_switch(&ui_fail);
+			ui_switch(&ui_fail, NULL);
 		}
 		return;
 	}
@@ -251,7 +251,7 @@ void pin_shuffle_pad(void)
 /* --- Open/close ---------------------------------------------------------- */
 
 
-static void ui_pin_open(void)
+static void ui_pin_open(void *params)
 {
 	unsigned row, col;
 

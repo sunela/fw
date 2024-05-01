@@ -15,7 +15,6 @@
 #include "gfx.h"
 #include "text.h"
 #include "accounts.h"
-#include "ui_account.h"
 #include "ui_list.h"
 #include "ui.h"
 
@@ -29,7 +28,7 @@
 #define	HOLD_MS	(5 * 1000)
 
 
-struct account *selected_account = NULL;
+static struct account *selected_account = NULL;
 
 static const struct ui_list_style style = {
 	y0:	LIST_Y0,
@@ -73,9 +72,9 @@ static void ui_account_tap(unsigned x, unsigned y)
 /* --- Open/close ---------------------------------------------------------- */
 
 
-static void ui_account_open(void)
+static void ui_account_open(void *params)
 {
-	struct account *a = selected_account;
+	struct account *a = selected_account = params;
 
 	gfx_rect_xy(&da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH, GFX_WHITE);
 	text_text(&da, GFX_WIDTH / 2, TOP_H / 2, a->name, &FONT_TOP,

@@ -145,7 +145,7 @@ static void ui_time_tap(unsigned x, unsigned y)
 /* --- Open/close ---------------------------------------------------------- */
 
 
-static void ui_time_open(void)
+static void ui_time_open(void *params)
 {
 	gfx_rect_xy(&da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH, GFX_WHITE);
 	text_text(&da, GFX_WIDTH / 2, TOP_H / 2, "Set Time",

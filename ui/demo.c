@@ -491,6 +491,19 @@ static bool demo_align(char *const *args, unsigned n_args)
 }
 
 
+/* Set the time */
+
+static bool demo_time(char *const *args, unsigned n_args)
+{
+	if (n_args)
+		return 0;
+
+	ui_switch(&ui_time);
+
+	return 1;
+}
+
+
 /* --- Initialization ------------------------------------------------------ */
 
 
@@ -518,6 +531,7 @@ static const struct demo {
 							// 14
 	{ "acc",	demo_acc,	"" },		// 15
 	{ "align",	demo_align,	"text x-align y-align" },
+	{ "time",	demo_time,	"" },
 };
 
 

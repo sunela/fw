@@ -69,6 +69,14 @@ static void ui_account_tap(unsigned x, unsigned y)
 }
 
 
+static void ui_account_to(unsigned from_x, unsigned from_y,
+    unsigned to_x, unsigned to_y, enum ui_swipe swipe)
+{
+	if (swipe == us_left)
+		ui_return();
+}
+
+
 /* --- Open/close ---------------------------------------------------------- */
 
 
@@ -109,6 +117,7 @@ static void ui_account_close(void)
 
 static const struct ui_events ui_account_events = {
 	.touch_tap	= ui_account_tap,
+	.touch_to	= ui_account_to,
 };
 
 const struct ui ui_account = {

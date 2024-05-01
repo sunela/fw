@@ -72,6 +72,17 @@ static void ui_accounts_close(void)
 }
 
 
+static void ui_accounts_resume(void)
+{
+	/*
+	 * @@@ once we have vertical scrolling, we'll also need to restore the
+	 * position.
+	 */
+	ui_accounts_close();
+	ui_accounts_open(NULL);
+}
+
+
 /* --- Interface ----------------------------------------------------------- */
 
 
@@ -82,5 +93,6 @@ static const struct ui_events ui_accounts_events = {
 const struct ui ui_accounts = {
 	.open = ui_accounts_open,
 	.close = ui_accounts_close,
+	.resume = ui_accounts_resume,
 	.events = &ui_accounts_events,
 };

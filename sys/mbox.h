@@ -32,6 +32,11 @@ struct mbox {
 };
 
 
+#define	MBOX_INIT	{ .enabled = 0, .buf = NULL, .size = 0, .length = 0 }
+#define	MBOX_INIT_BUF(buf, size) \
+	{ .enabled = 0, .buf = (buf), .size = (size), .length = 0 }
+
+
 /*
  * mbox_deposit and mbox_retrieve both return 0 if no operation was performed.
  * None of the functions block or loop. Messages must not exceed the maximum
@@ -51,6 +56,7 @@ bool mbox_deposit(volatile struct mbox *mbox, const void *data, size_t length);
 size_t mbox_retrieve(volatile struct mbox *mbox, void *data, size_t size);
 
 void mbox_enable(volatile struct mbox *mbox);
+void mbox_enable_buf(volatile struct mbox *mbox, void *buf, size_t size);
 void mbox_disable(volatile struct mbox *mbox);
 
 void mbox_init(struct mbox *mbox, void *buf, size_t size);

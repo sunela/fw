@@ -55,6 +55,16 @@ void mbox_enable(volatile struct mbox *mbox)
 }
 
 
+void mbox_enable_buf(volatile struct mbox *mbox, void *buf, size_t size)
+{
+	assert(!mbox->enabled);
+	mbox->buf = buf;
+	mbox->size = size;
+	mbox->length = 0;
+	mbox->enabled = 1;
+}
+
+
 void mbox_disable(volatile struct mbox *mbox)
 {
 	assert(mbox->enabled);

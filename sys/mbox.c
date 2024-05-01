@@ -14,15 +14,6 @@
 #include "mbox.h"
 
 
-struct mbox {
-	bool enabled;
-	void *buf;
-	size_t size;		/* buffer size */
-	uint32_t length;	/* receive only if length > 0 */
-		/* Note: read/write of "length" must be atomic. */
-};
-
-
 bool mbox_deposit(volatile struct mbox *mbox, const void *data, size_t length)
 {
 	if (!mbox->enabled)
@@ -52,7 +43,7 @@ size_t mbox_retrieve(volatile struct mbox *mbox, void *data, size_t size)
 		assert(mbox->length == len);
 	}
 	mbox->length = 0;
-	return 1;
+	return len;
 }
 
 

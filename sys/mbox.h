@@ -19,10 +19,17 @@
  */
 
 #include <stdbool.h>
+#include <stdint.h>
 #include <sys/types.h>
 
 
-struct mbox;
+struct mbox {
+	bool enabled;
+	void *buf;
+	size_t size;		/* buffer size */
+	uint32_t length;	/* receive only if length > 0 */
+		/* Note: read/write of "length" must be atomic. */
+};
 
 
 /*

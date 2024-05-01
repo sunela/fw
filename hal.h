@@ -30,6 +30,7 @@ void button_event(bool down);
 void touch_down_event(unsigned x, unsigned y);
 void touch_move_event(unsigned x, unsigned y);
 void touch_up_event(void);
+void tick_event(void);	/* call every ~10 ms */
 
 void mdelay(unsigned ms);
 void msleep(unsigned ms);

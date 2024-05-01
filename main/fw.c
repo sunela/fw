@@ -95,6 +95,8 @@ static void event_loop(void)
 		last_touch = on;
 
 		timer_tick(uptime);
+		if (!(uptime & 7))
+			tick_event();
 		msleep(1);
 		uptime++;
 	}

@@ -186,16 +186,24 @@ void touch_up_event(void)
 }
 
 
+/* --- Timer ticks --------------------------------------------------------- */
+
+
+void tick_event(void)
+{
+	if (current_ui && current_ui->events && current_ui->events->tick)
+		current_ui->events->tick();
+}
+
+
 /* --- UI page selection --------------------------------------------------- */
 
 
 void ui_switch(const struct ui *ui)
 {
 	debug("ui_switch (%p -> %p)\n", current_ui, ui);
-	if (current_ui) {
-		if (current_ui->close)
-			current_ui->close();
-	}
+	if (current_ui && current_ui->close)
+		current_ui->close();
 	gfx_clear(&da, GFX_BLACK);
 	current_ui = ui;
 	if (ui->open)

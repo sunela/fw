@@ -30,6 +30,7 @@ struct ui_events {
 	void (*touch_to)(unsigned x, unsigned y);
 	void (*button_down)(void);
 	void (*button_up)(void);
+	void (*tick)(void);	/* called every ~10 ms */
 };
 
 struct ui {

@@ -211,6 +211,7 @@ static void event_loop(void)
 	while (!quit) {
 		if (!process_events()) {
 			timer_tick(uptime);
+			tick_event();
 			msleep(10);
 			uptime += 10;
 		}

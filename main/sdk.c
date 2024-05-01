@@ -46,11 +46,15 @@ static void process_touch(void)
 	else
 		debug("\tUP\n");
 	if (t.events && e->action != cst816_up) {
-		if (down)
-			return;
+		unsigned x = GFX_WIDTH - 1 - e->x;
+		unsigned y = GFX_HEIGHT - 1 - e->y;
+
 		if (e->x >= GFX_WIDTH || e->y >= GFX_HEIGHT)
 			return;
-		touch_down_event(GFX_WIDTH - 1 - e->x, GFX_HEIGHT - 1 - e->y);
+		if (down)
+			 touch_move_event(x, y);
+		else
+			touch_down_event(x, y);
 		down = 1;
 	} else {
 		if (down)

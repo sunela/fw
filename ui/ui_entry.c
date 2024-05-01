@@ -131,7 +131,7 @@ static struct timer t_button;
 static bool valid(void)
 {
 	return !*ui_entry_input || !*ui_entry_validate ||
-            ui_entry_validate(ui_entry_input);
+	    ui_entry_validate(ui_entry_input);
 }
 
 
@@ -161,8 +161,8 @@ static void draw_input(void)
 	assert(bb.w <= MAX_INPUT_LEN * input_max_height);
 	assert(bb.h <= INPUT_PAD_TOP + input_max_height + INPUT_PAD_BOTTOM);
 	gfx_da_init(&buf, bb.w, bb.h, fb);
-        gfx_clear(&buf, valid() ? INPUT_VALID_BG : INPUT_INVALID_BG);
-        text_text(&buf, 0, 0, ui_entry_input, &INPUT_FONT,
+	gfx_clear(&buf, valid() ? INPUT_VALID_BG : INPUT_INVALID_BG);
+	text_text(&buf, 0, 0, ui_entry_input, &INPUT_FONT,
 	    GFX_LEFT, GFX_TOP | GFX_MAX, GFX_WHITE);
 	if ((GFX_WIDTH + bb.w) / 2 < INPUT_MAX_X)
 		gfx_copy(&da, (GFX_WIDTH - bb.w) / 2, INPUT_PAD_TOP, &buf, 0, 0,
@@ -219,7 +219,7 @@ static void first_label(unsigned x, unsigned y, const char *s)
 static void first_button(unsigned col, unsigned row, gfx_color bg)
 {
 	unsigned x = BUTTON_X0 + BUTTON_X_SPACING * col;
-        unsigned y = BUTTON_Y1 - BUTTON_Y_SPACING * row;
+	unsigned y = BUTTON_Y1 - BUTTON_Y_SPACING * row;
 
 	if (row > 0) {
 		base(x, y, bg);
@@ -281,7 +281,7 @@ static void second_button(const char *map, unsigned col, unsigned row,
     gfx_color bg)
 {
 	unsigned x = BUTTON_X0 + BUTTON_X_SPACING * col;
-        unsigned y = BUTTON_Y1 - BUTTON_Y_SPACING * row;
+	unsigned y = BUTTON_Y1 - BUTTON_Y_SPACING * row;
 	size_t len = strlen(map);
 	unsigned n = 1 + col + (3 - row) * 3;
 

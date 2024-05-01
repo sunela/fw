@@ -201,6 +201,6 @@ static const struct ui_events ui_time_events = {
 
 const struct ui ui_time = {
 	.open = ui_time_open,
-        .close = ui_time_close,
+	.close = ui_time_close,
 	.events = &ui_time_events,
 };

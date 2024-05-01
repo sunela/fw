@@ -33,7 +33,7 @@
 #define	BUTTON_BOTTOM_OFFSET	3
 #define	BUTTON_R		25
 #define	BUTTON_X_GAP		20
-#define	BUTTON_Y_GAP		10	
+#define	BUTTON_Y_GAP		10
 #define	BUTTON_X_SPACING	(2 * BUTTON_R + BUTTON_X_GAP)
 #define	BUTTON_Y_SPACING	(2 * BUTTON_R + BUTTON_Y_GAP)
 #define	BUTTON_X0		(GFX_WIDTH / 2 - BUTTON_X_SPACING)
@@ -89,8 +89,8 @@ static void draw_indicators(unsigned n)
 static void clear_button(unsigned col, unsigned row)
 {
 	unsigned x = BUTTON_X0 + BUTTON_X_SPACING * col;
-        unsigned y = BUTTON_Y1 - BUTTON_Y_SPACING * row;
-	
+	unsigned y = BUTTON_Y1 - BUTTON_Y_SPACING * row;
+
 	gfx_rect_xy(&da, x - BUTTON_R, y - BUTTON_R,
 	    2 * BUTTON_R + 1, 2 * BUTTON_R + 1 , GFX_BLACK);
 }
@@ -114,7 +114,7 @@ static void pin_digit(unsigned x, unsigned y, uint8_t digit)
 static void pin_button(unsigned col, unsigned row, gfx_color bg)
 {
 	unsigned x = BUTTON_X0 + BUTTON_X_SPACING * col;
-        unsigned y = BUTTON_Y1 - BUTTON_Y_SPACING * row;
+	unsigned y = BUTTON_Y1 - BUTTON_Y_SPACING * row;
 
 	gfx_disc(&da, x, y, BUTTON_R, bg);
 	if (row > 0) {

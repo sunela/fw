@@ -87,7 +87,7 @@ void gfx_rect(struct gfx_drawable *da, const struct gfx_rect *r,
     gfx_color color);
 void gfx_rect_xy(struct gfx_drawable *da, unsigned x, unsigned y, unsigned w,
     unsigned h, gfx_color color);
-void gfx_disc(struct gfx_drawable *da, unsigned x, unsigned y, unsigned r, 
+void gfx_disc(struct gfx_drawable *da, unsigned x, unsigned y, unsigned r,
     gfx_color color);
 void gfx_clear(struct gfx_drawable *da, gfx_color bg);
 

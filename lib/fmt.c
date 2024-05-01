@@ -147,7 +147,7 @@ bool vformat(void (*out)(void *user, char c), void *user,
 				assert(!longer);
 				dn = va_arg(ap, double);
 				if (dn < 0) {
-					out(user, '-');		
+					out(user, '-');
 					dn = -dn;
 				}
 				print_number(buf, dn, pad_int, 10);
@@ -156,7 +156,7 @@ bool vformat(void (*out)(void *user, char c), void *user,
 					double tmp;
 					unsigned i;
 
-					out(user, '.');		
+					out(user, '.');
 					tmp = dn - (unsigned) dn;
 					for (i = 0; i != pad; i++)
 						tmp *= 10;

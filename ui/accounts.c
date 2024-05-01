@@ -11,8 +11,8 @@
 static struct account dummy_accounts[] = {
 	{
 		name:	"demo",
-		user: 	"user@mail.com",
-		pw: 	"Geheim",
+		user:	"user@mail.com",
+		pw:	"Geheim",
 		token:	{ 0 }
 	},
 	{

@@ -70,7 +70,7 @@ static void hline(unsigned x0, unsigned x1, unsigned y)
 		.x = x0 * zoom,
 		.y = y * zoom,
 		.w = (x1 - x0 + 1) * zoom,
-		.h = zoom 
+		.h = zoom
 	};
 
 	SDL_FillRect(surf, &rect, SDL_MapRGB(surf->format, 30, 30, 30));
@@ -113,7 +113,7 @@ debug("update\n");
 				.x = x * zoom,
 				.y = y * zoom,
 				.w = zoom,
-				.h = zoom 
+				.h = zoom
 			};
 
 			SDL_FillRect(surf, &rect, SDL_MapRGB(surf->format,
@@ -259,14 +259,14 @@ static void init_sdl(void)
 	}
 
 	tex = SDL_CreateTexture(rend, SDL_PIXELFORMAT_RGB565,
-            SDL_TEXTUREACCESS_STREAMING, surf->w, surf->h);
+	    SDL_TEXTUREACCESS_STREAMING, surf->w, surf->h);
 	if (!tex) {
 		fprintf(stderr, "SDL_CreateTexture: %s\n",
 		    SDL_GetError());
 		exit(1);
 	}
 }
-	
+
 
 /* --- Command-line processing --------------------------------------------- */
 

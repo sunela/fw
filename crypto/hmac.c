@@ -21,7 +21,7 @@
 #include "hmac.h"
 
 
-void hmac_sha1(uint8_t res[HMAC_SHA1_BYTES], const void *k, size_t k_size, 
+void hmac_sha1(uint8_t res[HMAC_SHA1_BYTES], const void *k, size_t k_size,
     const void *c, size_t c_size)
 {
 	uint8_t key[SHA1_BLOCK_BYTES];

@@ -93,7 +93,7 @@ void gfx_clear(struct gfx_drawable *da, gfx_color bg)
 
 /* https://stackoverflow.com/a/1237519/8179289 */
 
-void gfx_disc(struct gfx_drawable *da, unsigned x, unsigned y, unsigned r, 
+void gfx_disc(struct gfx_drawable *da, unsigned x, unsigned y, unsigned r,
     gfx_color color)
 {
 	gfx_color *p = da->fb + (y - r) * da->w + x - r;
@@ -117,7 +117,7 @@ void gfx_disc(struct gfx_drawable *da, unsigned x, unsigned y, unsigned r,
 
 
 void gfx_copy(struct gfx_drawable *to, unsigned xt, unsigned yt,
-    const struct gfx_drawable *from, unsigned xf, unsigned yf, 
+    const struct gfx_drawable *from, unsigned xf, unsigned yf,
     unsigned w, unsigned h, int transparent_color)
 {
 	const gfx_color *src = from->fb + yf * from->w + xf;

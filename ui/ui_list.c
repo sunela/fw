@@ -38,7 +38,7 @@ struct ui_list_entry {
 static unsigned opad(const struct ui_list *list, const struct ui_list_entry *e)
 {
 	const struct ui_list_style *s = list->style;
-	
+
 	return s->opad ? s->opad : DEFAULT_OPAD;
 }
 
@@ -46,7 +46,7 @@ static unsigned opad(const struct ui_list *list, const struct ui_list_entry *e)
 static unsigned ipad(const struct ui_list *list, const struct ui_list_entry *e)
 {
 	const struct ui_list_style *s = list->style;
-	
+
 	return s->ipad ? s->ipad : DEFAULT_IPAD;
 }
 

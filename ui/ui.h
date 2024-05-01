@@ -18,8 +18,6 @@
 
 #define	IDLE_S		5	/* @@@ make dynamic */
 
-//#define	LONG_MS		
-
 #define	MAX_INPUT_LEN	32	/* for ui_entry */
 
 

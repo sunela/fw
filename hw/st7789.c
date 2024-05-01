@@ -31,8 +31,8 @@ static unsigned	st7789_height;
 
 
 #define	ST7789_SLPOUT	0x11	// Sleep Out
-#define	ST7789_PTLON	0x12	// Partial Display Mode On 
-#define	ST7789_NORON	0x13	// Normal Display Mode On 
+#define	ST7789_PTLON	0x12	// Partial Display Mode On
+#define	ST7789_NORON	0x13	// Normal Display Mode On
 #define	ST7789_INVON	0x21	// Display Inversion On
 #define	ST7789_DISPON	0x29	// Display On
 #define	ST7789_CASET	0x2a	// Column Address Set

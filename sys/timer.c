@@ -17,7 +17,7 @@ unsigned now;
 static struct timer *timers = NULL;
 
 
-void timer_set(struct timer *t, unsigned ms, 
+void timer_set(struct timer *t, unsigned ms,
     void (*fn)(void *user), void *user)
 {
 	unsigned due = now + ms;

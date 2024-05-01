@@ -83,6 +83,6 @@ static const struct ui_events ui_accounts_events = {
 
 const struct ui ui_accounts = {
 	.open = ui_accounts_open,
-        .close = ui_accounts_close,
+	.close = ui_accounts_close,
 	.events = &ui_accounts_events,
 };

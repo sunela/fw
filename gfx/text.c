@@ -82,7 +82,7 @@ unsigned text_char(struct gfx_drawable *da, int x1, int y1,
 			more -= d;
 			x = 0;
 			y++;
-		}	
+		}
 		if (on && more)
 			gfx_rect_xy(da, x1 + x, y1 + y, more, 1, color);
 		x += more;
@@ -227,7 +227,7 @@ static void query_max(struct text_query *q, unsigned x, unsigned y,
 
 
 void text_query(unsigned x, unsigned y, const char *s,
-    const struct font *font, int8_t align_x, int8_t align_y, 
+    const struct font *font, int8_t align_x, int8_t align_y,
     struct text_query *q)
 {
 	struct text_query q_text, q_max;
@@ -260,7 +260,7 @@ void text_query(unsigned x, unsigned y, const char *s,
 
 
 void text_text_bbox(unsigned x, unsigned y, const char *s,
-    const struct font *font, int8_t align_x, int8_t align_y, 
+    const struct font *font, int8_t align_x, int8_t align_y,
     struct gfx_rect *bb)
 {
 	struct text_query q;

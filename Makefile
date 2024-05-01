@@ -38,7 +38,7 @@ picocom:
 # E.g., for  info line *0x...
 
 gdb:
-	riscv64-unknown-elf-gdb sdk/build/build_out/sunela_bl808_m0.elf 
+	riscv64-unknown-elf-gdb sdk/build/build_out/sunela_bl808_m0.elf
 
 $(FONTS:%=font/%): font/Makefile font/cvtfont.py
 	$(MAKE) -C font

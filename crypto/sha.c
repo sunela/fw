@@ -29,7 +29,7 @@ static void sha1_init(void)
 	gcry_check_version(NULL);
 	gcry_control(GCRYCTL_INITIALIZATION_FINISHED, 0);
 	err = gcry_md_open(&h, GCRY_MD_SHA1, 0);
-        if (err) {
+	if (err) {
 		debug("gcry_md_open: %s\n", gcry_strerror(err));
 		exit(1);
 	}

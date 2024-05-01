@@ -46,15 +46,15 @@ static struct ui_list list;
 
 static void ui_account_tap(unsigned x, unsigned y)
 {
-        struct ui_list_entry *entry;
+	struct ui_list_entry *entry;
 	struct account *a;
 	char s[6 + 1];
 	char *p = s;
 	uint32_t code;
 
-        entry = ui_list_pick(&list, x, y);
-        if (!entry)
-                return;
+	entry = ui_list_pick(&list, x, y);
+	if (!entry)
+		return;
 	a = ui_list_user(entry);
 	if (!a)
 		return;
@@ -90,7 +90,7 @@ static void ui_account_open(void)
 		switch (a->token.type) {
 		case tt_hotp:
 			ui_list_add(&list, "HOTP", "------", a);
-			break;		
+			break;
 		default:
 			abort();
 		}
@@ -114,6 +114,6 @@ static const struct ui_events ui_account_events = {
 
 const struct ui ui_account = {
 	.open = ui_account_open,
-        .close = ui_account_close,
+	.close = ui_account_close,
 	.events = &ui_account_events,
 };

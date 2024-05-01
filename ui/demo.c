@@ -520,7 +520,7 @@ static const struct demo {
 	{ "vscroll",	demo_vscroll,	"[y0 y1 ytop | tda vsa bfa vsp]" },
 							// 6
 	{ "entry",	demo_entry,	"" },		// 7
-	{ NULL, 	NULL,		NULL },		// 8
+	{ NULL,		NULL,		NULL },		// 8
 		// was used to switch from vector fonts to ntext
 	{ "sha1",	demo_sha1,	"string" },	// 9
 	{ "hmac",	demo_hmac,	"key msg" },	// 10
@@ -600,7 +600,7 @@ void demo_init(void)
 {
 	static char demo_buf[256];
 
-        mbox_init(&demo_mbox, demo_buf, sizeof(demo_buf));
+	mbox_init(&demo_mbox, demo_buf, sizeof(demo_buf));
 	mbox_enable(&demo_mbox);
 }
 

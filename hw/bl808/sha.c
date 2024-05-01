@@ -32,7 +32,7 @@
 #endif
 
 
-#define	SHA_BASE       		(mmio_m0_base + 0x4000)
+#define	SHA_BASE		(mmio_m0_base + 0x4000)
 #define	SHA_CTRL		(*(volatile uint32_t *) SHA_BASE)
 #define	SHA_MASK_CTRL_MSG_LEN	(0xff << 16)	// in 512-bit blocks
 #define	SHA_MASK_LINK_MODE		(1 << 15)
@@ -95,7 +95,7 @@ static void *peek(unsigned long paddr)
 		perror("/dev/mem");
 		exit(1);
 	}
-        base = mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd,
+	base = mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd,
 	    paddr);
 	if (base == MAP_FAILED) {
 		perror("mmap");

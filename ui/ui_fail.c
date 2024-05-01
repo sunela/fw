@@ -100,11 +100,11 @@ static void ui_fail_close(void)
 
 const struct ui ui_fail = {
 	.open = ui_fail_open,
-        .close = ui_fail_close,
+	.close = ui_fail_close,
 };
 
 
 const struct ui ui_cooldown = {
 	.open = ui_cooldown_open,
-        .close = ui_fail_close,
+	.close = ui_fail_close,
 };

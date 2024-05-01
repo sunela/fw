@@ -48,8 +48,7 @@ static void ui_account_tap(unsigned x, unsigned y)
 {
         struct ui_list_entry *entry;
 	struct account *a;
-	/* @@@ ugly. should have list entries that strdup */
-	static char s[6 + 1];
+	char s[6 + 1];
 	char *p = s;
 	uint32_t code;
 

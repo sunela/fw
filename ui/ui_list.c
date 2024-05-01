@@ -101,8 +101,8 @@ struct ui_list_entry *ui_list_add(struct ui_list *list,
 
 	assert(first);
 	e = alloc_type(struct ui_list_entry);
-	e->first = first;
-	e->second = second;
+	e->first = first ? stralloc(first) : first;
+	e->second = second ? stralloc(second) : second;
 	e->user = user;
 	e->next = NULL;
 	*list->anchor = e;
@@ -139,12 +139,15 @@ void ui_list_update_entry(struct ui_list *list, struct ui_list_entry *entry,
 	unsigned y = list->style->y0;
 	int even = 0;
 
-	entry->first = first;
-	entry->second = second;
 	entry->user = user;
 	if (!changed)
 		return;
-	
+
+	free((void *) entry->first);
+	free((void *) entry->second);
+	entry->first = first ? stralloc(first) : first;
+	entry->second = second ? stralloc(second) : second;
+
 	for (e = list->list; e != entry; e = e->next) {
 		y += entry_height(list, e);
 		even = !even;
@@ -174,6 +177,10 @@ void ui_list_destroy(struct ui_list *list)
 	while (list->list) {
 		struct ui_list_entry *next = list->list->next;
 
+		if (list->list->first)
+			free((void *) list->list->first);
+		if (list->list->second)
+			free((void *) list->list->second);
 		free(list->list);
 		list->list = next;
 	}

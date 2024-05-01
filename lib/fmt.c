@@ -125,9 +125,14 @@ bool vformat(void (*out)(void *user, char c), void *user,
 				break;
 			case 's':
 				s = va_arg(ap, const char *);
-				string(out, user, s);
-				if (*s)
-					nl = strchr(s, 0)[-1] == '\n';
+				if (s) {
+					string(out, user, s);
+					if (*s)
+						nl = strchr(s, 0)[-1] == '\n';
+				} else {
+					string(out, user, "(null)");
+					nl = 0;
+				}
 				break;
 			case 'd':
 				sn = GET_INT;

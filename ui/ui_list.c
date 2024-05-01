@@ -20,8 +20,8 @@
 
 
 #define	DEFAULT_FONT	mono18
-
-#define	Y_PAD		1
+#define	DEFAULT_OPAD	1
+#define	DEFAULT_IPAD	1
 
 
 struct ui_list_entry {
@@ -35,11 +35,27 @@ struct ui_list_entry {
 /* --- Helper functions ---------------------------------------------------- */
 
 
+static unsigned opad(const struct ui_list *list, const struct ui_list_entry *e)
+{
+	const struct ui_list_style *s = list->style;
+	
+	return s->opad ? s->opad : DEFAULT_OPAD;
+}
+
+
+static unsigned ipad(const struct ui_list *list, const struct ui_list_entry *e)
+{
+	const struct ui_list_style *s = list->style;
+	
+	return s->ipad ? s->ipad : DEFAULT_IPAD;
+}
+
+
 static unsigned entry_height(const struct ui_list *list,
     const struct ui_list_entry *e)
 {
-	return 2 * Y_PAD + (e->second ? 2 * list->text_height + Y_PAD :
-	    list->text_height);
+	return 2 * opad(list, e) + (e->second ?
+	    2 * list->text_height + (ipad(list, e)) : list->text_height);
 }
 
 
@@ -118,11 +134,12 @@ static unsigned draw_entry(const struct ui_list *list,
 	unsigned h = entry_height(list, e);
 
 	gfx_rect_xy(&da, 0, y, GFX_WIDTH, h, style->bg[even]);
-	text_text(&da, 0, y + Y_PAD, e->first, list_font(list),
+	text_text(&da, 0, y + opad(list, e), e->first, list_font(list),
 	    GFX_LEFT, GFX_TOP | GFX_MAX, style->fg[even]);
 	if (!e->second)
 		return h;
-	text_text(&da, 0, y + 2 * Y_PAD + list->text_height, e->second,
+	text_text(&da, 0,
+	    y + opad(list, e) + ipad(list, e) + list->text_height, e->second,
 	    list_font(list), GFX_LEFT, GFX_TOP | GFX_MAX, style->fg[even]);
 	return h;
 }

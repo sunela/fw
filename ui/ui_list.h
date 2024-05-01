@@ -15,10 +15,12 @@
 struct ui_list_entry;
 
 struct ui_list_style {
-	unsigned			y0, y1;
-	gfx_color			fg[2];	/* even and odd entries */
-	gfx_color			bg[2];	/* even and odd entries */
-	const struct font *font;	/* NULL for default */
+	unsigned		y0, y1;	/* display area for the list */
+	gfx_color		fg[2];	/* even and odd entries */
+	gfx_color		bg[2];	/* even and odd entries */
+	unsigned		opad;	/* padding at top and bottom (0 -> 1) */
+	unsigned		ipad;	/* padding between lines (0 -> 1)*/
+	const struct font *font;/* NULL for default */
 };
 
 struct ui_list {

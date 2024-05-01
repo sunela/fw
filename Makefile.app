@@ -12,7 +12,7 @@ OBJS = ui.o demo.o timer.o debug.o mbox.o rnd.o hmac.o hotp.o base32.o \
     fmt.o \
     basic.o poly.o long_text.o font.o text.o \
     ui_off.o ui_pin.o ui_fail.o ui_accounts.o ui_account.o ui_list.o \
-    ui_entry.o shape.o accounts.o
+    ui_entry.o shape.o accounts.o ui_time.o
 
 include Makefile.c-common
 
@@ -44,6 +44,7 @@ vpath ui_list.c ui
 vpath ui_entry.c ui
 vpath shape.c ui
 vpath accounts.c ui
+vpath ui_time.c ui
 
 vpath citrine.jpg logo
 

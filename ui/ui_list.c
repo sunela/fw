@@ -91,6 +91,44 @@ void *ui_list_user(const struct ui_list_entry *entry)
 }
 
 
+/* --- Render callback ----------------------------------------------------- */
+
+
+void ui_list_render(struct ui_list *list, struct ui_list_entry *entry)
+{
+	struct gfx_rect bb = {
+		.x = 0,
+		.y = list->style->y0,
+		.w = GFX_WIDTH,
+		.h = entry_height(list, entry),
+	};
+	const struct ui_list_entry *e;
+	bool odd = 0;
+
+	if (!list->style->render)
+		return;
+	for (e = list->list; e != entry; e = e->next) {
+		bb.y += entry_height(list, e);
+		odd = !odd;
+	}
+	list->style->render(list, entry, &bb, odd);
+}
+
+
+/* --- Iterate over all entries -------------------------------------------- */
+
+
+void ui_list_forall(struct ui_list *list,
+    void (*fn)(struct ui_list *list, struct ui_list_entry *entry, void *user),
+    void *user)
+{
+	struct ui_list_entry *e;
+
+	for (e = list->list; e; e = e->next)
+		fn(list, e, user);
+}
+
+
 /* --- List construction, display, destruction ----------------------------- */
 
 
@@ -128,19 +166,22 @@ struct ui_list_entry *ui_list_add(struct ui_list *list,
 
 
 static unsigned draw_entry(const struct ui_list *list,
-    const struct ui_list_entry *e, unsigned y, bool even)
+    const struct ui_list_entry *e, unsigned y, bool odd)
 {
 	const struct ui_list_style *style = list->style;
 	unsigned h = entry_height(list, e);
+	struct gfx_rect bb = { .x = 0, .y = y, .w = GFX_WIDTH, .h = h };
 
-	gfx_rect_xy(&da, 0, y, GFX_WIDTH, h, style->bg[even]);
+	gfx_rect(&da, &bb, style->bg[odd]);
 	text_text(&da, 0, y + opad(list, e), e->first, list_font(list),
-	    GFX_LEFT, GFX_TOP | GFX_MAX, style->fg[even]);
-	if (!e->second)
-		return h;
-	text_text(&da, 0,
-	    y + opad(list, e) + ipad(list, e) + list->text_height, e->second,
-	    list_font(list), GFX_LEFT, GFX_TOP | GFX_MAX, style->fg[even]);
+	    GFX_LEFT, GFX_TOP | GFX_MAX, style->fg[odd]);
+	if (e->second)
+		text_text(&da, 0,
+		    y + opad(list, e) + ipad(list, e) + list->text_height,
+		    e->second, list_font(list),
+		    GFX_LEFT, GFX_TOP | GFX_MAX, style->fg[odd]);
+	if (style->render)
+		style->render(list, e, &bb, odd);
 	return h;
 }
 
@@ -154,7 +195,7 @@ void ui_list_update_entry(struct ui_list *list, struct ui_list_entry *entry,
 	    !!entry->second);
 	const struct ui_list_entry *e;
 	unsigned y = list->style->y0;
-	int even = 0;
+	int odd = 0;
 
 	entry->user = user;
 	if (!changed)
@@ -167,9 +208,9 @@ void ui_list_update_entry(struct ui_list *list, struct ui_list_entry *entry,
 
 	for (e = list->list; e != entry; e = e->next) {
 		y += entry_height(list, e);
-		even = !even;
+		odd = !odd;
 	}
-	draw_entry(list, entry, y, even);
+	draw_entry(list, entry, y, odd);
 }
 
 

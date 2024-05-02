@@ -13,6 +13,7 @@
 
 
 struct ui_list_entry;
+struct ui_list;
 
 struct ui_list_style {
 	unsigned		y0, y1;	/* display area for the list */
@@ -21,6 +22,9 @@ struct ui_list_style {
 	unsigned		opad;	/* padding at top and bottom (0 -> 1) */
 	unsigned		ipad;	/* padding between lines (0 -> 1)*/
 	const struct font *font;/* NULL for default */
+	void (*render)(const struct ui_list *list,
+	    const struct ui_list_entry *entry, const struct gfx_rect *bb,
+	    bool odd);
 };
 
 struct ui_list {
@@ -34,6 +38,16 @@ struct ui_list {
 struct ui_list_entry *ui_list_pick(const struct ui_list *list,
     unsigned x, unsigned y);
 void *ui_list_user(const struct ui_list_entry *entry);
+
+/*
+ * ui_list_render only calls the "render" callback (if set), but performs no
+ * other operations.
+ */
+void ui_list_render(struct ui_list *list, struct ui_list_entry *entry);
+
+void ui_list_forall(struct ui_list *list,
+    void (*fn)(struct ui_list *list, struct ui_list_entry *entry, void *user),
+    void *user);
 
 void ui_list_begin(struct ui_list *ctx, const struct ui_list_style *style);
 struct ui_list_entry *ui_list_add(struct ui_list *ctx,

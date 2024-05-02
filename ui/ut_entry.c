@@ -5,11 +5,6 @@
  * A copy of the license can be found in the file LICENSE.MIT
  */
 
-/*
- * @@@ ut_entry may be used at different places. maybe we need a stack of UI
- * elements ?
- */
-
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -59,8 +54,8 @@
 
 #define	FONT_2			mono34
 
-#define	LABEL_TOP_OFFSET	-11
-#define	LABEL_BOTTOM_OFFSET	14
+#define	LABEL_TOP_OFFSET	-12
+#define	LABEL_BOTTOM_OFFSET	13
 
 #define	BUTTON_BOTTOM_OFFSET	8
 
@@ -75,9 +70,6 @@
 #define	BUTTON_Y1		(GFX_HEIGHT - BUTTON_H / 2 - \
 				    BUTTON_BOTTOM_OFFSET)
 #define	BUTTON_Y0		(BUTTON_Y1 - 3 * BUTTON_Y_SPACING)
-
-#define	X_ADJUST(ch)		0
-#define	Y_ADJUST(ch)		(-1)
 
 
 /* --- First page ---------------------------------------------------------- */
@@ -207,12 +199,10 @@ static void first_label(unsigned x, unsigned y, const char *s)
 {
 	char top[] = { *s, 0 };
 
-	text_text(&da, x + X_ADJUST(*s), y + Y_ADJUST(*s) + LABEL_TOP_OFFSET,
-	    top, &FONT_1_TOP, GFX_CENTER, GFX_CENTER, GFX_BLACK);
-	text_text(&da, x + X_ADJUST('X'),
-	    y + Y_ADJUST('A') + LABEL_BOTTOM_OFFSET,
-	    s + 1, &FONT_1_BOTTOM, GFX_CENTER, GFX_CENTER,
-	    GFX_BLACK);
+	text_text(&da, x, y + LABEL_TOP_OFFSET, top, &FONT_1_TOP,
+	    GFX_CENTER, GFX_CENTER, GFX_BLACK);
+	text_text(&da, x, y + LABEL_BOTTOM_OFFSET, s + 1, &FONT_1_BOTTOM,
+	    GFX_CENTER, GFX_CENTER, GFX_BLACK);
 }
 
 
@@ -273,9 +263,8 @@ static void second_label(unsigned x, unsigned y, char ch)
 	 */
 	bool tricky = strchr("'\"`_,.", ch);
 
-	text_text(&da, x + X_ADJUST(ch), y + Y_ADJUST(ch), s, &FONT_2,
-	    GFX_CENTER, tricky ? GFX_CENTER | GFX_MAX : GFX_CENTER,
-	    GFX_BLACK);
+	text_text(&da, x, y, s, &FONT_2, GFX_CENTER,
+	    tricky ? GFX_CENTER | GFX_MAX : GFX_CENTER, GFX_BLACK);
 }
 
 

@@ -21,6 +21,9 @@
 /* --- gettimeofday wrapper ------------------------------------------------ */
 
 
+int64_t time_offset;
+
+
 #ifndef SDK
 
 uint64_t time_us(void)

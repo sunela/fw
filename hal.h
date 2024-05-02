@@ -19,6 +19,9 @@
 #define GFX_HEIGHT	280
 
 
+extern int64_t time_offset;
+
+
 void console_char(char c);
 
 void vdebug(const char *fmt, va_list ap);

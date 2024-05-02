@@ -66,9 +66,6 @@ static const char *sync_mode_name[] = {
 /* --- Show time ----------------------------------------------------------- */
 
 
-static uint64_t t_offset = 0;
-
-
 static void show_time(void)
 {
 	static char s_time[9];
@@ -78,7 +75,7 @@ static void show_time(void)
 	struct tm tm;
 	time_t t;
 
-	t = time_us() / 1000000 + t_offset;
+	t = time_us() / 1000000 + time_offset;
 	gmtime_r(&t, &tm);
 	format(add_char, &p_time, "%02d:%02d:%02d",
 	    tm.tm_hour, tm.tm_min, tm.tm_sec);
@@ -96,7 +93,7 @@ static void show_time(void)
 
 static void set_time(uint64_t t)
 {
-	t_offset = t - time_us() / 1000000;
+	time_offset = t - time_us() / 1000000;
 	show_time();
 	update_display(&da);
 }

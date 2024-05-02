@@ -34,8 +34,6 @@
 #define	TOP_LINE_WIDTH		2
 #define	LIST_Y0			(TOP_H + TOP_LINE_WIDTH + 1)
 
-#define	HOLD_MS	(5 * 1000)
-
 
 static void render_account(const struct ui_list *l,
     const struct ui_list_entry *entry, const struct gfx_rect *bb,
@@ -140,6 +138,8 @@ static void ui_account_tap(unsigned x, unsigned y)
 	if (!a->token.secret_size || a->token.type != tt_hotp)
 		return;
 
+	progress();
+
 	/* @@@ make it harder to update the counter ? */
 	a->token.counter++;
 	code = hotp64(a->token.secret, a->token.secret_size, a->token.counter);
@@ -186,6 +186,8 @@ static void ui_account_open(void *params)
 		}
 	}
 	ui_list_end(&list);
+
+	set_idle(IDLE_ACCOUNT_S);
 }
 
 

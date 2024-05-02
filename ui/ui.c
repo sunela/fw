@@ -31,6 +31,7 @@ unsigned pin_attempts = 0;
 static gfx_color fb[GFX_WIDTH * GFX_HEIGHT];
 static const struct ui *current_ui = NULL;
 static struct timer idle_timer;
+static unsigned idle_s;
 
 
 /* --- Crosshair ----------------------------------------------------------- */
@@ -95,7 +96,14 @@ static void idle_off(void *user)
 
 void progress(void)
 {
-	timer_set(&idle_timer, 1000 * IDLE_S, idle_off, NULL);
+	timer_set(&idle_timer, 1000 * idle_s, idle_off, NULL);
+}
+
+
+void set_idle(unsigned seconds)
+{
+	idle_s = seconds;
+	progress();
 }
 
 
@@ -116,6 +124,7 @@ static void turn_on(void)
 
 void turn_off(void)
 {
+	timer_cancel(&idle_timer);
 	if (!is_on)
 		return;
 	is_on = 0;
@@ -353,6 +362,7 @@ bool app_init(char **args, unsigned n_args)
 	gfx_clear(&da, gfx_hex(0));
 
 	timer_init(&idle_timer);
+
 	demo_init();
 
 	if (n_args)

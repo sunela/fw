@@ -262,6 +262,7 @@ static void ui_pin_open(void *params)
 			if (row > 0 || col == 1)
 				draw_digits(UP_BG);
 	timer_init(&t_button);
+	set_idle(IDLE_PIN_S);
 }
 
 

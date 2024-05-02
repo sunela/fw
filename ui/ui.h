@@ -16,7 +16,10 @@
 
 #define	DEBOUNCE_MS	20
 
-#define	IDLE_S		5	/* @@@ make dynamic */
+#define	IDLE_PIN_S	5
+#define	IDLE_HOLD_S	5
+#define	IDLE_ACCOUNTS_S	15	
+#define	IDLE_ACCOUNT_S	60
 
 #define	MAX_INPUT_LEN	32	/* for ui_entry */
 
@@ -80,6 +83,7 @@ extern const struct ui ui_entry;
 extern const struct ui ui_time;
 
 void progress(void);
+void set_idle(unsigned seconds);
 void turn_off(void);
 
 void show_citrine(void);

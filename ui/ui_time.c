@@ -34,8 +34,6 @@
 #define	TOP_LINE_WIDTH		2
 #define	LIST_Y0			(TOP_H + TOP_LINE_WIDTH + 1)
 
-#define	HOLD_MS	(5 * 1000)
-
 
 static const struct ui_list_style style = {
 	y0:	LIST_Y0,

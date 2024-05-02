@@ -21,8 +21,6 @@
 #define	TOP_LINE_WIDTH		2
 #define	LIST_Y0			(TOP_H + TOP_LINE_WIDTH + 1)
 
-#define	HOLD_MS	(5 * 1000)
-
 
 static const struct ui_list_style style = {
 	y0:	LIST_Y0,
@@ -63,6 +61,8 @@ static void ui_accounts_open(void *params)
 	for (i = 0; i != n_accounts; i++)
 		ui_list_add(&list, accounts[i].name, NULL, accounts + i);
 	ui_list_end(&list);
+
+	set_idle(IDLE_ACCOUNTS_S);
 }
 
 
@@ -80,6 +80,7 @@ static void ui_accounts_resume(void)
 	 */
 	ui_accounts_close();
 	ui_accounts_open(NULL);
+	progress();
 }
 
 

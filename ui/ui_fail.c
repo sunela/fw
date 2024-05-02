@@ -16,12 +16,9 @@
 #include "ui.h"
 
 
-#define	HOLD_MS	(5 * 1000)
-
 #define	FONT		mono58
 
 
-static struct timer t_hold;
 static struct timer t_tick;
 
 
@@ -58,25 +55,18 @@ static void show_cooldown(void *user)
 }
 
 
-static void end_hold(void *user)
-{
-	turn_off();
-}
-
-
 /* --- Open/close ---------------------------------------------------------- */
 
 
 static void ui_fail_open(void *params)
 {
-	timer_init(&t_hold);
 	timer_init(&t_tick);
 	pin_attempts++;
 	if (pin_attempts < PIN_FREE_ATTEMPTS) {
 		ui_switch(&ui_pin, NULL);
 		return;
 	}
-	timer_set(&t_hold, HOLD_MS, end_hold, NULL);
+	set_idle(IDLE_HOLD_S);
 	pin_cooldown = now + PIN_WAIT_S(pin_attempts) * 1000;
 	show_cooldown(NULL);
 }
@@ -84,16 +74,14 @@ static void ui_fail_open(void *params)
 
 static void ui_cooldown_open(void *params)
 {
-	timer_init(&t_hold);
 	timer_init(&t_tick);
-	timer_set(&t_hold, HOLD_MS, end_hold, NULL);
+	set_idle(IDLE_HOLD_S);
 	show_cooldown(NULL);
 }
 
 
 static void ui_fail_close(void)
 {
-	timer_cancel(&t_hold);
 	timer_cancel(&t_tick);
 }
 

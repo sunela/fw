@@ -8,11 +8,14 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include "hal.h"
 #include "fmt.h"
+#include "base32.h"
 #include "hotp.h"
 #include "gfx.h"
+#include "shape.h"
 #include "text.h"
 #include "accounts.h"
 #include "ui_list.h"
@@ -21,6 +24,12 @@
 
 #define	FONT_TOP		mono18
 
+#define	TITLE_FG		GFX_YELLOW
+#define	TIMER_FG		GFX_HEX(0x8080ff)
+#define	ENTRY_FG		GFX_WHITE
+#define	EVEN_BG			GFX_BLACK
+#define	ODD_BG			GFX_HEX(0x202020)
+
 #define	TOP_H			30
 #define	TOP_LINE_WIDTH		2
 #define	LIST_Y0			(TOP_H + TOP_LINE_WIDTH + 1)
@@ -28,16 +37,87 @@
 #define	HOLD_MS	(5 * 1000)
 
 
-static struct account *selected_account = NULL;
+static void render_account(const struct ui_list *l,
+    const struct ui_list_entry *entry, const struct gfx_rect *bb,
+    bool odd);
+
 
 static const struct ui_list_style style = {
-	y0:	LIST_Y0,
-	y1:	GFX_HEIGHT - 1,
-	fg:	{ GFX_WHITE, GFX_WHITE },
-	bg:	{ GFX_BLACK, GFX_HEX(0x202020) },
+	.y0	= LIST_Y0,
+	.y1	= GFX_HEIGHT - 1,
+	.fg	= { ENTRY_FG, ENTRY_FG },
+	.bg	= { EVEN_BG, ODD_BG },
+	.render	= render_account,
 };
 
+static struct account *selected_account = NULL;
 static struct ui_list list;
+
+
+/* --- Extra account rendering --------------------------------------------- */
+
+
+static void render_account(const struct ui_list *l,
+    const struct ui_list_entry *entry, const struct gfx_rect *bb,
+    bool odd)
+{
+	const struct account *a = selected_account;
+	unsigned passed_s = time_us() / 1000000 % 30;
+
+	if (!a->token.secret_size)
+		return;
+	if (a->token.type != tt_totp)
+		return;
+	gfx_arc(&da, bb->x + bb->w - 1 - bb->h / 2, bb->y + bb->h / 2,
+	    bb->h / 4, 12 * passed_s, 0, TIMER_FG, style.bg[odd]);
+}
+
+
+static void show_totp(struct ui_list *l,
+    struct ui_list_entry *entry, void *user)
+{
+	struct account *a = ui_list_user(entry);
+
+	if (!a)
+		return;
+	if (!a->token.secret_size)
+		return;
+	if (a->token.type != tt_totp)
+		return;
+	ssize_t size = base32_decode_size((char *) a->token.secret);
+
+	assert(size > 0);
+
+	uint8_t sec[size];
+	uint64_t counter = (time_us() + time_offset) / 1000000 / 30;
+	uint32_t code;
+	char s[6 + 1];
+	char *p = s;
+
+	base32_decode(sec, size, (char *) a->token.secret);
+	code = hotp64(sec, size, counter);
+	format(add_char, &p, "%06u", (unsigned) code % 1000000);
+	ui_list_update_entry(l, entry, "TOTP", s, a);
+	ui_list_render(l, entry);
+	update_display(&da);
+}
+
+
+static void ui_account_tick(void)
+{
+	static int64_t last_tick = -1;
+	int64_t this_tick = time_us() / 1000000;
+
+	if (last_tick == this_tick)
+                return;
+	last_tick = this_tick;
+	/*
+	 * @@@ we update every second for the "time left" display. The code
+	 * changes only every 30 seconds.
+	 */
+
+	ui_list_forall(&list, show_totp, NULL);
+}
 
 
 /* --- Event handling ------------------------------------------------------ */
@@ -86,7 +166,7 @@ static void ui_account_open(void *params)
 
 	gfx_rect_xy(&da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH, GFX_WHITE);
 	text_text(&da, GFX_WIDTH / 2, TOP_H / 2, a->name, &FONT_TOP,
-	    GFX_CENTER, GFX_CENTER, GFX_YELLOW);
+	    GFX_CENTER, GFX_CENTER, TITLE_FG);
 
 	ui_list_begin(&list, &style);
 	if (a->user)
@@ -97,6 +177,9 @@ static void ui_account_open(void *params)
 		switch (a->token.type) {
 		case tt_hotp:
 			ui_list_add(&list, "HOTP", "------", a);
+			break;
+		case tt_totp:
+			ui_list_add(&list, "TOTP", "------", a);
 			break;
 		default:
 			abort();
@@ -118,6 +201,7 @@ static void ui_account_close(void)
 static const struct ui_events ui_account_events = {
 	.touch_tap	= ui_account_tap,
 	.touch_to	= ui_account_to,
+	.tick		= ui_account_tick,
 };
 
 const struct ui ui_account = {

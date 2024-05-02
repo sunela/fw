@@ -1,12 +1,12 @@
 /*
- * ui_entry.c - User interface: Text entry
+ * ut_entry.c - User interface tool: Text entry
  *
  * This work is licensed under the terms of the MIT License.
  * A copy of the license can be found in the file LICENSE.MIT
  */
 
 /*
- * @@@ ui_entry may be used at different places. maybe we need a stack of UI
+ * @@@ ut_entry may be used at different places. maybe we need a stack of UI
  * elements ?
  */
 
@@ -117,8 +117,8 @@ static const char *second_maps[] = {
 /* ---  Variables ---------------------------------------------------------- */
 
 
-char ui_entry_input[MAX_INPUT_LEN + 1] = { 0, };
-bool (*ui_entry_validate)(const char *s) = NULL;
+char ut_entry_input[MAX_INPUT_LEN + 1] = { 0, };
+bool (*ut_entry_validate)(const char *s) = NULL;
 
 static unsigned input_max_height;
 static const char *second = NULL;
@@ -130,8 +130,8 @@ static struct timer t_button;
 
 static bool valid(void)
 {
-	return !*ui_entry_input || !*ui_entry_validate ||
-	    ui_entry_validate(ui_entry_input);
+	return !*ut_entry_input || !*ut_entry_validate ||
+	    ut_entry_validate(ut_entry_input);
 }
 
 
@@ -154,15 +154,15 @@ static void draw_input(void)
 	gfx_color fb[MAX_INPUT_LEN * input_max_height * input_max_height];
 	struct gfx_rect bb;
 
-	if (!*ui_entry_input)
+	if (!*ut_entry_input)
 		return;
-	text_text_bbox(0, 0, ui_entry_input, &INPUT_FONT,
+	text_text_bbox(0, 0, ut_entry_input, &INPUT_FONT,
 	    GFX_LEFT, GFX_TOP | GFX_MAX, &bb);
 	assert(bb.w <= MAX_INPUT_LEN * input_max_height);
 	assert(bb.h <= INPUT_PAD_TOP + input_max_height + INPUT_PAD_BOTTOM);
 	gfx_da_init(&buf, bb.w, bb.h, fb);
 	gfx_clear(&buf, valid() ? INPUT_VALID_BG : INPUT_INVALID_BG);
-	text_text(&buf, 0, 0, ui_entry_input, &INPUT_FONT,
+	text_text(&buf, 0, 0, ut_entry_input, &INPUT_FONT,
 	    GFX_LEFT, GFX_TOP | GFX_MAX, GFX_WHITE);
 	if ((GFX_WIDTH + bb.w) / 2 < INPUT_MAX_X)
 		gfx_copy(&da, (GFX_WIDTH - bb.w) / 2, INPUT_PAD_TOP, &buf, 0, 0,
@@ -226,7 +226,7 @@ static void first_button(unsigned col, unsigned row, gfx_color bg)
 		first_label(x, y, first_map[1 + col + (3 - row) * 3]);
 	} else if (col == 0) {	// X
 		base(x, y, bg);
-		if (*ui_entry_input)
+		if (*ut_entry_input)
 			gfx_equilateral(&da, x, y, BUTTON_H * 0.7, -1,
 			    GFX_BLACK);
 		else
@@ -235,7 +235,7 @@ static void first_button(unsigned col, unsigned row, gfx_color bg)
 		base(x, y, bg);
 		first_label(x, y, first_map[0]);
 	} else {	// >
-		if (*ui_entry_input) {
+		if (*ut_entry_input) {
 			base(x, y, valid() ? bg : SPECIAL_DISABLED_BG);
 			gfx_equilateral(&da, x, y, BUTTON_H * 0.7, 1,
 			    GFX_BLACK);
@@ -329,13 +329,13 @@ static void release_button(void *user)
 }
 
 
-static void ui_entry_tap(unsigned x, unsigned y)
+static void ut_entry_tap(unsigned x, unsigned y)
 {
 	unsigned col = x < BUTTON_X0 + BUTTON_X_SPACING / 2 ? 0 :
 	    x < BUTTON_X0 + 1.5 * BUTTON_X_SPACING ? 1 : 2;
 	unsigned row = 0;
 	unsigned n;
-	char *end = strchr(ui_entry_input, 0);
+	char *end = strchr(ut_entry_input, 0);
 
 	if (y < BUTTON_Y0 - BUTTON_Y_SPACING + BUTTON_R)
 		return;
@@ -357,7 +357,7 @@ static void ui_entry_tap(unsigned x, unsigned y)
 			update_display(&da);
 			return;
 		}
-		if (!*ui_entry_input) {
+		if (!*ut_entry_input) {
 			ui_return();
 			return;
 		}
@@ -370,21 +370,21 @@ static void ui_entry_tap(unsigned x, unsigned y)
 		end[-1] = 0;
 		clear_input();
 		draw_input();
-		if (!*ui_entry_input)
+		if (!*ut_entry_input)
 			first_button(2, 0, SPECIAL_UP_BG);
-		if (end - ui_entry_input == MAX_INPUT_LEN)
+		if (end - ut_entry_input == MAX_INPUT_LEN)
 			draw_first_text(1);
 		update_display(&da);
 		return;
 	}
 	if (col == 2 && row == 0) { // enter
-		if (second || !*ui_entry_input)
+		if (second || !*ut_entry_input)
 			return;
 		if (valid())
 			ui_return();
 		return;
 	}
-	if (end - ui_entry_input == MAX_INPUT_LEN)
+	if (end - ut_entry_input == MAX_INPUT_LEN)
 		return;
 	progress();
 	timer_flush(&t_button);
@@ -399,7 +399,7 @@ static void ui_entry_tap(unsigned x, unsigned y)
 		draw_input();
 		first_button(0, 0, SPECIAL_UP_BG);
 		first_button(2, 0, SPECIAL_UP_BG);
-		draw_first_text(strlen(ui_entry_input) != MAX_INPUT_LEN);
+		draw_first_text(strlen(ut_entry_input) != MAX_INPUT_LEN);
 	} else {
 		second = second_maps[n];
 		draw_second(second);
@@ -411,11 +411,11 @@ static void ui_entry_tap(unsigned x, unsigned y)
 /* --- Open/close ---------------------------------------------------------- */
 
 
-static void ui_entry_open(void *params)
+static void ut_entry_open(void *params)
 {
 	struct text_query q;
 
-	assert(strlen(ui_entry_input) <= MAX_INPUT_LEN);
+	assert(strlen(ut_entry_input) <= MAX_INPUT_LEN);
 
 	text_query(0, 0, "", &INPUT_FONT,
 	    GFX_TOP | GFX_MAX, GFX_TOP | GFX_MAX, &q);
@@ -424,13 +424,13 @@ static void ui_entry_open(void *params)
 	clear_input();
 	draw_input();
 	first_button(0, 0, SPECIAL_UP_BG);
-	draw_first_text(strlen(ui_entry_input) != MAX_INPUT_LEN);
+	draw_first_text(strlen(ut_entry_input) != MAX_INPUT_LEN);
 	first_button(2, 0, SPECIAL_UP_BG);
 	timer_init(&t_button);
 }
 
 
-static void ui_entry_close(void)
+static void ut_entry_close(void)
 {
 	timer_cancel(&t_button);
 }
@@ -439,13 +439,13 @@ static void ui_entry_close(void)
 /* --- Interface ----------------------------------------------------------- */
 
 
-static const struct ui_events ui_entry_events = {
-	.touch_tap	= ui_entry_tap,
+static const struct ui_events ut_entry_events = {
+	.touch_tap	= ut_entry_tap,
 };
 
 
-const struct ui ui_entry = {
-	.open = ui_entry_open,
-	.close = ui_entry_close,
-	.events	= &ui_entry_events,
+const struct ui ut_entry = {
+	.open = ut_entry_open,
+	.close = ut_entry_close,
+	.events	= &ut_entry_events,
 };

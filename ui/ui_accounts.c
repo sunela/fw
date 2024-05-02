@@ -10,7 +10,7 @@
 #include "hal.h"
 #include "gfx.h"
 #include "text.h"
-#include "ui_list.h"
+#include "uw_list.h"
 #include "accounts.h"
 #include "ui.h"
 
@@ -22,14 +22,14 @@
 #define	LIST_Y0			(TOP_H + TOP_LINE_WIDTH + 1)
 
 
-static const struct ui_list_style style = {
+static const struct uw_list_style style = {
 	y0:	LIST_Y0,
 	y1:	GFX_HEIGHT - 1,
 	fg:	{ GFX_WHITE, GFX_WHITE },
 	bg:	{ GFX_BLACK, GFX_HEX(0x202020) },
 };
 
-static struct ui_list list;
+static struct uw_list list;
 
 
 /* --- Event handling ------------------------------------------------------ */
@@ -37,12 +37,12 @@ static struct ui_list list;
 
 static void ui_accounts_tap(unsigned x, unsigned y)
 {
-	const struct ui_list_entry *entry;
+	const struct uw_list_entry *entry;
 
-	entry = ui_list_pick(&list, x, y);
+	entry = uw_list_pick(&list, x, y);
 	if (!entry)
 		return;
-	ui_call(&ui_account, ui_list_user(entry));
+	ui_call(&ui_account, uw_list_user(entry));
 }
 
 
@@ -57,10 +57,10 @@ static void ui_accounts_open(void *params)
 	text_text(&da, GFX_WIDTH / 2, TOP_H / 2, "Accounts",
 	    &FONT_TOP, GFX_CENTER, GFX_CENTER, GFX_WHITE);
 
-	ui_list_begin(&list, &style);
+	uw_list_begin(&list, &style);
 	for (i = 0; i != n_accounts; i++)
-		ui_list_add(&list, accounts[i].name, NULL, accounts + i);
-	ui_list_end(&list);
+		uw_list_add(&list, accounts[i].name, NULL, accounts + i);
+	uw_list_end(&list);
 
 	set_idle(IDLE_ACCOUNTS_S);
 }
@@ -68,7 +68,7 @@ static void ui_accounts_open(void *params)
 
 static void ui_accounts_close(void)
 {
-	ui_list_destroy(&list);
+	uw_list_destroy(&list);
 }
 
 

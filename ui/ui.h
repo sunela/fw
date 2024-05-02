@@ -21,7 +21,7 @@
 #define	IDLE_ACCOUNTS_S	15	
 #define	IDLE_ACCOUNT_S	60
 
-#define	MAX_INPUT_LEN	32	/* for ui_entry */
+#define	MAX_INPUT_LEN	32	/* for ut_entry */
 
 
 /*
@@ -70,8 +70,10 @@ extern unsigned pin_attempts; /* number of failed PIN entries */
 
 extern struct mbox time_mbox;
 
-extern char ui_entry_input[MAX_INPUT_LEN + 1];
-extern bool (*ui_entry_validate)(const char *s);
+extern char ut_entry_input[MAX_INPUT_LEN + 1];
+extern bool (*ut_entry_validate)(const char *s);
+
+/* User interface pages */
 
 extern const struct ui ui_off;
 extern const struct ui ui_pin;
@@ -79,8 +81,11 @@ extern const struct ui ui_fail;
 extern const struct ui ui_cooldown;
 extern const struct ui ui_accounts;
 extern const struct ui ui_account;
-extern const struct ui ui_entry;
-extern const struct ui ui_time;
+
+/* User interface tools (called from UI pages) */
+
+extern const struct ui ut_entry;
+extern const struct ui ut_time;
 
 void progress(void);
 void set_idle(unsigned seconds);

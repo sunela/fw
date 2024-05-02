@@ -54,7 +54,14 @@ static void render(const struct font *font, const struct character *ch)
 	(void) font;
 	/* @@@ Support uncompressed fonts later */
 	assert(ch->bits > 1);
+
+	printf("%3s", "");
+	for (x = 0; x != ch->w; x++)
+		printf("%2u", x);
+	printf("\n");
+
 	for (y = 0; y != ch->h; y++) {
+		printf("%2u ", y);
 		for (x = 0; x != ch->w; x++) {
 			if (!more) {
 				while (1) {
@@ -75,7 +82,7 @@ static void render(const struct font *font, const struct character *ch)
 				}
 				on = !on;
 			}
-			putchar(on ? '#' : '-');
+			printf("%s", on ? "##" : "--");
 			more--;
 		}
 		putchar('\n');

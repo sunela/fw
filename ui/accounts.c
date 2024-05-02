@@ -37,6 +37,21 @@ static struct account dummy_accounts[] = {
 			counter:	0,
 		},
 	},
+	{
+		name:	"TOTP",
+		token:	{
+			/*
+			 * @@@ we store the secret in base32 since all the test
+			 * pages use URLs, where the secret is base32-encoded.
+			 * for real use, this should be binary.
+			 */
+			secret_size:	1,	/* @@@ mark as "in use" */
+			secret:		(uint8_t *)
+					    "GZ4FORKTNBVFGQTFJJGEIRDOKY",
+			type:		tt_totp,
+			algo:		ta_sha1,
+		},
+	},
 };
 
 struct account *accounts = dummy_accounts;

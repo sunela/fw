@@ -20,11 +20,14 @@ struct account {
 		uint8_t		*secret;
 		enum token_type {
 			tt_hotp,
+			tt_totp,
 		} type;
 		enum token_algo {
 			ta_sha1,
 		} algo;
 		uint64_t	counter; /* for HOTP */
+		/* @@@ the number of digits is always 6 */
+		/* @@@ the TOTP interval is always 30 seconds */
 	} token;
 };
 

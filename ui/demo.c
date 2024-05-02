@@ -16,6 +16,7 @@
 #include "debug.h"
 #include "mbox.h"
 #include "gfx.h"
+#include "shape.h"
 #include "long_text.h"
 #include "text.h"
 #include "pin.h"
@@ -504,6 +505,20 @@ static bool demo_time(char *const *args, unsigned n_args)
 }
 
 
+/* Draw a filled arc */
+
+static bool demo_arc(char *const *args, unsigned n_args)
+{
+	if (n_args != 2)
+		return 0;
+
+	gfx_arc(&da, GFX_WIDTH / 2, GFX_HEIGHT / 2, GFX_WIDTH * .4,
+	    atoi(args[0]), atoi(args[1]), GFX_WHITE, GFX_BLUE);
+
+	return 1;
+}
+
+
 /* --- Initialization ------------------------------------------------------ */
 
 
@@ -532,6 +547,7 @@ static const struct demo {
 	{ "acc",	demo_acc,	"" },		// 15
 	{ "align",	demo_align,	"text x-align y-align" },
 	{ "time",	demo_time,	"" },
+	{ "arc",	demo_arc,	"from to" },
 };
 
 

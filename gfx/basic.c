@@ -91,19 +91,25 @@ void gfx_clear(struct gfx_drawable *da, gfx_color bg)
 /* --- Filled circle (disc) ------------------------------------------------ */
 
 
-/* https://stackoverflow.com/a/1237519/8179289 */
+/*
+ * https://stackoverflow.com/a/1237519/8179289
+ *
+ * See also:
+ * https://gamedev.stackexchange.com/q/176036
+ */
 
 void gfx_disc(struct gfx_drawable *da, unsigned x, unsigned y, unsigned r,
     gfx_color color)
 {
 	gfx_color *p = da->fb + (y - r) * da->w + x - r;
 	int dx, dy;
+	int r2 = (r + 0.5) * (r + 0.5);
 
 	assert(x >= r && x + r < da->w);
 	assert(y >= r && y + r < da->h);
 	for (dy = -r; dy <= (int) r; dy++) {
 		for (dx = -r; dx <= (int) r; dx++) {
-			if (dx * dx + dy * dy <= (int) (r * r))
+			if (dx * dx + dy * dy < r2)
 				*p = color;
 			p++;
 		}

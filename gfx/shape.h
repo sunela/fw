@@ -11,8 +11,9 @@
 #include "gfx.h"
 
 
-void cross(unsigned x, unsigned y, unsigned r, unsigned w,
-    gfx_color color);
-void equilateral(unsigned x, unsigned y, unsigned a, int dir, gfx_color color);
+void gfx_cross(struct gfx_drawable *da, unsigned x, unsigned y, unsigned r,
+    unsigned w, gfx_color color);
+void gfx_equilateral(struct gfx_drawable *da, unsigned x, unsigned y,
+    unsigned a, int dir, gfx_color color);
 
 #endif /* !SHAPE_H */

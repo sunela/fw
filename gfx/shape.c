@@ -6,15 +6,14 @@
  */
 
 #include "gfx.h"
-#include "ui.h"
 #include "shape.h"
 
 
 /* --- Diagonal cross ------------------------------------------------------ */
 
 
-void cross(unsigned x, unsigned y, unsigned r, unsigned w,
-    gfx_color color)
+void gfx_cross(struct gfx_drawable *da, unsigned x, unsigned y, unsigned r,
+    unsigned w, gfx_color color)
 {
 	unsigned d0 = (r - w) / 1.414;
 	unsigned d1 = (r + w) / 1.414;
@@ -31,12 +30,16 @@ void cross(unsigned x, unsigned y, unsigned r, unsigned w,
 		x + d1, y + d0
 	};
 
-	gfx_poly(&da, 4, v1, color);
-	gfx_poly(&da, 4, v2, color);
+	gfx_poly(da, 4, v1, color);
+	gfx_poly(da, 4, v2, color);
 }
 
 
-void equilateral(unsigned x, unsigned y, unsigned a, int dir, gfx_color color)
+/* --- Equilateral triangle ------------------------------------------------ */
+
+
+void gfx_equilateral(struct gfx_drawable *da, unsigned x, unsigned y,
+    unsigned a, int dir, gfx_color color)
 {
 	/* R = a / sqrt(3); R = 2 r */
 	unsigned R = a / 1.732;
@@ -47,5 +50,5 @@ void equilateral(unsigned x, unsigned y, unsigned a, int dir, gfx_color color)
 		x + dir * R, y
 	};
 
-	gfx_poly(&da, 3, v, color);
+	gfx_poly(da, 3, v, color);
 }

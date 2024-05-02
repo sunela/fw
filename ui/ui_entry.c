@@ -227,16 +227,18 @@ static void first_button(unsigned col, unsigned row, gfx_color bg)
 	} else if (col == 0) {	// X
 		base(x, y, bg);
 		if (*ui_entry_input)
-			equilateral(x, y, BUTTON_H * 0.7, -1, GFX_BLACK);
+			gfx_equilateral(&da, x, y, BUTTON_H * 0.7, -1,
+			    GFX_BLACK);
 		else
-			cross(x, y, BUTTON_H * 0.4, 4, GFX_BLACK);
+			gfx_cross(&da, x, y, BUTTON_H * 0.4, 4, GFX_BLACK);
 	} else if (col == 1) {	// "0"
 		base(x, y, bg);
 		first_label(x, y, first_map[0]);
 	} else {	// >
 		if (*ui_entry_input) {
 			base(x, y, valid() ? bg : SPECIAL_DISABLED_BG);
-			equilateral(x, y, BUTTON_H * 0.7, 1, GFX_BLACK);
+			gfx_equilateral(&da, x, y, BUTTON_H * 0.7, 1,
+			    GFX_BLACK);
 		} else {
 			base(x, y, GFX_BLACK);
 		}
@@ -292,7 +294,7 @@ static void second_button(const char *map, unsigned col, unsigned row,
 		second_label(x, y, map[n]);
 	} else if (col == 0) {	// X
 		base(x, y, SPECIAL_UP_BG);
-		equilateral(x, y, BUTTON_H * 0.7, -1, GFX_BLACK);
+		gfx_equilateral(&da, x, y, BUTTON_H * 0.7, -1, GFX_BLACK);
 	} else if (col == 1) {	// "0"
 		base(x, y, bg);
 		second_label(x, y, map[0]);

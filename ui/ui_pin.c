@@ -120,11 +120,11 @@ static void pin_button(unsigned col, unsigned row, gfx_color bg)
 	if (row > 0) {
 		pin_digit(x, y, 1 + col + (3 - row) * 3);
 	} else if (col == 0) {	// X
-		cross(x, y, BUTTON_R * 0.8, 4, GFX_BLACK);
+		gfx_cross(&da, x, y, BUTTON_R * 0.8, 4, GFX_BLACK);
 	} else if (col == 1) {	// "0"
 		pin_digit(x, y, 0);
 	} else {	// >
-		equilateral(x, y, BUTTON_R * 1.4, 1, GFX_BLACK);
+		gfx_equilateral(&da, x, y, BUTTON_R * 1.4, 1, GFX_BLACK);
 	}
 }
 

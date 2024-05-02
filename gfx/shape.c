@@ -35,6 +35,18 @@ void gfx_cross(struct gfx_drawable *da, unsigned x, unsigned y, unsigned r,
 }
 
 
+/* --- Filled triangle ----------------------------------------------------- */
+
+
+void gfx_triangle(struct gfx_drawable *da, unsigned x0, unsigned y0,
+    unsigned x1, unsigned y1, unsigned x2, unsigned y2, gfx_color color)
+{
+	short v[] = { x0, y0, x1, y1, x2, y2 };
+
+	gfx_poly(da, 3, v, color);
+}
+
+
 /* --- Equilateral triangle ------------------------------------------------ */
 
 

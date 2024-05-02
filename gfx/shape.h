@@ -18,4 +18,13 @@ void gfx_triangle(struct gfx_drawable *da, unsigned x0, unsigned y0,
 void gfx_equilateral(struct gfx_drawable *da, unsigned x, unsigned y,
     unsigned a, int dir, gfx_color color);
 
+/*
+ * Angle a0 is the start angle, a1 the end angle. They are in degrees, must be
+ * in the range 0 - 359, increase clockwise, with 0 degrees in the 12 h
+ * position. For a0 = a1. we draw a full circle.
+ */
+
+void gfx_arc(struct gfx_drawable *da, unsigned x, unsigned y, unsigned r, 
+    unsigned a0, unsigned a1, gfx_color color, gfx_color bg);
+
 #endif /* !SHAPE_H */

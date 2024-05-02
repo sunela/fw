@@ -5,8 +5,13 @@
  * A copy of the license can be found in the file LICENSE.MIT
  */
 
+#include <assert.h>
+
 #include "gfx.h"
 #include "shape.h"
+
+
+//#define DEBUG
 
 
 /* --- Diagonal cross ------------------------------------------------------ */
@@ -63,4 +68,76 @@ void gfx_equilateral(struct gfx_drawable *da, unsigned x, unsigned y,
 	};
 
 	gfx_poly(da, 3, v, color);
+}
+
+
+/* --- Filled arc ---------------------------------------------------------- */
+
+
+static const uint8_t sin_tab[] = {
+#include "sin.inc"
+};
+
+
+static void octant(int *ox, int *oy, int *dx, int *dy, uint8_t oct)
+{
+	static int8_t d[] = { 0, 1, 1, 1, 0, -1, -1, -1 };
+
+	*ox = d[oct];
+	*oy = d[(oct + 2) & 7];
+	*dx = d[(oct + 1) & 7] - *ox;
+	*dy = d[(oct + 3) & 7] - *oy;
+}
+
+
+static void point_on_arc(short **p, unsigned x, unsigned y, unsigned r,
+    unsigned a)
+{
+	uint8_t pos = r * sin_tab[a % 45] / 255;
+	int ox, oy, dx, dy;
+
+	octant(&ox, &oy, &dx, &dy, a / 45);
+	*(*p)++ = x + ox * r + dx * pos;
+	*(*p)++ = y - oy * r - dy * pos;
+}
+
+
+void gfx_arc(struct gfx_drawable *da, unsigned x, unsigned y, unsigned r,
+    unsigned a0, unsigned a1, gfx_color color, gfx_color bg)
+{
+	short v[22];	/* center, arc start, end, and up to 8 octants */
+	short *p = v;
+	unsigned oct;
+
+#if DEBUG
+	gfx_rect_xy(da, x - r, y - r, 2 * r + 1, 2 * r + 1, GFX_RED);
+#endif
+	gfx_disc(da, x, y, r, color);
+	if (a0 == a1)
+		return;
+
+	/* @@@ for some weird reason, gfx_triangle (gfx_poly) is slightly off */
+	x++;
+	r++;
+
+	if (a0 / 45 != a1 / 45 || a0 < a1)
+		for (oct = a1 / 45; p == v || oct != a0 / 45;
+		    oct = (oct + 1) & 7) {
+			int ox, oy, dx, dy;
+
+			/* add end of octant */
+			octant(&ox, &oy, &dx, &dy, oct);
+			*p++ = x + ox * r + dx * r;
+			*p++ = y - oy * r - dy * r;
+		}
+
+	point_on_arc(&p, x, y, r, a0);
+	*p++ = x;
+	*p++ = y;
+	point_on_arc(&p, x, y, r, a1);
+
+	assert(p - v >= 6);
+	assert(p - v <= 22);
+
+	gfx_poly(da, (p - v) / 2, v, bg);
 }

@@ -47,14 +47,20 @@ vpath accounts.c ui
 vpath ui_time.c ui
 
 vpath citrine.jpg logo
+vpath mksintab.pl gfx
 
 
 ui.o:		citrine.inc
+gfx/shape.c:	sin.inc
 
 citrine.inc:    citrine.jpg scripts/pnmtorgb.pl
 		jpegtopnm $< | scripts/pnmtorgb.pl >$@ || \
 		    { rm -f $@; exit 1; }
 
+sin.inc:	mksintab.pl
+		$(BUILD) perl $< >$@ || { rm -f $@; exit 1; }
+
 clean::
 		rm -f citrine.inc
+		rm -f sin.inc
 		$(MAKE) -C font clean

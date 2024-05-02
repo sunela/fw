@@ -84,8 +84,29 @@ def character():
 	print(v, "} },")
 
 
+def read_patch_file(filename):
+	global patche
+
+	with open(arg) as file:
+		for line in file:
+			if re.match("^\s*$", line):
+				continue
+			if re.match("^\s*#", line):
+				continue
+			m = re.match("^(\S+)\s+'(.)'((\s+\d+\s+\d+)+)\s*$",
+			    line)
+			if m is None:
+				raise Exception("bad patch: " + line)
+			if name != m.group(1):
+				continue
+			code = "%04X" % ord(m.group(2))
+			patch[code] = list(map(lambda x: int(x),
+			    m.group(3).split()))
+
+
 if len(sys.argv) < 4:
-	print("usage: ttf-font size name [from[-to] ...]", file = sys.stderr)
+	print("usage: ttf-font size name [from[-to] ...] [patch-file ...]",
+	    file = sys.stderr)
 	sys.exit(1)
 
 font = sys.argv[1]
@@ -93,12 +114,13 @@ size = sys.argv[2]
 name = sys.argv[3]
 select = sys.argv[4:]
 
+patch = {}
 if len(select) == 0:
 	subset = ""
 else:
 	subset = "-l "
 	for arg in select:
-		print("ARG", arg, file = sys.stderr)
+#		print("ARG", arg, file = sys.stderr)
 		m = re.match("^([0-9A-Fa-f]+)$", arg)
 		if m is not None:
 			subset += m.group(1) + " "
@@ -107,7 +129,8 @@ else:
 		if m is not None:
 			subset += m.group(1) + "_" + m.group(2) + " "
 			continue
-		raise Exception("invalid subset")
+		read_patch_file(arg)
+#		raise Exception("invalid subset")
 
 #print("otf2bdf " + font + " -p " + size)
 (exitcode, output) = subprocess.getstatusoutput(
@@ -190,18 +213,29 @@ for line in output.splitlines():
 		data = [ 0 ]
 		last = start
 		best = []
+		y = 0
 
 	print("// LINE", line)
+	x = 0
 	for i in range(0, len(line) // 2):
 		v = int(line[2 * i:2 * i + 2], 16)
 		print("// V", v, "last", last)
 		for j in range(0, 8):
 			if i * 8 + j >= int(bbx[0]):
 				break
-			if (v >> (7 - j)) & 1 == last:
+			this = (v >> (7 - j)) & 1
+			if code in patch:
+				p = patch[code]
+#				print(code, x, y, "P", p, file = sys.stderr)
+				for k in range(0, len(p), 2):
+					if p[k] == x and p[k + 1] == y:
+						this = 1 - this
+			if this == last:
 				data[-1] += 1
 			else:
 				data.append(1)
 				last = 1 - last
 			best.append(last)
+			x += 1
+	y += 1
 print("} };");

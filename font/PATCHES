@@ -1,0 +1,29 @@
+#
+# font/PATCHES - Fix pixel errors in bitmap fonts
+#
+# This work is licensed under the terms of the MIT License.
+# A copy of the license can be found in the file LICENSE.MIT
+#
+
+#
+# Each line has the following format:
+#
+# font-name 'character' x y ...
+#
+# where x and y are the coordinates shown by "show", from this directory.
+#
+
+mono18	'A'	7 2
+mono18	'N'	2 4
+
+mono24	'4'	10 4
+mono24	'6'	4 9
+
+mono34	'N'	5 8 16 21 16 22
+
+mono36	'3'	1 9 2 9 3 9 4 9 5 9 7 9
+mono36	'4'	15 6
+mono36	'5'	7 12
+
+mono58	'2'	0 14
+mono58	'3'	40 39

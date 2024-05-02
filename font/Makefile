@@ -30,22 +30,27 @@ all::	show
 show:	show.c $(FONTS) $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $< $(OBJS)
 
-mono18.font: cvtfont.py Makefile
-	./cvtfont.py $(FONT_FILE) 18 mono18 32-126 >$@ || { rm -f $@; exit 1; }
+mono18.font: cvtfont.py Makefile PATCHES
+	./cvtfont.py $(FONT_FILE) 18 mono18 32-126 PATCHES >$@ || \
+	    { rm -f $@; exit 1; }
 
-mono24.font: cvtfont.py Makefile
-	./cvtfont.py $(FONT_FILE) 24 mono24 32-126 >$@ || { rm -f $@; exit 1; }
+mono24.font: cvtfont.py Makefile PATCHES
+	./cvtfont.py $(FONT_FILE) 24 mono24 32-126 PATCHES >$@ || \
+	    { rm -f $@; exit 1; }
 
-mono34.font: cvtfont.py Makefile
-	./cvtfont.py $(FONT_FILE) 34 mono34 32-126 >$@ || { rm -f $@; exit 1; }
+mono34.font: cvtfont.py Makefile PATCHES
+	./cvtfont.py $(FONT_FILE) 34 mono34 32-126 PATCHES >$@ || \
+	    { rm -f $@; exit 1; }
 
 # only decimal digits
-mono36.font: cvtfont.py Makefile
-	./cvtfont.py $(FONT_FILE) 36 mono36 48-57 >$@ || { rm -f $@; exit 1; }
+mono36.font: cvtfont.py Makefile PATCHES
+	./cvtfont.py $(FONT_FILE) 36 mono36 48-57 PATCHES >$@ || \
+	    { rm -f $@; exit 1; }
 
 # only decimal digits
-mono58.font: cvtfont.py Makefile
-	./cvtfont.py $(FONT_FILE) 58 mono58 48-57 >$@ || { rm -f $@; exit 1; }
+mono58.font: cvtfont.py Makefile PATCHES
+	./cvtfont.py $(FONT_FILE) 58 mono58 48-57 PATCHES >$@ || \
+	    { rm -f $@; exit 1; }
 
 clean::
 	rm -f $(FONTS)

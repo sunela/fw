@@ -18,8 +18,8 @@
 /* --- Diagonal cross ------------------------------------------------------ */
 
 
-void gfx_cross(struct gfx_drawable *da, unsigned x, unsigned y, unsigned r,
-    unsigned w, gfx_color color)
+void gfx_diagonal_cross(struct gfx_drawable *da, unsigned x, unsigned y,
+    unsigned r, unsigned w, gfx_color color)
 {
 	unsigned d0 = (r - w) / 1.414;
 	unsigned d1 = (r + w) / 1.414;

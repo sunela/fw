@@ -206,7 +206,8 @@ static void first_button(unsigned col, unsigned row, gfx_color bg)
 			gfx_equilateral(&da, x, y, BUTTON_H * 0.7, -1,
 			    GFX_BLACK);
 		else
-			gfx_cross(&da, x, y, BUTTON_H * 0.4, 4, GFX_BLACK);
+			gfx_diagonal_cross(&da, x, y, BUTTON_H * 0.4, 4,
+			    GFX_BLACK);
 	} else if (col == 1) {	// "0"
 		base(x, y, bg);
 		first_label(x, y, first_map[0]);

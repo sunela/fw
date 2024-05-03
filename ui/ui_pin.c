@@ -120,7 +120,7 @@ static void pin_button(unsigned col, unsigned row, gfx_color bg)
 	if (row > 0) {
 		pin_digit(x, y, 1 + col + (3 - row) * 3);
 	} else if (col == 0) {	// X
-		gfx_cross(&da, x, y, BUTTON_R * 0.8, 4, GFX_BLACK);
+		gfx_diagonal_cross(&da, x, y, BUTTON_R * 0.8, 4, GFX_BLACK);
 	} else if (col == 1) {	// "0"
 		pin_digit(x, y, 0);
 	} else {	// >

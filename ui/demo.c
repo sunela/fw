@@ -519,6 +519,32 @@ static bool demo_arc(char *const *args, unsigned n_args)
 }
 
 
+/* Draw a power symbol */
+
+static bool demo_powersym(char *const *args, unsigned n_args)
+{
+	unsigned r = 50;
+	unsigned lw = 15;
+
+	switch (n_args) {
+	case 0:
+		break;
+	case 2:
+		lw = atoi(args[1]);
+		/* fall through */
+	case 1:
+		r = atoi(args[0]);
+		break;
+	default:
+		return 0;
+	}
+
+	gfx_power_sym(&da, GFX_WIDTH / 2, GFX_HEIGHT / 2, r, lw,
+	    GFX_WHITE, GFX_BLACK);
+	return 1;
+}
+
+
 /* --- Initialization ------------------------------------------------------ */
 
 
@@ -548,6 +574,7 @@ static const struct demo {
 	{ "align",	demo_align,	"text x-align y-align" },
 	{ "time",	demo_time,	"" },
 	{ "arc",	demo_arc,	"from to" },
+	{ "powersym",	demo_powersym,	"[r [lw]]"  },
 };
 
 

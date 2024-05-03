@@ -53,8 +53,8 @@ void gfx_rect_xy(struct gfx_drawable *da, unsigned x, unsigned y, unsigned w,
 	gfx_color *p = da->fb + y * da->w + x;
 	unsigned ix, iy;
 
-	assert(x < da->w && x + w <= da->w);
-	assert(y < da->h && y + h <= da->h);
+	assert(x < da->w && w <= da->w && x + w <= da->w);
+	assert(y < da->h && h <= da->h && y + h <= da->h);
 	for (iy = 0; iy != h; iy++) {
 		/*
 		 * @@@ could use memset if all bytes of bg have the same value,

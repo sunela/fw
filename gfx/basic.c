@@ -47,38 +47,31 @@ static void damage(struct gfx_drawable *da, unsigned x, unsigned y,
 /* --- Filled rectangles --------------------------------------------------- */
 
 
-void gfx_rect(struct gfx_drawable *da, const struct gfx_rect *r,
-    gfx_color color)
+void gfx_rect_xy(struct gfx_drawable *da, unsigned x, unsigned y, unsigned w,
+    unsigned h, gfx_color color)
 {
-	gfx_color *p = da->fb + r->y * da->w + r->x;
-	unsigned x, y;
+	gfx_color *p = da->fb + y * da->w + x;
+	unsigned ix, iy;
 
-	assert(r->x < da->w && r->x + r->w <= da->w);
-	assert(r->y < da->h && r->y + r->h <= da->h);
-	for (y = 0; y != r->h; y++) {
+	assert(x < da->w && x + w <= da->w);
+	assert(y < da->h && y + h <= da->h);
+	for (iy = 0; iy != h; iy++) {
 		/*
 		 * @@@ could use memset if all bytes of bg have the same value,
 		 * e.g., black or white.
 		 */
-		for (x = 0; x != r->w; x++)
+		for (ix = 0; ix != w; ix++)
 			*p++ = color;
-		p += da->w - r->w;
+		p += da->w - w;
 	}
-	damage(da, r->x, r->y, r->w, r->h);
+	damage(da, x, y, w, h);
 }
 
 
-void gfx_rect_xy(struct gfx_drawable *da, unsigned x, unsigned y, unsigned w,
-    unsigned h, gfx_color color)
+void gfx_rect(struct gfx_drawable *da, const struct gfx_rect *bb,
+    gfx_color color)
 {
-	struct gfx_rect r = {
-		.x = x,
-		.y = y,
-		.w = w,
-		.h = h,
-	};
-
-	gfx_rect(da, &r, color);
+	gfx_rect_xy(da, bb->x, bb->y, bb->w, bb->h, color);
 }
 
 

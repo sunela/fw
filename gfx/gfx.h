@@ -83,7 +83,7 @@ static inline gfx_color gfx_hex(uint32_t hex)
 #define	GFX_CYAN	GFX_HEX(0x00ffff)
 
 
-void gfx_rect(struct gfx_drawable *da, const struct gfx_rect *r,
+void gfx_rect(struct gfx_drawable *da, const struct gfx_rect *bb,
     gfx_color color);
 void gfx_rect_xy(struct gfx_drawable *da, unsigned x, unsigned y, unsigned w,
     unsigned h, gfx_color color);

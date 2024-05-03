@@ -71,6 +71,36 @@ void gfx_equilateral(struct gfx_drawable *da, unsigned x, unsigned y,
 }
 
 
+/* --- Filled rectangle with rounded corners ------------------------------- */
+
+
+void gfx_rrect_xy(struct gfx_drawable *da, unsigned x, unsigned y, unsigned w,
+    unsigned h, unsigned r, gfx_color color)
+{
+	int dx, dy;
+
+	if (2 * r > h)
+		r = h / 2;
+	if (2 * r > w)
+		r = w / 2;
+	for (dx = 0; dx != 2; dx++)
+                for (dy = 0; dy != 2; dy++)
+                        gfx_disc(da,
+			    x + dx * (w - 1) * dx + r * (1 - dx * 2),
+			    y + dy * (h - 1) * dy + r * (1 - dy * 2), r, color);
+	gfx_rect_xy(da, x + r, y, w - 2 * r, r, color);
+	gfx_rect_xy(da, x, y + r, w, h - 2 * r, color);
+	gfx_rect_xy(da, x + r, y + h - r, w - 2 * r, r, color);
+}
+
+
+void gfx_rrect(struct gfx_drawable *da, const struct gfx_rect *bb, unsigned r,
+    gfx_color color)
+{
+	gfx_rrect_xy(da, bb->x, bb->y, bb->w, bb->h, r, color);
+}
+
+
 /* --- Filled arc ---------------------------------------------------------- */
 
 

@@ -173,22 +173,8 @@ static void draw_input(void)
 
 static void base(unsigned x, unsigned y, gfx_color bg)
 {
-	int dx, dy;
-
-	for (dx = -1; dx <= 1; dx += 2)
-		for (dy = -1; dy <= 1; dy += 2) {
-			gfx_disc(&da,
-			    x + dx * (BUTTON_W / 2 - BUTTON_R - (dx == 1)),
-			    y + dy * (BUTTON_H / 2 - BUTTON_R - (dy == 1)),
-			    BUTTON_R, bg);
-		}
-	gfx_rect_xy(&da, x - BUTTON_W / 2 + BUTTON_R, y - BUTTON_H / 2,
-	    BUTTON_W - 2 * BUTTON_R, BUTTON_R, bg);
-	gfx_rect_xy(&da, x - BUTTON_W / 2, y - BUTTON_H / 2 + BUTTON_R,
-	    BUTTON_W, BUTTON_H - 2 * BUTTON_R, bg);
-	gfx_rect_xy(&da, x - BUTTON_W / 2 + BUTTON_R,
-	    y + BUTTON_H / 2 - BUTTON_R,
-	    BUTTON_W - 2 * BUTTON_R, BUTTON_R, bg);
+	gfx_rrect_xy(&da, x - BUTTON_W / 2, y - BUTTON_H / 2,
+	    BUTTON_W, BUTTON_H, BUTTON_R, bg);
 }
 
 

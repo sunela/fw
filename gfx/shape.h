@@ -18,6 +18,11 @@ void gfx_triangle(struct gfx_drawable *da, unsigned x0, unsigned y0,
 void gfx_equilateral(struct gfx_drawable *da, unsigned x, unsigned y,
     unsigned a, int dir, gfx_color color);
 
+void gfx_rrect(struct gfx_drawable *da, const struct gfx_rect *bb, unsigned r,
+    gfx_color color);
+void gfx_rrect_xy(struct gfx_drawable *da, unsigned x, unsigned y, unsigned w,
+    unsigned h, unsigned r, gfx_color color);
+
 /*
  * Angle a0 is the start angle, a1 the end angle. They are in degrees, must be
  * in the range 0 - 359, increase clockwise, with 0 degrees in the 12 h

@@ -48,11 +48,11 @@ vpath accounts.c ui
 vpath ut_time.c ui
 
 vpath citrine.jpg logo
-vpath mksintab.pl gfx
+vpath mksintab.pl lib
 
 
 ui.o:		citrine.inc
-gfx/shape.c:	sin.inc
+lib/imath.c:	sin.inc
 
 citrine.inc:    citrine.jpg scripts/pnmtorgb.pl
 		jpegtopnm $< | scripts/pnmtorgb.pl >$@ || \

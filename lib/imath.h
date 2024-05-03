@@ -13,4 +13,10 @@
 
 uint32_t isqrt(uint32_t n);
 
+/*
+ * isin returns f * sin(a), for 0 <= a <= 45 degrees.
+ */
+
+unsigned isin(unsigned a, unsigned f);
+
 #endif /* !IMATH_H */

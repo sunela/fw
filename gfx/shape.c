@@ -105,11 +105,6 @@ void gfx_rrect(struct gfx_drawable *da, const struct gfx_rect *bb, unsigned r,
 /* --- Filled arc ---------------------------------------------------------- */
 
 
-static const uint8_t sin_tab[] = {
-#include "sin.inc"
-};
-
-
 static void octant(int *ox, int *oy, int *dx, int *dy, uint8_t oct)
 {
 	static int8_t d[] = { 0, 1, 1, 1, 0, -1, -1, -1 };
@@ -124,7 +119,7 @@ static void octant(int *ox, int *oy, int *dx, int *dy, uint8_t oct)
 static void point_on_arc(short **p, unsigned x, unsigned y, unsigned r,
     unsigned a)
 {
-	uint8_t pos = r * sin_tab[a % 45] / 255;
+	uint8_t pos = r * isin(a % 45, r);
 	int ox, oy, dx, dy;
 
 	octant(&ox, &oy, &dx, &dy, a / 45);

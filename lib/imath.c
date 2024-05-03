@@ -5,7 +5,13 @@
  * A copy of the license can be found in the file LICENSE.MIT
  */
 
+#include <stdint.h>
+#include <assert.h>
+
 #include "imath.h"
+
+
+/* --- isqrt --------------------------------------------------------------- */
 
 
 /*
@@ -35,4 +41,20 @@ uint32_t isqrt(uint32_t n)
 		d >>= 2;	// d_(m-1) = d_m/4
 	}
 	return c;		// c_(-1)
+}
+
+
+/* --- isin ---------------------------------------------------------------- */
+
+
+static const uint8_t sin_tab[] = {
+#include "sin.inc"
+};
+
+
+unsigned isin(unsigned a, unsigned f)
+{
+	assert(a <= 45);
+
+	return f * sin_tab[a] / 255;
 }

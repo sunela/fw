@@ -7,6 +7,7 @@
 
 #include <assert.h>
 
+#include "imath.h"
 #include "gfx.h"
 #include "shape.h"
 
@@ -170,4 +171,50 @@ void gfx_arc(struct gfx_drawable *da, unsigned x, unsigned y, unsigned r,
 	assert(p - v <= 22);
 
 	gfx_poly(da, (p - v) / 2, v, bg);
+}
+
+
+/* --- Power symbol -------------------------------------------------------- */
+
+
+/*
+ * Origin of the power symbol:
+ * https://en.wikipedia.org/wiki/Power_symbol
+ *
+ * We draw the arc such that the gap between the ends of the arc (with rounded
+ * cap) and the vertical bar is equal to the line width. The endpoints of the
+ * arc are therefore, if the arc is centered at (0, 0), at x = +/- 2 * lw,
+ * y = sqrt(r ^ 2 - 4 * lw ^ 2)
+ */
+
+#define	BAR_TOP(r, lw)	((r) + (lw) / 2)
+#define	BAR_BOTTOM(r, lw) ((r) / 4)
+#define	BAR_H(r, lw)	(BAR_TOP(r, lw) - BAR_BOTTOM(r, lw) - 1)
+
+
+void gfx_power_sym(struct gfx_drawable *da, unsigned x, unsigned y, unsigned r,
+    unsigned lw, gfx_color color, gfx_color bg)
+{
+	unsigned or;	/* outer radius */
+	unsigned ey = isqrt(r * r - 4 * lw * lw);
+	float f = 2.0 * lw / ey;
+	int i;
+
+	lw |= 1;	/* we need this for rounded caps */
+	or = r + lw / 2;
+
+	/* broken circle */
+
+	gfx_disc(da, x, y, or, color);
+	gfx_disc(da, x, y, r - lw / 2, bg);
+	gfx_triangle(da, x, y, x - f * or, y - or, x + f * or, y - or, bg);
+	for (i = -1; i <= 1; i += 2)
+		gfx_disc(da, x + i * lw * 2, y - ey, lw / 2, GFX_WHITE);
+
+	/* verical bar */
+
+	gfx_rect_xy(da, x - lw / 2, y - BAR_TOP(r, lw), lw, BAR_H(r, lw),
+	    color);
+	gfx_disc(da, x, y - BAR_TOP(r, lw), lw / 2, color);
+	gfx_disc(da, x, y - BAR_BOTTOM(r, lw), lw / 2, color);
 }

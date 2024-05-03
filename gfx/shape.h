@@ -32,4 +32,7 @@ void gfx_rrect_xy(struct gfx_drawable *da, unsigned x, unsigned y, unsigned w,
 void gfx_arc(struct gfx_drawable *da, unsigned x, unsigned y, unsigned r, 
     unsigned a0, unsigned a1, gfx_color color, gfx_color bg);
 
+void gfx_power_sym(struct gfx_drawable *da, unsigned x, unsigned y, unsigned r,
+    unsigned lw, gfx_color color, gfx_color bg);
+
 #endif /* !SHAPE_H */

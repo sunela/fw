@@ -20,7 +20,8 @@
 
 
 static struct gfx_drawable old_da;
-static gfx_color old_fb[GFX_WIDTH * GFX_HEIGHT];
+static PSRAM gfx_color old_fb[GFX_WIDTH * GFX_HEIGHT];
+static PSRAM gfx_color tmp_fb[GFX_WIDTH * GFX_HEIGHT];
 static unsigned nx, ny;
 
 
@@ -80,7 +81,6 @@ static void ut_overlay_open(void *params)
 	const struct ut_overlay_button *b = p->buttons;
 	const struct ut_overlay_style *s = p->style ? p->style : &default_style;
 	struct gfx_drawable tmp_da;
-	gfx_color tmp_fb[GFX_WIDTH * GFX_HEIGHT];
 	unsigned w, h, ix, iy;
 	unsigned r = DEFAULT_BUTTON_R;
 

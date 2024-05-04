@@ -28,7 +28,7 @@ struct gfx_drawable da;
 unsigned pin_cooldown = 0;
 unsigned pin_attempts = 0;
 
-static gfx_color fb[GFX_WIDTH * GFX_HEIGHT];
+static PSRAM gfx_color fb[GFX_WIDTH * GFX_HEIGHT];
 static const struct ui *current_ui = NULL;
 static struct timer idle_timer;
 static unsigned idle_s;

@@ -18,6 +18,11 @@
 #define GFX_WIDTH	240
 #define GFX_HEIGHT	280
 
+#ifdef SDK
+#define	PSRAM	__attribute__((__section__(".psram_noinit")))
+#else
+#define	PSRAM
+#endif
 
 extern int64_t time_offset;
 

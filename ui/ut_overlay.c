@@ -50,6 +50,80 @@ void ui_overlay_sym_power(struct gfx_drawable *tmp_da,
 }
 
 
+void ui_overlay_sym_delete(struct gfx_drawable *tmp_da,
+    const struct ut_overlay_params *params, unsigned x, unsigned y, void *user)
+{
+	const struct ut_overlay_style *s =
+	    params->style ? params->style : &default_style;
+
+	gfx_diagonal_cross(tmp_da, x, y, s->size * 0.4, s->size * 0.1,
+	    s->button_fg);
+}
+
+
+void ui_overlay_sym_add(struct gfx_drawable *tmp_da,
+    const struct ut_overlay_params *params, unsigned x, unsigned y, void *user)
+{
+	const struct ut_overlay_style *s =
+	    params->style ? params->style : &default_style;
+	unsigned side = s->size * 0.7;
+
+	gfx_greek_cross(tmp_da, x - side / 2, y - side / 2,
+	    side, side, s->size * 0.15, s->button_fg);
+}
+
+
+void ui_overlay_sym_back(struct gfx_drawable *tmp_da,
+    const struct ut_overlay_params *params, unsigned x, unsigned y, void *user)
+{
+	const struct ut_overlay_style *s =
+	    params->style ? params->style : &default_style;
+
+	gfx_equilateral(tmp_da, x + s->size * 0.05, y, s->size * 0.7, -1,
+	    s->button_fg);
+}
+
+
+void ui_overlay_sym_next(struct gfx_drawable *tmp_da,
+    const struct ut_overlay_params *params, unsigned x, unsigned y, void *user)
+{
+	const struct ut_overlay_style *s =
+	    params->style ? params->style : &default_style;
+
+	gfx_equilateral(tmp_da, x - s->size * 0.05, y, s->size * 0.7, 1,
+	    s->button_fg);
+}
+
+
+void ui_overlay_sym_edit(struct gfx_drawable *tmp_da,
+    const struct ut_overlay_params *params, unsigned x, unsigned y, void *user)
+{
+	const struct ut_overlay_style *s =
+	    params->style ? params->style : &default_style;
+	unsigned side;
+
+	side = gfx_pencil_sym(NULL, 0, 0,
+	    s->size * 0.4, s->size * 0.7, s->size * 0.1,	// wi len lw
+	    0, 0);
+	gfx_pencil_sym(tmp_da, x - side * 0.45, y - side / 2,
+	    s->size * 0.4, s->size * 0.7, s->size * 0.1,	// wi len lw
+	    s->button_fg, s->button_bg);
+}
+
+
+void ui_overlay_sym_setup(struct gfx_drawable *tmp_da,
+    const struct ut_overlay_params *params, unsigned x, unsigned y, void *user)
+{
+	const struct ut_overlay_style *s =
+	    params->style ? params->style : &default_style;
+
+	gfx_gear_sym(tmp_da, x, y,
+	    s->size * 0.3, s->size * 0.1,			// ro ri
+	    s->size * 0.2, s->size * 0.15, s->size * 0.1,	// tb tt th
+	    s->button_fg, s->button_bg);
+}
+
+
 /* --- Event handling ------------------------------------------------------ */
 
 

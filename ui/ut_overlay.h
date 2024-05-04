@@ -39,5 +39,17 @@ struct ut_overlay_params {
 
 void ui_overlay_sym_power(struct gfx_drawable *tmp_da,
     const struct ut_overlay_params *params, unsigned x, unsigned y, void *user);
+void ui_overlay_sym_delete(struct gfx_drawable *tmp_da,
+    const struct ut_overlay_params *params, unsigned x, unsigned y, void *user);
+void ui_overlay_sym_add(struct gfx_drawable *tmp_da,
+    const struct ut_overlay_params *params, unsigned x, unsigned y, void *user);
+void ui_overlay_sym_back(struct gfx_drawable *tmp_da,
+    const struct ut_overlay_params *params, unsigned x, unsigned y, void *user);
+void ui_overlay_sym_next(struct gfx_drawable *tmp_da,
+    const struct ut_overlay_params *params, unsigned x, unsigned y, void *user);
+void ui_overlay_sym_edit(struct gfx_drawable *tmp_da,
+    const struct ut_overlay_params *params, unsigned x, unsigned y, void *user);
+void ui_overlay_sym_setup(struct gfx_drawable *tmp_da,
+    const struct ut_overlay_params *params, unsigned x, unsigned y, void *user);
 
 #endif /* !UT_ENTRY_H */

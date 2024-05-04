@@ -9,7 +9,7 @@
 
 #include "hal.h"
 #include "debug.h"
-//#include "timer.h"
+#include "timer.h"
 #include "gfx.h"
 #include "shape.h"
 #include "ui.h"
@@ -32,8 +32,10 @@ static const struct ut_overlay_style default_style = {
 	.halo		= 8,
 	.button_fg	= GFX_BLACK,
 	.button_bg	= GFX_WHITE,
-	.halo_bg	= GFX_BLUE,
+	.halo_bg	= GFX_BLACK,
 };
+
+static struct timer t_overlay_idle;
 
 
 /* --- Wrappers for common symbols ----------------------------------------- */
@@ -129,6 +131,16 @@ void ui_overlay_sym_setup(struct gfx_drawable *tmp_da,
 
 static void ut_overlay_tap(unsigned x, unsigned y)
 {
+	// @@@ find out which button was pressed, then act accordingly
+	ui_switch(&ut_setup, NULL);
+}
+
+
+/* --- Idle timer ---------------------------------------------------------- */
+
+
+static void overlay_idle(void *user)
+{
 	ui_return();
 }
 
@@ -207,19 +219,25 @@ static void ut_overlay_open(void *params)
 
 			if (b == p->buttons + p->n_buttons)
 				break;
-			draw_button(&tmp_da, p, b, x, y);
+			if (b->draw)
+				draw_button(&tmp_da, p, b, x, y);
 			b++;
 		}
 	gfx_copy(&da, 0, 0, &tmp_da, 0, 0, da.w, da.h, GFX_TRANSPARENT);
 
-//	timer_init(&t_button);
+	timer_init(&t_overlay_idle);
+	timer_set(&t_overlay_idle, 1000 * IDLE_OVERLAY_S, overlay_idle, NULL);
+
+	/* make sure we don't hit the caller's idle timer */
+	progress();
 }
 
 
 static void ut_overlay_close(void)
 {
 	gfx_copy(&da, 0, 0, &old_da, 0, 0, da.w, da.h, -1);
-//	timer_cancel(&t_button);
+	timer_cancel(&t_overlay_idle);
+	progress();
 }
 
 

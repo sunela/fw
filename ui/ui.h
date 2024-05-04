@@ -16,10 +16,14 @@
 
 #define	DEBOUNCE_MS	20
 
-#define	IDLE_PIN_S	5
-#define	IDLE_HOLD_S	5
-#define	IDLE_ACCOUNTS_S	15	
-#define	IDLE_ACCOUNT_S	60
+#define	IDLE_PIN_S	5	/* very short, in case of pocket activation */
+#define	IDLE_HOLD_S	5	/* not much to look at. Also, pocket ... */
+#define	IDLE_ACCOUNTS_S	15	/* keep it short */
+#define	IDLE_ACCOUNT_S	60	/* give people enough time to interact */
+#define	IDLE_OVERLAY_S	10	/* note: this is "back", not "off" */
+#define	IDLE_SETUP_S	15	/* keep it short, in case we got there by
+				   accident */
+#define	IDLE_SET_TIME_S	30	/* long - the page is complex */
 
 #define	MAX_INPUT_LEN	32	/* for ut_entry */
 
@@ -87,6 +91,7 @@ extern const struct ui ui_account;
 extern const struct ui ut_entry;
 extern const struct ui ut_time;
 extern const struct ui ut_overlay;
+extern const struct ui ut_setup;
 
 void progress(void);
 void set_idle(unsigned seconds);

@@ -137,6 +137,14 @@ static void ut_time_tap(unsigned x, unsigned y)
 }
 
 
+static void ut_time_to(unsigned from_x, unsigned from_y,
+    unsigned to_x, unsigned to_y, enum ui_swipe swipe)
+{
+	if (swipe == us_left)
+		ui_return();
+}
+
+
 /* --- Open/close ---------------------------------------------------------- */
 
 
@@ -156,6 +164,8 @@ static void ut_time_open(void *params)
 	uw_list_end(&list);
 	show_time();
 	show_sync_mode();
+
+	set_idle(IDLE_SET_TIME_S);
 }
 
 
@@ -191,6 +201,7 @@ static void ut_time_tick(void)
 
 static const struct ui_events ut_time_events = {
 	.touch_tap	= ut_time_tap,
+	.touch_to	= ut_time_to,
 	.tick		= ut_time_tick,
 };
 

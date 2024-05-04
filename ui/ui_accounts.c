@@ -11,6 +11,7 @@
 #include "gfx.h"
 #include "text.h"
 #include "uw_list.h"
+#include "ut_overlay.h"
 #include "accounts.h"
 #include "ui.h"
 
@@ -32,7 +33,7 @@ static const struct uw_list_style style = {
 static struct uw_list list;
 
 
-/* --- Event handling ------------------------------------------------------ */
+/* --- Tap event ----------------------------------------------------------- */
 
 
 static void ui_accounts_tap(unsigned x, unsigned y)
@@ -43,6 +44,49 @@ static void ui_accounts_tap(unsigned x, unsigned y)
 	if (!entry)
 		return;
 	ui_call(&ui_account, uw_list_user(entry));
+}
+
+
+/* --- Long press event ---------------------------------------------------- */
+
+
+static void power_off(void *user)
+{
+	turn_off();
+}
+
+
+static void add_account(void *user)
+{
+	// @@@
+}
+
+
+static void enter_setup(void *user)
+{
+	ui_switch(&ut_setup, NULL);
+}
+
+
+static void ui_accounts_long(unsigned x, unsigned y)
+{
+	/* @@@ future: if in sub-folder, edit folder name */
+	if (y < LIST_Y0)
+		return;
+
+	static const struct ut_overlay_button buttons[] = {
+		{ ui_overlay_sym_power,	power_off, NULL },
+		{ ui_overlay_sym_add,	add_account, NULL },
+		{ NULL, },
+		{ ui_overlay_sym_setup,	enter_setup, NULL },
+	};
+	struct ut_overlay_params prm = {
+		.buttons	= buttons,
+		.n_buttons	= 4,
+        };
+
+	ui_call(&ut_overlay, &prm);
+	
 }
 
 
@@ -89,6 +133,7 @@ static void ui_accounts_resume(void)
 
 static const struct ui_events ui_accounts_events = {
 	.touch_tap	= ui_accounts_tap,
+	.touch_long	= ui_accounts_long,
 };
 
 const struct ui ui_accounts = {

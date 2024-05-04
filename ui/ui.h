@@ -86,6 +86,7 @@ extern const struct ui ui_account;
 
 extern const struct ui ut_entry;
 extern const struct ui ut_time;
+extern const struct ui ut_overlay;
 
 void progress(void);
 void set_idle(unsigned seconds);

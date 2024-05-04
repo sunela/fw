@@ -134,7 +134,7 @@ static void octant(int *ox, int *oy, int *dx, int *dy, uint8_t oct)
 static void point_on_arc(short **p, unsigned x, unsigned y, unsigned r,
     unsigned a)
 {
-	uint8_t pos = r * isin(a % 45, r);
+	uint8_t pos = isin(a % 45, r);
 	int ox, oy, dx, dy;
 
 	octant(&ox, &oy, &dx, &dy, a / 45);

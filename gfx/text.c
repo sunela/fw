@@ -127,9 +127,10 @@ static void area_rendered(struct text_area *a, const char *s,
 static void area_max(struct text_area *a, unsigned len,
     const struct font *font)
 {
+	unsigned max_adv = 0;
+
 	if (len) {
 		const struct character *c;
-		unsigned max_adv = 0;
 
 		/* @@@ we should do that at build time */
 		for (c = font->chars; c != font->chars + font->n_chars; c++)
@@ -142,6 +143,7 @@ static void area_max(struct text_area *a, unsigned len,
 	}
 	a->y0 = font->oy;
 	a->y1 = font->oy + font->h - 1;
+	a->next = font->ox + max_adv * len;
 }
 
 

@@ -82,6 +82,23 @@ static inline gfx_color gfx_hex(uint32_t hex)
 #define	GFX_MAGENTA	GFX_HEX(0xff00ff)
 #define	GFX_CYAN	GFX_HEX(0x00ffff)
 
+/*
+ * Preferred color for chroma keying. GFX_TRANSPARENT looks like GFX_GREEN, but  * its RGB565 value differs by one bit. One can use gfx_not_transparent (or,
+ * for static initializers GFX_NOT_TRANSPARENT) to filter color choices, e.g.,
+ * if using pixels obtained from a camera.
+ */
+
+#define	GFX_TRANSPARENT	GFX_HEX(0xfff8ff)
+
+
+#define	GFX_NOT_TRANSPARENT(color) \
+	((color) != GFX_TRANSPARENT ? (color) : GFX_GREEN)
+
+static inline gfx_color gfx_not_transparent(gfx_color color)
+{
+	return color== GFX_TRANSPARENT ? color : GFX_GREEN;
+}
+
 
 void gfx_rect(struct gfx_drawable *da, const struct gfx_rect *bb,
     gfx_color color);

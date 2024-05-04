@@ -239,11 +239,11 @@ unsigned gfx_power_sym(struct gfx_drawable *da, unsigned x, unsigned y, unsigned
 
 
 unsigned gfx_pencil_sym(struct gfx_drawable *da, unsigned x, unsigned y,
-    unsigned width, unsigned lenght, unsigned lw,
+    unsigned width, unsigned length, unsigned lw,
     gfx_color color, gfx_color bg)
 {
 	unsigned d = width / SQRT_2;
-	unsigned side = lenght / SQRT_2 + d;
+	unsigned side = length / SQRT_2 + d;
 	short vo[10] = {
 		x + side - 1,		y + d ,
 		x + side - 1 - d,	y,

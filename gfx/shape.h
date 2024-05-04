@@ -66,7 +66,7 @@ unsigned gfx_power_sym(struct gfx_drawable *da, unsigned x, unsigned y,
  */
 
 unsigned gfx_pencil_sym(struct gfx_drawable *da, unsigned x, unsigned y,
-    unsigned width, unsigned lenght, unsigned lw,
+    unsigned width, unsigned length, unsigned lw,
     gfx_color color, gfx_color bg);
 
 /*

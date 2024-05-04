@@ -219,7 +219,7 @@ void gfx_power_sym(struct gfx_drawable *da, unsigned x, unsigned y, unsigned r,
 	gfx_disc(da, x, y, r - lw / 2, bg);
 	gfx_triangle(da, x, y, x - f * or, y - or, x + f * or, y - or, bg);
 	for (i = -1; i <= 1; i += 2)
-		gfx_disc(da, x + i * lw * 2, y - ey, lw / 2, GFX_WHITE);
+		gfx_disc(da, x + i * lw * 2, y - ey, lw / 2, color);
 
 	/* verical bar */
 

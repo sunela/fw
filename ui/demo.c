@@ -582,19 +582,19 @@ static bool demo_gearsym(char *const *args, unsigned n_args)
 static bool demo_overlay(char *const *args, unsigned n_args)
 {
 	static const struct ut_overlay_button buttons[] = {
-		{ ui_overlay_sym_power, NULL, NULL },
-		{ NULL, },
-		{ NULL, },
-		{ NULL, },
-		{ NULL, },
-		{ NULL, },
-		{ NULL, },
+		{ ui_overlay_sym_power,		NULL, NULL },
+		{ ui_overlay_sym_delete,	NULL, NULL },
+		{ ui_overlay_sym_add,		NULL, NULL },
+		{ ui_overlay_sym_back,		NULL, NULL },
+		{ ui_overlay_sym_next,		NULL, NULL },
+		{ ui_overlay_sym_edit,		NULL, NULL },
+		{ ui_overlay_sym_setup,		NULL, NULL },
 		{ NULL, },
 		{ NULL }
 	};
 	struct ut_overlay_params prm = {
 		.buttons	= buttons,
-		.n_buttons	= 4,
+		.n_buttons	= 7,
 	};
 
 	switch (n_args) {

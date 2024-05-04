@@ -47,17 +47,22 @@ void gfx_arc(struct gfx_drawable *da, unsigned x, unsigned y, unsigned r,
 
 /*
  * Power symbol (arc with vertical bar) centered at (x, y), with arc radius r.
+ *
+ * gfx_power_sym returns the distance between the top of the vertical bar and
+ * the arc center, which is greater than the radius of the arc. da can be set
+ * to zero if we are only interested in the return value.
  */
 
-void gfx_power_sym(struct gfx_drawable *da, unsigned x, unsigned y, unsigned r,
-    unsigned lw, gfx_color color, gfx_color bg);
+unsigned gfx_power_sym(struct gfx_drawable *da, unsigned x, unsigned y,
+    unsigned r, unsigned lw, gfx_color color, gfx_color bg);
 
 /*
  * Edit symbol (pencil) inscribed in a square with its upper left corner at
  * (x, y). "width" is the (outer) width of the pen. "length" is the total
  * length, from tip to the flat top.
  *
- * gfx_pencil_sym returns the length of the side of the square.
+ * gfx_pencil_sym returns the length of the side of the square. "da" can be set
+ * to NULL if we are only interested in the return value.
  */
 
 unsigned gfx_pencil_sym(struct gfx_drawable *da, unsigned x, unsigned y,

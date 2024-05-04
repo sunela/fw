@@ -202,7 +202,7 @@ void gfx_arc(struct gfx_drawable *da, unsigned x, unsigned y, unsigned r,
 #define	BAR_H(r, lw)	(BAR_TOP(r, lw) - BAR_BOTTOM(r, lw) - 1)
 
 
-void gfx_power_sym(struct gfx_drawable *da, unsigned x, unsigned y, unsigned r,
+unsigned gfx_power_sym(struct gfx_drawable *da, unsigned x, unsigned y, unsigned r,
     unsigned lw, gfx_color color, gfx_color bg)
 {
 	unsigned or;	/* outer radius */
@@ -213,20 +213,25 @@ void gfx_power_sym(struct gfx_drawable *da, unsigned x, unsigned y, unsigned r,
 	lw |= 1;	/* we need this for rounded caps */
 	or = r + lw / 2;
 
-	/* broken circle */
+	if (da) {
+		/* broken circle */
 
-	gfx_disc(da, x, y, or, color);
-	gfx_disc(da, x, y, r - lw / 2, bg);
-	gfx_triangle(da, x, y, x - f * or, y - or, x + f * or, y - or, bg);
-	for (i = -1; i <= 1; i += 2)
-		gfx_disc(da, x + i * lw * 2, y - ey, lw / 2, color);
+		gfx_disc(da, x, y, or, color);
+		gfx_disc(da, x, y, r - lw / 2, bg);
+		gfx_triangle(da, x, y, x - f * or, y - or, x + f * or, y - or,
+		    bg);
+		for (i = -1; i <= 1; i += 2)
+			gfx_disc(da, x + i * lw * 2, y - ey, lw / 2, color);
 
-	/* verical bar */
+		/* verical bar */
 
-	gfx_rect_xy(da, x - lw / 2, y - BAR_TOP(r, lw), lw, BAR_H(r, lw),
-	    color);
-	gfx_disc(da, x, y - BAR_TOP(r, lw), lw / 2, color);
-	gfx_disc(da, x, y - BAR_BOTTOM(r, lw), lw / 2, color);
+		gfx_rect_xy(da, x - lw / 2, y - BAR_TOP(r, lw),
+		    lw, BAR_H(r, lw), color);
+		gfx_disc(da, x, y - BAR_TOP(r, lw), lw / 2, color);
+		gfx_disc(da, x, y - BAR_BOTTOM(r, lw), lw / 2, color);
+	}
+
+	return BAR_TOP(r, lw) + lw / 2;
 }
 
 
@@ -253,8 +258,10 @@ unsigned gfx_pencil_sym(struct gfx_drawable *da, unsigned x, unsigned y,
 		vo[8] - lw / SQRT_2,	vo[9] - lw / SQRT_2
 	};
 
-	gfx_poly(da, 5, vo, color);
-	gfx_poly(da, 4, vi, bg);
+	if (da) {
+		gfx_poly(da, 5, vo, color);
+		gfx_poly(da, 4, vi, bg);
+	}
 
 	return side;
 }

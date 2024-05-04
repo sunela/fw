@@ -5,6 +5,7 @@
  * A copy of the license can be found in the file LICENSE.MIT
  */
 
+#include <string.h>
 #include <assert.h>
 
 #include "imath.h"
@@ -14,15 +15,18 @@
 
 //#define DEBUG
 
+#define	SQRT_2	1.414
+#define	PI	3.1416
+
 
 /* --- Diagonal cross ------------------------------------------------------ */
 
 
 void gfx_diagonal_cross(struct gfx_drawable *da, unsigned x, unsigned y,
-    unsigned r, unsigned w, gfx_color color)
+    unsigned r, unsigned lw, gfx_color color)
 {
-	unsigned d0 = (r - w) / 1.414;
-	unsigned d1 = (r + w) / 1.414;
+	unsigned d0 = (r - lw) / SQRT_2;
+	unsigned d1 = (r + lw) / SQRT_2;
 	short v1[] = {
 		x + d0, y - d1,
 		x + d1, y - d0,
@@ -38,6 +42,17 @@ void gfx_diagonal_cross(struct gfx_drawable *da, unsigned x, unsigned y,
 
 	gfx_poly(da, 4, v1, color);
 	gfx_poly(da, 4, v2, color);
+}
+
+
+/* --- Greek cross (plus sign) --------------------------------------------- */
+
+
+void gfx_greek_cross(struct gfx_drawable *da, unsigned x, unsigned y,
+    unsigned w, unsigned h, unsigned lw, gfx_color color)
+{
+	gfx_rect_xy(da, x, y + h / 2- lw / 2, w, lw, color);
+	gfx_rect_xy(da, x + w / 2 - lw / 2, y, lw, h, color);
 }
 
 
@@ -212,4 +227,98 @@ void gfx_power_sym(struct gfx_drawable *da, unsigned x, unsigned y, unsigned r,
 	    color);
 	gfx_disc(da, x, y - BAR_TOP(r, lw), lw / 2, color);
 	gfx_disc(da, x, y - BAR_BOTTOM(r, lw), lw / 2, color);
+}
+
+
+/* --- Pencil (edit symbol) ------------------------------------------------ */
+
+
+unsigned gfx_pencil_sym(struct gfx_drawable *da, unsigned x, unsigned y,
+    unsigned width, unsigned lenght, unsigned lw,
+    gfx_color color, gfx_color bg)
+{
+	unsigned d = width / SQRT_2;
+	unsigned side = lenght / SQRT_2 + d;
+	short vo[10] = {
+		x + side - 1,		y + d ,
+		x + side - 1 - d,	y,
+		x,			y + side - 1 - d,
+		x,			y + side - 1,
+		x + d,			y + side - 1
+	};
+	short vi[8] = {
+		vo[0] - lw * SQRT_2,	vo[1],
+		vo[2],			vo[3] + lw * SQRT_2,
+		vo[4] + lw / SQRT_2,	vo[5] + lw / SQRT_2,
+		vo[8] - lw / SQRT_2,	vo[9] - lw / SQRT_2
+	};
+
+	gfx_poly(da, 5, vo, color);
+	gfx_poly(da, 4, vi, bg);
+
+	return side;
+}
+
+
+/* --- Gear (setup (symbol) ------------------------------------------------ */
+
+
+/*
+ * https://en.wikipedia.org/wiki/Rotation_matrix
+ * https://en.wikipedia.org/wiki/Exact_trigonometric_values
+ * https://en.wikipedia.org/wiki/Matrix_multiplication
+ */
+
+static const float matrix_identity[2][2] = { { 1, 0 }, { 0, 1 }};
+static const float matrix_45deg[2][2] =
+    { { SQRT_2 / 2, -SQRT_2 / 2 }, { SQRT_2 / 2, SQRT_2 / 2 }};
+
+
+static void matrix_mult(float res[2][2], const float a[2][2],
+    const float b[2][2])
+{
+	unsigned i, j, k;
+
+	for (i = 0; i != 2; i++)
+		for (j = 0; j != 2; j++) {
+			res[i][j] = 0;
+			for (k = 0; k != 2; k++)
+				res[i][j] += a[i][k] * b[k][j];
+		}
+}
+
+
+void gfx_gear_sym(struct gfx_drawable *da, unsigned x, unsigned y,
+    unsigned ro, unsigned ri, unsigned tb, unsigned tt, unsigned th,
+    gfx_color color, gfx_color bg)
+{
+	float m[2][2];
+	int rb = isqrt(ro * ro - tb * tb / 4);
+	short trap[] = {
+		-tb / 2,	rb,
+		-tt / 2,	ro + th,
+		tt / 2,		ro + th,
+		tb / 2,		rb,
+		
+	};
+	unsigned o, i;
+
+	memcpy(m, matrix_identity, sizeof(m));
+	gfx_disc(da, x, y, ro, color);
+	x++; /* @@@ for gfx_poly weirdness */
+	for (o = 0; o != 8; o++) {
+		float tmp[2][2];
+		short v[8];
+
+		for (i = 0; i != 8; i += 2) {
+			v[i] = x + trap[i] * m[0][0] + trap[i + 1] * m[0][1];
+			v[i + 1] =
+			    y + trap[i] * m[1][0] + trap[i + 1] * m[1][1];
+		}
+		gfx_poly(da, 4, v, color);
+		matrix_mult(tmp, m, matrix_45deg);
+		memcpy(m, tmp, sizeof(m));
+	}
+	x--; /* @@@ */
+	gfx_disc(da, x, y, ri, bg);
 }

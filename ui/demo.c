@@ -24,6 +24,7 @@
 #include "hmac.h"
 #include "hotp.h"
 #include "base32.h"
+#include "ut_overlay.h"
 #include "ui.h"
 #include "demo.h"
 
@@ -576,6 +577,41 @@ static bool demo_gearsym(char *const *args, unsigned n_args)
 }
 
 
+/* Show a button overlay */
+
+static bool demo_overlay(char *const *args, unsigned n_args)
+{
+	static const struct ut_overlay_button buttons[] = {
+		{ ui_overlay_sym_power, NULL, NULL },
+		{ NULL, },
+		{ NULL, },
+		{ NULL, },
+		{ NULL, },
+		{ NULL, },
+		{ NULL, },
+		{ NULL, },
+		{ NULL }
+	};
+	struct ut_overlay_params prm = {
+		.buttons	= buttons,
+		.n_buttons	= 4,
+	};
+
+	switch (n_args) {
+	case 0:
+		break;
+	case 1:
+		prm.n_buttons = atoi(args[0]);
+		break;
+	default:
+		return 0;
+	}
+
+	ui_switch(&ut_overlay, &prm);
+	return 1;
+}
+
+
 /* --- Initialization ------------------------------------------------------ */
 
 
@@ -607,6 +643,7 @@ static const struct demo {
 	{ "arc",	demo_arc,	"from to" },
 	{ "powersym",	demo_powersym,	"[r [lw]]"  },
 	{ "gearsym",	demo_gearsym,	"[ro ri tb tt th]" },
+	{ "overlay",	demo_overlay,	"[n]" },
 };
 
 

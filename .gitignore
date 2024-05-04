@@ -1,0 +1,15 @@
+# Generated files of the application
+fw
+sim
+obj-*/
+sdk/build/
+font/show
+font/*.font
+sin.inc
+
+# Generated files of tools
+tools/io
+tools/*.[do]
+
+# vim temporary files
+*.sw?

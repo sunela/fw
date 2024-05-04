@@ -545,6 +545,37 @@ static bool demo_powersym(char *const *args, unsigned n_args)
 }
 
 
+/* Draw a gear symbol */
+
+static bool demo_gearsym(char *const *args, unsigned n_args)
+{
+	// Big gear (which looks much better): 60 30 36 20 16
+	unsigned ro = 12;
+	unsigned ri = 6;
+	unsigned tb = 10;
+	unsigned tt = 6;
+	unsigned th = 4;
+	
+	switch (n_args) {
+	case 0:
+		break;
+	case 5:
+		ro = atoi(args[0]);
+		ri = atoi(args[1]);
+		tb = atoi(args[2]);
+		tt = atoi(args[3]);
+		th = atoi(args[4]);
+		break;
+	default:
+		return 0;
+	}
+
+	gfx_gear_sym(&da, GFX_WIDTH / 2, GFX_HEIGHT / 2, ro, ri, tb, tt, th,
+	    GFX_WHITE, GFX_BLACK);
+	return 1;
+}
+
+
 /* --- Initialization ------------------------------------------------------ */
 
 
@@ -575,6 +606,7 @@ static const struct demo {
 	{ "time",	demo_time,	"" },
 	{ "arc",	demo_arc,	"from to" },
 	{ "powersym",	demo_powersym,	"[r [lw]]"  },
+	{ "gearsym",	demo_gearsym,	"[ro ri tb tt th]" },
 };
 
 

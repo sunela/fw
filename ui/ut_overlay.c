@@ -5,6 +5,7 @@
  * A copy of the license can be found in the file LICENSE.MIT
  */
 
+#include <stddef.h>
 #include <stdlib.h>
 
 #include "hal.h"
@@ -16,13 +17,22 @@
 #include "ut_overlay.h"
 
 
+#define	MAX_BUTTONS		9
+
 #define	DEFAULT_BUTTON_R	12
+
+
+struct button_ref {
+	void (*fn)(void *user);	/* skip if NULL */
+	void *user;
+	struct gfx_rect bb;
+};
 
 
 static struct gfx_drawable old_da;
 static PSRAM gfx_color old_fb[GFX_WIDTH * GFX_HEIGHT];
 static PSRAM gfx_color tmp_fb[GFX_WIDTH * GFX_HEIGHT];
-static unsigned nx, ny;
+static struct button_ref refs[MAX_BUTTONS];
 
 
 static const struct ut_overlay_style default_style = {
@@ -131,8 +141,18 @@ void ui_overlay_sym_setup(struct gfx_drawable *tmp_da,
 
 static void ut_overlay_tap(unsigned x, unsigned y)
 {
-	// @@@ find out which button was pressed, then act accordingly
-	ui_switch(&ut_setup, NULL);
+	const struct button_ref *ref;
+
+	for (ref = refs; ref != refs + MAX_BUTTONS; ref++) {
+		if (!ref->fn)
+			continue;
+		if (x < ref->bb.x || x >= ref->bb.x + ref->bb.w)
+			continue;
+		if (y < ref->bb.y || y >= ref->bb.y + ref->bb.h)
+			continue;
+		ref->fn(ref->user);
+		break;
+	}
 }
 
 
@@ -172,7 +192,9 @@ static void ut_overlay_open(void *params)
 	const struct ut_overlay_params *p = params;
 	const struct ut_overlay_button *b = p->buttons;
 	const struct ut_overlay_style *s = p->style ? p->style : &default_style;
+	struct button_ref *ref = refs;
 	struct gfx_drawable tmp_da;
+	unsigned nx, ny;
 	unsigned w, h, ix, iy;
 	unsigned r = DEFAULT_BUTTON_R;
 
@@ -180,7 +202,7 @@ static void ut_overlay_open(void *params)
 	gfx_da_init(&tmp_da, da.w, da.h, tmp_fb);
 	gfx_copy(&old_da, 0, 0, &da, 0, 0, da.w, da.h, -1);
 	gfx_clear(&tmp_da, GFX_TRANSPARENT);
-	
+
 	switch (p->n_buttons) {
 	case 1:
 		nx = 1;
@@ -225,11 +247,23 @@ static void ut_overlay_open(void *params)
 
 			if (b == p->buttons + p->n_buttons)
 				break;
-			if (b->draw)
+			if (b->draw) {
 				draw_button(&tmp_da, p, b, x, y);
+				ref->fn = b->fn;
+				ref->user = b->user;
+				ref->bb.x = x - s->size / 2 - s->gap / 2;
+				ref->bb.y = y - s->size / 2 - s->gap / 2;
+				ref->bb.w = ref->bb.h = s->size + s->gap;
+				ref++;
+			}
 			b++;
 		}
 	gfx_copy(&da, 0, 0, &tmp_da, 0, 0, da.w, da.h, GFX_TRANSPARENT);
+
+	while (ref != refs + MAX_BUTTONS) {
+		ref->fn = NULL;
+		ref++;
+	}
 
 	timer_init(&t_overlay_idle);
 	timer_set(&t_overlay_idle, 1000 * IDLE_OVERLAY_S, overlay_idle, NULL);

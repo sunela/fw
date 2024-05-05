@@ -30,8 +30,11 @@
 
 /*
  * Possible touch sequences:
- * down-top			small movements are suppressed
+ * down-tap			small movements are suppressed
  * down-long			small movements are suppressed
+ * down-long-cancel
+ * down-long-cancel-moving-...-to
+ * down-long-cancel-moving-...-cancel
  * down-cancel			ambiguous gesture
  * down-(moving-...)-to
  * down-(moving-...)-cancel	movement ended near beginning

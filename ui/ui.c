@@ -31,6 +31,7 @@ unsigned pin_attempts = 0;
 static PSRAM gfx_color fb[GFX_WIDTH * GFX_HEIGHT];
 static const struct ui *current_ui = NULL;
 static struct timer idle_timer;
+static struct timer long_timer; /* for long touch screen press */
 static unsigned idle_s;
 
 
@@ -125,6 +126,7 @@ static void turn_on(void)
 void turn_off(void)
 {
 	timer_cancel(&idle_timer);
+	timer_cancel(&long_timer);
 	if (!is_on)
 		return;
 	is_on = 0;
@@ -197,25 +199,43 @@ static unsigned touch_start_ms = 0;
 static unsigned touch_start_x, touch_start_y;
 static unsigned touch_last_x, touch_last_y;
 static bool touch_dragging = 0;
+static bool touch_is_long = 0;
+
+
+static void touch_long(void *user)
+{
+	if (current_ui && current_ui->events) {
+		const struct ui_events *e = current_ui->events;
+
+		if (e->touch_long)
+			e->touch_long(touch_start_x, touch_start_y);
+	}
+	touch_is_long  = 1;
+}
 
 
 void touch_down_event(unsigned x, unsigned y)
 {
+	const struct ui_events *e = current_ui ? current_ui->events : NULL;
+
 	debug("mouse down %u %u\n", x, y);
 	if (x >= GFX_WIDTH || y >= GFX_HEIGHT)
 		return;
-	if (current_ui && current_ui->events && current_ui->events->touch_down)
-		current_ui->events->touch_down(x, y);
+	if (e && e->touch_down)
+		e->touch_down(x, y);
 	touch_start_ms = now;
 	touch_start_x = touch_last_x = x;
 	touch_start_y = touch_last_y = y;
 	touch_dragging = 0;
+	touch_is_long = 0;
+	timer_set(&long_timer, LONG_MS, touch_long, NULL);
 	crosshair_show(x, y);
 }
 
 
 void touch_move_event(unsigned x, unsigned y)
 {
+	const struct ui_events *e = current_ui ? current_ui->events : NULL;
 	int dx = (int) x - (int) touch_start_x;
 	int dy = (int) y - (int) touch_start_y;
 
@@ -225,10 +245,12 @@ void touch_move_event(unsigned x, unsigned y)
 	touch_last_x = x;
 	touch_last_y = y;
 	if (dx * dx + dy * dy >= DRAG_R * DRAG_R) {
-		if (current_ui && current_ui->events &&
-		    current_ui->events->touch_moving)
-			current_ui->events->touch_moving(touch_start_x,
-			    touch_start_y, x, y);
+		if (e->touch_cancel)
+			e->touch_cancel();
+		timer_cancel(&long_timer);
+		touch_is_long = 0;
+		if (e && e->touch_moving)
+			e->touch_moving(touch_start_x, touch_start_y, x, y);
 		touch_dragging = 1;
 	}
 	crosshair_show(x, y);
@@ -237,9 +259,17 @@ void touch_move_event(unsigned x, unsigned y)
 
 void touch_up_event(void)
 {
+	const struct ui_events *e = current_ui ? current_ui->events : NULL;
+
 	debug("mouse up\n");
-	if (current_ui && current_ui->events) {
-		const struct ui_events *e = current_ui->events;
+	timer_cancel(&long_timer);
+	if (touch_is_long) {
+		assert(!touch_dragging);
+		touch_is_long = 0;
+		crosshair_remove();
+		return;
+	}
+	if (e) {
 		int dx = (int) touch_last_x - (int) touch_start_x;
 		int dy = (int) touch_last_y - (int) touch_start_y;
 
@@ -253,10 +283,6 @@ void touch_up_event(void)
 			if (touch_dragging) {
 				if (e->touch_cancel)
 					e->touch_cancel();
-			} else if (now - touch_start_ms > LONG_MS) {
-				if (e->touch_long)
-					e->touch_long(touch_start_x,
-					    touch_start_y);
 			} else {
 				if (e->touch_tap)
 					e->touch_tap(touch_start_x,
@@ -362,6 +388,7 @@ bool app_init(char **args, unsigned n_args)
 	gfx_clear(&da, gfx_hex(0));
 
 	timer_init(&idle_timer);
+	timer_init(&long_timer);
 
 	demo_init();
 

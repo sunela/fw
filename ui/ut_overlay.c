@@ -136,6 +136,12 @@ static void ut_overlay_tap(unsigned x, unsigned y)
 }
 
 
+static void ut_overlay_cancel(void)
+{
+	ui_return();
+}
+
+
 /* --- Idle timer ---------------------------------------------------------- */
 
 
@@ -246,6 +252,7 @@ static void ut_overlay_close(void)
 
 static const struct ui_events ut_overlay_events = {
 	.touch_tap	= ut_overlay_tap,
+	.touch_cancel	= ut_overlay_cancel,
 };
 
 

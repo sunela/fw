@@ -60,14 +60,15 @@ static void render_account(const struct uw_list *l,
     bool odd)
 {
 	const struct account *a = selected_account;
-	unsigned passed_s = time_us() / 1000000 % 30;
+	unsigned passed_s = (time_us() / 1000000 + 1) % 30;
 
 	if (!a->token.secret_size)
 		return;
 	if (a->token.type != tt_totp)
 		return;
 	gfx_arc(&da, bb->x + bb->w - 1 - bb->h / 2, bb->y + bb->h / 2,
-	    bb->h / 4, 12 * passed_s, 0, TIMER_FG, style.bg[odd]);
+	    bb->h / 4, 12 * passed_s, 0,
+	    passed_s ? TIMER_FG : style.bg[odd], style.bg[odd]);
 }
 
 

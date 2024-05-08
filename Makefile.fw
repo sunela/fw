@@ -14,6 +14,7 @@ include Makefile.app
 
 CFLAGS += -Ihw -Ihw/bl808
 OBJS += fw.o shared.o mmio.o gpio.o spi.o i2c.o trng.o sha.o physmem.o \
+	storage-file.o \
 	delay.o \
 	st7789.o backlight.o cst816.o
 
@@ -33,6 +34,7 @@ vpath cst816.c hw
 
 vpath fw.c main
 vpath shared.c main
+vpath storage-file.c db
 
 
 all::		| $(OBJDIR:%/=%)

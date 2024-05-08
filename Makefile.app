@@ -7,10 +7,11 @@
 
 CFLAGS += -g -Wall -Wextra -Wshadow -Wno-unused-parameter \
 	 -Wmissing-prototypes -Wmissing-declarations \
-	 -I$(shell pwd) -Isys -Ilib -Igfx -Iui -Ifont -Icrypto
+	 -I$(shell pwd) -Isys -Ilib -Igfx -Iui -Ifont -Icrypto -Idb
 OBJS = ui.o demo.o timer.o debug.o mbox.o rnd.o hmac.o hotp.o base32.o \
     fmt.o imath.o \
     basic.o poly.o shape.o long_text.o font.o text.o \
+    dbcrypt.o block.o \
     ui_off.o ui_pin.o ui_fail.o ui_accounts.o ui_account.o uw_list.o \
     ut_entry.o accounts.o ut_time.o ut_overlay.o ut_setup.o
 
@@ -31,9 +32,13 @@ vpath timer.c sys
 vpath debug.c sys
 vpath mbox.c sys
 vpath rnd.c sys
+
 vpath hmac.c crypto
 vpath hotp.c crypto
 vpath base32.c crypto
+
+vpath dbcrypt.c db
+vpath block.c db
 
 vpath ui.c ui
 vpath demo.c ui
@@ -48,6 +53,7 @@ vpath accounts.c ui
 vpath ut_time.c ui
 vpath ut_overlay.c ui
 vpath ut_setup.c ui
+vpath ut_storage.c ui
 
 vpath citrine.jpg logo
 vpath mksintab.pl lib

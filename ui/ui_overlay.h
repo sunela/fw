@@ -1,27 +1,27 @@
 /*
- * ut_overlay.h - User interface tool: Overlay buttons
+ * ui_overlay.h - User interface: Overlay buttons
  *
  * This work is licensed under the terms of the MIT License.
  * A copy of the license can be found in the file LICENSE.MIT
  */
 
-#ifndef UT_OVERLAY_H
-#define	UT_OVERLAY_H
+#ifndef UI_OVERLAY_H
+#define	UI_OVERLAY_H
 
 #include "gfx.h"
 
 
-struct ut_overlay_params;
+struct ui_overlay_params;
 
-struct ut_overlay_button {
+struct ui_overlay_button {
 	void (*draw)(struct gfx_drawable *tmp_da,
-	    const struct ut_overlay_params *params,
+	    const struct ui_overlay_params *params,
 	    unsigned x, unsigned y, void *user);
 	void (*fn)(void *user);
 	void *user;
 };
 
-struct ut_overlay_style {
+struct ui_overlay_style {
 	unsigned size;		/* button size (square) */
 	unsigned button_r;	/* corner radius */
 	unsigned gap;		/* horizontal/vertical gap between buttons */
@@ -30,26 +30,26 @@ struct ut_overlay_style {
 	gfx_color halo_bg;
 };
 
-struct ut_overlay_params {
-	const struct ut_overlay_button *buttons;
+struct ui_overlay_params {
+	const struct ui_overlay_button *buttons;
 	unsigned n_buttons;
-	const struct ut_overlay_style *style;	/* NULL for default */
+	const struct ui_overlay_style *style;	/* NULL for default */
 };
 
 
 void ui_overlay_sym_power(struct gfx_drawable *tmp_da,
-    const struct ut_overlay_params *params, unsigned x, unsigned y, void *user);
+    const struct ui_overlay_params *params, unsigned x, unsigned y, void *user);
 void ui_overlay_sym_delete(struct gfx_drawable *tmp_da,
-    const struct ut_overlay_params *params, unsigned x, unsigned y, void *user);
+    const struct ui_overlay_params *params, unsigned x, unsigned y, void *user);
 void ui_overlay_sym_add(struct gfx_drawable *tmp_da,
-    const struct ut_overlay_params *params, unsigned x, unsigned y, void *user);
+    const struct ui_overlay_params *params, unsigned x, unsigned y, void *user);
 void ui_overlay_sym_back(struct gfx_drawable *tmp_da,
-    const struct ut_overlay_params *params, unsigned x, unsigned y, void *user);
+    const struct ui_overlay_params *params, unsigned x, unsigned y, void *user);
 void ui_overlay_sym_next(struct gfx_drawable *tmp_da,
-    const struct ut_overlay_params *params, unsigned x, unsigned y, void *user);
+    const struct ui_overlay_params *params, unsigned x, unsigned y, void *user);
 void ui_overlay_sym_edit(struct gfx_drawable *tmp_da,
-    const struct ut_overlay_params *params, unsigned x, unsigned y, void *user);
+    const struct ui_overlay_params *params, unsigned x, unsigned y, void *user);
 void ui_overlay_sym_setup(struct gfx_drawable *tmp_da,
-    const struct ut_overlay_params *params, unsigned x, unsigned y, void *user);
+    const struct ui_overlay_params *params, unsigned x, unsigned y, void *user);
 
-#endif /* !UT_ENTRY_H */
+#endif /* !UI_ENTRY_H */

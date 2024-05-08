@@ -13,7 +13,7 @@ OBJS = ui.o demo.o timer.o debug.o mbox.o rnd.o hmac.o hotp.o base32.o \
     basic.o poly.o shape.o long_text.o font.o text.o \
     dbcrypt.o block.o \
     ui_off.o ui_pin.o ui_fail.o ui_accounts.o ui_account.o uw_list.o \
-    ut_entry.o accounts.o ut_time.o ut_overlay.o ut_setup.o ut_storage.o
+    ui_entry.o accounts.o ui_time.o ui_overlay.o ui_setup.o ui_storage.o
 
 include Makefile.c-common
 
@@ -48,12 +48,12 @@ vpath ui_fail.c ui
 vpath ui_accounts.c ui
 vpath ui_account.c ui
 vpath uw_list.c ui
-vpath ut_entry.c ui
+vpath ui_entry.c ui
 vpath accounts.c ui
-vpath ut_time.c ui
-vpath ut_overlay.c ui
-vpath ut_setup.c ui
-vpath ut_storage.c ui
+vpath ui_time.c ui
+vpath ui_overlay.c ui
+vpath ui_setup.c ui
+vpath ui_storage.c ui
 
 vpath citrine.jpg logo
 vpath mksintab.pl lib

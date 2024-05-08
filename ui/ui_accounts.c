@@ -11,7 +11,7 @@
 #include "gfx.h"
 #include "text.h"
 #include "uw_list.h"
-#include "ut_overlay.h"
+#include "ui_overlay.h"
 #include "accounts.h"
 #include "ui.h"
 
@@ -64,7 +64,7 @@ static void add_account(void *user)
 
 static void enter_setup(void *user)
 {
-	ui_switch(&ut_setup, NULL);
+	ui_switch(&ui_setup, NULL);
 }
 
 
@@ -74,18 +74,18 @@ static void ui_accounts_long(unsigned x, unsigned y)
 	if (y < LIST_Y0)
 		return;
 
-	static const struct ut_overlay_button buttons[] = {
+	static const struct ui_overlay_button buttons[] = {
 		{ ui_overlay_sym_power,	power_off, NULL },
 		{ ui_overlay_sym_add,	add_account, NULL },
 		{ NULL, },
 		{ ui_overlay_sym_setup,	enter_setup, NULL },
 	};
-	static struct ut_overlay_params prm = {
+	static struct ui_overlay_params prm = {
 		.buttons	= buttons,
 		.n_buttons	= 4,
         };
 
-	ui_call(&ut_overlay, &prm);
+	ui_call(&ui_overlay, &prm);
 	
 }
 

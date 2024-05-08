@@ -1,5 +1,5 @@
 /*
- * ut_storage.c - User interface tool: Storage management
+ * ui_storage.c - User interface: Storage management
  *
  * This work is licensed under the terms of the MIT License.
  * A copy of the license can be found in the file LICENSE.MIT
@@ -55,20 +55,20 @@ debug("%u/%u\n", i, total);
 /* --- Event handling ------------------------------------------------------ */
 
 
-static void ut_storage_tap(unsigned x, unsigned y)
+static void ui_storage_tap(unsigned x, unsigned y)
 {
 	const struct uw_list_entry *entry;
 
 	entry = uw_list_pick(&list, x, y);
 	if (entry && entry == initialize) {
 		initialize_storage();
-		ui_switch(&ut_storage, NULL);
+		ui_switch(&ui_storage, NULL);
 	}
 	return;
 }
 
 
-static void ut_storage_to(unsigned from_x, unsigned from_y,
+static void ui_storage_to(unsigned from_x, unsigned from_y,
     unsigned to_x, unsigned to_y, enum ui_swipe swipe)
 {
 	if (swipe == us_left)
@@ -79,7 +79,7 @@ static void ut_storage_to(unsigned from_x, unsigned from_y,
 /* --- Open/close ---------------------------------------------------------- */
 
 
-static void ut_storage_open(void *params)
+static void ui_storage_open(void *params)
 {
 	unsigned total = storage_blocks();
 	unsigned error = 0;
@@ -168,7 +168,7 @@ debug("Invalid: %u\n", invalid);
 }
 
 
-static void ut_storage_close(void)
+static void ui_storage_close(void)
 {
 	uw_list_destroy(&list);
 }
@@ -177,13 +177,13 @@ static void ut_storage_close(void)
 /* --- Interface ----------------------------------------------------------- */
 
 
-static const struct ui_events ut_storage_events = {
-	.touch_tap	= ut_storage_tap,
-	.touch_to	= ut_storage_to,
+static const struct ui_events ui_storage_events = {
+	.touch_tap	= ui_storage_tap,
+	.touch_to	= ui_storage_to,
 };
 
-const struct ui ut_storage = {
-	.open = ut_storage_open,
-	.close = ut_storage_close,
-	.events = &ut_storage_events,
+const struct ui ui_storage = {
+	.open = ui_storage_open,
+	.close = ui_storage_close,
+	.events = &ui_storage_events,
 };

@@ -24,7 +24,7 @@
 #include "hmac.h"
 #include "hotp.h"
 #include "base32.h"
-#include "ut_overlay.h"
+#include "ui_overlay.h"
 #include "ui.h"
 #include "demo.h"
 
@@ -254,8 +254,8 @@ static bool demo_entry(char *const *args, unsigned n_args)
 	if (n_args)
 		return 0;
 
-	ut_entry_validate = demo_entry_validate;
-	ui_switch(&ut_entry, NULL);
+	ui_entry_validate = demo_entry_validate;
+	ui_switch(&ui_entry, NULL);
 
 	return 1;
 }
@@ -500,7 +500,7 @@ static bool demo_time(char *const *args, unsigned n_args)
 	if (n_args)
 		return 0;
 
-	ui_switch(&ut_time, NULL);
+	ui_switch(&ui_time, NULL);
 
 	return 1;
 }
@@ -581,7 +581,7 @@ static bool demo_gearsym(char *const *args, unsigned n_args)
 
 static bool demo_overlay(char *const *args, unsigned n_args)
 {
-	static const struct ut_overlay_button buttons[] = {
+	static const struct ui_overlay_button buttons[] = {
 		{ ui_overlay_sym_power,		NULL, NULL },
 		{ ui_overlay_sym_delete,	NULL, NULL },
 		{ ui_overlay_sym_add,		NULL, NULL },
@@ -592,7 +592,7 @@ static bool demo_overlay(char *const *args, unsigned n_args)
 		{ NULL, },
 		{ NULL }
 	};
-	struct ut_overlay_params prm = {
+	struct ui_overlay_params prm = {
 		.buttons	= buttons,
 		.n_buttons	= 7,
 	};
@@ -607,7 +607,7 @@ static bool demo_overlay(char *const *args, unsigned n_args)
 		return 0;
 	}
 
-	ui_switch(&ut_overlay, &prm);
+	ui_switch(&ui_overlay, &prm);
 	return 1;
 }
 

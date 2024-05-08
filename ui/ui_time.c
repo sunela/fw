@@ -1,5 +1,5 @@
 /*
- * ut_time.c - User interface: set the time
+ * ui_time.c - User interface: set the time
  *
  * This work is licensed under the terms of the MIT License.
  * A copy of the license can be found in the file LICENSE.MIT
@@ -125,7 +125,7 @@ static void change_sync_mode(void)
 /* --- Event handling ------------------------------------------------------ */
 
 
-static void ut_time_tap(unsigned x, unsigned y)
+static void ui_time_tap(unsigned x, unsigned y)
 {
 	const struct uw_list_entry *entry;
 
@@ -137,7 +137,7 @@ static void ut_time_tap(unsigned x, unsigned y)
 }
 
 
-static void ut_time_to(unsigned from_x, unsigned from_y,
+static void ui_time_to(unsigned from_x, unsigned from_y,
     unsigned to_x, unsigned to_y, enum ui_swipe swipe)
 {
 	if (swipe == us_left)
@@ -148,7 +148,7 @@ static void ut_time_to(unsigned from_x, unsigned from_y,
 /* --- Open/close ---------------------------------------------------------- */
 
 
-static void ut_time_open(void *params)
+static void ui_time_open(void *params)
 {
 	gfx_rect_xy(&da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH, GFX_WHITE);
 	text_text(&da, GFX_WIDTH / 2, TOP_H / 2, "Set Time",
@@ -169,7 +169,7 @@ static void ut_time_open(void *params)
 }
 
 
-static void ut_time_close(void)
+static void ui_time_close(void)
 {
 	uw_list_destroy(&list);
 	if (sync_mode == sm_usb)
@@ -180,7 +180,7 @@ static void ut_time_close(void)
 /* --- Timer ticks --------------------------------------------------------- */
 
 
-static void ut_time_tick(void)
+static void ui_time_tick(void)
 {
 	static int64_t last_tick = -1;
 	int64_t this_tick = time_us() / 1000000;
@@ -199,14 +199,14 @@ static void ut_time_tick(void)
 /* --- Interface ----------------------------------------------------------- */
 
 
-static const struct ui_events ut_time_events = {
-	.touch_tap	= ut_time_tap,
-	.touch_to	= ut_time_to,
-	.tick		= ut_time_tick,
+static const struct ui_events ui_time_events = {
+	.touch_tap	= ui_time_tap,
+	.touch_to	= ui_time_to,
+	.tick		= ui_time_tick,
 };
 
-const struct ui ut_time = {
-	.open = ut_time_open,
-	.close = ut_time_close,
-	.events = &ut_time_events,
+const struct ui ui_time = {
+	.open = ui_time_open,
+	.close = ui_time_close,
+	.events = &ui_time_events,
 };

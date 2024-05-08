@@ -1,5 +1,5 @@
 /*
- * ut_overlay.c - User interface tool: Overlay buttons
+ * ui_overlay.c - User interface: Overlay buttons
  *
  * This work is licensed under the terms of the MIT License.
  * A copy of the license can be found in the file LICENSE.MIT
@@ -14,7 +14,7 @@
 #include "gfx.h"
 #include "shape.h"
 #include "ui.h"
-#include "ut_overlay.h"
+#include "ui_overlay.h"
 
 
 #define	MAX_BUTTONS		9
@@ -35,7 +35,7 @@ static PSRAM gfx_color tmp_fb[GFX_WIDTH * GFX_HEIGHT];
 static struct button_ref refs[MAX_BUTTONS];
 
 
-static const struct ut_overlay_style default_style = {
+static const struct ui_overlay_style default_style = {
 	.size		= 50,
 	.button_r	= 12,
 	.gap		= 12,
@@ -52,9 +52,9 @@ static struct timer t_overlay_idle;
 
 
 void ui_overlay_sym_power(struct gfx_drawable *tmp_da,
-    const struct ut_overlay_params *params, unsigned x, unsigned y, void *user)
+    const struct ui_overlay_params *params, unsigned x, unsigned y, void *user)
 {
-	const struct ut_overlay_style *s =
+	const struct ui_overlay_style *s =
 	    params->style ? params->style : &default_style;
 
 	gfx_power_sym(tmp_da, x, y, s->size * 0.3, s->size * 0.1,
@@ -63,9 +63,9 @@ void ui_overlay_sym_power(struct gfx_drawable *tmp_da,
 
 
 void ui_overlay_sym_delete(struct gfx_drawable *tmp_da,
-    const struct ut_overlay_params *params, unsigned x, unsigned y, void *user)
+    const struct ui_overlay_params *params, unsigned x, unsigned y, void *user)
 {
-	const struct ut_overlay_style *s =
+	const struct ui_overlay_style *s =
 	    params->style ? params->style : &default_style;
 
 	gfx_diagonal_cross(tmp_da, x, y, s->size * 0.4, s->size * 0.1,
@@ -74,9 +74,9 @@ void ui_overlay_sym_delete(struct gfx_drawable *tmp_da,
 
 
 void ui_overlay_sym_add(struct gfx_drawable *tmp_da,
-    const struct ut_overlay_params *params, unsigned x, unsigned y, void *user)
+    const struct ui_overlay_params *params, unsigned x, unsigned y, void *user)
 {
-	const struct ut_overlay_style *s =
+	const struct ui_overlay_style *s =
 	    params->style ? params->style : &default_style;
 	unsigned side = s->size * 0.7;
 
@@ -86,9 +86,9 @@ void ui_overlay_sym_add(struct gfx_drawable *tmp_da,
 
 
 void ui_overlay_sym_back(struct gfx_drawable *tmp_da,
-    const struct ut_overlay_params *params, unsigned x, unsigned y, void *user)
+    const struct ui_overlay_params *params, unsigned x, unsigned y, void *user)
 {
-	const struct ut_overlay_style *s =
+	const struct ui_overlay_style *s =
 	    params->style ? params->style : &default_style;
 
 	gfx_equilateral(tmp_da, x + s->size * 0.05, y, s->size * 0.7, -1,
@@ -97,9 +97,9 @@ void ui_overlay_sym_back(struct gfx_drawable *tmp_da,
 
 
 void ui_overlay_sym_next(struct gfx_drawable *tmp_da,
-    const struct ut_overlay_params *params, unsigned x, unsigned y, void *user)
+    const struct ui_overlay_params *params, unsigned x, unsigned y, void *user)
 {
-	const struct ut_overlay_style *s =
+	const struct ui_overlay_style *s =
 	    params->style ? params->style : &default_style;
 
 	gfx_equilateral(tmp_da, x - s->size * 0.05, y, s->size * 0.7, 1,
@@ -108,9 +108,9 @@ void ui_overlay_sym_next(struct gfx_drawable *tmp_da,
 
 
 void ui_overlay_sym_edit(struct gfx_drawable *tmp_da,
-    const struct ut_overlay_params *params, unsigned x, unsigned y, void *user)
+    const struct ui_overlay_params *params, unsigned x, unsigned y, void *user)
 {
-	const struct ut_overlay_style *s =
+	const struct ui_overlay_style *s =
 	    params->style ? params->style : &default_style;
 	unsigned side;
 
@@ -124,9 +124,9 @@ void ui_overlay_sym_edit(struct gfx_drawable *tmp_da,
 
 
 void ui_overlay_sym_setup(struct gfx_drawable *tmp_da,
-    const struct ut_overlay_params *params, unsigned x, unsigned y, void *user)
+    const struct ui_overlay_params *params, unsigned x, unsigned y, void *user)
 {
-	const struct ut_overlay_style *s =
+	const struct ui_overlay_style *s =
 	    params->style ? params->style : &default_style;
 
 	gfx_gear_sym(tmp_da, x, y,
@@ -139,7 +139,7 @@ void ui_overlay_sym_setup(struct gfx_drawable *tmp_da,
 /* --- Event handling ------------------------------------------------------ */
 
 
-static void ut_overlay_tap(unsigned x, unsigned y)
+static void ui_overlay_tap(unsigned x, unsigned y)
 {
 	const struct button_ref *ref;
 
@@ -156,7 +156,7 @@ static void ut_overlay_tap(unsigned x, unsigned y)
 }
 
 
-static void ut_overlay_cancel(void)
+static void ui_overlay_cancel(void)
 {
 	ui_return();
 }
@@ -175,10 +175,10 @@ static void overlay_idle(void *user)
 
 
 static void draw_button(struct gfx_drawable *tmp_da,
-    const struct ut_overlay_params *p,
-    const struct ut_overlay_button *b, int x, int y)
+    const struct ui_overlay_params *p,
+    const struct ui_overlay_button *b, int x, int y)
 {
-	const struct ut_overlay_style *s = p->style ? p->style : &default_style;
+	const struct ui_overlay_style *s = p->style ? p->style : &default_style;
 
 	gfx_rrect_xy(tmp_da, x - s->size / 2, y - s->size / 2,
 	    s->size, s->size, DEFAULT_BUTTON_R, s->button_bg);
@@ -187,11 +187,11 @@ static void draw_button(struct gfx_drawable *tmp_da,
 }
 
 
-static void ut_overlay_open(void *params)
+static void ui_overlay_open(void *params)
 {
-	const struct ut_overlay_params *p = params;
-	const struct ut_overlay_button *b = p->buttons;
-	const struct ut_overlay_style *s = p->style ? p->style : &default_style;
+	const struct ui_overlay_params *p = params;
+	const struct ui_overlay_button *b = p->buttons;
+	const struct ui_overlay_style *s = p->style ? p->style : &default_style;
 	struct button_ref *ref = refs;
 	struct gfx_drawable tmp_da;
 	unsigned nx, ny;
@@ -273,7 +273,7 @@ static void ut_overlay_open(void *params)
 }
 
 
-static void ut_overlay_close(void)
+static void ui_overlay_close(void)
 {
 	gfx_copy(&da, 0, 0, &old_da, 0, 0, da.w, da.h, -1);
 	timer_cancel(&t_overlay_idle);
@@ -284,14 +284,14 @@ static void ut_overlay_close(void)
 /* --- Interface ----------------------------------------------------------- */
 
 
-static const struct ui_events ut_overlay_events = {
-	.touch_tap	= ut_overlay_tap,
-	.touch_cancel	= ut_overlay_cancel,
+static const struct ui_events ui_overlay_events = {
+	.touch_tap	= ui_overlay_tap,
+	.touch_cancel	= ui_overlay_cancel,
 };
 
 
-const struct ui ut_overlay = {
-	.open = ut_overlay_open,
-	.close = ut_overlay_close,
-	.events	= &ut_overlay_events,
+const struct ui ui_overlay = {
+	.open = ui_overlay_open,
+	.close = ui_overlay_close,
+	.events	= &ui_overlay_events,
 };

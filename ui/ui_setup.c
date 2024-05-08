@@ -1,5 +1,5 @@
 /*
- * ut_setup.c - User interface tool: Setup
+ * ui_setup.c - User interface: Setup
  *
  * This work is licensed under the terms of the MIT License.
  * A copy of the license can be found in the file LICENSE.MIT
@@ -35,7 +35,7 @@ static struct uw_list list;
 /* --- Event handling ------------------------------------------------------ */
 
 
-static void ut_setup_tap(unsigned x, unsigned y)
+static void ui_setup_tap(unsigned x, unsigned y)
 {
 	const struct uw_list_entry *entry;
 	const struct ui *next;
@@ -50,7 +50,7 @@ static void ut_setup_tap(unsigned x, unsigned y)
 }
 
 
-static void ut_setup_to(unsigned from_x, unsigned from_y,
+static void ui_setup_to(unsigned from_x, unsigned from_y,
     unsigned to_x, unsigned to_y, enum ui_swipe swipe)
 {
 	if (swipe == us_left)
@@ -61,7 +61,7 @@ static void ut_setup_to(unsigned from_x, unsigned from_y,
 /* --- Open/close ---------------------------------------------------------- */
 
 
-static void ut_setup_open(void *params)
+static void ui_setup_open(void *params)
 {
 	gfx_rect_xy(&da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH, GFX_WHITE);
 	text_text(&da, GFX_WIDTH / 2, TOP_H / 2, "Setup",
@@ -69,28 +69,28 @@ static void ut_setup_open(void *params)
 
 	uw_list_begin(&list, &style);
 	uw_list_add(&list, "Change PIN", NULL, NULL);
-	uw_list_add(&list, "Time & date", NULL, (void *) &ut_time);
-	uw_list_add(&list, "Storage", NULL, (void *) &ut_storage);
+	uw_list_add(&list, "Time & date", NULL, (void *) &ui_time);
+	uw_list_add(&list, "Storage", NULL, (void *) &ui_storage);
 	uw_list_end(&list);
 
 	set_idle(IDLE_SETUP_S);
 }
 
 
-static void ut_setup_close(void)
+static void ui_setup_close(void)
 {
 	uw_list_destroy(&list);
 }
 
 
-static void ut_setup_resume(void)
+static void ui_setup_resume(void)
 {
         /*
          * @@@ once we have vertical scrolling, we'll also need to restore the
          * position.
          */
-        ut_setup_close();
-        ut_setup_open(NULL);
+        ui_setup_close();
+        ui_setup_open(NULL);
         progress();
 }
 
@@ -98,14 +98,14 @@ static void ut_setup_resume(void)
 /* --- Interface ----------------------------------------------------------- */
 
 
-static const struct ui_events ut_setup_events = {
-	.touch_tap	= ut_setup_tap,
-	.touch_to	= ut_setup_to,
+static const struct ui_events ui_setup_events = {
+	.touch_tap	= ui_setup_tap,
+	.touch_to	= ui_setup_to,
 };
 
-const struct ui ut_setup = {
-	.open = ut_setup_open,
-	.close = ut_setup_close,
-	.resume = ut_setup_resume,
-	.events = &ut_setup_events,
+const struct ui ui_setup = {
+	.open = ui_setup_open,
+	.close = ui_setup_close,
+	.resume = ui_setup_resume,
+	.events = &ui_setup_events,
 };

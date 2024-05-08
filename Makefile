@@ -9,7 +9,8 @@ TARGETS = sim fw sdk
 
 FONTS = mono18.font mono24.font mono34.font mono36.font mono58.font
 
-.PHONY:	all sim fw sdk flash picocom gdb clean spotless
+.PHONY:	all sim fw sdk gdb clean spotless
+.PHONY:	flash picocom upload download erase
 
 all:	$(FONTS:%=font/%) $(TARGETS)
 
@@ -27,6 +28,27 @@ sdk:
 
 flash:
 	$(MAKE) -C sdk flash COMX=$(CONSOLE)
+
+SDK = $(shell pwd)/../bouffalo_sdk/
+FLASH = $(SDK)/tools/bflb_tools/bouffalo_flash_cube/BLFlashCommand-ubuntu
+COMX = /dev/ttyACM1
+
+upload:	$(shell pwd)/_storage
+	$(FLASH) --interface uart --baudrate 2000000 --port=$(COMX) \
+	    --chipname bl808 --cpu_id m0 \
+	    --flash --write --start 0x800000 --len 0x200000 --file $<
+# --config=sdk/flash_prog_cfg.ini \
+
+download:	
+	$(FLASH) --interface uart --baudrate 2000000 --port=$(COMX) \
+	    --chipname bl808 --cpu_id m0 \
+	    --flash --read --start 0x0 --len 0x1000000 \
+	    --file $(shell pwd)/foo
+
+erase:
+	$(FLASH) --interface uart --baudrate 2000000 --port=$(COMX) \
+	    --chipname bl808 --cpu_id m0 \
+	    --flash --erase --whole_chip
 
 # For convenience: invoke picocom with flashing on ^A^S (+ Enter)
 

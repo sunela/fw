@@ -24,7 +24,7 @@
 #include "fmt.h"
 #include "gfx.h"
 #include "text.h"
-#include "uw_list.h"
+#include "wi_list.h"
 #include "ui.h"
 
 
@@ -35,7 +35,7 @@
 #define	LIST_Y0			(TOP_H + TOP_LINE_WIDTH + 1)
 
 
-static const struct uw_list_style style = {
+static const struct wi_list_style style = {
 	y0:	LIST_Y0,
 	y1:	GFX_HEIGHT - 1,
 	fg:	{ GFX_WHITE, GFX_WHITE },
@@ -51,8 +51,8 @@ enum sync_mode {
 
 struct mbox time_mbox = MBOX_INIT;
 
-static struct uw_list list;
-static struct uw_list_entry *entry_time, *entry_date, *entry_sync;
+static struct wi_list list;
+static struct wi_list_entry *entry_time, *entry_date, *entry_sync;
 static enum sync_mode sync_mode;
 
 static const char *sync_mode_name[] = {
@@ -79,9 +79,9 @@ static void show_time(void)
 	    tm.tm_hour, tm.tm_min, tm.tm_sec);
 	format(add_char, &p_date, "%04d-%02d-%02d",
 	    tm.tm_year + 1900, tm.tm_mon, tm.tm_mday);
-	uw_list_update_entry(&list, entry_time, "Time", s_time, NULL);
-	uw_list_update_entry(&list, entry_date, "Date", s_date, NULL);
-	uw_list_update_entry(&list, entry_sync, sync_mode_name[sync_mode],
+	wi_list_update_entry(&list, entry_time, "Time", s_time, NULL);
+	wi_list_update_entry(&list, entry_date, "Date", s_date, NULL);
+	wi_list_update_entry(&list, entry_sync, sync_mode_name[sync_mode],
 	    NULL, NULL);
 }
 
@@ -102,7 +102,7 @@ static void set_time(uint64_t t)
 
 static void show_sync_mode(void)
 {
-	uw_list_update_entry(&list, entry_sync, sync_mode_name[sync_mode],
+	wi_list_update_entry(&list, entry_sync, sync_mode_name[sync_mode],
 	    NULL, NULL);
 }
 
@@ -127,9 +127,9 @@ static void change_sync_mode(void)
 
 static void ui_time_tap(unsigned x, unsigned y)
 {
-	const struct uw_list_entry *entry;
+	const struct wi_list_entry *entry;
 
-	entry = uw_list_pick(&list, x, y);
+	entry = wi_list_pick(&list, x, y);
 	if (!entry)
 		return;
 	if (entry == entry_sync)
@@ -156,12 +156,12 @@ static void ui_time_open(void *params)
 
 	sync_mode = sm_manual;
 
-	uw_list_begin(&list, &style);
-	entry_time = uw_list_add(&list, "Time", "--:--:--", NULL);
-	entry_date = uw_list_add(&list, "Date", "****-**-**", NULL);
-	uw_list_add(&list, "Time zone", "UTC", NULL);
-	entry_sync = uw_list_add(&list, "", NULL, NULL);
-	uw_list_end(&list);
+	wi_list_begin(&list, &style);
+	entry_time = wi_list_add(&list, "Time", "--:--:--", NULL);
+	entry_date = wi_list_add(&list, "Date", "****-**-**", NULL);
+	wi_list_add(&list, "Time zone", "UTC", NULL);
+	entry_sync = wi_list_add(&list, "", NULL, NULL);
+	wi_list_end(&list);
 	show_time();
 	show_sync_mode();
 
@@ -171,7 +171,7 @@ static void ui_time_open(void *params)
 
 static void ui_time_close(void)
 {
-	uw_list_destroy(&list);
+	wi_list_destroy(&list);
 	if (sync_mode == sm_usb)
 		mbox_disable(&time_mbox);
 }

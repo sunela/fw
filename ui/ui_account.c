@@ -18,7 +18,7 @@
 #include "shape.h"
 #include "text.h"
 #include "accounts.h"
-#include "uw_list.h"
+#include "wi_list.h"
 #include "ui.h"
 
 
@@ -35,12 +35,12 @@
 #define	LIST_Y0			(TOP_H + TOP_LINE_WIDTH + 1)
 
 
-static void render_account(const struct uw_list *l,
-    const struct uw_list_entry *entry, const struct gfx_rect *bb,
+static void render_account(const struct wi_list *l,
+    const struct wi_list_entry *entry, const struct gfx_rect *bb,
     bool odd);
 
 
-static const struct uw_list_style style = {
+static const struct wi_list_style style = {
 	.y0	= LIST_Y0,
 	.y1	= GFX_HEIGHT - 1,
 	.fg	= { ENTRY_FG, ENTRY_FG },
@@ -49,14 +49,14 @@ static const struct uw_list_style style = {
 };
 
 static struct account *selected_account = NULL;
-static struct uw_list list;
+static struct wi_list list;
 
 
 /* --- Extra account rendering --------------------------------------------- */
 
 
-static void render_account(const struct uw_list *l,
-    const struct uw_list_entry *entry, const struct gfx_rect *bb,
+static void render_account(const struct wi_list *l,
+    const struct wi_list_entry *entry, const struct gfx_rect *bb,
     bool odd)
 {
 	const struct account *a = selected_account;
@@ -72,10 +72,10 @@ static void render_account(const struct uw_list *l,
 }
 
 
-static void show_totp(struct uw_list *l,
-    struct uw_list_entry *entry, void *user)
+static void show_totp(struct wi_list *l,
+    struct wi_list_entry *entry, void *user)
 {
-	struct account *a = uw_list_user(entry);
+	struct account *a = wi_list_user(entry);
 
 	if (!a)
 		return;
@@ -96,8 +96,8 @@ static void show_totp(struct uw_list *l,
 	base32_decode(sec, size, (char *) a->token.secret);
 	code = hotp64(sec, size, counter);
 	format(add_char, &p, "%06u", (unsigned) code % 1000000);
-	uw_list_update_entry(l, entry, "TOTP", s, a);
-	uw_list_render(l, entry);
+	wi_list_update_entry(l, entry, "TOTP", s, a);
+	wi_list_render(l, entry);
 	update_display(&da);
 }
 
@@ -115,7 +115,7 @@ static void ui_account_tick(void)
 	 * changes only every 30 seconds.
 	 */
 
-	uw_list_forall(&list, show_totp, NULL);
+	wi_list_forall(&list, show_totp, NULL);
 }
 
 
@@ -124,16 +124,16 @@ static void ui_account_tick(void)
 
 static void ui_account_tap(unsigned x, unsigned y)
 {
-	struct uw_list_entry *entry;
+	struct wi_list_entry *entry;
 	struct account *a;
 	char s[6 + 1];
 	char *p = s;
 	uint32_t code;
 
-	entry = uw_list_pick(&list, x, y);
+	entry = wi_list_pick(&list, x, y);
 	if (!entry)
 		return;
-	a = uw_list_user(entry);
+	a = wi_list_user(entry);
 	if (!a)
 		return;
 	if (!a->token.secret_size || a->token.type != tt_hotp)
@@ -145,7 +145,7 @@ static void ui_account_tap(unsigned x, unsigned y)
 	a->token.counter++;
 	code = hotp64(a->token.secret, a->token.secret_size, a->token.counter);
 	format(add_char, &p, "%06u", (unsigned) code % 1000000);
-	uw_list_update_entry(&list, entry, "HOTP", s, a);
+	wi_list_update_entry(&list, entry, "HOTP", s, a);
 	update_display(&da);
 }
 
@@ -169,24 +169,24 @@ static void ui_account_open(void *params)
 	text_text(&da, GFX_WIDTH / 2, TOP_H / 2, a->name, &FONT_TOP,
 	    GFX_CENTER, GFX_CENTER, TITLE_FG);
 
-	uw_list_begin(&list, &style);
+	wi_list_begin(&list, &style);
 	if (a->user)
-		uw_list_add(&list, "User", a->user, NULL);
+		wi_list_add(&list, "User", a->user, NULL);
 	if (a->pw)
-		uw_list_add(&list, "Password", a->pw, NULL);
+		wi_list_add(&list, "Password", a->pw, NULL);
 	if (a->token.secret_size) {
 		switch (a->token.type) {
 		case tt_hotp:
-			uw_list_add(&list, "HOTP", "------", a);
+			wi_list_add(&list, "HOTP", "------", a);
 			break;
 		case tt_totp:
-			uw_list_add(&list, "TOTP", "------", a);
+			wi_list_add(&list, "TOTP", "------", a);
 			break;
 		default:
 			abort();
 		}
 	}
-	uw_list_end(&list);
+	wi_list_end(&list);
 
 	set_idle(IDLE_ACCOUNT_S);
 }
@@ -194,7 +194,7 @@ static void ui_account_open(void *params)
 
 static void ui_account_close(void)
 {
-	uw_list_destroy(&list);
+	wi_list_destroy(&list);
 }
 
 

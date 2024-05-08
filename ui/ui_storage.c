@@ -11,7 +11,7 @@
 #include "hal.h"
 #include "gfx.h"
 #include "text.h"
-#include "uw_list.h"
+#include "wi_list.h"
 #include "fmt.h"
 #include "storage.h"
 #include "block.h"
@@ -26,15 +26,15 @@
 #define	LIST_Y0			(TOP_H + TOP_LINE_WIDTH + 1)
 
 
-static const struct uw_list_style style = {
+static const struct wi_list_style style = {
 	y0:	LIST_Y0,
 	y1:	GFX_HEIGHT - 1,
 	fg:	{ GFX_WHITE, GFX_WHITE },
 	bg:	{ GFX_BLACK, GFX_HEX(0x202020) },
 };
 
-static struct uw_list list;
-static const struct uw_list_entry *initialize = NULL;
+static struct wi_list list;
+static const struct wi_list_entry *initialize = NULL;
 
 
 static void initialize_storage(void)
@@ -57,9 +57,9 @@ debug("%u/%u\n", i, total);
 
 static void ui_storage_tap(unsigned x, unsigned y)
 {
-	const struct uw_list_entry *entry;
+	const struct wi_list_entry *entry;
 
-	entry = uw_list_pick(&list, x, y);
+	entry = wi_list_pick(&list, x, y);
 	if (entry && entry == initialize) {
 		initialize_storage();
 		ui_switch(&ui_storage, NULL);
@@ -123,19 +123,19 @@ static void ui_storage_open(void *params)
 			abort();
 		}
 	
-	uw_list_begin(&list, &style);
+	wi_list_begin(&list, &style);
 
 	p = tmp;
 	format(add_char, &p, "%u", total);
-	uw_list_add(&list, "Total blocks", tmp, NULL);
+	wi_list_add(&list, "Total blocks", tmp, NULL);
 
 	p = tmp;
 	format(add_char, &p, "%u", used);
-	uw_list_add(&list, "Used", tmp, NULL);
+	wi_list_add(&list, "Used", tmp, NULL);
 
 	p = tmp;
 	format(add_char, &p, "%u", empty);
-	uw_list_add(&list, "Empty", tmp, NULL);
+	wi_list_add(&list, "Empty", tmp, NULL);
 
 	/*
 	 * @@@ we can't have lists longer than the screen yet, so we need to
@@ -144,7 +144,7 @@ static void ui_storage_open(void *params)
 #if 0
 	p = tmp;
 	format(add_char, &p, "%u", unallocated);
-	uw_list_add(&list, "Unallocated", tmp, NULL);
+	wi_list_add(&list, "Unallocated", tmp, NULL);
 #else
 debug("Unallocated: %u\n", unallocated);
 #endif
@@ -152,7 +152,7 @@ debug("Unallocated: %u\n", unallocated);
 #if 0
 	p = tmp;
 	format(add_char, &p, "%u", invalid);
-	uw_list_add(&list, "Invalid", tmp, NULL);
+	wi_list_add(&list, "Invalid", tmp, NULL);
 #else
 debug("Invalid: %u\n", invalid);
 #endif
@@ -160,9 +160,9 @@ debug("Invalid: %u\n", invalid);
 	if (empty + used)
 		initialize = NULL;
 	else
-		initialize = uw_list_add(&list, "Initialize", NULL, NULL);
+		initialize = wi_list_add(&list, "Initialize", NULL, NULL);
 
-	uw_list_end(&list);
+	wi_list_end(&list);
 
 	set_idle(IDLE_SETUP_S);
 }
@@ -170,7 +170,7 @@ debug("Invalid: %u\n", invalid);
 
 static void ui_storage_close(void)
 {
-	uw_list_destroy(&list);
+	wi_list_destroy(&list);
 }
 
 

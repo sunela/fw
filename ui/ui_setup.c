@@ -10,7 +10,7 @@
 #include "hal.h"
 #include "gfx.h"
 #include "text.h"
-#include "uw_list.h"
+#include "wi_list.h"
 #include "accounts.h"
 #include "ui.h"
 
@@ -22,14 +22,14 @@
 #define	LIST_Y0			(TOP_H + TOP_LINE_WIDTH + 1)
 
 
-static const struct uw_list_style style = {
+static const struct wi_list_style style = {
 	y0:	LIST_Y0,
 	y1:	GFX_HEIGHT - 1,
 	fg:	{ GFX_WHITE, GFX_WHITE },
 	bg:	{ GFX_BLACK, GFX_HEX(0x202020) },
 };
 
-static struct uw_list list;
+static struct wi_list list;
 
 
 /* --- Event handling ------------------------------------------------------ */
@@ -37,13 +37,13 @@ static struct uw_list list;
 
 static void ui_setup_tap(unsigned x, unsigned y)
 {
-	const struct uw_list_entry *entry;
+	const struct wi_list_entry *entry;
 	const struct ui *next;
 
-	entry = uw_list_pick(&list, x, y);
+	entry = wi_list_pick(&list, x, y);
 	if (!entry)
 		return;
-	next = uw_list_user(entry);
+	next = wi_list_user(entry);
 	if (!next)
 		return;
 	ui_call(next, NULL);
@@ -67,11 +67,11 @@ static void ui_setup_open(void *params)
 	text_text(&da, GFX_WIDTH / 2, TOP_H / 2, "Setup",
 	    &FONT_TOP, GFX_CENTER, GFX_CENTER, GFX_WHITE);
 
-	uw_list_begin(&list, &style);
-	uw_list_add(&list, "Change PIN", NULL, NULL);
-	uw_list_add(&list, "Time & date", NULL, (void *) &ui_time);
-	uw_list_add(&list, "Storage", NULL, (void *) &ui_storage);
-	uw_list_end(&list);
+	wi_list_begin(&list, &style);
+	wi_list_add(&list, "Change PIN", NULL, NULL);
+	wi_list_add(&list, "Time & date", NULL, (void *) &ui_time);
+	wi_list_add(&list, "Storage", NULL, (void *) &ui_storage);
+	wi_list_end(&list);
 
 	set_idle(IDLE_SETUP_S);
 }
@@ -79,7 +79,7 @@ static void ui_setup_open(void *params)
 
 static void ui_setup_close(void)
 {
-	uw_list_destroy(&list);
+	wi_list_destroy(&list);
 }
 
 

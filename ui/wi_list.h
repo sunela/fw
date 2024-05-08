@@ -21,6 +21,7 @@ struct wi_list_style {
 	gfx_color		bg[2];	/* even and odd entries */
 	unsigned		opad;	/* padding at top and bottom (0 -> 1) */
 	unsigned		ipad;	/* padding between lines (0 -> 1)*/
+	unsigned		min_h;	/* including padding */
 	const struct font *font;/* NULL for default */
 	void (*render)(const struct wi_list *list,
 	    const struct wi_list_entry *entry, const struct gfx_rect *bb,

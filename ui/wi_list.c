@@ -71,13 +71,16 @@ static const struct font *list_font(const struct wi_list *list)
 struct wi_list_entry *wi_list_pick(const struct wi_list *list,
     unsigned x, unsigned y)
 {
+	const struct wi_list_style *style = list->style;
 	struct wi_list_entry *e;
-	unsigned pos = list->style->y0;
+	unsigned pos = style->y0;
 
 	if (y < pos)
 		return NULL;
 	for (e = list->list; e; e = e->next) {
-		pos += entry_height(list, e);
+		unsigned h = entry_height(list, e);
+
+		pos += style->min_h < h ? h : style->min_h;
 		if (y < pos)
 			return e;
 	}
@@ -102,13 +105,18 @@ void wi_list_render(struct wi_list *list, struct wi_list_entry *entry)
 		.w = GFX_WIDTH,
 		.h = entry_height(list, entry),
 	};
+	const struct wi_list_style *style = list->style;
 	const struct wi_list_entry *e;
 	bool odd = 0;
 
-	if (!list->style->render)
+	if (!style->render)
 		return;
+	if (bb.h < style->min_h)
+		bb.h = style->min_h;
 	for (e = list->list; e != entry; e = e->next) {
-		bb.y += entry_height(list, e);
+		unsigned h = entry_height(list, e);
+
+		bb.y += style->min_h < h ? h : style->min_h;
 		odd = !odd;
 	}
 	list->style->render(list, entry, &bb, odd);
@@ -172,6 +180,10 @@ static unsigned draw_entry(const struct wi_list *list,
 	unsigned h = entry_height(list, e);
 	struct gfx_rect bb = { .x = 0, .y = y, .w = GFX_WIDTH, .h = h };
 
+	if (h < style->min_h) {
+		y += (style->min_h - h) / 2;
+		bb.h = style->min_h;
+	}
 	gfx_rect(&da, &bb, style->bg[odd]);
 	text_text(&da, 0, y + opad(list, e), e->first, list_font(list),
 	    GFX_LEFT, GFX_TOP | GFX_MAX, style->fg[odd]);
@@ -182,7 +194,7 @@ static unsigned draw_entry(const struct wi_list *list,
 		    GFX_LEFT, GFX_TOP | GFX_MAX, style->fg[odd]);
 	if (style->render)
 		style->render(list, e, &bb, odd);
-	return h;
+	return bb.h;
 }
 
 

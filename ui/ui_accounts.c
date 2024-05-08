@@ -80,7 +80,7 @@ static void ui_accounts_long(unsigned x, unsigned y)
 		{ NULL, },
 		{ ui_overlay_sym_setup,	enter_setup, NULL },
 	};
-	struct ut_overlay_params prm = {
+	static struct ut_overlay_params prm = {
 		.buttons	= buttons,
 		.n_buttons	= 4,
         };

@@ -13,7 +13,7 @@ OBJS = ui.o demo.o timer.o debug.o mbox.o rnd.o hmac.o hotp.o base32.o \
     basic.o poly.o shape.o long_text.o font.o text.o \
     dbcrypt.o block.o \
     ui_off.o ui_pin.o ui_fail.o ui_accounts.o ui_account.o uw_list.o \
-    ut_entry.o accounts.o ut_time.o ut_overlay.o ut_setup.o
+    ut_entry.o accounts.o ut_time.o ut_overlay.o ut_setup.o ut_storage.o
 
 include Makefile.c-common
 

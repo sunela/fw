@@ -95,6 +95,7 @@ extern const struct ui ut_entry;
 extern const struct ui ut_time;
 extern const struct ui ut_overlay;
 extern const struct ui ut_setup;
+extern const struct ui ut_storage;
 
 void progress(void);
 void set_idle(unsigned seconds);

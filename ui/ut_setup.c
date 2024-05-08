@@ -70,6 +70,7 @@ static void ut_setup_open(void *params)
 	uw_list_begin(&list, &style);
 	uw_list_add(&list, "Change PIN", NULL, NULL);
 	uw_list_add(&list, "Time & date", NULL, (void *) &ut_time);
+	uw_list_add(&list, "Storage", NULL, (void *) &ut_storage);
 	uw_list_end(&list);
 
 	set_idle(IDLE_SETUP_S);

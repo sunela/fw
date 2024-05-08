@@ -41,6 +41,7 @@ static const struct wi_list_style style = {
 	fg:	{ GFX_WHITE, GFX_WHITE },
 	bg:	{ GFX_BLACK, GFX_HEX(0x202020) },
 	opad:	3,
+	min_h:	40,
 };
 
 enum sync_mode {

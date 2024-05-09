@@ -119,7 +119,7 @@ void wi_list_render(struct wi_list *list, struct wi_list_entry *entry)
 		bb.y += style->min_h < h ? h : style->min_h;
 		odd = !odd;
 	}
-	list->style->render(list, entry, &bb, odd);
+	list->style->render(list, entry, &da, &bb, odd);
 }
 
 
@@ -193,7 +193,7 @@ static unsigned draw_entry(const struct wi_list *list,
 		    e->second, list_font(list),
 		    GFX_LEFT, GFX_TOP | GFX_MAX, style->fg[odd]);
 	if (style->render)
-		style->render(list, e, &bb, odd);
+		style->render(list, e, &da, &bb, odd);
 	return bb.h;
 }
 

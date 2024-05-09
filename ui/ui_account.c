@@ -36,8 +36,8 @@
 
 
 static void render_account(const struct wi_list *l,
-    const struct wi_list_entry *entry, const struct gfx_rect *bb,
-    bool odd);
+    const struct wi_list_entry *entry, struct gfx_drawable *d,
+    const struct gfx_rect *bb, bool odd);
 
 
 static const struct wi_list_style style = {
@@ -57,8 +57,8 @@ static struct wi_list list;
 
 
 static void render_account(const struct wi_list *l,
-    const struct wi_list_entry *entry, const struct gfx_rect *bb,
-    bool odd)
+    const struct wi_list_entry *entry, struct gfx_drawable *d,
+    const struct gfx_rect *bb, bool odd)
 {
 	const struct account *a = selected_account;
 	unsigned passed_s = (time_us() / 1000000 + 1) % 30;
@@ -67,7 +67,7 @@ static void render_account(const struct wi_list *l,
 		return;
 	if (a->token.type != tt_totp)
 		return;
-	gfx_arc(&da, bb->x + bb->w - 1 - bb->h / 2, bb->y + bb->h / 2,
+	gfx_arc(d, bb->x + bb->w - 1 - bb->h / 2, bb->y + bb->h / 2,
 	    bb->h / 4, 12 * passed_s, 0,
 	    passed_s ? TIMER_FG : style.bg[odd], style.bg[odd]);
 }

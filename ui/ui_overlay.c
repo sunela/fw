@@ -151,8 +151,9 @@ static void ui_overlay_tap(unsigned x, unsigned y)
 		if (y < ref->bb.y || y >= ref->bb.y + ref->bb.h)
 			continue;
 		ref->fn(ref->user);
-		break;
+		return;
 	}
+	ui_return();
 }
 
 

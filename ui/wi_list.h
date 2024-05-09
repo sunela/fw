@@ -62,9 +62,9 @@ void wi_list_forall(struct wi_list *list,
  */
 
 bool list_scroll(struct wi_list *list, int dy);
-void wi_list_moving(struct wi_list *list, unsigned from_x, unsigned from_y,
+bool wi_list_moving(struct wi_list *list, unsigned from_x, unsigned from_y,
     unsigned to_x, unsigned to_y);
-void wi_list_to(struct wi_list *list, unsigned from_x, unsigned from_y,
+bool wi_list_to(struct wi_list *list, unsigned from_x, unsigned from_y,
     unsigned to_x, unsigned to_y, enum ui_swipe swipe);
 void wi_list_cancel(struct wi_list *list);
 

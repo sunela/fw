@@ -8,8 +8,11 @@
 #ifndef WI_LIST_H
 #define	WI_LIST_H
 
+#include <stdbool.h>
+
 #include "gfx.h"
 #include "text.h"
+#include "ui.h"
 
 
 struct wi_list_entry;
@@ -29,10 +32,14 @@ struct wi_list_style {
 };
 
 struct wi_list {
-	struct wi_list_entry		*list;
-	struct wi_list_entry		**anchor;
-	const struct wi_list_style	*style;
-	unsigned			text_height;
+	struct wi_list_entry	*list;
+	struct wi_list_entry	**anchor;
+	const struct wi_list_style *style;
+	unsigned		text_height;
+	unsigned		total_height;	/* set by wi_list_end */
+	unsigned		up;		/* distance scrolled up */
+	bool			scrolling;
+	unsigned		scroll_from;
 };
 
 
@@ -41,14 +48,25 @@ struct wi_list_entry *wi_list_pick(const struct wi_list *list,
 void *wi_list_user(const struct wi_list_entry *entry);
 
 /*
- * wi_list_render only calls the "render" callback (if set), but performs no
- * other operations.
+ * wi_list_render_entry only calls the "render" callback (if set), but performs
+ * no other operations.
  */
-void wi_list_render(struct wi_list *list, struct wi_list_entry *entry);
+void wi_list_render_entry(struct wi_list *list, struct wi_list_entry *entry);
 
 void wi_list_forall(struct wi_list *list,
     void (*fn)(struct wi_list *list, struct wi_list_entry *entry, void *user),
     void *user);
+
+/*
+ * Negative dy scrolls up.
+ */
+
+bool list_scroll(struct wi_list *list, int dy);
+void wi_list_moving(struct wi_list *list, unsigned from_x, unsigned from_y,
+    unsigned to_x, unsigned to_y);
+void wi_list_to(struct wi_list *list, unsigned from_x, unsigned from_y,
+    unsigned to_x, unsigned to_y, enum ui_swipe swipe);
+void wi_list_cancel(struct wi_list *list);
 
 void wi_list_begin(struct wi_list *ctx, const struct wi_list_style *style);
 struct wi_list_entry *wi_list_add(struct wi_list *ctx,

@@ -142,7 +142,7 @@ static void ui_storage_open(void *params)
 	 * @@@ we can't have lists longer than the screen yet, so we need to
 	 * switch to debug() here.
 	 */
-#if 0
+#if 1
 	p = tmp;
 	format(add_char, &p, "%u", unallocated);
 	wi_list_add(&list, "Unallocated", tmp, NULL);
@@ -150,7 +150,7 @@ static void ui_storage_open(void *params)
 debug("Unallocated: %u\n", unallocated);
 #endif
 
-#if 0
+#if 1
 	p = tmp;
 	format(add_char, &p, "%u", invalid);
 	wi_list_add(&list, "Invalid", tmp, NULL);

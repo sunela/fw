@@ -239,20 +239,20 @@ void touch_move_event(unsigned x, unsigned y)
 	int dx = (int) x - (int) touch_start_x;
 	int dy = (int) y - (int) touch_start_y;
 
-//	debug("mouse move %u %u\n", x, y);
+	debug("mouse move %u %u\n", x, y);
 	if (x >= GFX_WIDTH || y >= GFX_HEIGHT)
 		return;
 	touch_last_x = x;
 	touch_last_y = y;
-	if (dx * dx + dy * dy >= DRAG_R * DRAG_R) {
+	if (dx * dx + dy * dy >= DRAG_R * DRAG_R && !touch_dragging) {
 		if (e->touch_cancel)
 			e->touch_cancel();
 		timer_cancel(&long_timer);
 		touch_is_long = 0;
-		if (e && e->touch_moving)
-			e->touch_moving(touch_start_x, touch_start_y, x, y);
 		touch_dragging = 1;
 	}
+	if (touch_dragging && e && e->touch_moving)
+		e->touch_moving(touch_start_x, touch_start_y, x, y);
 	crosshair_show(x, y);
 }
 

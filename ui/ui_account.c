@@ -98,7 +98,7 @@ static void show_totp(struct wi_list *l,
 	code = hotp64(sec, size, counter);
 	format(add_char, &p, "%06u", (unsigned) code % 1000000);
 	wi_list_update_entry(l, entry, "TOTP", s, a);
-	wi_list_render(l, entry);
+	wi_list_render_entry(l, entry);
 	update_display(&da);
 }
 

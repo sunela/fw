@@ -48,6 +48,8 @@ enum ui_swipe {
 	us_down
 };
 
+struct wi_list;
+
 struct ui_events {
 	void (*touch_down)(unsigned x, unsigned y);
 	void (*touch_tap)(unsigned x, unsigned y);
@@ -60,6 +62,10 @@ struct ui_events {
 	void (*button_down)(void);
 	void (*button_up)(void);
 	void (*tick)(void);	/* called every ~10 ms */
+
+	/* automatically handle list events */
+	struct wi_list **lists;
+	unsigned n_lists;
 };
 
 struct ui {

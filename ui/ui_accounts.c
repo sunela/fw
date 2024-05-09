@@ -32,6 +32,8 @@ static const struct wi_list_style style = {
 };
 
 static struct wi_list list;
+static struct wi_list *lists[1] = { &list };
+
 
 
 /* --- Tap event ----------------------------------------------------------- */
@@ -129,38 +131,14 @@ static void ui_accounts_resume(void)
 }
 
 
-/* --- Scrolling ----------------------------------------------------------- */
-
-
-static void ui_accounts_moving(unsigned from_x, unsigned from_y,
-    unsigned to_x, unsigned to_y)
-{
-	wi_list_moving(&list, from_x, from_y, to_x, to_y);
-}
-
-
-static void ui_accounts_to(unsigned from_x, unsigned from_y,
-    unsigned to_x, unsigned to_y, enum ui_swipe swipe)
-{
-	wi_list_to(&list, from_x, from_y, to_x, to_y, swipe);
-}
-
-
-static void ui_accounts_cancel(void)
-{
-	wi_list_cancel(&list);
-}
-
-
 /* --- Interface ----------------------------------------------------------- */
 
 
 static const struct ui_events ui_accounts_events = {
 	.touch_tap	= ui_accounts_tap,
 	.touch_long	= ui_accounts_long,
-	.touch_moving	= ui_accounts_moving,
-	.touch_to	= ui_accounts_to,
-	.touch_cancel	= ui_accounts_cancel,
+	.lists		= lists,
+	.n_lists	= 1,
 };
 
 const struct ui ui_accounts = {

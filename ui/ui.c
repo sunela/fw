@@ -13,6 +13,7 @@
 #include "hal.h"
 #include "timer.h"
 #include "gfx.h"
+#include "wi_list.h"
 #include "pin.h"
 #include "demo.h"
 #include "ui.h"
@@ -233,9 +234,60 @@ void touch_down_event(unsigned x, unsigned y)
 }
 
 
-void touch_move_event(unsigned x, unsigned y)
+static void moving_event(unsigned from_x, unsigned from_y,
+    unsigned to_x, unsigned to_y)
 {
 	const struct ui_events *e = current_ui ? current_ui->events : NULL;
+	unsigned i;
+
+	if (!e)
+		return;
+	if (e->n_lists)
+		for (i = 0; i != e->n_lists; i++)
+			if (e->lists[i] && wi_list_moving(e->lists[i],
+			    from_x, from_y, to_x, to_y))
+				return;
+	if (e->touch_moving)
+		e->touch_moving(from_x, from_y, to_x, to_y);
+}
+
+
+static void to_event(unsigned from_x, unsigned from_y,
+    unsigned to_x, unsigned to_y, enum ui_swipe swipe)
+{
+	const struct ui_events *e = current_ui ? current_ui->events : NULL;
+	unsigned i;
+
+	if (!e)
+		return;
+	if (e->n_lists)
+		for (i = 0; i != e->n_lists; i++)
+			if (e->lists[i] && wi_list_to(e->lists[i],
+			    from_x, from_y, to_x, to_y, swipe))
+				return;
+	if (e->touch_to)
+		e->touch_to(from_x, from_y, to_x, to_y, swipe);
+}
+
+
+static void cancel_event(void)
+{
+	const struct ui_events *e = current_ui ? current_ui->events : NULL;
+	unsigned i;
+
+	if (!e)
+		return;
+	if (e->n_lists)
+		for (i = 0; i != e->n_lists; i++)
+			if (e->lists[i])
+				wi_list_cancel(e->lists[i]);
+	if (e->touch_cancel)
+		e->touch_cancel();
+}
+
+
+void touch_move_event(unsigned x, unsigned y)
+{
 	int dx = (int) x - (int) touch_start_x;
 	int dy = (int) y - (int) touch_start_y;
 
@@ -245,14 +297,13 @@ void touch_move_event(unsigned x, unsigned y)
 	touch_last_x = x;
 	touch_last_y = y;
 	if (dx * dx + dy * dy >= DRAG_R * DRAG_R && !touch_dragging) {
-		if (e->touch_cancel)
-			e->touch_cancel();
+		cancel_event();
 		timer_cancel(&long_timer);
 		touch_is_long = 0;
 		touch_dragging = 1;
 	}
-	if (touch_dragging && e && e->touch_moving)
-		e->touch_moving(touch_start_x, touch_start_y, x, y);
+	if (touch_dragging)
+		moving_event(touch_start_x, touch_start_y, x, y);
 	crosshair_show(x, y);
 }
 
@@ -274,17 +325,15 @@ void touch_up_event(void)
 		int dy = (int) touch_last_y - (int) touch_start_y;
 
 		if (dx * dx + dy * dy >= DRAG_R * DRAG_R) {
-			if (e->touch_to)
-				e->touch_to(touch_start_x,
-				    touch_start_y, touch_last_x, touch_last_y,
-				    classify_swipe(touch_start_x, touch_start_y,
-				    touch_last_x, touch_last_y));
+			to_event(touch_start_x, touch_start_y,
+			    touch_last_x, touch_last_y,
+			    classify_swipe(touch_start_x, touch_start_y,
+			    touch_last_x, touch_last_y));
 		} else 	{
 			if (touch_dragging) {
-				if (e->touch_cancel)
-					e->touch_cancel();
+				cancel_event();
 			} else {
-				if (e->touch_tap)
+				if (e && e->touch_tap)
 					e->touch_tap(touch_start_x,
 					    touch_start_y);
 			}

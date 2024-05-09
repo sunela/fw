@@ -28,6 +28,18 @@ static struct account dummy_accounts[] = {
 		token:	{ 0 }
 	},
 	{
+		name:	"dummy1",
+		user:	"for scrolling",
+		pw:	"Geheim",
+		token:	{ 0 }
+	},
+	{
+		name:	"dummy2",
+		user:	"for scrolling",
+		pw:	"Geheim",
+		token:	{ 0 }
+	},
+	{
 		name:	"HOTP",
 		token:	{
 			secret_size:	20,

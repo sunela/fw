@@ -74,15 +74,15 @@ struct wi_list_entry *wi_list_pick(const struct wi_list *list,
 {
 	const struct wi_list_style *style = list->style;
 	struct wi_list_entry *e;
-	unsigned pos = style->y0;
+	int pos = style->y0 - list->up;
 
-	if (y < pos)
+	if ((int) y < pos)
 		return NULL;
 	for (e = list->list; e; e = e->next) {
 		unsigned h = entry_height(list, e);
 
 		pos += style->min_h < h ? h : style->min_h;
-		if (y < pos)
+		if ((int) y < pos)
 			return e;
 	}
 	return NULL;

@@ -35,6 +35,7 @@ static const struct wi_list_style style = {
 };
 
 static struct wi_list list;
+static struct wi_list *lists[1] = { &list };
 static const struct wi_list_entry *initialize = NULL;
 
 
@@ -181,6 +182,9 @@ static void ui_storage_close(void)
 static const struct ui_events ui_storage_events = {
 	.touch_tap	= ui_storage_tap,
 	.touch_to	= ui_storage_to,
+	.lists		= lists,
+	.n_lists	= 1,
+
 };
 
 const struct ui ui_storage = {

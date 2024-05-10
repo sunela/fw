@@ -53,6 +53,7 @@ enum sync_mode {
 struct mbox time_mbox = MBOX_INIT;
 
 static struct wi_list list;
+static struct wi_list *lists[1] = { &list };
 static struct wi_list_entry *entry_time, *entry_date, *entry_sync;
 static enum sync_mode sync_mode;
 
@@ -204,6 +205,8 @@ static const struct ui_events ui_time_events = {
 	.touch_tap	= ui_time_tap,
 	.touch_to	= ui_time_to,
 	.tick		= ui_time_tick,
+	.lists		= lists,
+	.n_lists	= 1,
 };
 
 const struct ui ui_time = {

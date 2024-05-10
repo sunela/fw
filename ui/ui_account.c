@@ -51,6 +51,7 @@ static const struct wi_list_style style = {
 
 static struct account *selected_account = NULL;
 static struct wi_list list;
+static struct wi_list *lists[1] = { &list };
 
 
 /* --- Extra account rendering --------------------------------------------- */
@@ -206,6 +207,8 @@ static const struct ui_events ui_account_events = {
 	.touch_tap	= ui_account_tap,
 	.touch_to	= ui_account_to,
 	.tick		= ui_account_tick,
+	.lists		= lists,
+	.n_lists	= 1,
 };
 
 const struct ui ui_account = {

@@ -31,6 +31,7 @@ static const struct wi_list_style style = {
 };
 
 static struct wi_list list;
+static struct wi_list *lists[1] = { &list };
 
 
 /* --- Event handling ------------------------------------------------------ */
@@ -102,6 +103,8 @@ static void ui_setup_resume(void)
 static const struct ui_events ui_setup_events = {
 	.touch_tap	= ui_setup_tap,
 	.touch_to	= ui_setup_to,
+	.lists		= lists,
+	.n_lists	= 1,
 };
 
 const struct ui ui_setup = {

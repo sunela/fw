@@ -193,7 +193,7 @@ static enum ui_swipe classify_swipe(unsigned ax, unsigned ay,
 /* --- Touch screen / mouse ------------------------------------------------ */
 
 
-#define	DRAG_R		10	/* minimum distance to indicate draggig */
+#define	DRAG_R		10	/* minimum distance to indicate dragging */
 #define	LONG_MS		200
 
 static unsigned touch_start_ms = 0;
@@ -242,11 +242,10 @@ static void moving_event(unsigned from_x, unsigned from_y,
 
 	if (!e)
 		return;
-	if (e->n_lists)
-		for (i = 0; i != e->n_lists; i++)
-			if (e->lists[i] && wi_list_moving(e->lists[i],
-			    from_x, from_y, to_x, to_y))
-				return;
+	for (i = 0; i != e->n_lists; i++)
+		if (e->lists[i] && wi_list_moving(e->lists[i],
+		    from_x, from_y, to_x, to_y))
+			return;
 	if (e->touch_moving)
 		e->touch_moving(from_x, from_y, to_x, to_y);
 }
@@ -260,11 +259,10 @@ static void to_event(unsigned from_x, unsigned from_y,
 
 	if (!e)
 		return;
-	if (e->n_lists)
-		for (i = 0; i != e->n_lists; i++)
-			if (e->lists[i] && wi_list_to(e->lists[i],
-			    from_x, from_y, to_x, to_y, swipe))
-				return;
+	for (i = 0; i != e->n_lists; i++)
+		if (e->lists[i] && wi_list_to(e->lists[i],
+		    from_x, from_y, to_x, to_y, swipe))
+			return;
 	if (e->touch_to)
 		e->touch_to(from_x, from_y, to_x, to_y, swipe);
 }
@@ -277,10 +275,9 @@ static void cancel_event(void)
 
 	if (!e)
 		return;
-	if (e->n_lists)
-		for (i = 0; i != e->n_lists; i++)
-			if (e->lists[i])
-				wi_list_cancel(e->lists[i]);
+	for (i = 0; i != e->n_lists; i++)
+		if (e->lists[i])
+			wi_list_cancel(e->lists[i]);
 	if (e->touch_cancel)
 		e->touch_cancel();
 }
@@ -320,23 +317,21 @@ void touch_up_event(void)
 		crosshair_remove();
 		return;
 	}
-	if (e) {
-		int dx = (int) touch_last_x - (int) touch_start_x;
-		int dy = (int) touch_last_y - (int) touch_start_y;
 
-		if (dx * dx + dy * dy >= DRAG_R * DRAG_R) {
-			to_event(touch_start_x, touch_start_y,
-			    touch_last_x, touch_last_y,
-			    classify_swipe(touch_start_x, touch_start_y,
-			    touch_last_x, touch_last_y));
-		} else 	{
-			if (touch_dragging) {
-				cancel_event();
-			} else {
-				if (e && e->touch_tap)
-					e->touch_tap(touch_start_x,
-					    touch_start_y);
-			}
+	int dx = (int) touch_last_x - (int) touch_start_x;
+	int dy = (int) touch_last_y - (int) touch_start_y;
+
+	if (dx * dx + dy * dy >= DRAG_R * DRAG_R) {
+		to_event(touch_start_x, touch_start_y,
+		    touch_last_x, touch_last_y,
+		    classify_swipe(touch_start_x, touch_start_y,
+		    touch_last_x, touch_last_y));
+	} else 	{
+		if (touch_dragging) {
+			cancel_event();
+		} else {
+			if (e && e->touch_tap)
+				e->touch_tap(touch_start_x, touch_start_y);
 		}
 	}
 	crosshair_remove();

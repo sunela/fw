@@ -192,7 +192,7 @@ static unsigned draw_entry(const struct wi_list *list,
 	tmp_bb.y = 0;
 	gfx_da_init(&tmp_da, GFX_WIDTH, bb.h, tmp_fb);
 	gfx_clear(&tmp_da, style->bg[odd]); /* better safe than sorry */
-	do_draw_entry(list, e, &tmp_da, &tmp_bb, 0, odd);
+	do_draw_entry(list, e, &tmp_da, &tmp_bb, y - bb.y, odd);
 	if (top < (int) style->y0)
 		gfx_copy(d, 0, style->y0, &tmp_da, 0, style->y0 - top,
 		    GFX_WIDTH, bb.h - ((int) style->y0 - top), -1);

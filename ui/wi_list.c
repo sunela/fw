@@ -274,7 +274,7 @@ bool wi_list_to(struct wi_list *list, unsigned from_x, unsigned from_y,
 {
 	bool res;
 
-	if (swipe != us_up && swipe != us_down) {
+	if (swipe == us_left || swipe == us_right) {
 		wi_list_cancel(list);
 		return 0;
 	}

@@ -322,6 +322,20 @@ void touch_up_event(void)
 	int dy = (int) touch_last_y - (int) touch_start_y;
 
 	if (dx * dx + dy * dy >= DRAG_R * DRAG_R) {
+		/*
+		 * @@@ the way how timers are currently implemented, some time,
+		 * including for timers, moves more slowly when there is
+		 * interaction or other system activity. This means that we
+		 * don't timeout easily when scrolling. However, this will
+		 * change.
+		 *
+		 * For now, just the "progress" call here should be enough to
+		 * prevent overly aggressive timeouts. The more general problem
+		 * is to make sure accidental touches can't defer an idle
+		 * timeout indefinitely, and we will need a better progress
+		 * indicator.
+		 */
+		progress();
 		to_event(touch_start_x, touch_start_y,
 		    touch_last_x, touch_last_y,
 		    classify_swipe(touch_start_x, touch_start_y,

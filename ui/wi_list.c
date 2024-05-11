@@ -24,6 +24,8 @@
 #define	DEFAULT_OPAD	1
 #define	DEFAULT_IPAD	1
 
+#define	OVER_SCROLL	50	/* to get bottom item out of corner area */
+
 
 struct wi_list_entry {
 	const char *first;
@@ -178,7 +180,7 @@ static unsigned draw_entry(const struct wi_list *list,
 		return bb.h;
 	if (top > (int) style->y1)
 		return bb.h;
-	if (top >= (int) style->y0 && top + (int) bb.h + 1 <= (int) style->y1) {
+	if (top >= (int) style->y0 && top + (int) bb.h - 1 <= (int) style->y1) {
 		do_draw_entry(list, e, d, &bb, y, odd);
 		return bb.h;
 	}
@@ -205,8 +207,9 @@ static unsigned draw_entry(const struct wi_list *list,
 
 static unsigned draw_list(struct wi_list *list)
 {
+	const struct wi_list_style *style = list->style;
 	const struct wi_list_entry *e;
-	unsigned y = list->style->y0;
+	unsigned y = style->y0;
 	unsigned i = 0;
 
 debug("  up %u\n", list->up);
@@ -217,7 +220,13 @@ debug("  up %u\n", list->up);
 		i++;
 		y += h;
 	}
-	return y - list->style->y0;
+
+	int ys = (int) y - (int) list->up;
+
+	if (ys >= 0 && ys <= (int) style->y1)
+		gfx_rect_xy(&da, 0, ys, GFX_WIDTH, style->y1 - ys + 1,
+		    GFX_BLACK);
+	return y - style->y0;
 }
 
 
@@ -235,7 +244,8 @@ debug("scrolling %u up %u scroll_from %u dy %d y0 %u y1 %u th %u\n",
 		if (dy > (int) list->up)
 			dy = list->up;
 	} else {
-		unsigned visible_h = list->total_height - list->up;
+		unsigned visible_h =
+		    list->total_height + OVER_SCROLL - list->up;
 		unsigned win_h = style->y1 - style->y0 + 1;
 
 		if (visible_h < win_h)

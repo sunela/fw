@@ -24,73 +24,82 @@ static PSRAM uint8_t io_buf[STORAGE_BLOCK_SIZE];
 static PSRAM struct block_content bc;
 
 
+static enum block_type classify_block(const uint8_t *b)
+{
+	unsigned i;
+
+	switch (*b++) {
+	case 0:
+		for (i = 1; i != DB_NONCE_SIZE; i++)
+			if (*b++)
+				return bt_data;
+		return bt_deleted;
+	case 0xff:
+		for (i = 1; i != DB_NONCE_SIZE; i++)
+			if (*b++ != 0xff)
+				return bt_data;
+		while (i++ != STORAGE_BLOCK_SIZE)
+			if (*b++ != 0xff)
+				return bt_invalid;
+		return bt_erased;
+	default:
+		return bt_data;	/* or bt_empty or bt_invalid */
+	}
+}
+
 
 enum block_type block_read(const struct dbcrypt *c, void *payload, unsigned n)
 {
-	const struct block *b = (const void *) io_buf;
-	enum block_type ret;
+	enum block_type type;
 
 debug("block_read %u\n", n);
 	if (!storage_read_block(io_buf, n))
 		return bt_error;
-debug("\tstatus %u\n", b->status);
-	switch (b->status) {
-	case bs_unallocated_1:
-	case bs_unallocated_2:
-		return bt_unallocated;
-	case bs_allocated:
-		break;
-	case bs_invalidated:
-		return bt_invalidated;
+	type = classify_block((const uint8_t *) io_buf);
+	switch (type) {
+	case bt_deleted:
+	case bt_erased:
+	case bt_invalid:
+		return type;
 	default:
-		abort();
+		break;
 	}
 	if (!db_decrypt(c, &bc, io_buf)) {
 		memset(&bc, 0, sizeof(bc));
-		return bt_corrupt;
+		return bt_invalid;
 	}
+	type = bc.type;
 	switch (bc.type) {
-	case bt_single:
-	case bt_first:
-	case bt_nth ... bt_max:
-	case bt_last:
+	case bt_data:
 		memcpy(payload, bc.payload, sizeof(bc.payload));
-		/* fall through */
+		break;
 	case bt_empty:
-		ret = bc.type;
 		break;
 	default:
-		ret = bt_corrupt;
+		type = bt_invalid;
+		break;
 	}
 	memset(&bc, 0, sizeof(bc));
-	return ret;
+	return type;
 }
 
 
-bool block_write(const struct dbcrypt *c, enum block_type type,
+bool block_write(const struct dbcrypt *c, enum content_type type,
     const void *payload, unsigned n)
 {
-	struct block *b = (void *) io_buf;
-
 	assert(sizeof(struct block) == STORAGE_BLOCK_SIZE);
 	memset(io_buf, 0, sizeof(io_buf));
-	memset(&bc, 0, sizeof(bc));
+	bc.type = type;
 	switch (type) {
-	case bt_invalidated:
-		return block_invalidate(n);
-	case bt_single:
-	case bt_first:
-	case bt_nth ... bt_max:
-	case bt_last:
-		memcpy(bc.payload, payload, sizeof(bc.payload));
-		break;
 	case bt_empty:
+		memset(&bc, 0, sizeof(bc));
+		break;
+	case bt_data:
+		memcpy(bc.payload, payload, sizeof(bc.payload));
 		break;
 	default:
 		abort();
 	}
-	b->status = bs_allocated;
-	bc.type = type;
 	if (!db_encrypt(c, io_buf, &bc))
 		return 0;
 	memset(&bc, 0, sizeof(bc));
@@ -98,21 +107,8 @@ bool block_write(const struct dbcrypt *c, enum block_type type,
 }
 
 
-bool block_invalidate(unsigned n)
+bool block_delete(unsigned n)
 {
-	struct block *b = (void *) io_buf;
-
 	memset(io_buf, 0, sizeof(io_buf));
-	b->status = bs_invalidated;
-	return storage_write_block(io_buf, n);
-}
-
-
-bool block_deallocate(unsigned n)
-{
-	struct block *b = (void *) io_buf;
-
-	memset(io_buf, 0, sizeof(io_buf));
-	b->status = bs_unallocated_1;
 	return storage_write_block(io_buf, n);
 }

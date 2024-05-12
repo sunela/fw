@@ -7,21 +7,9 @@
 #include "bflb_mtimer.h"
 #include "bflb_rtc.h"
 #include "bflb_uart.h"
-#include "bflb_flash.h"
 #include "board.h"
 
 #include "../sdk-hal.h"
-#include "../db/storage.h"
-
-
-/*
- * 16 MB Flash (M1s). We reserve the first half for the SDK and use the second
- * half for data storage. Of the storage area, we use - at least for now - two
- * partitions of 1 MB each.
- */
-
-#define	FLASH_STORAGE_BASE	(8 * 1024 * 1024)
-#define	FLASH_STORAGE_SIZE	(2 * 1024 * 1024)
 
 
 void sunela_usb_init(void);
@@ -81,39 +69,6 @@ volatile uint32_t *base = (void *) 0x2000a000;	// ACM1 (M0)
 
 while (!(base[0x21] & 0x3f));
 base[0x22] = c;
-}
-
-
-bool storage_read_block(void *buf, unsigned n)
-{
-	uint32_t addr = FLASH_STORAGE_BASE + n * STORAGE_BLOCK_SIZE;
-	int ret;
-
-	assert(n < FLASH_STORAGE_SIZE / STORAGE_BLOCK_SIZE);
-	ret = bflb_flash_read(addr, buf, STORAGE_BLOCK_SIZE);
-debug("read (%d 0x%08lx) %d\n", n, (unsigned long) addr, ret);
-	return !ret;
-}
-
-
-/* @@@ the W25Q128JVEJQ Flash in M1s has 4 kB sectors, so each "block" erase
- * erases four blocks. */
-
-bool storage_write_block(const void *buf, unsigned n)
-{
-	uint32_t addr = FLASH_STORAGE_BASE + n * STORAGE_BLOCK_SIZE;
-
-/* @@@ we probably need to disable interrupts while erasing / writing Flash */
-	assert(n < FLASH_STORAGE_SIZE / STORAGE_BLOCK_SIZE);
-	if (bflb_flash_erase(addr, STORAGE_BLOCK_SIZE))
-		return 0;
-	return !bflb_flash_write(addr, (void *) buf, STORAGE_BLOCK_SIZE);
-}
-
-
-unsigned storage_blocks(void)
-{
-	return FLASH_STORAGE_SIZE / STORAGE_BLOCK_SIZE;
 }
 
 

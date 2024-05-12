@@ -19,8 +19,11 @@ extern const char *storage_file;
 #endif
 
 
+unsigned storage_blocks(void);
+unsigned storage_erase_size(void);
+
 bool storage_read_block(void *buf, unsigned n);
 bool storage_write_block(const void *buf, unsigned n);
-unsigned storage_blocks(void);
+bool storage_erase_blocks(unsigned n, unsigned n_blocks);
 
 #endif /* !STORAGE_H */

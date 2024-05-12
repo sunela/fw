@@ -41,16 +41,11 @@ static const struct wi_list_entry *initialize = NULL;
 
 static void initialize_storage(void)
 {
-	static const uint8_t zero[BLOCK_PAYLOAD_SIZE] = { 0, };
 	unsigned total = storage_blocks();
-	unsigned i;
 
 	gfx_clear(&da, GFX_BLACK);
 	update_display(&da);
-	for (i = 0; i != total; i++) {
-debug("%u/%u\n", i, total);
-		block_write(NULL, bt_empty, zero, i);
-	}
+	storage_erase_blocks(0, total);
 }
 
 
@@ -85,10 +80,11 @@ static void ui_storage_open(void *params)
 {
 	unsigned total = storage_blocks();
 	unsigned error = 0;
-	unsigned empty = 0;
-	unsigned unallocated = 0;
+	unsigned deleted = 0;
+	unsigned erased = 0;
 	unsigned invalid = 0;
-	unsigned used = 0;
+	unsigned empty = 0;
+	unsigned data = 0;
 	unsigned i;
 	uint8_t dummy[BLOCK_PAYLOAD_SIZE];
 	char tmp[20];
@@ -105,21 +101,20 @@ static void ui_storage_open(void *params)
 		case bt_error:
 			error++;
 			break;
-		case bt_unallocated:
-			unallocated++;
+		case bt_deleted:
+			deleted++;
+			break;
+		case bt_erased:
+			erased++;
+			break;
+		case bt_invalid:
+			invalid++;
 			break;
 		case bt_empty:
 			empty++;
 			break;
-		case bt_corrupt:
-		case bt_invalidated:
-			invalid++;
-			break;
-		case bt_single:
-		case bt_first:
-		case bt_nth ... bt_max:
-		case bt_last:
-			used++;
+		case bt_data:
+			data++;
 			break;
 		default:
 			abort();
@@ -132,34 +127,33 @@ static void ui_storage_open(void *params)
 	wi_list_add(&list, "Total blocks", tmp, NULL);
 
 	p = tmp;
-	format(add_char, &p, "%u", used);
+	format(add_char, &p, "%u", data);
 	wi_list_add(&list, "Used", tmp, NULL);
+
+	p = tmp;
+	format(add_char, &p, "%u", error);
+	wi_list_add(&list, "Error", tmp, NULL);
+
+	p = tmp;
+	format(add_char, &p, "%u", erased);
+	wi_list_add(&list, "Erased", tmp, NULL);
+
+	p = tmp;
+	format(add_char, &p, "%u", deleted);
+	wi_list_add(&list, "Deleted", tmp, NULL);
+
+	p = tmp;
+	format(add_char, &p, "%u", invalid);
+	wi_list_add(&list, "Invalid", tmp, NULL);
 
 	p = tmp;
 	format(add_char, &p, "%u", empty);
 	wi_list_add(&list, "Empty", tmp, NULL);
 
 	/*
-	 * @@@ we can't have lists longer than the screen yet, so we need to
-	 * switch to debug() here.
+	 * "Invalid" includes blocks that were encrypted with a different key.
 	 */
-#if 1
-	p = tmp;
-	format(add_char, &p, "%u", unallocated);
-	wi_list_add(&list, "Unallocated", tmp, NULL);
-#else
-debug("Unallocated: %u\n", unallocated);
-#endif
-
-#if 1
-	p = tmp;
-	format(add_char, &p, "%u", invalid);
-	wi_list_add(&list, "Invalid", tmp, NULL);
-#else
-debug("Invalid: %u\n", invalid);
-#endif
-
-	if (empty + used)
+	if (data + invalid)
 		initialize = NULL;
 	else
 		initialize = wi_list_add(&list, "Initialize", NULL, NULL);

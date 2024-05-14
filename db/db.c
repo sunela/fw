@@ -196,16 +196,26 @@ static void free_fields(struct db_entry *de)
 /* --- Database entries ---------------------------------------------------- */
 
 
-static struct db_entry *new_entry(struct db *db, const char *name)
+static struct db_entry *new_entry(struct db *db, const char *name,
+    const char *prev)
 {
 	struct db_entry *de, **anchor;
+	struct db_entry *e = NULL;
 
 	de = alloc_type(struct db_entry);
 	memset(de, 0, sizeof(*de));
 	de->db = db;
-	for (anchor = &db->entries; *anchor; anchor = &(*anchor)->next)
-		if (strcmp((*anchor)->name, name) > 0)
-			break;
+	if (prev)
+		for (e = db->entries; e; e = e->next)
+			if (!strcmp(e->name, prev))
+				break;
+	if (e) {
+		anchor = &e->next;
+	} else {
+		for (anchor = &db->entries; *anchor; anchor = &(*anchor)->next)
+			if (strcmp((*anchor)->name, name) > 0)
+				break;
+	}
 	de->next = *anchor;
 	*anchor = de;
 	return de;
@@ -274,24 +284,33 @@ static const void *tlv_item(const void **p, const void *end,
 }
 
 
+static char *alloc_string(const char *s, unsigned len)
+{
+	char *tmp;
+
+	tmp = alloc_size(len + 1);
+	memcpy(tmp, s, len);
+	tmp[len] = 0;
+	return tmp;
+}
+
+
 static bool process_payload(struct db *db, unsigned block, uint16_t seq,
     const void *payload, unsigned size)
 {
 	const void *end = payload + size;
 	struct db_entry *de;
 	struct db_field **df;
-	const void *p = payload;
-	const void *q;
+	const void *p, *q;
 	enum field_type type;
 	char *name;
 	unsigned len;
 
-	q = tlv_item(&payload, end, &type, &len);
+	p = payload;
+	q = tlv_item(&p, end, &type, &len);
 	if (!q || type != ft_id)
 		return 0;
-	name = alloc_size(len + 1);
-	memcpy(name, q, len);
-	name[len] = 0;
+	name = alloc_string(q, len);
 	for (de = db->entries; de; de = de->next)
 		if (!strcmp(de->name, name))
 			break;
@@ -305,12 +324,25 @@ static bool process_payload(struct db *db, unsigned block, uint16_t seq,
 			return 1;
 		free_fields(de);
 	} else {
-		de = new_entry(db, name);
+		char *prev = NULL;
+
+		while (1) {
+			q = tlv_item(&p, end, &type, &len);
+			if (!q)
+				break;
+			if (type == ft_prev) {
+				prev = alloc_string(q, len);
+				break;
+			}
+		}
+		de = new_entry(db, name, prev);
 		de->name = name;
+		free(prev);
 	}
 	de->block = block;
 	de->seq = seq;
 	df = &de->fields;
+	p = payload;
 	while (p != end) {
 		q = tlv_item(&p, end, &type, &len);
 		if (!q)

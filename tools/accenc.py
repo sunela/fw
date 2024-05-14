@@ -20,12 +20,13 @@ HASH_PAD = 12
 STORAGE_BLOCKS = 2048
 
 
-keys = ( "id", "user", "email", "pw", "hotp_secret", "hotp_counter",
+keys = ( "id", "prev", "user", "email", "pw", "hotp_secret", "hotp_counter",
     "totp_secret" )
 
 
 def encode(key, code, v):
-	if key == "id" or key == "user" or key == "email" or key == "pw":
+	if key == "id" or key == "prev" or key == "user" or key == "email" or \
+	    key == "pw":
 		return struct.pack("BB", code, len(v)) + v.encode()
 	if key == "hotp_secret" or key == "totp_secret":
 		s = base64.b32decode(v)
@@ -44,10 +45,10 @@ with open(sys.argv[1]) as file:
 s = b''
 for e in db:
 	b = b''
-	i = 0
+	i = 1
 	for key in keys:
 		if key in e:
-			b += encode(key, i + 2, e[key])
+			b += encode(key, i, e[key])
 		i += 1
 	sys.stdout.buffer.write(os.urandom(NONCE_SIZE) + b'\000' * NONCE_PAD +
 	    struct.pack("<BBH", 4, 0, 0) +

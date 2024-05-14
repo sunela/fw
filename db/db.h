@@ -24,8 +24,8 @@
 
 enum __attribute__((__packed__)) field_type {
 	ft_end		= 0,
-	ft_prev		= 1,	// reserved for sorting
-	ft_id		= 2,
+	ft_id		= 1,
+	ft_prev		= 2,	// place after this entry 
 	ft_user		= 3,
 	ft_email	= 4,
 	ft_pw		= 5,
@@ -37,7 +37,7 @@ enum __attribute__((__packed__)) field_type {
 /*
  * Encodings:
  *
- * ID, PREV:
+ * ID, prev:
  *   Now: <non-NUL characters>
  *   Later: (<non-NUL characters> NUL)+ <non-NUL characters>
  * User, E-Mail, Password:

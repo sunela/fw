@@ -215,6 +215,7 @@ static void ui_account_open(void *params)
 	for (f = de->fields; f; f = f->next)
 		switch (f->type) {
 		case ft_id:
+		case ft_prev:
 			break;
 		case ft_user:
 			add_string("User", f->data, f->len, NULL);

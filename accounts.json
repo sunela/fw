@@ -1,3 +1,10 @@
+#
+# accounts.json: Dummy account list
+#
+# This work is licensed under the terms of the MIT License.
+# A copy of the license can be found in the file LICENSE.MIT
+#
+
 [
 	{
 		"id":	"demo",
@@ -32,6 +39,7 @@
 		"id":	"HOTP",
 		"prev":	"dummy2",
 		"hotp_secret":
+			# 12345678901234567890
 			"GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ",
 		"hotp_counter":
 			0

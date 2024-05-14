@@ -7,7 +7,7 @@
 #
 
 
-import sys, os, struct, json, base64
+import sys, os, struct, json, base64, re
 
 
 BLOCK_SIZE = 1024
@@ -40,9 +40,13 @@ if len(sys.argv) != 2:
         print("usage:", sys.argv[0], "db.json", file = sys.stderr)
         sys.exit(1)
 
+s = ""
 with open(sys.argv[1]) as file:
-	db = json.load(file)
-s = b''
+	for line in file:
+		if not re.match("^\s*#", line):
+			s += line
+db = json.loads(s)
+
 for e in db:
 	b = b''
 	i = 1

@@ -12,6 +12,7 @@
 #include <assert.h>
 
 #include "hal.h"
+#include "debug.h"
 #include "alloc.h"
 #include "fmt.h"
 #include "base32.h"
@@ -165,17 +166,15 @@ static void ui_account_tap(unsigned x, unsigned y)
 
 	progress();
 
-	/* @@@ database currently doesn't support updates */
-#if 0
-	/* @@@ make it harder to update the counter ? */
-	a->token.counter++;
-#endif
-
 	memcpy(&counter, hotp_counter, sizeof(counter));
 	code = hotp64(hotp_secret, hotp_secret_len, counter);
 	format(add_char, &p, "%06u", (unsigned) code % 1000000);
 	wi_list_update_entry(&list, entry, "HOTP", s, de);
 	update_display(&da);
+
+	counter++;
+	if (!db_change(de, ft_hotp_counter, &counter, sizeof(counter)))
+		debug("HOTP counter increment failed\n");
 }
 
 

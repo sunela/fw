@@ -9,10 +9,10 @@ TARGETS = sim fw sdk
 
 FONTS = mono18.font mono24.font mono34.font mono36.font mono58.font
 
-.PHONY:	all sim fw sdk gdb clean spotless
+.PHONY:	all sim fw sdk fonts gdb clean spotless
 .PHONY:	flash picocom upload download erase
 
-all:	$(FONTS:%=font/%) $(TARGETS) _storage
+all:	fonts $(TARGETS) _storage
 
 sim:
 	$(MAKE) -f Makefile.sim
@@ -61,6 +61,8 @@ picocom:
 
 gdb:
 	riscv64-unknown-elf-gdb sdk/build/build_out/sunela_bl808_m0.elf
+
+fonts:	$(FONTS:%=font/%)
 
 $(FONTS:%=font/%): font/Makefile font/cvtfont.py
 	$(MAKE) -C font

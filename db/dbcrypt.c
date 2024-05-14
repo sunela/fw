@@ -12,6 +12,7 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include "rnd.h"
 #include "block.h"
 #include "dbcrypt.h"
 
@@ -21,7 +22,7 @@ bool db_encrypt(const struct dbcrypt *c, void *block, const void *content)
 	struct block *b = (void *) block;
 	struct block_content *bc = &b->content;
 
-	memset(b->nonce, 0, sizeof(b->nonce));
+	rnd_bytes(b->nonce, sizeof(b->nonce));
 	memcpy(bc, content, sizeof(struct block_content));
 	memset(b->hash, 0, sizeof(b->hash));
 	return 1;

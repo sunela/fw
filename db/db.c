@@ -12,6 +12,7 @@
 #include <string.h>
 
 #include "hal.h"
+#include "debug.h"
 #include "alloc.h"
 #include "storage.h"
 #include "block.h"
@@ -228,11 +229,74 @@ struct db_entry *db_new_entry(struct db *db, const char *name)
 }
 
 
+static bool write_entry(const struct db_entry *de)
+{
+	const void *end = payload_buf + sizeof(payload_buf);
+	uint8_t *p = payload_buf;
+	const struct db_field *f;
+
+	memset(payload_buf, 0, sizeof(payload_buf));
+	for (f = de->fields; f; f = f->next) {
+		if ((const void *) p + f->len + 2 > end) {
+			debug("write_entry: %p + %u + 2 > %p\n",
+			    p, f->len, end);
+			return 0;
+		}
+		*p++ = f->type;
+		*p++ = f->len;
+		memcpy(p, f->data, f->len);
+		p += f->len;
+	}
+	return block_write(de->db->c, ct_data, de->seq, payload_buf, de->block);
+}
+
+
 bool db_change(struct db_entry *de, enum field_type type,
     const void *data, unsigned size)
 {
-	// @@@
-	return 0;
+	struct db *db = de->db;
+	struct db_field **anchor;
+	struct db_field *f;
+	unsigned old = de->block;
+	int new;
+
+	new = get_erased_block(de->db);
+	if (new < 0)
+		return 0;
+	for (anchor = &de->fields; *anchor; anchor = &(*anchor)->next)
+		if ((*anchor)->type >= type)
+			break;
+	if (*anchor && (*anchor)->type == type) {
+		f = *anchor;
+		free(f->data);
+	} else {
+		f = alloc_type(struct db_field);
+		f->type = type;
+		f->next = *anchor;
+		*anchor = f;
+	}
+	f->len = size;
+	f->data = alloc_size(size);
+	memcpy(f->data, data, size);
+
+	old = de->block;
+	de->block = new;
+	de->seq++;
+
+	if (!write_entry(de)) {
+		// @@@ complain more if block_delete fails ?
+		if (block_delete(new)) {
+			span_add(&db->deleted, new, 1);
+			db->stats.deleted++;
+		}
+		return 0;
+	}
+	// @@@ complain if block_delete fails ?
+	if (block_delete(old)) {
+		span_add(&db->deleted, old, 1);
+		db->stats.deleted++;
+	}
+	return 1;
 }
 
 

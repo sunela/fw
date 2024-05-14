@@ -148,8 +148,8 @@ bool storage_write_block(const void *buf, unsigned n)
 	}
 
 	/* writing can only turn "1"" into "0" */
-	for (p = tmp; p != (void *) p + sizeof(tmp); p++)
-		*p++ &= *q++;
+	for (p = tmp; p != (void *) tmp + sizeof(tmp); p++)
+		*p &= *q++;
 
 	ret = do_write_block(tmp, n);
 

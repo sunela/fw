@@ -20,6 +20,7 @@
 #include "debug.h"
 #include "timer.h"
 #include "gfx.h"
+#include "storage.h"
 
 
 static SDL_Window *win;
@@ -273,7 +274,9 @@ static void init_sdl(void)
 
 static void usage(const char *name)
 {
-	fprintf(stderr, "usage: %s [-2] [demo-number [demo-arg ...]]\n", name);
+	fprintf(stderr,
+"usage: %s [-2] [-d database] [demo-number [demo-arg ...]]\n",
+    name);
 	exit(1);
 }
 
@@ -282,10 +285,13 @@ int main(int argc, char **argv)
 {
 	int c;
 
-	while ((c = getopt(argc, argv, "2")) != EOF)
+	while ((c = getopt(argc, argv, "2d:")) != EOF)
 		switch (c) {
 		case '2':
 			zoom = 2;
+			break;
+		case 'd':
+			storage_file = optarg;
 			break;
 		default:
 			usage(*argv);

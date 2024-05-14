@@ -5,29 +5,76 @@
  * A copy of the license can be found in the file LICENSE.MIT
  */
 
+/*
+ * @@@ On the final device, use more entropy sources.
+ */
+
 #include <stdint.h>
-#include <stdlib.h>
 
 #include "rnd.h"
 
 
-/*
- * This is a very poor random number generator:
- * - its output is highly predictable
- * - depending on the range, it may be biased towards smaller values
- * Use only for simulation !
- */
+#ifdef SIM
 
-uint32_t rnd(uint32_t range)
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/types.h>
+
+
+#define	DEV_RANDOM	"/dev/random"
+
+
+void rnd_bytes(void *buf, unsigned size)
 {
-	return random() % range;
+	static int fd = -1;
+
+	if (fd == -1) {
+		fd = open(DEV_RANDOM, O_RDONLY);
+		if (fd < 0) {
+			perror("open " DEV_RANDOM);
+			exit(1);
+		}
+	}
+	while (size) {
+		ssize_t got;
+
+		got = read(fd, buf, size);
+		if (got < 0) {
+			perror("read " DEV_RANDOM);
+			exit(1);
+		}
+		if (!got) {
+			fprintf(stderr, "got no data from " DEV_RANDOM);
+			exit(1);
+		}
+		buf += got;
+		size -= got;
+	}
 }
 
 
-void rnd_bytes(uint8_t *buf, unsigned size)
-{
-	unsigned i;
+#else /* SIM */
 
-	for (i = 0; i != size; i++)
-		buf[i] = rnd(256);
+
+#include "bl808/trng.h"
+
+
+void rnd_bytes(void *buf, unsigned size)
+{
+	trng_read(buf, size);
+}
+
+
+#endif /* !SIM */
+
+
+uint32_t rnd(uint32_t range)
+{
+	uint64_t tmp;
+
+	rnd_bytes(&tmp, sizeof(tmp));
+        return tmp % range;
 }

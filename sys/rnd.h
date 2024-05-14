@@ -12,6 +12,6 @@
 
 
 uint32_t rnd(uint32_t range);
-void rnd_bytes(uint8_t *buf, unsigned size);
+void rnd_bytes(void *buf, unsigned size);
 
 #endif /* !RND_H */

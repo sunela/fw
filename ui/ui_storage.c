@@ -101,29 +101,41 @@ static void ui_storage_open(void *params)
 	format(add_char, &p, "%u", s.total);
 	wi_list_add(&list, "Total blocks", tmp, NULL);
 
-	p = tmp;
-	format(add_char, &p, "%u", s.data);
-	wi_list_add(&list, "Used", tmp, NULL);
+	if (s.data) {
+		p = tmp;
+		format(add_char, &p, "%u", s.data);
+		wi_list_add(&list, "Used", tmp, NULL);
+	}
 
-	p = tmp;
-	format(add_char, &p, "%u", s.error);
-	wi_list_add(&list, "Error", tmp, NULL);
+	if (s.error) {
+		p = tmp;
+		format(add_char, &p, "%u", s.error);
+		wi_list_add(&list, "Error", tmp, NULL);
+	}
 
-	p = tmp;
-	format(add_char, &p, "%u", s.erased);
-	wi_list_add(&list, "Erased", tmp, NULL);
+	if (s.erased) {
+		p = tmp;
+		format(add_char, &p, "%u", s.erased);
+		wi_list_add(&list, "Erased", tmp, NULL);
+	}
 
-	p = tmp;
-	format(add_char, &p, "%u", s.deleted);
-	wi_list_add(&list, "Deleted", tmp, NULL);
+	if (s.deleted) {
+		p = tmp;
+		format(add_char, &p, "%u", s.deleted);
+		wi_list_add(&list, "Deleted", tmp, NULL);
+	}
 
-	p = tmp;
-	format(add_char, &p, "%u", s.invalid);
-	wi_list_add(&list, "Invalid", tmp, NULL);
+	if (s.invalid) {
+		p = tmp;
+		format(add_char, &p, "%u", s.invalid);
+		wi_list_add(&list, "Invalid", tmp, NULL);
+	}
 
-	p = tmp;
-	format(add_char, &p, "%u", s.empty);
-	wi_list_add(&list, "Empty", tmp, NULL);
+	if (s.empty) {
+		p = tmp;
+		format(add_char, &p, "%u", s.empty);
+		wi_list_add(&list, "Empty", tmp, NULL);
+	}
 
 	/*
 	 * "Invalid" includes blocks that were encrypted with a different key.

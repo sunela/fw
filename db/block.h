@@ -65,23 +65,25 @@ struct block {
 	} content;
 	uint8_t hash[SHA1_HASH_BYTES];
 	uint8_t reserved_2[12];	/* set to zero */
-};
+} __attribute__((__packed__));
 
 
 
 /*
  * block_read returns the decrypted payload in the buffer at "payload".
- * If the block type is bt_error, bt_invalid, or bt_empty, no payload data is
- * returned.
+ * If the block type is anything other than bt_data, neither sequence number
+ * nor payload data are returned. If the sequence number is not needed, a NULL
+ * pointer can be passed for "seq".
  */
-enum block_type block_read(const struct dbcrypt *c, void *payload, unsigned n);
+enum block_type block_read(const struct dbcrypt *c, uint16_t *seq,
+    void *payload, unsigned n);
 
 /*
  * block_write requires the block to be erased. Note that attempting to write
  * to a block that is not completelly erased is likely to produce an invalid
  * block, losing any (valid) data that may have been stored there before.
  */
-bool block_write(const struct dbcrypt *c, enum content_type type,
+bool block_write(const struct dbcrypt *c, enum content_type type, uint16_t seq,
     const void *buf, unsigned n);
 
 bool block_delete(unsigned n);

@@ -6,6 +6,7 @@
  */
 
 #include <stddef.h>
+#include <stdbool.h>
 #include <stdlib.h>
 
 #include "hal.h"
@@ -15,6 +16,7 @@
 #include "fmt.h"
 #include "storage.h"
 #include "block.h"
+#include "db.h"
 #include "ui.h"
 
 #include "debug.h"
@@ -37,6 +39,8 @@ static const struct wi_list_style style = {
 static struct wi_list list;
 static struct wi_list *lists[1] = { &list };
 static const struct wi_list_entry *initialize = NULL;
+static struct db db;
+static bool is_open = 0;
 
 
 static void initialize_storage(void)
@@ -45,6 +49,8 @@ static void initialize_storage(void)
 
 	gfx_clear(&da, GFX_BLACK);
 	update_display(&da);
+	db_close(&db);
+	is_open = 0;
 	storage_erase_blocks(0, total);
 }
 
@@ -78,15 +84,7 @@ static void ui_storage_to(unsigned from_x, unsigned from_y,
 
 static void ui_storage_open(void *params)
 {
-	unsigned total = storage_blocks();
-	unsigned error = 0;
-	unsigned deleted = 0;
-	unsigned erased = 0;
-	unsigned invalid = 0;
-	unsigned empty = 0;
-	unsigned data = 0;
-	unsigned i;
-	uint8_t dummy[BLOCK_PAYLOAD_SIZE];
+	struct db_stats s;
 	char tmp[20];
 	char *p;
 
@@ -96,64 +94,46 @@ static void ui_storage_open(void *params)
 
 	update_display(&da);
 
-	for (i = 0; i != total; i++)
-		switch (block_read(NULL, dummy, i)) {
-		case bt_error:
-			error++;
-			break;
-		case bt_deleted:
-			deleted++;
-			break;
-		case bt_erased:
-			erased++;
-			break;
-		case bt_invalid:
-			invalid++;
-			break;
-		case bt_empty:
-			empty++;
-			break;
-		case bt_data:
-			data++;
-			break;
-		default:
-			abort();
-		}
-	
+	if (!is_open) {
+		db_open(&db, NULL);
+		is_open = 1;
+	}
+	db_stats(&db, &s);
+
 	wi_list_begin(&list, &style);
 
 	p = tmp;
-	format(add_char, &p, "%u", total);
+	format(add_char, &p, "%u", s.total);
 	wi_list_add(&list, "Total blocks", tmp, NULL);
 
 	p = tmp;
-	format(add_char, &p, "%u", data);
+	format(add_char, &p, "%u", s.data);
 	wi_list_add(&list, "Used", tmp, NULL);
 
 	p = tmp;
-	format(add_char, &p, "%u", error);
+	format(add_char, &p, "%u", s.error);
 	wi_list_add(&list, "Error", tmp, NULL);
 
 	p = tmp;
-	format(add_char, &p, "%u", erased);
+	format(add_char, &p, "%u", s.erased);
 	wi_list_add(&list, "Erased", tmp, NULL);
 
 	p = tmp;
-	format(add_char, &p, "%u", deleted);
+	format(add_char, &p, "%u", s.deleted);
 	wi_list_add(&list, "Deleted", tmp, NULL);
 
 	p = tmp;
-	format(add_char, &p, "%u", invalid);
+	format(add_char, &p, "%u", s.invalid);
 	wi_list_add(&list, "Invalid", tmp, NULL);
 
 	p = tmp;
-	format(add_char, &p, "%u", empty);
+	format(add_char, &p, "%u", s.empty);
 	wi_list_add(&list, "Empty", tmp, NULL);
 
 	/*
 	 * "Invalid" includes blocks that were encrypted with a different key.
 	 */
-	if (data + invalid)
+	if (s.data + s.invalid)
 		initialize = NULL;
 	else
 		initialize = wi_list_add(&list, "Initialize", NULL, NULL);

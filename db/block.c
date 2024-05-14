@@ -48,11 +48,11 @@ static enum block_type classify_block(const uint8_t *b)
 }
 
 
-enum block_type block_read(const struct dbcrypt *c, void *payload, unsigned n)
+enum block_type block_read(const struct dbcrypt *c, uint16_t *seq,
+    void *payload, unsigned n)
 {
 	enum block_type type;
 
-debug("block_read %u\n", n);
 	if (!storage_read_block(io_buf, n))
 		return bt_error;
 	type = classify_block((const uint8_t *) io_buf);
@@ -71,6 +71,8 @@ debug("block_read %u\n", n);
 	type = bc.type;
 	switch (bc.type) {
 	case bt_data:
+		if (seq)
+			*seq = bc.seq;
 		memcpy(payload, bc.payload, sizeof(bc.payload));
 		break;
 	case bt_empty:
@@ -84,12 +86,13 @@ debug("block_read %u\n", n);
 }
 
 
-bool block_write(const struct dbcrypt *c, enum content_type type,
+bool block_write(const struct dbcrypt *c, enum content_type type, uint16_t seq,
     const void *payload, unsigned n)
 {
 	assert(sizeof(struct block) == STORAGE_BLOCK_SIZE);
 	memset(io_buf, 0, sizeof(io_buf));
 	bc.type = type;
+	bc.seq = seq;
 	switch (type) {
 	case bt_empty:
 		memset(&bc, 0, sizeof(bc));

@@ -8,16 +8,18 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 
 #include "hal.h"
+#include "alloc.h"
 #include "fmt.h"
 #include "base32.h"
 #include "hotp.h"
 #include "gfx.h"
 #include "shape.h"
 #include "text.h"
-#include "accounts.h"
+#include "db.h"
 #include "wi_list.h"
 #include "ui.h"
 
@@ -49,7 +51,7 @@ static const struct wi_list_style style = {
 	.render	= render_account,
 };
 
-static struct account *selected_account = NULL;
+static struct db_entry *selected_account = NULL;
 static struct wi_list list;
 static struct wi_list *lists[1] = { &list };
 
@@ -61,12 +63,14 @@ static void render_account(const struct wi_list *l,
     const struct wi_list_entry *entry, struct gfx_drawable *d,
     const struct gfx_rect *bb, bool odd)
 {
-	const struct account *a = selected_account;
+	const struct db_entry *de = selected_account;
+	const struct db_field *f;
 	unsigned passed_s = (time_us() / 1000000 + 1) % 30;
 
-	if (!a->token.secret_size)
-		return;
-	if (a->token.type != tt_totp)
+	for (f = de->fields; f; f = f->next)
+		if (f->type == ft_totp_secret)
+			break;
+	if (!f)
 		return;
 	gfx_arc(d, bb->x + bb->w - 1 - bb->h / 2, bb->y + bb->h / 2,
 	    bb->h / 4, 12 * passed_s, 0,
@@ -77,28 +81,27 @@ static void render_account(const struct wi_list *l,
 static void show_totp(struct wi_list *l,
     struct wi_list_entry *entry, void *user)
 {
-	struct account *a = wi_list_user(entry);
+	struct db_entry *de = wi_list_user(entry);
+	const struct db_field *f;
 
-	if (!a)
+	if (!de)
 		return;
-	if (!a->token.secret_size)
+	for (f = de->fields; f; f = f->next)
+		if (f->type == ft_totp_secret)
+			break;
+	if (!f)
 		return;
-	if (a->token.type != tt_totp)
-		return;
-	ssize_t size = base32_decode_size((char *) a->token.secret);
 
-	assert(size > 0);
+	assert(f->len > 0);
 
-	uint8_t sec[size];
 	uint64_t counter = (time_us() + time_offset) / 1000000 / 30;
 	uint32_t code;
 	char s[6 + 1];
 	char *p = s;
 
-	base32_decode(sec, size, (char *) a->token.secret);
-	code = hotp64(sec, size, counter);
+	code = hotp64(f->data, f->len, counter);
 	format(add_char, &p, "%06u", (unsigned) code % 1000000);
-	wi_list_update_entry(l, entry, "TOTP", s, a);
+	wi_list_update_entry(l, entry, "TOTP", s, de);
 	wi_list_render_entry(l, entry);
 	update_display(&da);
 }
@@ -127,7 +130,13 @@ static void ui_account_tick(void)
 static void ui_account_tap(unsigned x, unsigned y)
 {
 	struct wi_list_entry *entry;
-	struct account *a;
+	struct db_entry *de;
+	struct db_field *f;
+	const struct db_field *hotp_secret = NULL;
+	unsigned hotp_secret_len;
+	struct db_field *hotp_counter = NULL;
+	uint64_t counter;
+
 	char s[6 + 1];
 	char *p = s;
 	uint32_t code;
@@ -135,19 +144,37 @@ static void ui_account_tap(unsigned x, unsigned y)
 	entry = wi_list_pick(&list, x, y);
 	if (!entry)
 		return;
-	a = wi_list_user(entry);
-	if (!a)
+	de = wi_list_user(entry);
+	if (!de)
 		return;
-	if (!a->token.secret_size || a->token.type != tt_hotp)
+	for (f = de->fields; f; f = f->next)
+		switch (f->type) {
+		case ft_hotp_secret:
+			hotp_secret = f->data;
+			hotp_secret_len = f->len;
+			break;
+		case ft_hotp_counter:
+			hotp_counter = f->data;
+			assert(f->len == sizeof(counter));
+			break;
+		default:
+			break;
+		}
+	if (!hotp_secret || !hotp_counter)
 		return;
 
 	progress();
 
+	/* @@@ database currently doesn't support updates */
+#if 0
 	/* @@@ make it harder to update the counter ? */
 	a->token.counter++;
-	code = hotp64(a->token.secret, a->token.secret_size, a->token.counter);
+#endif
+
+	memcpy(&counter, hotp_counter, sizeof(counter));
+	code = hotp64(hotp_secret, hotp_secret_len, counter);
 	format(add_char, &p, "%06u", (unsigned) code % 1000000);
-	wi_list_update_entry(&list, entry, "HOTP", s, a);
+	wi_list_update_entry(&list, entry, "HOTP", s, de);
 	update_display(&da);
 }
 
@@ -163,31 +190,52 @@ static void ui_account_to(unsigned from_x, unsigned from_y,
 /* --- Open/close ---------------------------------------------------------- */
 
 
+static void add_string(const char *label, const char *s, unsigned len,
+    void *user)
+{
+	char *tmp = alloc_size(len + 1);
+
+	memcpy(tmp, s, len);
+	tmp[len] = 0;
+	wi_list_add(&list, label, tmp, user);
+	free(tmp);
+}
+
+
 static void ui_account_open(void *params)
 {
-	struct account *a = selected_account = params;
+	struct db_entry *de = selected_account = params;
+	const struct db_field *f;
 
 	gfx_rect_xy(&da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH, GFX_WHITE);
-	text_text(&da, GFX_WIDTH / 2, TOP_H / 2, a->name, &FONT_TOP,
+	text_text(&da, GFX_WIDTH / 2, TOP_H / 2, de->name, &FONT_TOP,
 	    GFX_CENTER, GFX_CENTER, TITLE_FG);
 
 	wi_list_begin(&list, &style);
-	if (a->user)
-		wi_list_add(&list, "User", a->user, NULL);
-	if (a->pw)
-		wi_list_add(&list, "Password", a->pw, NULL);
-	if (a->token.secret_size) {
-		switch (a->token.type) {
-		case tt_hotp:
-			wi_list_add(&list, "HOTP", "------", a);
+	for (f = de->fields; f; f = f->next)
+		switch (f->type) {
+		case ft_id:
 			break;
-		case tt_totp:
-			wi_list_add(&list, "TOTP", "------", a);
+		case ft_user:
+			add_string("User", f->data, f->len, NULL);
+			break;
+		case ft_email:
+			add_string("E-Mail", f->data, f->len, NULL);
+			break;
+		case ft_pw:
+			add_string("Password", f->data, f->len, NULL);
+			break;
+		case ft_hotp_secret:
+			wi_list_add(&list, "HOTP", "------", de);
+			break;
+		case ft_hotp_counter:
+			break;
+		case ft_totp_secret:
+			wi_list_add(&list, "TOTP", "------", de);
 			break;
 		default:
 			abort();
 		}
-	}
 	wi_list_end(&list);
 
 	set_idle(IDLE_ACCOUNT_S);

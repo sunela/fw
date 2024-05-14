@@ -12,7 +12,6 @@
 #include "text.h"
 #include "wi_list.h"
 #include "ui_overlay.h"
-#include "accounts.h"
 #include "ui.h"
 
 
@@ -59,7 +58,7 @@ static void power_off(void *user)
 }
 
 
-static void add_account(void *user)
+static void new_account(void *user)
 {
 	// @@@
 }
@@ -79,7 +78,7 @@ static void ui_accounts_long(unsigned x, unsigned y)
 
 	static const struct ui_overlay_button buttons[] = {
 		{ ui_overlay_sym_power,	power_off, NULL },
-		{ ui_overlay_sym_add,	add_account, NULL },
+		{ ui_overlay_sym_add,	new_account, NULL },
 		{ NULL, },
 		{ ui_overlay_sym_setup,	enter_setup, NULL },
 	};
@@ -96,17 +95,21 @@ static void ui_accounts_long(unsigned x, unsigned y)
 /* --- Open/close ---------------------------------------------------------- */
 
 
+static bool add_account(void *user, struct db_entry *de)
+{
+	wi_list_add(&list, de->name, NULL, de);
+	return 1;
+}
+
+
 static void ui_accounts_open(void *params)
 {
-	unsigned i;
-
 	gfx_rect_xy(&da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH, GFX_WHITE);
 	text_text(&da, GFX_WIDTH / 2, TOP_H / 2, "Accounts",
 	    &FONT_TOP, GFX_CENTER, GFX_CENTER, GFX_WHITE);
 
 	wi_list_begin(&list, &style);
-	for (i = 0; i != n_accounts; i++)
-		wi_list_add(&list, accounts[i].name, NULL, accounts + i);
+	db_iterate(&main_db, add_account, NULL);
 	wi_list_end(&list);
 
 	set_idle(IDLE_ACCOUNTS_S);

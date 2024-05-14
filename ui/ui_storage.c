@@ -39,8 +39,6 @@ static const struct wi_list_style style = {
 static struct wi_list list;
 static struct wi_list *lists[1] = { &list };
 static const struct wi_list_entry *initialize = NULL;
-static struct db db;
-static bool is_open = 0;
 
 
 static void initialize_storage(void)
@@ -49,9 +47,10 @@ static void initialize_storage(void)
 
 	gfx_clear(&da, GFX_BLACK);
 	update_display(&da);
-	db_close(&db);
-	is_open = 0;
+	db_close(&main_db);
 	storage_erase_blocks(0, total);
+	// @@@ create at least one empty entry, so that we can verify the PIN
+	db_open(&main_db, NULL);
 }
 
 
@@ -94,11 +93,7 @@ static void ui_storage_open(void *params)
 
 	update_display(&da);
 
-	if (!is_open) {
-		db_open(&db, NULL);
-		is_open = 1;
-	}
-	db_stats(&db, &s);
+	db_stats(&main_db, &s);
 
 	wi_list_begin(&list, &style);
 

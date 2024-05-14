@@ -12,7 +12,7 @@ FONTS = mono18.font mono24.font mono34.font mono36.font mono58.font
 .PHONY:	all sim fw sdk gdb clean spotless
 .PHONY:	flash picocom upload download erase
 
-all:	$(FONTS:%=font/%) $(TARGETS)
+all:	$(FONTS:%=font/%) $(TARGETS) _storage
 
 sim:
 	$(MAKE) -f Makefile.sim
@@ -65,9 +65,13 @@ gdb:
 $(FONTS:%=font/%): font/Makefile font/cvtfont.py
 	$(MAKE) -C font
 
+_storage: tools/accenc.py accounts.json
+	$(BUILD) $^ >$@ || { rm -f $@; exit 1; }
+
 clean:
 	for n in $(TARGETS); do $(MAKE) -f Makefile.$$n clean; done
 	$(MAKE) -C sdk clean
 
 spotless:
 	for n in $(TARGETS); do $(MAKE) -f Makefile.$$n spotless; done
+	rm -f _storage

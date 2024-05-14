@@ -15,6 +15,7 @@
 #include "rnd.h"
 #include "gfx.h"
 #include "text.h"
+#include "db.h"
 #include "pin.h"
 #include "shape.h"
 #include "ui.h"
@@ -154,6 +155,19 @@ debug("release_button 0x%x\n", n);
 }
 
 
+static bool accept_pin(void)
+{
+	struct db_stats s;
+
+	if (pin != DUMMY_PIN)
+		return 0;
+	if (!db_open(&main_db, NULL))
+		return 0;
+	db_stats(&main_db, &s);
+	return s.data || s.empty;
+}
+
+
 static void ui_pin_tap(unsigned x, unsigned y)
 {
 	unsigned col = x < BUTTON_X0 + BUTTON_X_SPACING / 2 ? 0 :
@@ -193,7 +207,7 @@ static void ui_pin_tap(unsigned x, unsigned y)
 			return;
 debug("%08lx\n", (unsigned long) pin);
 		progress();
-		if (pin == DUMMY_PIN) {
+		if (accept_pin()) {
 			pin_attempts = 0;
 			pin_cooldown = 0;
 			ui_switch(&ui_accounts, NULL);

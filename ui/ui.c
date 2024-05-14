@@ -14,6 +14,7 @@
 #include "timer.h"
 #include "gfx.h"
 #include "wi_list.h"
+#include "db.h"
 #include "pin.h"
 #include "demo.h"
 #include "ui.h"
@@ -25,6 +26,7 @@
 
 
 struct gfx_drawable da;
+struct db main_db;
 
 unsigned pin_cooldown = 0;
 unsigned pin_attempts = 0;

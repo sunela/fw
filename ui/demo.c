@@ -658,6 +658,7 @@ void demo(char **args, unsigned n_args)
 	unsigned n, i;
 	char *end;
 
+	db_open(&main_db, NULL);
 	display_on(1);
 	n = strtoul(args[0], &end, 0);
 	if (*end)

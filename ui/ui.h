@@ -12,6 +12,7 @@
 
 #include "gfx.h"
 #include "mbox.h"
+#include "db.h"
 
 
 #define	DEBOUNCE_MS	20
@@ -77,6 +78,7 @@ struct ui {
 
 
 extern struct gfx_drawable da;
+extern struct db main_db;
 
 extern unsigned pin_cooldown; /* time when the PIN cooldown ends */
 extern unsigned pin_attempts; /* number of failed PIN entries */

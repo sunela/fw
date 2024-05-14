@@ -1,0 +1,39 @@
+[
+	{
+		"id":	"demo",
+		"user":	"user@mail.com",
+		"pw":	"Geheim"
+	},
+	{
+		"id":	"more",
+		"user":	"something",
+		"pw":	"else"
+	},
+	{
+		"id":	"2nd",
+		"user":	"account name",
+		"pw":	"password"
+	},
+	{
+		"id":	"dummy1",
+		"user":	"for scrolling",
+		"pw":	"Geheim"
+	},
+	{
+		"id":	"dummy2",
+		"user":	"for scrolling",
+		"pw":	"Geheim"
+	},
+	{
+		"id":	"HOTP",
+		"hotp_secret":
+			"GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ",
+		"hotp_counter":
+			0
+	},
+	{
+		"id":	"TOTP",
+		"totp_secret":
+			"GZ4FORKTNBVFGQTFJJGEIRDOKY======"
+	}
+]

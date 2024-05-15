@@ -390,7 +390,7 @@ static void ui_entry_tap(unsigned x, unsigned y)
 		draw_input();
 		if (!*entry_params.buf)
 			first_button(2, 0, SPECIAL_UP_BG);
-		if (end - entry_params.buf == entry_params.max_len)
+		if (end - entry_params.buf == (int) entry_params.max_len)
 			draw_first_text(1);
 		update_display(&da);
 		return;
@@ -402,7 +402,7 @@ static void ui_entry_tap(unsigned x, unsigned y)
 			ui_return();
 		return;
 	}
-	if (end - entry_params.buf == entry_params.max_len)
+	if (end - entry_params.buf == (int) entry_params.max_len)
 		return;
 	progress();
 	timer_flush(&t_button);

@@ -154,12 +154,22 @@ static void clear_input(void)
 }
 
 
+/*
+ * @@@ the "fb" allocation was
+ *
+ * gfx_color
+ *	fb[entry_params.max_len * input_max_height * input_max_height];
+ *
+ * in function draw_top. This caused stack problems.
+ */
+
+static PSRAM gfx_color fb[100000];
+
+
 static void draw_top(const char *s, const struct font *font,
     gfx_color color, gfx_color bg)
 {
 	struct gfx_drawable buf;
-	gfx_color
-	    fb[entry_params.max_len * input_max_height * input_max_height];
 	struct text_query q;
 
 	if (!*s)

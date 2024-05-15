@@ -197,6 +197,45 @@ static void free_fields(struct db_entry *de)
 /* --- Database entries ---------------------------------------------------- */
 
 
+/*
+ * Sorting: "prev" establishes a partial order [1]. The idea is that entries
+ * are sorted alphabetically, but that this sort order can be overridden by
+ * setting "prev".
+ *
+ * The algorithm below does this for any new entry that is added, where the new
+ * entry may have a pointer (prev) to the previous entry. However, this is only
+ * valid under the following conditions:
+ * - the entry referenced by "prev" already exists when the new entry is added,
+ *   and
+ * - no existing entries reference the new entry as their "prev" entry.
+ *
+ * If these conditions are not met, we could aim for an alphabetic order, and
+ * then perform a stable [2] topological sort [1] on the resulting list.
+ * "Stable" means that entries on which the partial order imposes no ordering,
+ * either directly or via other entries, are left in their original order with
+ * respect to each other.
+ *
+ * Some practical considerations:
+ * https://stackoverflow.com/q/11230881/11496135
+ *
+ * Note: the conditions of this algorithm are met if adding a new entry for
+ * which no "prev" references exist in the database. However, already deleting
+ * an old entry and creating a new one with the same name would violate this
+ * condition. (I.e., when deleting entries, we don't try to maintain
+ * referential integrity [3] by also removing all "prev" entries pointing to
+ * it, which can cause the corresponding ordering relations to "come back"
+ * later.)
+ *
+ * Also, given that entries need to be copied when making changes, including
+ * automatic ones, like incrementing the HOTP counter, and thus generally move
+ * around, we can easily end up with a database where entries are stored in a
+ * sequence where the current algorithm fails to produce the expected results.
+ *
+ * [1] https://en.wikipedia.org/wiki/Topological_sorting#Relation_to_partial_orders
+ * [2] https://en.wikipedia.org/wiki/Sorting_algorithm#Stability
+ * [3] https://en.wikipedia.org/wiki/Referential_integrity
+ */
+
 static struct db_entry *new_entry(struct db *db, const char *name,
     const char *prev)
 {

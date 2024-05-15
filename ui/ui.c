@@ -89,7 +89,7 @@ static void crosshair_show(unsigned x, unsigned y)
 /* --- On/off button ------------------------------------------------------- */
 
 
-static bool is_on = 0;
+bool is_on = 0;
 
 
 static void idle_off(void *user)
@@ -452,10 +452,12 @@ bool app_init(char **args, unsigned n_args)
 
 	demo_init();
 
-	if (n_args)
+	if (n_args) {
+		is_on = 1;
 		demo(args, n_args);
-	else
+	} else {
 		ui_switch(&ui_off, NULL);
+	}
 
 	update_display(&da);
 	return 1;

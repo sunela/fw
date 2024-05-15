@@ -396,6 +396,8 @@ void ui_switch(const struct ui *ui, void *params)
 void ui_call(const struct ui *ui, void *params)
 {
 	debug("ui_call(%p -> %p)\n", current_ui, ui);
+	if (current_ui && current_ui->close)
+		current_ui->close();
 	assert(sp != UI_STACK_SIZE);
 	stack[sp].ui = current_ui;
 	sp++;

@@ -40,17 +40,17 @@ struct wi_list_entry {
 
 static unsigned opad(const struct wi_list *list, const struct wi_list_entry *e)
 {
-	const struct wi_list_style *s = list->style;
+	const struct wi_list_style *style = list->style;
 
-	return s->opad ? s->opad : DEFAULT_OPAD;
+	return style->opad ? style->opad : DEFAULT_OPAD;
 }
 
 
 static unsigned ipad(const struct wi_list *list, const struct wi_list_entry *e)
 {
-	const struct wi_list_style *s = list->style;
+	const struct wi_list_style *style = list->style;
 
-	return s->ipad ? s->ipad : DEFAULT_IPAD;
+	return style->ipad ? style->ipad : DEFAULT_IPAD;
 }
 
 

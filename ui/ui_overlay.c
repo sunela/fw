@@ -54,85 +54,88 @@ static struct timer t_overlay_idle;
 void ui_overlay_sym_power(struct gfx_drawable *tmp_da,
     const struct ui_overlay_params *params, unsigned x, unsigned y, void *user)
 {
-	const struct ui_overlay_style *s =
+	const struct ui_overlay_style *style =
 	    params->style ? params->style : &default_style;
 
-	gfx_power_sym(tmp_da, x, y, s->size * 0.3, s->size * 0.1,
-	    s->button_fg, s->button_bg);
+	gfx_power_sym(tmp_da, x, y, style->size * 0.3, style->size * 0.1,
+	    style->button_fg, style->button_bg);
 }
 
 
 void ui_overlay_sym_delete(struct gfx_drawable *tmp_da,
     const struct ui_overlay_params *params, unsigned x, unsigned y, void *user)
 {
-	const struct ui_overlay_style *s =
+	const struct ui_overlay_style *style =
 	    params->style ? params->style : &default_style;
 
-	gfx_diagonal_cross(tmp_da, x, y, s->size * 0.4, s->size * 0.1,
-	    s->button_fg);
+	gfx_diagonal_cross(tmp_da, x, y, style->size * 0.4, style->size * 0.1,
+	    style->button_fg);
 }
 
 
 void ui_overlay_sym_add(struct gfx_drawable *tmp_da,
     const struct ui_overlay_params *params, unsigned x, unsigned y, void *user)
 {
-	const struct ui_overlay_style *s =
+	const struct ui_overlay_style *style =
 	    params->style ? params->style : &default_style;
-	unsigned side = s->size * 0.7;
+	unsigned side = style->size * 0.7;
 
 	gfx_greek_cross(tmp_da, x - side / 2, y - side / 2,
-	    side, side, s->size * 0.15, s->button_fg);
+	    side, side, style->size * 0.15, style->button_fg);
 }
 
 
 void ui_overlay_sym_back(struct gfx_drawable *tmp_da,
     const struct ui_overlay_params *params, unsigned x, unsigned y, void *user)
 {
-	const struct ui_overlay_style *s =
+	const struct ui_overlay_style *style =
 	    params->style ? params->style : &default_style;
 
-	gfx_equilateral(tmp_da, x + s->size * 0.05, y, s->size * 0.7, -1,
-	    s->button_fg);
+	gfx_equilateral(tmp_da, x + style->size * 0.05, y, style->size * 0.7,
+	    -1, style->button_fg);
 }
 
 
 void ui_overlay_sym_next(struct gfx_drawable *tmp_da,
     const struct ui_overlay_params *params, unsigned x, unsigned y, void *user)
 {
-	const struct ui_overlay_style *s =
+	const struct ui_overlay_style *style =
 	    params->style ? params->style : &default_style;
 
-	gfx_equilateral(tmp_da, x - s->size * 0.05, y, s->size * 0.7, 1,
-	    s->button_fg);
+	gfx_equilateral(tmp_da, x - style->size * 0.05, y, style->size * 0.7,
+	    1, style->button_fg);
 }
 
 
 void ui_overlay_sym_edit(struct gfx_drawable *tmp_da,
     const struct ui_overlay_params *params, unsigned x, unsigned y, void *user)
 {
-	const struct ui_overlay_style *s =
+	const struct ui_overlay_style *style =
 	    params->style ? params->style : &default_style;
 	unsigned side;
 
 	side = gfx_pencil_sym(NULL, 0, 0,
-	    s->size * 0.4, s->size * 0.7, s->size * 0.1,	// wi len lw
+	    style->size * 0.4, style->size * 0.7,	// wi len
+	     style->size * 0.1,				// lw
 	    0, 0);
 	gfx_pencil_sym(tmp_da, x - side * 0.45, y - side / 2,
-	    s->size * 0.4, s->size * 0.7, s->size * 0.1,	// wi len lw
-	    s->button_fg, s->button_bg);
+	    style->size * 0.4, style->size * 0.7,	// wi len
+	     style->size * 0.1,				// lw
+	    style->button_fg, style->button_bg);
 }
 
 
 void ui_overlay_sym_setup(struct gfx_drawable *tmp_da,
     const struct ui_overlay_params *params, unsigned x, unsigned y, void *user)
 {
-	const struct ui_overlay_style *s =
+	const struct ui_overlay_style *style =
 	    params->style ? params->style : &default_style;
 
 	gfx_gear_sym(tmp_da, x, y,
-	    s->size * 0.3, s->size * 0.1,			// ro ri
-	    s->size * 0.2, s->size * 0.15, s->size * 0.1,	// tb tt th
-	    s->button_fg, s->button_bg);
+	    style->size * 0.3, style->size * 0.1,	// ro ri
+	    style->size * 0.2, style->size * 0.15,	// tb tt
+	    style->size * 0.1,				// th
+	    style->button_fg, style->button_bg);
 }
 
 
@@ -140,13 +143,13 @@ static void sym_move(struct gfx_drawable *tmp_da,
     const struct ui_overlay_params *params, unsigned x, unsigned y,
     bool from, int to)
 {
-	const struct ui_overlay_style *s =
+	const struct ui_overlay_style *style =
 	    params->style ? params->style : &default_style;
 
 	gfx_move_sym(tmp_da, x, y,
-	    s->size * 0.4, s->size * 0.15,		// bs br
-	    s->size * 0.1,				// lw
-	    from, to, s->button_fg, s->button_bg);
+	    style->size * 0.4, style->size * 0.15,	// bs br
+	    style->size * 0.1,				// lw
+	    from, to, style->button_fg, style->button_bg);
 }
 
 
@@ -214,10 +217,11 @@ static void draw_button(struct gfx_drawable *tmp_da,
     const struct ui_overlay_params *p,
     const struct ui_overlay_button *b, int x, int y)
 {
-	const struct ui_overlay_style *s = p->style ? p->style : &default_style;
+	const struct ui_overlay_style *style =
+	    p->style ? p->style : &default_style;
 
-	gfx_rrect_xy(tmp_da, x - s->size / 2, y - s->size / 2,
-	    s->size, s->size, DEFAULT_BUTTON_R, s->button_bg);
+	gfx_rrect_xy(tmp_da, x - style->size / 2, y - style->size / 2,
+	    style->size, style->size, DEFAULT_BUTTON_R, style->button_bg);
 	if (b->draw)
 		b->draw(tmp_da, p, x, y, b->user);
 }
@@ -227,7 +231,8 @@ static void ui_overlay_open(void *params)
 {
 	const struct ui_overlay_params *p = params;
 	const struct ui_overlay_button *b = p->buttons;
-	const struct ui_overlay_style *s = p->style ? p->style : &default_style;
+	const struct ui_overlay_style *style =
+	    p->style ? p->style : &default_style;
 	struct button_ref *ref = refs;
 	struct gfx_drawable tmp_da;
 	unsigned nx, ny;
@@ -270,16 +275,16 @@ static void ui_overlay_open(void *params)
 	default:
 		abort();
 	}
-	w = nx * s->size + (nx - 1) * s->gap + 2 * s->halo;
-	h = ny * s->size + (ny - 1) * s->gap + 2 * s->halo;
+	w = nx * style->size + (nx - 1) * style->gap + 2 * style->halo;
+	h = ny * style->size + (ny - 1) * style->gap + 2 * style->halo;
 	gfx_rrect_xy(&tmp_da, (GFX_WIDTH - w) / 2, (GFX_HEIGHT - h) / 2, w, h,
-	    r + s->halo, s->halo_bg);
+	    r + style->halo, style->halo_bg);
 	for (iy = 0; iy != ny; iy++)
 		for (ix = 0; ix != nx; ix++) {
 			unsigned x = GFX_WIDTH / 2 -
-			    ((nx - 1) / 2.0 - ix) * (s->size + s->gap);
+			    ((nx - 1) / 2.0 - ix) * (style->size + style->gap);
 			unsigned y = GFX_HEIGHT / 2 -
-			    ((ny - 1) / 2.0 - iy) * (s->size + s->gap);
+			    ((ny - 1) / 2.0 - iy) * (style->size + style->gap);
 
 			if (b == p->buttons + p->n_buttons)
 				break;
@@ -287,9 +292,12 @@ static void ui_overlay_open(void *params)
 				draw_button(&tmp_da, p, b, x, y);
 				ref->fn = b->fn;
 				ref->user = b->user;
-				ref->bb.x = x - s->size / 2 - s->gap / 2;
-				ref->bb.y = y - s->size / 2 - s->gap / 2;
-				ref->bb.w = ref->bb.h = s->size + s->gap;
+				ref->bb.x =
+				    x - style->size / 2 - style->gap / 2;
+				ref->bb.y =
+				    y - style->size / 2 - style->gap / 2;
+				ref->bb.w = ref->bb.h =
+				    style->size + style->gap;
 				ref++;
 			}
 			b++;

@@ -454,6 +454,7 @@ bool app_init(char **args, unsigned n_args)
 
 	if (n_args) {
 		is_on = 1;
+		idle_s = 600;
 		demo(args, n_args);
 	} else {
 		ui_switch(&ui_off, NULL);

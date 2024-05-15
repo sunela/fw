@@ -12,7 +12,7 @@ CFLAGS += -g -Wall -Wextra -Wshadow -Wno-unused-parameter \
 OBJS = ui.o demo.o timer.o debug.o mbox.o rnd.o hmac.o hotp.o base32.o \
     fmt.o imath.o \
     basic.o poly.o shape.o long_text.o font.o text.o \
-    dbcrypt.o block.o db.o \
+    dbcrypt.o block.o span.o db.o \
     ui_off.o ui_pin.o ui_fail.o ui_accounts.o ui_account.o wi_list.o \
     ui_entry.o ui_time.o ui_overlay.o ui_setup.o ui_storage.o
 
@@ -40,6 +40,7 @@ vpath base32.c crypto
 
 vpath dbcrypt.c db
 vpath block.c db
+vpath span.c db
 vpath db.c db
 
 vpath ui.c ui

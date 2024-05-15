@@ -14,133 +14,13 @@
 #include "hal.h"
 #include "debug.h"
 #include "alloc.h"
+#include "span.h"
 #include "storage.h"
 #include "block.h"
 #include "db.h"
 
 
-struct db_span {
-	unsigned start;
-	unsigned len;
-	struct db_span *next;
-};
-
-
 static PSRAM uint8_t payload_buf[BLOCK_PAYLOAD_SIZE];
-
-
-/* --- Spans --------------------------------------------------------------- */
-
-
-static void span_add(struct db_span **spans, unsigned n, unsigned size)
-{
-	struct db_span *this;
-
-	while (*spans) {
-		this = *spans;
-		if (this->start + this->len == n) {
-			struct db_span *next = this->next;
-
-			this->len += size;
-			if (!next)
-				return;
-			if (next->start != this->start + this->len)
-				return;
-			this->len += next->len;
-			this->next = next->next;
-			free(next);
-			return;
-		}
-		if (this->start == n + size) {
-			this->start -= size;
-			this->len += size;
-			break;
-		}
-		spans = &(*spans)->next;
-	}
-	*spans = this = alloc_type(struct db_span);
-	this->start = n;
-	this->len = size;
-	this->next = NULL;
-}
-
-
-static int span_pull_one(struct db_span **spans)
-{
-	struct db_span *this = *spans;
-	unsigned n;
-
-	if (!this)
-		return -1;
-	n = this->start;
-	if (--this->len) {
-		this->start++;
-	} else {
-		*spans = this->next;
-		free(this);
-	}
-	return n;
-}
-
-
-static inline unsigned round_up(unsigned n, unsigned mod)
-{
-	n += mod - 1;
-	return n - n % mod;
-}
-
-
-static int span_pull_erase_block(struct db_span **spans)
-{
-	unsigned size = storage_erase_size();
-	struct db_span *this;
-	unsigned n;
-
-	while (*spans) {
-		this = *spans;
-		n = round_up(this->start, size);
-		if (this->start + this->len >= n + size)
-			break;
-		spans = &(*spans)->next;
-	}
-	if (!*spans)
-		return -1;
-	n = round_up(this->start, size);
-	if (n == this->start) {
-		if (this->len == size) {
-			*spans = this;
-			free(this);
-		} else {
-			this->start += size;
-			this->len -= size;
-		}
-	} else {
-		if (this->start + this->len == n + size) {
-			this->len -= size;
-		} else {
-			struct db_span *next;
-
-			next = alloc_type(struct db_span);
-			next->start = n + size;
-			next->len = this->start + this->len - n - size;
-			next->next = this->next;
-			this->len = n - this->start;
-			this->next = next;
-		}
-	}
-	return n;
-}
-
-
-static void free_spans(struct db_span *spans)
-{
-	while (spans) {
-		struct db_span *next = spans->next;
-
-		free(spans);
-		spans = next;
-	}
-}
 
 
 /* --- Get an erased block, erasing if needed ------------------------------ */
@@ -148,30 +28,30 @@ static void free_spans(struct db_span *spans)
 
 static int get_erased_block(struct db *db)
 {
-	unsigned size = storage_erase_size();
+	unsigned erase_size = storage_erase_size();
 	int n;
 
 	while (1) {
 		n = span_pull_one(&db->erased);
 		if (n >= 0)
 			break;
-		n = span_pull_erase_block(&db->empty);
+		n = span_pull_erase_block(&db->empty, erase_size);
 		if (n >= 0) {
-			db->stats.empty -= size;
-			if (storage_erase_blocks(n, size)) {
-				db->stats.erased += size;
+			db->stats.empty -= erase_size;
+			if (storage_erase_blocks(n, erase_size)) {
+				db->stats.erased += erase_size;
 				continue;
 			}
-			db->stats.error += size;
+			db->stats.error += erase_size;
 		}
-		n = span_pull_erase_block(&db->deleted);
+		n = span_pull_erase_block(&db->deleted, erase_size);
 		if (n >= 0) {
-			db->stats.deleted -= size;
-			if (storage_erase_blocks(n, size)) {
-				db->stats.erased += size;
+			db->stats.deleted -= erase_size;
+			if (storage_erase_blocks(n, erase_size)) {
+				db->stats.erased += erase_size;
 				continue;
 			}
-			db->stats.error += size;
+			db->stats.error += erase_size;
 		}
 		return -1;
 	}
@@ -516,7 +396,7 @@ void db_close(struct db *db)
 		free_fields(this);
 		free(this);
 	}
-	free_spans(db->erased);
-	free_spans(db->deleted);
-	free_spans(db->empty);
+	span_free_all(db->erased);
+	span_free_all(db->deleted);
+	span_free_all(db->empty);
 }

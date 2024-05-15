@@ -85,9 +85,6 @@ extern unsigned pin_attempts; /* number of failed PIN entries */
 
 extern struct mbox time_mbox;
 
-extern char ui_entry_input[MAX_INPUT_LEN + 1];
-extern bool (*ui_entry_validate)(const char *s);
-
 /* User interface pages */
 
 extern const struct ui ui_off;

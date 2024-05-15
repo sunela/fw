@@ -25,6 +25,7 @@
 #include "hotp.h"
 #include "base32.h"
 #include "ui_overlay.h"
+#include "ui_entry.h"
 #include "ui.h"
 #include "demo.h"
 
@@ -243,7 +244,7 @@ static bool demo_vscroll(char *const *args, unsigned n_args)
 
 /* Text entry */
 
-static bool demo_entry_validate(const char *s)
+static bool demo_entry_validate(void *user, const char *s)
 {
 	return !strchr(s, 'x');
 }
@@ -251,11 +252,17 @@ static bool demo_entry_validate(const char *s)
 
 static bool demo_entry(char *const *args, unsigned n_args)
 {
+	static char buf[MAX_INPUT_LEN + 1] = "";
+	struct ui_entry_params params = {
+		.buf		= buf,
+		.max_len	= sizeof(buf) - 1,
+		.validate	= demo_entry_validate,
+	};
+
 	if (n_args)
 		return 0;
 
-	ui_entry_validate = demo_entry_validate;
-	ui_switch(&ui_entry, NULL);
+	ui_switch(&ui_entry, &params);
 
 	return 1;
 }

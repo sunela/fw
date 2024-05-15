@@ -35,7 +35,7 @@ static const struct wi_list_style style = {
 
 static struct wi_list list;
 static struct wi_list *lists[1] = { &list };
-
+static void (*resume_action)(void) = NULL;
 
 
 /* --- Tap event ----------------------------------------------------------- */
@@ -52,12 +52,21 @@ static void ui_accounts_tap(unsigned x, unsigned y)
 }
 
 
-/* --- Long press event ---------------------------------------------------- */
+/* --- New account --------------------------------------------------------- */
 
 
-static void power_off(void *user)
+#define	MAX_NAME_LEN	16
+
+
+static char buf[MAX_NAME_LEN + 1];
+
+
+static void new_account_name(void)
 {
-	turn_off();
+	if (!*buf)
+		return;
+	/* handle errors */
+	db_new_entry(&main_db, buf);
 }
 
 
@@ -75,13 +84,8 @@ static bool validate_new_account(void *user, const char *s)
 }
 
 
-#define	MAX_NAME_LEN	16
-
-
 static void new_account(void *user)
 {
-	static char buf[MAX_NAME_LEN + 1];
-	
 	struct ui_entry_params params = {
 		.buf		= buf,
 		.max_len	= sizeof(buf) - 1,
@@ -90,7 +94,17 @@ static void new_account(void *user)
 	};
 
 	*buf = 0;
-	ui_call(&ui_entry, &params);
+	resume_action = new_account_name;
+	ui_switch(&ui_entry, &params);
+}
+
+
+/* --- Long press event ---------------------------------------------------- */
+
+
+static void power_off(void *user)
+{
+	turn_off();
 }
 
 
@@ -118,7 +132,6 @@ static void ui_accounts_long(unsigned x, unsigned y)
         };
 
 	ui_call(&ui_overlay, &prm);
-	
 }
 
 
@@ -134,6 +147,8 @@ static bool add_account(void *user, struct db_entry *de)
 
 static void ui_accounts_open(void *params)
 {
+	resume_action = NULL;
+
 	gfx_rect_xy(&da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH, GFX_WHITE);
 	text_text(&da, GFX_WIDTH / 2, TOP_H / 2, "Accounts",
 	    &FONT_TOP, GFX_CENTER, GFX_CENTER, GFX_WHITE);
@@ -159,6 +174,8 @@ static void ui_accounts_resume(void)
 	 * position.
 	 */
 	ui_accounts_close();
+	if (resume_action)
+		resume_action();
 	ui_accounts_open(NULL);
 	progress();
 }

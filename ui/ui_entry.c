@@ -144,27 +144,35 @@ static void draw_input(void)
 	struct gfx_drawable buf;
 	gfx_color
 	    fb[entry_params.max_len * input_max_height * input_max_height];
-	struct gfx_rect bb;
+	struct text_query q;
 
 	if (!*entry_params.buf)
 		return;
-	text_text_bbox(0, 0, entry_params.buf, &INPUT_FONT,
-	    GFX_LEFT, GFX_TOP | GFX_MAX, &bb);
-	assert(bb.w <= entry_params.max_len * input_max_height);
-	assert(bb.h <= INPUT_PAD_TOP + input_max_height + INPUT_PAD_BOTTOM);
-	gfx_da_init(&buf, bb.w, bb.h, fb);
+	/*
+	 * For the text width, we use the position of the next character
+	 * (q.next) instread of the bounding box width (q.w), so that there is
+	 * visual feedback when entering a space. (A trailing space doesn't
+	 * grow the bounding box. Multiple spaces would, though, which is
+	 * somewhat inconsistent.)
+	 */
+	text_query(0, 0, entry_params.buf, &INPUT_FONT,
+	    GFX_LEFT, GFX_TOP | GFX_MAX, &q);
+	assert(q.next <= entry_params.max_len * input_max_height);
+	assert((unsigned) q.h <=
+	    INPUT_PAD_TOP + input_max_height + INPUT_PAD_BOTTOM);
+	gfx_da_init(&buf, q.next, q.h, fb);
 	gfx_clear(&buf, valid() ? INPUT_VALID_BG : INPUT_INVALID_BG);
 	text_text(&buf, 0, 0, entry_params.buf, &INPUT_FONT,
 	    GFX_LEFT, GFX_TOP | GFX_MAX, GFX_WHITE);
-	if ((GFX_WIDTH + bb.w) / 2 < INPUT_MAX_X)
-		gfx_copy(&da, (GFX_WIDTH - bb.w) / 2, INPUT_PAD_TOP, &buf, 0, 0,
-		    bb.w, bb.h, -1);
-	else if (bb.w < INPUT_MAX_X)
-		gfx_copy(&da, INPUT_MAX_X - bb.w, INPUT_PAD_TOP, &buf, 0, 0,
-		    bb.w, bb.h, -1);
+	if ((GFX_WIDTH + q.next) / 2 < INPUT_MAX_X)
+		gfx_copy(&da, (GFX_WIDTH - q.next) / 2, INPUT_PAD_TOP, &buf,
+		    0, 0, q.next, q.h, -1);
+	else if (q.next < INPUT_MAX_X)
+		gfx_copy(&da, INPUT_MAX_X - q.next, INPUT_PAD_TOP, &buf, 0, 0,
+		    q.next, q.h, -1);
 	else
-		gfx_copy(&da, 0, INPUT_PAD_TOP, &buf, bb.w - INPUT_MAX_X, 0,
-		    INPUT_MAX_X, bb.h, -1);
+		gfx_copy(&da, 0, INPUT_PAD_TOP, &buf, q.next - INPUT_MAX_X, 0,
+		    INPUT_MAX_X, q.h, -1);
 }
 
 

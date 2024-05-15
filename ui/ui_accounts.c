@@ -6,12 +6,15 @@
  */
 
 #include <stddef.h>
+#include <string.h>
 
 #include "hal.h"
 #include "gfx.h"
 #include "text.h"
 #include "wi_list.h"
 #include "ui_overlay.h"
+#include "ui_entry.h"
+#include "db.h"
 #include "ui.h"
 
 
@@ -58,9 +61,36 @@ static void power_off(void *user)
 }
 
 
+static bool name_is_different(void *user, struct db_entry *de)
+{
+	const char *s = user;
+
+	return strcmp(de->name, s);
+}
+
+
+static bool validate_new_account(void *user, const char *s)
+{
+	return db_iterate(&main_db, name_is_different, (void *) s);
+}
+
+
+#define	MAX_NAME_LEN	16
+
+
 static void new_account(void *user)
 {
-	// @@@
+	static char buf[MAX_NAME_LEN + 1];
+	
+	struct ui_entry_params params = {
+		.buf		= buf,
+		.max_len	= sizeof(buf) - 1,
+		.validate	= validate_new_account,
+		.title		= "New account",
+	};
+
+	*buf = 0;
+	ui_call(&ui_entry, &params);
 }
 
 

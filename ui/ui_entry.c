@@ -26,8 +26,10 @@
 
 #define	INPUT_PAD_TOP		5
 #define	INPUT_PAD_BOTTOM	2
-#define	INPUT_FONT		mono34
 #define INPUT_MAX_X		210
+
+#define	DEFAULT_INPUT_FONT	mono34
+#define	DEFAULT_TITLE_FONT	mono24
 
 /* --- Keypad -------------------------------------------------------------- */
 
@@ -77,6 +79,8 @@ static const struct ui_entry_style default_style = {
 	.input_fg		= GFX_WHITE,
 	.input_valid_bg		= GFX_HEX(0x002060),
 	.input_invalid_bg	= GFX_HEX(0x800000),
+	.title_fg		= GFX_WHITE,
+	.title_bg		= GFX_BLACK,
 };
 
 
@@ -145,20 +149,20 @@ static void clear_input(void)
 
 	gfx_rect_xy(&da, 0, 0, GFX_WIDTH,
 	    INPUT_PAD_TOP + input_max_height + INPUT_PAD_BOTTOM,
+	    !*entry_params.buf && entry_params.title ? style->title_bg :
 	    valid() ? style->input_valid_bg : style->input_invalid_bg);
 }
 
 
-static void draw_input(void)
+static void draw_top(const char *s, const struct font *font,
+    gfx_color color, gfx_color bg)
 {
-	const struct ui_entry_style *style =
-	    entry_params.style ? entry_params.style : &default_style;
 	struct gfx_drawable buf;
 	gfx_color
 	    fb[entry_params.max_len * input_max_height * input_max_height];
 	struct text_query q;
 
-	if (!*entry_params.buf)
+	if (!*s)
 		return;
 	/*
 	 * For the text width, we use the position of the next character
@@ -167,16 +171,14 @@ static void draw_input(void)
 	 * grow the bounding box. Multiple spaces would, though, which is
 	 * somewhat inconsistent.)
 	 */
-	text_query(0, 0, entry_params.buf, &INPUT_FONT,
-	    GFX_LEFT, GFX_TOP | GFX_MAX, &q);
+	text_query(0, 0, s, font, GFX_LEFT, GFX_TOP | GFX_MAX, &q);
 	assert(q.next <= entry_params.max_len * input_max_height);
 	assert((unsigned) q.h <=
 	    INPUT_PAD_TOP + input_max_height + INPUT_PAD_BOTTOM);
 	gfx_da_init(&buf, q.next, q.h, fb);
-	gfx_clear(&buf,
-	    valid() ? style->input_valid_bg : style->input_invalid_bg);
-	text_text(&buf, 0, 0, entry_params.buf, &INPUT_FONT,
-	    GFX_LEFT, GFX_TOP | GFX_MAX, style->input_fg);
+	gfx_clear(&buf, bg);
+	text_text(&buf, 0, 0, s, font, GFX_LEFT, GFX_TOP | GFX_MAX,
+	    color);
 	if ((GFX_WIDTH + q.next) / 2 < INPUT_MAX_X)
 		gfx_copy(&da, (GFX_WIDTH - q.next) / 2, INPUT_PAD_TOP, &buf,
 		    0, 0, q.next, q.h, -1);
@@ -186,6 +188,25 @@ static void draw_input(void)
 	else
 		gfx_copy(&da, 0, INPUT_PAD_TOP, &buf, q.next - INPUT_MAX_X, 0,
 		    INPUT_MAX_X, q.h, -1);
+}
+
+
+static void draw_input(void)
+{
+	const struct ui_entry_style *style =
+	    entry_params.style ? entry_params.style : &default_style;
+
+	if (!*entry_params.buf && entry_params.title)
+		text_text(&da, GFX_WIDTH / 2,
+		    (INPUT_PAD_TOP + input_max_height + INPUT_PAD_BOTTOM) / 2,
+		    entry_params.title,
+		    style->title_font ? style->title_font : &DEFAULT_TITLE_FONT,
+		    GFX_CENTER, GFX_CENTER, style->title_fg);
+	else
+		draw_top(entry_params.buf,
+		    style->input_font ? style->input_font : &DEFAULT_INPUT_FONT,
+		    style->input_fg,
+		    valid() ? style->input_valid_bg : style->input_invalid_bg);
 }
 
 
@@ -412,12 +433,15 @@ static void ui_entry_tap(unsigned x, unsigned y)
 static void ui_entry_open(void *params)
 {
 	const struct ui_entry_params *prm = params;
+	const struct ui_entry_style *style =
+	    prm->style ? prm->style : &default_style;
 	struct text_query q;
 
 	assert(strlen(prm->buf) <= prm->max_len);
 	entry_params = *prm;
 
-	text_query(0, 0, "", &INPUT_FONT,
+	text_query(0, 0, "",
+	    style->input_font ? style->input_font : &DEFAULT_INPUT_FONT,
 	    GFX_TOP | GFX_MAX, GFX_TOP | GFX_MAX, &q);
 	input_max_height = q.h;
 

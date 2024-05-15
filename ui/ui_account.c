@@ -22,6 +22,7 @@
 #include "text.h"
 #include "db.h"
 #include "wi_list.h"
+#include "ui_overlay.h"
 #include "ui.h"
 
 
@@ -55,6 +56,7 @@ static const struct wi_list_style style = {
 static struct db_entry *selected_account = NULL;
 static struct wi_list list;
 static struct wi_list *lists[1] = { &list };
+static void (*resume_action)(void) = NULL;
 
 
 /* --- Extra account rendering --------------------------------------------- */
@@ -125,7 +127,7 @@ static void ui_account_tick(void)
 }
 
 
-/* --- Event handling ------------------------------------------------------ */
+/* --- Tap ----------------------------------------------------------------- */
 
 
 static void ui_account_tap(unsigned x, unsigned y)
@@ -178,6 +180,56 @@ static void ui_account_tap(unsigned x, unsigned y)
 }
 
 
+/* --- Long press ---------------------------------------------------------- */
+
+
+static void power_off(void *user)
+{
+	turn_off();
+}
+
+
+static void edit_account_name(void *user)
+{
+}
+
+
+static void delete_account(void *user)
+{
+	/* @@@ ask for confirmation */
+	resume_action = ui_return;
+	db_delete(selected_account);
+	selected_account = NULL;
+	ui_return();
+}
+
+
+static void account_overlay(void)
+{
+	static const struct ui_overlay_button buttons[] = {
+		{ ui_overlay_sym_power,	power_off, NULL },
+		{ ui_overlay_sym_edit,	edit_account_name, NULL },
+		{ ui_overlay_sym_delete, delete_account, NULL },
+	};
+	static struct ui_overlay_params prm = {
+		.buttons	= buttons,
+		.n_buttons	= 3,
+	};
+
+	ui_call(&ui_overlay, &prm);
+}
+
+
+static void ui_account_long(unsigned x, unsigned y)
+{
+	if (y < LIST_Y0)
+                account_overlay();
+}
+
+
+/* --- Swipe --------------------------------------------------------------- */
+
+
 static void ui_account_to(unsigned from_x, unsigned from_y,
     unsigned to_x, unsigned to_y, enum ui_swipe swipe)
 {
@@ -205,6 +257,8 @@ static void ui_account_open(void *params)
 {
 	struct db_entry *de = selected_account = params;
 	const struct db_field *f;
+
+	resume_action = NULL;
 
 	gfx_rect_xy(&da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH, GFX_WHITE);
 	text_text(&da, GFX_WIDTH / 2, TOP_H / 2, de->name, &FONT_TOP,
@@ -248,11 +302,23 @@ static void ui_account_close(void)
 }
 
 
+static void ui_account_resume(void)
+{
+	ui_account_close();
+	if (resume_action)
+		resume_action();
+	if (selected_account)
+		ui_account_open(selected_account);
+	progress();
+}
+
+
 /* --- Interface ----------------------------------------------------------- */
 
 
 static const struct ui_events ui_account_events = {
 	.touch_tap	= ui_account_tap,
+	.touch_long	= ui_account_long,
 	.touch_to	= ui_account_to,
 	.tick		= ui_account_tick,
 	.lists		= lists,
@@ -262,5 +328,6 @@ static const struct ui_events ui_account_events = {
 const struct ui ui_account = {
 	.open = ui_account_open,
 	.close = ui_account_close,
+	.resume	= ui_account_resume,
 	.events = &ui_account_events,
 };

@@ -329,3 +329,49 @@ void gfx_gear_sym(struct gfx_drawable *da, unsigned x, unsigned y,
 	x--; /* @@@ */
 	gfx_disc(da, x, y, ri, bg);
 }
+
+
+/* --- Move symbols -------------------------------------------------------- */
+
+
+#define	TWEAK	1	/* @@@ ugly little micro-adjustments */
+
+
+void gfx_move_sym(struct gfx_drawable *da, unsigned x, unsigned y,
+    unsigned box_size, unsigned box_ro, unsigned lw,
+    bool from, int to, gfx_color color, gfx_color bg)
+{
+	unsigned r = (box_size + lw) / 2;
+
+	/* arc */
+	gfx_arc(da, x, y - lw, r + lw / 2, 270, 90, color, bg);
+	gfx_disc(da, x, y - lw, r - lw / 2, bg);
+
+	/* left box */
+	gfx_rrect_xy(da, x - box_size - lw / 2, y, box_size, box_size,
+	    box_ro, color);
+	if (!from)
+		gfx_rrect_xy(da, x - box_size + lw / 2, y + lw,
+		    box_size - 2 * lw, box_size - 2 * lw, box_ro - lw, bg);
+
+	/* right box, cross, and arrowhead */
+	if (to < 0) {
+		gfx_diagonal_cross(da, x + r + TWEAK, y,
+		    box_size / 2, lw / 2, color);
+	} else {
+		gfx_rrect_xy(da, x + lw / 1.414, y, box_size, box_size,
+		    box_ro, color);
+		if (!to)
+			gfx_rrect_xy(da, x + 3 * lw / 2, y + lw,
+			    box_size - 2 * lw, box_size - 2 * lw,
+			    box_ro - lw, bg);
+
+		/* point of arrowhead */
+		unsigned ax = x + r;
+		unsigned ay = y - lw / 4;
+
+		gfx_triangle(da, ax + TWEAK, ay,
+		    ax - lw, ay - 1.5 * lw, ax + lw + TWEAK, ay - 1.5 * lw,
+		    color);
+	}
+}

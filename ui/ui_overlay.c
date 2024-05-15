@@ -136,6 +136,41 @@ void ui_overlay_sym_setup(struct gfx_drawable *tmp_da,
 }
 
 
+static void sym_move(struct gfx_drawable *tmp_da,
+    const struct ui_overlay_params *params, unsigned x, unsigned y,
+    bool from, int to)
+{
+	const struct ui_overlay_style *s =
+	    params->style ? params->style : &default_style;
+
+	gfx_move_sym(tmp_da, x, y,
+	    s->size * 0.4, s->size * 0.15,		// bs br
+	    s->size * 0.1,				// lw
+	    from, to, s->button_fg, s->button_bg);
+}
+
+
+void ui_overlay_sym_move_from(struct gfx_drawable *tmp_da,
+    const struct ui_overlay_params *params, unsigned x, unsigned y, void *user)
+{
+	sym_move(tmp_da, params, x, y, 1, 0);
+}
+
+
+void ui_overlay_sym_move_to(struct gfx_drawable *tmp_da,
+    const struct ui_overlay_params *params, unsigned x, unsigned y, void *user)
+{
+	sym_move(tmp_da, params, x, y, 0, 1);
+}
+
+
+void ui_overlay_sym_move_cancel(struct gfx_drawable *tmp_da,
+    const struct ui_overlay_params *params, unsigned x, unsigned y, void *user)
+{
+	sym_move(tmp_da, params, x, y, 1, -1);
+}
+
+
 /* --- Event handling ------------------------------------------------------ */
 
 

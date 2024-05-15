@@ -79,4 +79,23 @@ void gfx_gear_sym(struct gfx_drawable *da, unsigned x, unsigned y,
     unsigned ro, unsigned ri, unsigned tb, unsigned tt, unsigned th,
     gfx_color color, gfx_color bg);
 
+/*
+ * Entry movement symbol. The symbol consists of two boxes, left and right,
+ * with an arrowed arc goin from left to right. If "from" is true, the left
+ * box is filled, else it is empty. If "to" is 0 or 1, the right box is drawn
+ * accordingly. If "to" is negative, the arrowhead and the right box are
+ * omitted, and a diagonal cross is drawn instead on the right side, indicating
+ * cancellation of the operation.
+ *
+ * The symbol is centered at (x, y).
+ *
+ * box_size is the outer size of each box. box_ro is the corner radius "lw" is
+ * the line width, used for empty boxes, the arc, the space between boxes, the
+ * space between boxes and arc, and the cross.
+ */
+
+void gfx_move_sym(struct gfx_drawable *da, unsigned x, unsigned y,
+    unsigned box_size, unsigned box_ro, unsigned lw,
+    bool from, int to, gfx_color color, gfx_color bg);
+
 #endif /* !SHAPE_H */

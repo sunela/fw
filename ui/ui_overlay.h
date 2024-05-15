@@ -51,5 +51,11 @@ void ui_overlay_sym_edit(struct gfx_drawable *tmp_da,
     const struct ui_overlay_params *params, unsigned x, unsigned y, void *user);
 void ui_overlay_sym_setup(struct gfx_drawable *tmp_da,
     const struct ui_overlay_params *params, unsigned x, unsigned y, void *user);
+void ui_overlay_sym_move_from(struct gfx_drawable *tmp_da,
+    const struct ui_overlay_params *params, unsigned x, unsigned y, void *user);
+void ui_overlay_sym_move_to(struct gfx_drawable *tmp_da,
+    const struct ui_overlay_params *params, unsigned x, unsigned y, void *user);
+void ui_overlay_sym_move_cancel(struct gfx_drawable *tmp_da,
+    const struct ui_overlay_params *params, unsigned x, unsigned y, void *user);
 
 #endif /* !UI_ENTRY_H */

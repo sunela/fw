@@ -75,6 +75,14 @@ static void free_fields(struct db_entry *de)
 }
 
 
+static void free_entry(struct db_entry *de)
+{
+	free((void *) de->name);
+	free_fields(de);
+	free(de);
+}
+
+
 /* --- Database entries ---------------------------------------------------- */
 
 
@@ -259,8 +267,19 @@ bool db_change(struct db_entry *de, enum field_type type,
 
 bool db_delete(struct db_entry *de)
 {
-	// @@@
-	return 0;
+	struct db *db = de->db;
+	struct db_entry **anchor;
+
+	for (anchor = &db->entries; *anchor != de;
+	    anchor = &(*anchor)->next);
+	*anchor = de->next;
+
+	if (!block_delete(de->block))
+		return 0;
+	span_add(&db->deleted, de->block, 1);
+	free_entry(de);
+	db->stats.deleted++;
+	return 1;
 }
 
 
@@ -422,9 +441,7 @@ void db_close(struct db *db)
 		struct db_entry *this = db->entries;
 
 		db->entries = this->next;
-		free((void *) this->name);
-		free_fields(this);
-		free(this);
+		free_entry(this);
 	}
 	span_free_all(db->erased);
 	span_free_all(db->deleted);

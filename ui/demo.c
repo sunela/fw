@@ -612,6 +612,72 @@ static bool demo_overlay(char *const *args, unsigned n_args)
 }
 
 
+static bool demo_overlay2(char *const *args, unsigned n_args)
+{
+	static const struct ui_overlay_button buttons[] = {
+		{ ui_overlay_sym_move_from,	NULL, NULL },
+		{ ui_overlay_sym_move_to,	NULL, NULL },
+		{ ui_overlay_sym_move_cancel,	NULL, NULL },
+		{ NULL, },
+		{ NULL, },
+		{ NULL, },
+		{ NULL, },
+		{ NULL, },
+		{ NULL }
+	};
+	struct ui_overlay_params prm = {
+		.buttons	= buttons,
+		.n_buttons	= 3,
+	};
+
+	switch (n_args) {
+	case 0:
+		break;
+	case 1:
+		prm.n_buttons = atoi(args[0]);
+		break;
+	default:
+		return 0;
+	}
+
+	ui_switch(&ui_overlay, &prm);
+	return 1;
+}
+
+
+/* Draw a movement symbol */
+
+static bool demo_movesym(char *const *args, unsigned n_args)
+{
+	// Big gear (which looks much better): 60 30 36 20 16
+	unsigned bs = 50;
+	unsigned br = 10;
+	unsigned lw = 8;
+	bool from = 1;
+	int to = 0;
+	
+	switch (n_args) {
+	case 0:
+		break;
+	case 5:
+		bs = atoi(args[2]);
+		br = atoi(args[3]);
+		lw = atoi(args[4]);
+		/* fall through */
+	case 2:
+		from = atoi(args[0]);
+		to = atoi(args[1]);
+		break;
+	default:
+		return 0;
+	}
+
+	gfx_move_sym(&da, GFX_WIDTH / 2, GFX_HEIGHT / 2, bs, br, lw, from, to,
+	    GFX_WHITE, GFX_BLACK);
+	return 1;
+}
+
+
 /* --- Initialization ------------------------------------------------------ */
 
 
@@ -644,6 +710,8 @@ static const struct demo {
 	{ "powersym",	demo_powersym,	"[r [lw]]"  },
 	{ "gearsym",	demo_gearsym,	"[ro ri tb tt th]" },
 	{ "overlay",	demo_overlay,	"[n]" },
+	{ "movesym",	demo_movesym,	"[from to [bs br lw]]" },
+	{ "overlay2",	demo_overlay2,	"[n]" },
 };
 
 

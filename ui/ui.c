@@ -196,7 +196,7 @@ static enum ui_swipe classify_swipe(unsigned ax, unsigned ay,
 
 
 #define	DRAG_R		10	/* minimum distance to indicate dragging */
-#define	LONG_MS		200
+#define	LONG_MS		400
 
 static unsigned touch_start_ms = 0;
 static unsigned touch_start_x, touch_start_y;

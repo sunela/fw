@@ -14,6 +14,7 @@
 #include "hal.h"
 #include "debug.h"
 #include "alloc.h"
+#include "rnd.h"
 #include "span.h"
 #include "storage.h"
 #include "block.h"
@@ -142,12 +143,6 @@ static struct db_entry *new_entry(struct db *db, const char *name,
 }
 
 
-struct db_entry *db_new_entry(struct db *db, const char *name)
-{
-	return NULL;
-}
-
-
 static bool write_entry(const struct db_entry *de)
 {
 	const void *end = payload_buf + sizeof(payload_buf);
@@ -167,6 +162,49 @@ static bool write_entry(const struct db_entry *de)
 		p += f->len;
 	}
 	return block_write(de->db->c, ct_data, de->seq, payload_buf, de->block);
+}
+
+
+static void add_field(struct db_entry *de, enum field_type type,
+    const void *data, unsigned len)
+{
+	struct db_field **anchor;
+	struct db_field *f;
+
+	for (anchor = &de->fields; *anchor; anchor = &(*anchor)->next)
+		if ((*anchor)->type > type)
+			break;
+	f = alloc_type(struct db_field);
+	f->type = type;
+	f->len = len;
+	f->data = alloc_size(len);
+	memcpy(f->data, data, len);
+	f->next = *anchor;
+	*anchor = f;
+}
+
+
+struct db_entry *db_new_entry(struct db *db, const char *name)
+{
+	struct db_entry *de;
+	int new;
+
+	new = get_erased_block(db);
+	if (new < 0)
+		return NULL;
+	de = new_entry(db, name, NULL);
+	de->name = stralloc(name);
+	de->block = new;
+	rnd_bytes(&de->seq, sizeof(de->seq));
+	add_field(de, ft_id, name, strlen(name));
+	if (write_entry(de))
+		return de;
+	// @@@ complain
+	if (block_delete(new)) {
+		span_add(&db->deleted, new, 1);
+		db->stats.deleted++;
+	}
+	return NULL;
 }
 
 
@@ -283,7 +321,6 @@ static bool process_payload(struct db *db, unsigned block, uint16_t seq,
 {
 	const void *end = payload + size;
 	struct db_entry *de;
-	struct db_field **df;
 	const void *p, *q;
 	enum field_type type;
 	char *name;
@@ -324,19 +361,12 @@ static bool process_payload(struct db *db, unsigned block, uint16_t seq,
 	}
 	de->block = block;
 	de->seq = seq;
-	df = &de->fields;
 	p = payload;
 	while (p != end) {
 		q = tlv_item(&p, end, &type, &len);
 		if (!q)
 			break;
-		*df = alloc_type(struct db_field);
-		(*df)->type = type;
-		(*df)->len = len;
-		(*df)->data = alloc_size(len);
-		memcpy((*df)->data, q, len);
-		(*df)->next = NULL;
-		df = &(*df)->next;
+		add_field(de, type, q, len);
 	}
 	return 1;
 }

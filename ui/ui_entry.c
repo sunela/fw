@@ -24,9 +24,6 @@
 
 /* --- Input --------------------------------------------------------------- */
 
-#define	INPUT_VALID_BG		gfx_hex(0x002060)
-#define	INPUT_INVALID_BG	gfx_hex(0x800000)
-
 #define	INPUT_PAD_TOP		5
 #define	INPUT_PAD_BOTTOM	2
 #define	INPUT_FONT		mono34
@@ -71,6 +68,16 @@
 #define	BUTTON_Y1		(GFX_HEIGHT - BUTTON_H / 2 - \
 				    BUTTON_BOTTOM_OFFSET)
 #define	BUTTON_Y0		(BUTTON_Y1 - 3 * BUTTON_Y_SPACING)
+
+
+/* --- Style --------------------------------------------------------------- */
+
+
+static const struct ui_entry_style default_style = {
+	.input_fg		= GFX_WHITE,
+	.input_valid_bg		= GFX_HEX(0x002060),
+	.input_invalid_bg	= GFX_HEX(0x800000),
+};
 
 
 /* --- First page ---------------------------------------------------------- */
@@ -133,14 +140,19 @@ static bool valid(void)
 
 static void clear_input(void)
 {
+	const struct ui_entry_style *style =
+	    entry_params.style ? entry_params.style : &default_style;
+
 	gfx_rect_xy(&da, 0, 0, GFX_WIDTH,
 	    INPUT_PAD_TOP + input_max_height + INPUT_PAD_BOTTOM,
-	    valid() ? INPUT_VALID_BG : INPUT_INVALID_BG);
+	    valid() ? style->input_valid_bg : style->input_invalid_bg);
 }
 
 
 static void draw_input(void)
 {
+	const struct ui_entry_style *style =
+	    entry_params.style ? entry_params.style : &default_style;
 	struct gfx_drawable buf;
 	gfx_color
 	    fb[entry_params.max_len * input_max_height * input_max_height];
@@ -161,9 +173,10 @@ static void draw_input(void)
 	assert((unsigned) q.h <=
 	    INPUT_PAD_TOP + input_max_height + INPUT_PAD_BOTTOM);
 	gfx_da_init(&buf, q.next, q.h, fb);
-	gfx_clear(&buf, valid() ? INPUT_VALID_BG : INPUT_INVALID_BG);
+	gfx_clear(&buf,
+	    valid() ? style->input_valid_bg : style->input_invalid_bg);
 	text_text(&buf, 0, 0, entry_params.buf, &INPUT_FONT,
-	    GFX_LEFT, GFX_TOP | GFX_MAX, GFX_WHITE);
+	    GFX_LEFT, GFX_TOP | GFX_MAX, style->input_fg);
 	if ((GFX_WIDTH + q.next) / 2 < INPUT_MAX_X)
 		gfx_copy(&da, (GFX_WIDTH - q.next) / 2, INPUT_PAD_TOP, &buf,
 		    0, 0, q.next, q.h, -1);

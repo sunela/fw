@@ -19,6 +19,8 @@
 
 
 #define	MAX_NAME_LEN	16	/* maximum length of an entry name */
+#define	MAX_STRING_LEN	64	/* maximum length of user, email, pw */
+#define	MAX_SECRET_LEN	20	/* maximum bytes of HOTP/TOTP secret */
 
 
 /*
@@ -93,6 +95,7 @@ struct db {
 struct db_entry *db_new_entry(struct db *db, const char *name);
 bool db_change_field(struct db_entry *de, enum field_type type,
     const void *data, unsigned size);
+bool db_delete_field(struct db_entry *de, struct db_field *f);
 bool db_delete_entry(struct db_entry *de);
 
 bool db_iterate(struct db *db, bool (*fn)(void *user, struct db_entry *de),

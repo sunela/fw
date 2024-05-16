@@ -63,14 +63,20 @@ static int get_erased_block(struct db *db)
 /* --- Helper functions ---------------------------------------------------- */
 
 
+static void free_field(struct db_field *f)
+{
+	free(f->data);
+	free(f);
+}
+
+
 static void free_fields(struct db_entry *de)
 {
 	while (de->fields) {
 		struct db_field *this = de->fields;
 
 		de->fields = this->next;
-		free(this->data);
-		free(this);
+		free_field(this);
 	}
 }
 
@@ -216,33 +222,10 @@ struct db_entry *db_new_entry(struct db *db, const char *name)
 }
 
 
-bool db_change_field(struct db_entry *de, enum field_type type,
-    const void *data, unsigned size)
+static bool update_entry(struct db_entry *de, unsigned new)
 {
 	struct db *db = de->db;
-	struct db_field **anchor;
-	struct db_field *f;
 	unsigned old = de->block;
-	int new;
-
-	new = get_erased_block(de->db);
-	if (new < 0)
-		return 0;
-	for (anchor = &de->fields; *anchor; anchor = &(*anchor)->next)
-		if ((*anchor)->type >= type)
-			break;
-	if (*anchor && (*anchor)->type == type) {
-		f = *anchor;
-		free(f->data);
-	} else {
-		f = alloc_type(struct db_field);
-		f->type = type;
-		f->next = *anchor;
-		*anchor = f;
-	}
-	f->len = size;
-	f->data = alloc_size(size);
-	memcpy(f->data, data, size);
 
 	old = de->block;
 	de->block = new;
@@ -262,6 +245,56 @@ bool db_change_field(struct db_entry *de, enum field_type type,
 		db->stats.deleted++;
 	}
 	return 1;
+}
+
+
+bool db_change_field(struct db_entry *de, enum field_type type,
+    const void *data, unsigned size)
+{
+	struct db *db = de->db;
+	struct db_field **anchor;
+	struct db_field *f;
+	int new;
+
+	new = get_erased_block(db);
+	if (new < 0)
+		return 0;
+
+	for (anchor = &de->fields; *anchor; anchor = &(*anchor)->next)
+		if ((*anchor)->type >= type)
+			break;
+	if (*anchor && (*anchor)->type == type) {
+		f = *anchor;
+		free(f->data);
+	} else {
+		f = alloc_type(struct db_field);
+		f->type = type;
+		f->next = *anchor;
+		*anchor = f;
+	}
+	f->len = size;
+	f->data = alloc_size(size);
+	memcpy(f->data, data, size);
+
+	return update_entry(de, new);
+}
+
+
+bool db_delete_field(struct db_entry *de, struct db_field *f)
+{
+	struct db *db = de->db;
+	struct db_field **anchor;
+	int new;
+
+	new = get_erased_block(db);
+	if (new < 0)
+		return 0;
+
+	for (anchor = &de->fields; *anchor != f; anchor = &(*anchor)->next);
+	*anchor = f->next;
+	free_field(f);
+
+	return update_entry(de, new);
 }
 
 

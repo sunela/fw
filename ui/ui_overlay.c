@@ -5,6 +5,42 @@
  * A copy of the license can be found in the file LICENSE.MIT
  */
 
+/*
+ * @@@ ui_overlay is designed to preserve the screen content of the page it was
+ * called from and to use it as background. However, ui_call always clears the
+ * screen before switching, so the icons of the overlay appear on an all-black
+ * background.
+ *
+ * Surprisingly, it took me weeks to even realize this was happening. This
+ * raises the question whether it even makes sense to try to preserve the
+ * previous content as background, or whether the way it is now actually looks
+ * good enough, or even better.
+ *
+ * Regarding the previous screen content, we have three options:
+ *
+ * 1) just clear the screen, as we currently do.
+ *
+ * 2) preserve the screen, as ui_overlay is designed to support. (Just removing
+ *    the gfx_clear in ui_call enabled this, but there are a few places where
+ *    ui_call is used where we don't want the old screen content to stay
+ *    around, so a bit more work would be needed to do this properly.)
+ *
+ *    One issue is that buttons for which space is allocated but that aren't
+ *    shown still have their background blacked out, which looks a bit odd.
+ *    Possible solutions:
+ *    a) make the "halo" follow the outline of the buttons shown. This is
+ *       somewhat difficult.
+ *    b) instead of one large "halo" around the overlay, draw one around each
+ *       (visible) button. This is easy to do, and may look almost like a).
+ *    c) draw an outline around the buttons, visually delimiting the overlay
+ *       area.
+ *    d) use a non-black background for the overlay, also visually delimiting
+ *       the overlay area.
+ *
+ * 3) preserve the screen, but reduce the brightness of the old content. E.g.,
+ *    divide all pixel values by two. This may look good, too.
+ */
+
 #include <stddef.h>
 #include <stdlib.h>
 

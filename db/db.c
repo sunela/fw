@@ -83,7 +83,7 @@ static void free_fields(struct db_entry *de)
 
 static void free_entry(struct db_entry *de)
 {
-	free((void *) de->name);
+	free(de->name);
 	free_fields(de);
 	free(de);
 }
@@ -275,6 +275,13 @@ bool db_change_field(struct db_entry *de, enum field_type type,
 	f->len = size;
 	f->data = alloc_size(size);
 	memcpy(f->data, data, size);
+
+	if (type == ft_id) {
+		free(de->name);
+		de->name = alloc_size(size + 1);
+		memcpy(de->name, data, size);
+		de->name[size] = 0;
+	}
 
 	return update_entry(de, new);
 }

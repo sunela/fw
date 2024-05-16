@@ -63,7 +63,7 @@ struct db;
 
 struct db_entry {
 	struct db	*db;
-	const char	*name;
+	char		*name;
 	uint16_t	seq;
 	unsigned	block;
 	struct db_field	*fields;

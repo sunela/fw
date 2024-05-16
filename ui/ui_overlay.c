@@ -213,7 +213,7 @@ void ui_overlay_sym_move_cancel(struct gfx_drawable *tmp_da,
 /* --- Event handling ------------------------------------------------------ */
 
 
-static void ui_overlay_tap(unsigned x, unsigned y)
+static void ui_overlay_tap(void *ctx, unsigned x, unsigned y)
 {
 	const struct button_ref *ref;
 
@@ -231,7 +231,7 @@ static void ui_overlay_tap(unsigned x, unsigned y)
 }
 
 
-static void ui_overlay_cancel(void)
+static void ui_overlay_cancel(void *ctx)
 {
 	ui_return();
 }
@@ -263,7 +263,7 @@ static void draw_button(struct gfx_drawable *tmp_da,
 }
 
 
-static void ui_overlay_open(void *params)
+static void ui_overlay_open(void *ctx, void *params)
 {
 	const struct ui_overlay_params *p = params;
 	const struct ui_overlay_button *b = p->buttons;
@@ -353,7 +353,7 @@ static void ui_overlay_open(void *params)
 }
 
 
-static void ui_overlay_close(void)
+static void ui_overlay_close(void *ctx)
 {
 	gfx_copy(&da, 0, 0, &old_da, 0, 0, da.w, da.h, -1);
 	timer_cancel(&t_overlay_idle);

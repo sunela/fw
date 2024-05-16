@@ -41,7 +41,7 @@ static void (*resume_action)(void) = NULL;
 /* --- Tap event ----------------------------------------------------------- */
 
 
-static void ui_accounts_tap(unsigned x, unsigned y)
+static void ui_accounts_tap(void *ctx, unsigned x, unsigned y)
 {
 	const struct wi_list_entry *entry;
 
@@ -111,7 +111,7 @@ static void enter_setup(void *user)
 }
 
 
-static void ui_accounts_long(unsigned x, unsigned y)
+static void ui_accounts_long(void *ctx, unsigned x, unsigned y)
 {
 	/* @@@ future: if in sub-folder, edit folder name */
 	if (y < LIST_Y0)
@@ -142,7 +142,7 @@ static bool add_account(void *user, struct db_entry *de)
 }
 
 
-static void ui_accounts_open(void *params)
+static void ui_accounts_open(void *ctx, void *params)
 {
 	resume_action = NULL;
 
@@ -158,22 +158,22 @@ static void ui_accounts_open(void *params)
 }
 
 
-static void ui_accounts_close(void)
+static void ui_accounts_close(void *ctx)
 {
 	wi_list_destroy(&list);
 }
 
 
-static void ui_accounts_resume(void)
+static void ui_accounts_resume(void *ctx)
 {
 	/*
 	 * @@@ once we have vertical scrolling, we'll also need to restore the
 	 * position.
 	 */
-	ui_accounts_close();
+	ui_accounts_close(ctx);
 	if (resume_action)
 		resume_action();
-	ui_accounts_open(NULL);
+	ui_accounts_open(ctx, NULL);
 	progress();
 }
 

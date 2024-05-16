@@ -168,7 +168,7 @@ static bool accept_pin(void)
 }
 
 
-static void ui_pin_tap(unsigned x, unsigned y)
+static void ui_pin_tap(void *ctx, unsigned x, unsigned y)
 {
 	unsigned col = x < BUTTON_X0 + BUTTON_X_SPACING / 2 ? 0 :
 	    x < BUTTON_X0 + 1.5 * BUTTON_X_SPACING ? 1 : 2;
@@ -265,7 +265,7 @@ void pin_shuffle_pad(void)
 /* --- Open/close ---------------------------------------------------------- */
 
 
-static void ui_pin_open(void *params)
+static void ui_pin_open(void *ctx, void *params)
 {
 	unsigned row, col;
 
@@ -280,7 +280,7 @@ static void ui_pin_open(void *params)
 }
 
 
-static void ui_pin_close(void)
+static void ui_pin_close(void *ctx)
 {
 	timer_cancel(&t_button);
 }

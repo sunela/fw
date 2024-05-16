@@ -93,7 +93,7 @@ bool ui_field_more(const struct db_entry *de)
  */
 
 static char buf[MAX_STRING_LEN + 1];
-static struct ui_field_edit_ctx edited_ctx;
+static struct ui_field_edit_params edited_params;
 
 
 #define	PARAMS(text, max, fn)			\
@@ -115,23 +115,23 @@ static void field_edited(void)
 		ui_return();
 		return;
 	}
-	switch (edited_ctx.type) {
+	switch (edited_params.type) {
 	case ft_user:
 	case ft_email:
 	case ft_pw:
 		/* @@@ report errors */
-		db_change_field(edited_ctx.de, edited_ctx.type,
+		db_change_field(edited_params.de, edited_params.type,
 		    buf, strlen(buf));
 		break;
 	case ft_hotp_secret:
 	case ft_totp_secret:
 		len = base32_decode(tmp, MAX_SECRET_LEN, buf);
-		db_change_field(edited_ctx.de, edited_ctx.type, tmp, len);
+		db_change_field(edited_params.de, edited_params.type, tmp, len);
 		break;
 	case ft_hotp_counter:
 		counter = strtoull(buf, &end, 10);
 		assert(!*end);	// @@@ should check properly :)
-		db_change_field(edited_ctx.de, edited_ctx.type, &counter,
+		db_change_field(edited_params.de, edited_params.type, &counter,
 		    sizeof(counter));
 		break;
 	default:
@@ -177,14 +177,14 @@ static bool validate_decimal(void *user, const char *s)
 }
 
 
-static void ui_field_edit_open(void *params)
+static void ui_field_edit_open(void *ctx, void *params)
 {
-	const struct ui_field_edit_ctx *ctx = params;
+	const struct ui_field_edit_params *p = params;
 	struct db_field *f;
 
 	edit_resume_action = NULL;
-	for (f = ctx->de->fields; f; f = f->next)
-		if (f->type == ctx->type)
+	for (f = p->de->fields; f; f = f->next)
+		if (f->type == p->type)
 			break;
 
 	struct ui_entry_params entry_params = {
@@ -192,7 +192,7 @@ static void ui_field_edit_open(void *params)
 		/* we set the remaining fields below */
 	};
 
-	switch (ctx->type) {
+	switch (p->type) {
 	case ft_user:
 		PARAMS("User name", MAX_STRING_LEN, NULL);
 		copy_value(buf, f);	
@@ -221,20 +221,20 @@ static void ui_field_edit_open(void *params)
 		abort();
 	}
 	edit_resume_action = field_edited;
-	edited_ctx = *ctx;
+	edited_params = *p;
 	ui_call(&ui_entry, &entry_params);
 }
 
 
-static void ui_field_edit_close(void)
+static void ui_field_edit_close(void *ctx)
 {
 	/* for now, nothing to do */
 }
 
 
-static void ui_field_edit_resume(void)
+static void ui_field_edit_resume(void *ctx)
 {
-	ui_field_edit_close();
+	ui_field_edit_close(ctx);
 	if (edit_resume_action)
 		edit_resume_action();
         progress();
@@ -244,7 +244,7 @@ static void ui_field_edit_resume(void)
 /* --- Selection of type for new field ------------------------------------- */
 
 
-static void ui_field_add_tap(unsigned x, unsigned y)
+static void ui_field_add_tap(void *ctx, unsigned x, unsigned y)
 {
 	const struct wi_list_entry *entry;
 
@@ -255,14 +255,14 @@ static void ui_field_add_tap(unsigned x, unsigned y)
 }
 
 
-static void ui_field_add_open(void *params)
+static void ui_field_add_open(void *ctx, void *params)
 {
-	static struct ui_field_edit_ctx ctx_user = { type: ft_user, };
-	static struct ui_field_edit_ctx ctx_email = { type: ft_email, };
-	static struct ui_field_edit_ctx ctx_pw = { type: ft_pw, };
-	static struct ui_field_edit_ctx ctx_hotp_secret =
+	static struct ui_field_edit_params ctx_user = { type: ft_user, };
+	static struct ui_field_edit_params ctx_email = { type: ft_email, };
+	static struct ui_field_edit_params ctx_pw = { type: ft_pw, };
+	static struct ui_field_edit_params ctx_hotp_secret =
 	    { type: ft_hotp_secret, };
-	static struct ui_field_edit_ctx ctx_totp_secret =
+	static struct ui_field_edit_params ctx_totp_secret =
 	    { type: ft_totp_secret, };
 	struct db_entry *de = params;
 
@@ -287,7 +287,7 @@ static void ui_field_add_open(void *params)
 }
 
 
-static  void ui_field_add_close(void)
+static  void ui_field_add_close(void *ctx)
 {
 	wi_list_destroy(&list);
 }

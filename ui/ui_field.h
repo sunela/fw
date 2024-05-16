@@ -13,7 +13,7 @@
 #include "db.h"
 
 
-struct ui_field_edit_ctx {
+struct ui_field_edit_params {
 	struct db_entry *de;
 	enum field_type type;
 };

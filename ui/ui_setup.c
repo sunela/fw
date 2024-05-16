@@ -36,7 +36,7 @@ static struct wi_list *lists[1] = { &list };
 /* --- Event handling ------------------------------------------------------ */
 
 
-static void ui_setup_tap(unsigned x, unsigned y)
+static void ui_setup_tap(void *ctx, unsigned x, unsigned y)
 {
 	const struct wi_list_entry *entry;
 	const struct ui *next;
@@ -51,7 +51,7 @@ static void ui_setup_tap(unsigned x, unsigned y)
 }
 
 
-static void ui_setup_to(unsigned from_x, unsigned from_y,
+static void ui_setup_to(void *ctx, unsigned from_x, unsigned from_y,
     unsigned to_x, unsigned to_y, enum ui_swipe swipe)
 {
 	if (swipe == us_left)
@@ -62,7 +62,7 @@ static void ui_setup_to(unsigned from_x, unsigned from_y,
 /* --- Open/close ---------------------------------------------------------- */
 
 
-static void ui_setup_open(void *params)
+static void ui_setup_open(void *ctx, void *params)
 {
 	gfx_rect_xy(&da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH, GFX_WHITE);
 	text_text(&da, GFX_WIDTH / 2, TOP_H / 2, "Setup",
@@ -78,20 +78,20 @@ static void ui_setup_open(void *params)
 }
 
 
-static void ui_setup_close(void)
+static void ui_setup_close(void *ctx)
 {
 	wi_list_destroy(&list);
 }
 
 
-static void ui_setup_resume(void)
+static void ui_setup_resume(void *ctx)
 {
         /*
          * @@@ once we have vertical scrolling, we'll also need to restore the
          * position.
          */
-        ui_setup_close();
-        ui_setup_open(NULL);
+        ui_setup_close(ctx);
+        ui_setup_open(ctx, NULL);
         progress();
 }
 

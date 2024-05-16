@@ -357,7 +357,7 @@ static void release_button(void *user)
 }
 
 
-static void ui_entry_tap(unsigned x, unsigned y)
+static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 {
 	unsigned col = x < BUTTON_X0 + BUTTON_X_SPACING / 2 ? 0 :
 	    x < BUTTON_X0 + 1.5 * BUTTON_X_SPACING ? 1 : 2;
@@ -440,7 +440,7 @@ static void ui_entry_tap(unsigned x, unsigned y)
 /* --- Open/close ---------------------------------------------------------- */
 
 
-static void ui_entry_open(void *params)
+static void ui_entry_open(void *ctx, void *params)
 {
 	const struct ui_entry_params *prm = params;
 	const struct ui_entry_style *style =
@@ -464,7 +464,7 @@ static void ui_entry_open(void *params)
 }
 
 
-static void ui_entry_close(void)
+static void ui_entry_close(void *ctx)
 {
 	timer_cancel(&t_button);
 }

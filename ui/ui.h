@@ -53,17 +53,17 @@ enum ui_swipe {
 struct wi_list;
 
 struct ui_events {
-	void (*touch_down)(unsigned x, unsigned y);
-	void (*touch_tap)(unsigned x, unsigned y);
-	void (*touch_long)(unsigned x, unsigned y);
-	void (*touch_moving)(unsigned from_x, unsigned from_y,
+	void (*touch_down)(void *ctx, unsigned x, unsigned y);
+	void (*touch_tap)(void *ctx, unsigned x, unsigned y);
+	void (*touch_long)(void *ctx, unsigned x, unsigned y);
+	void (*touch_moving)(void *ctx, unsigned from_x, unsigned from_y,
 	    unsigned to_x, unsigned to_y);
-	void (*touch_to)(unsigned from_x, unsigned from_y,
+	void (*touch_to)(void *ctx, unsigned from_x, unsigned from_y,
 	    unsigned to_x, unsigned to_y, enum ui_swipe swipe);
-	void (*touch_cancel)(void);
-	void (*button_down)(void);
-	void (*button_up)(void);
-	void (*tick)(void);	/* called every ~10 ms */
+	void (*touch_cancel)(void *ctx);
+	void (*button_down)(void *ctx);
+	void (*button_up)(void *ctx);
+	void (*tick)(void *ctx);	/* called every ~10 ms */
 
 	/* automatically handle list events */
 	struct wi_list **lists;
@@ -71,9 +71,10 @@ struct ui_events {
 };
 
 struct ui {
-	void (*open)(void *params);
-	void (*close)(void);
-	void (*resume)(void);
+	size_t ctx_size;
+	void (*open)(void *ctx, void *params);
+	void (*close)(void *ctx);
+	void (*resume)(void *ctx);
 	const struct ui_events *events;
 };
 

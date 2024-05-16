@@ -57,7 +57,7 @@ static void initialize_storage(void)
 /* --- Event handling ------------------------------------------------------ */
 
 
-static void ui_storage_tap(unsigned x, unsigned y)
+static void ui_storage_tap(void *ctx, unsigned x, unsigned y)
 {
 	const struct wi_list_entry *entry;
 
@@ -70,7 +70,7 @@ static void ui_storage_tap(unsigned x, unsigned y)
 }
 
 
-static void ui_storage_to(unsigned from_x, unsigned from_y,
+static void ui_storage_to(void *ctx, unsigned from_x, unsigned from_y,
     unsigned to_x, unsigned to_y, enum ui_swipe swipe)
 {
 	if (swipe == us_left)
@@ -81,7 +81,7 @@ static void ui_storage_to(unsigned from_x, unsigned from_y,
 /* --- Open/close ---------------------------------------------------------- */
 
 
-static void ui_storage_open(void *params)
+static void ui_storage_open(void *ctx, void *params)
 {
 	struct db_stats s;
 	char tmp[20];
@@ -151,7 +151,7 @@ static void ui_storage_open(void *params)
 }
 
 
-static void ui_storage_close(void)
+static void ui_storage_close(void *ctx)
 {
 	wi_list_destroy(&list);
 }

@@ -7,9 +7,12 @@
 
 #include <stddef.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 
 #include "debug.h"
+#include "alloc.h"
 #include "hal.h"
 #include "timer.h"
 #include "gfx.h"
@@ -37,10 +40,11 @@ static PSRAM gfx_color fb[GFX_WIDTH * GFX_HEIGHT];
 
 struct stack {
 	const struct ui *ui;
+	void *ctx;
 };
 
 
-static struct stack stack[UI_STACK_SIZE] = { { NULL }, };
+static struct stack stack[UI_STACK_SIZE] = { { NULL, NULL }, };
 static unsigned sp = 0;
 static struct timer idle_timer;
 static struct timer long_timer; /* for long touch screen press */
@@ -60,6 +64,12 @@ static inline const struct ui_events *current_events(void)
 {
 	return stack[sp].ui && stack[sp].ui->events ?
 	    stack[sp].ui->events : NULL;
+}
+
+
+static inline void *current_ctx(void)
+{
+	return stack[sp].ctx;
 }
 
 
@@ -235,7 +245,7 @@ static void touch_long(void *user)
 	const struct ui_events *e = current_events();
 
 	if (e && e->touch_long)
-		e->touch_long(touch_start_x, touch_start_y);
+		e->touch_long(current_ctx(), touch_start_x, touch_start_y);
 	touch_is_long  = 1;
 }
 
@@ -248,7 +258,7 @@ void touch_down_event(unsigned x, unsigned y)
 	if (x >= GFX_WIDTH || y >= GFX_HEIGHT)
 		return;
 	if (e && e->touch_down)
-		e->touch_down(x, y);
+		e->touch_down(current_ctx(), x, y);
 	touch_start_ms = now;
 	touch_start_x = touch_last_x = x;
 	touch_start_y = touch_last_y = y;
@@ -272,7 +282,7 @@ static void moving_event(unsigned from_x, unsigned from_y,
 		    from_x, from_y, to_x, to_y))
 			return;
 	if (e->touch_moving)
-		e->touch_moving(from_x, from_y, to_x, to_y);
+		e->touch_moving(current_ctx(), from_x, from_y, to_x, to_y);
 }
 
 
@@ -289,7 +299,7 @@ static void to_event(unsigned from_x, unsigned from_y,
 		    from_x, from_y, to_x, to_y, swipe))
 			return;
 	if (e->touch_to)
-		e->touch_to(from_x, from_y, to_x, to_y, swipe);
+		e->touch_to(current_ctx(), from_x, from_y, to_x, to_y, swipe);
 }
 
 
@@ -304,7 +314,7 @@ static void cancel_event(void)
 		if (e->lists[i])
 			wi_list_cancel(e->lists[i]);
 	if (e->touch_cancel)
-		e->touch_cancel();
+		e->touch_cancel(current_ctx());
 }
 
 
@@ -370,7 +380,8 @@ void touch_up_event(void)
 			cancel_event();
 		} else {
 			if (e && e->touch_tap)
-				e->touch_tap(touch_start_x, touch_start_y);
+				e->touch_tap(current_ctx(),
+				    touch_start_x, touch_start_y);
 		}
 	}
 	crosshair_remove();
@@ -385,7 +396,7 @@ void tick_event(void)
 	const struct ui_events *e = current_events();
 
 	if (e && e->tick)
-		e->tick();
+		e->tick(current_ctx());
 	poll_demo_mbox();
 }
 
@@ -396,12 +407,18 @@ void tick_event(void)
 void ui_switch(const struct ui *ui, void *params)
 {
 	debug("ui_switch (%p -> %p)\n", current_ui(), ui);
-	if (current_ui() && current_ui()->close)
-		current_ui()->close();
+	if (current_ui()) {
+		if (current_ui()->close)
+			current_ui()->close(current_ctx());
+		memset(current_ctx(), 0, current_ui()->ctx_size);
+	}
+	free(current_ctx());
 	gfx_clear(&da, GFX_BLACK);
 	stack[sp].ui = ui;
+	stack[sp].ctx = ui->ctx_size ? alloc_size(ui->ctx_size) : NULL;
+	memset(current_ctx(), 0, ui->ctx_size);
 	if (ui->open)
-		ui->open(params);
+		ui->open(current_ctx(), params);
 	update_display(&da);
 }
 
@@ -410,13 +427,15 @@ void ui_call(const struct ui *ui, void *params)
 {
 	debug("ui_call(%p -> %p)\n", current_ui(), ui);
 	if (current_ui() && current_ui()->close)
-		current_ui()->close();
+		current_ui()->close(current_ctx());
 	assert(sp < UI_STACK_SIZE);
 	gfx_clear(&da, GFX_BLACK);
 	sp++;
 	stack[sp].ui = ui;
+	stack[sp].ctx = ui->ctx_size ? alloc_size(ui->ctx_size) : NULL;
+	memset(current_ctx(), 0, ui->ctx_size);
 	if (ui->open)
-		ui->open(params);
+		ui->open(current_ctx(), params);
 	update_display(&da);
 }
 
@@ -424,12 +443,16 @@ void ui_call(const struct ui *ui, void *params)
 void ui_return(void)
 {
 	assert(sp);
-	if (current_ui() && current_ui()->close)
-		current_ui()->close();
+	if (current_ui()) {
+		if (current_ui()->close)
+			current_ui()->close(current_ctx());
+		memset(current_ctx(), 0, current_ui()->ctx_size);
+	}
+	free(current_ctx());
 	gfx_clear(&da, GFX_BLACK);
 	sp--;
 	assert(current_ui()->resume);
-	current_ui()->resume();
+	current_ui()->resume(current_ctx());
 	update_display(&da);
 }
 
@@ -441,13 +464,14 @@ void ui_empty_stack(void)
 	while (sp) {
 		const struct ui *ui;
 
-		ui = stack[sp].ui;
+		ui = current_ui();
 		if (ui->close)
-			ui->close();
+			ui->close(current_ctx());
+		free(current_ctx());
 		sp--;
 	}
 	assert(current_ui()->resume);
-	current_ui()->resume();
+	current_ui()->resume(current_ctx());
 }
 
 

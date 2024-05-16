@@ -58,7 +58,7 @@ static void show_cooldown(void *user)
 /* --- Open/close ---------------------------------------------------------- */
 
 
-static void ui_fail_open(void *params)
+static void ui_fail_open(void *ctx, void *params)
 {
 	timer_init(&t_tick);
 	pin_attempts++;
@@ -72,7 +72,7 @@ static void ui_fail_open(void *params)
 }
 
 
-static void ui_cooldown_open(void *params)
+static void ui_cooldown_open(void *ctx, void *params)
 {
 	timer_init(&t_tick);
 	set_idle(IDLE_HOLD_S);
@@ -80,7 +80,7 @@ static void ui_cooldown_open(void *params)
 }
 
 
-static void ui_fail_close(void)
+static void ui_fail_close(void *ctx)
 {
 	timer_cancel(&t_tick);
 }

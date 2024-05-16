@@ -106,7 +106,7 @@ static void show_totp(struct wi_list *l,
 }
 
 
-static void ui_account_tick(void)
+static void ui_account_tick(void *ctx)
 {
 	static int64_t last_tick = -1;
 	int64_t this_tick = time_us() / 1000000;
@@ -126,7 +126,7 @@ static void ui_account_tick(void)
 /* --- Tap ----------------------------------------------------------------- */
 
 
-static void ui_account_tap(unsigned x, unsigned y)
+static void ui_account_tap(void *ctx, unsigned x, unsigned y)
 {
 	struct wi_list_entry *entry;
 	struct db_field *f;
@@ -280,7 +280,7 @@ static void add_field(void *user)
 static void edit_field(void *user)
 {
 	struct db_field *f = user;
-	struct ui_field_edit_ctx prm = {
+	struct ui_field_edit_params prm = {
 		.de	= selected_account,
 		.type	= f->type,
 	};
@@ -360,7 +360,7 @@ static void fields_overlay(struct db_field *f)
 }
 
 
-static void ui_account_long(unsigned x, unsigned y)
+static void ui_account_long(void *ctx, unsigned x, unsigned y)
 {
 	if (y < LIST_Y0) {
                 account_overlay();
@@ -375,7 +375,7 @@ static void ui_account_long(unsigned x, unsigned y)
 /* --- Swipe --------------------------------------------------------------- */
 
 
-static void ui_account_to(unsigned from_x, unsigned from_y,
+static void ui_account_to(void *ctx, unsigned from_x, unsigned from_y,
     unsigned to_x, unsigned to_y, enum ui_swipe swipe)
 {
 	if (swipe == us_left)
@@ -398,7 +398,7 @@ static void add_string(const char *label, const char *s, unsigned len,
 }
 
 
-static void ui_account_open(void *params)
+static void ui_account_open(void *ctx, void *params)
 {
 	struct db_entry *de = selected_account = params;
 	struct db_field *f;
@@ -441,19 +441,19 @@ static void ui_account_open(void *params)
 }
 
 
-static void ui_account_close(void)
+static void ui_account_close(void *ctx)
 {
 	wi_list_destroy(&list);
 }
 
 
-static void ui_account_resume(void)
+static void ui_account_resume(void *ctx)
 {
-	ui_account_close();
+	ui_account_close(ctx);
 	if (resume_action)
 		resume_action();
 	if (selected_account)
-		ui_account_open(selected_account);
+		ui_account_open(ctx, selected_account);
 	progress();
 }
 

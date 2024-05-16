@@ -9,13 +9,13 @@
 #include "ui.h"
 
 
-static void ui_off_open(void *params)
+static void ui_off_open(void *ctx, void *params)
 {
 	display_on(0);
 }
 
 
-static void ui_off_close(void)
+static void ui_off_close(void *ctx)
 {
 	display_on(1);
 }

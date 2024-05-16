@@ -127,7 +127,7 @@ static void change_sync_mode(void)
 /* --- Event handling ------------------------------------------------------ */
 
 
-static void ui_time_tap(unsigned x, unsigned y)
+static void ui_time_tap(void *ctx, unsigned x, unsigned y)
 {
 	const struct wi_list_entry *entry;
 
@@ -139,7 +139,7 @@ static void ui_time_tap(unsigned x, unsigned y)
 }
 
 
-static void ui_time_to(unsigned from_x, unsigned from_y,
+static void ui_time_to(void *ctx, unsigned from_x, unsigned from_y,
     unsigned to_x, unsigned to_y, enum ui_swipe swipe)
 {
 	if (swipe == us_left)
@@ -150,7 +150,7 @@ static void ui_time_to(unsigned from_x, unsigned from_y,
 /* --- Open/close ---------------------------------------------------------- */
 
 
-static void ui_time_open(void *params)
+static void ui_time_open(void *ctx, void *params)
 {
 	gfx_rect_xy(&da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH, GFX_WHITE);
 	text_text(&da, GFX_WIDTH / 2, TOP_H / 2, "Set Time",
@@ -171,7 +171,7 @@ static void ui_time_open(void *params)
 }
 
 
-static void ui_time_close(void)
+static void ui_time_close(void *ctx)
 {
 	wi_list_destroy(&list);
 	if (sync_mode == sm_usb)
@@ -182,7 +182,7 @@ static void ui_time_close(void)
 /* --- Timer ticks --------------------------------------------------------- */
 
 
-static void ui_time_tick(void)
+static void ui_time_tick(void *ctx)
 {
 	static int64_t last_tick = -1;
 	int64_t this_tick = time_us() / 1000000;

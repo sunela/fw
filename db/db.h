@@ -18,7 +18,11 @@
 #include <stdint.h>
 
 
+#define	MAX_NAME_LEN	16	/* maximum length of an entry name */
+
+
 /*
+ * Use of "packed":
  * https://stackoverflow.com/q/4879286/11496135
  */
 

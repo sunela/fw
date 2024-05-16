@@ -55,9 +55,6 @@ static void ui_accounts_tap(unsigned x, unsigned y)
 /* --- New account --------------------------------------------------------- */
 
 
-#define	MAX_NAME_LEN	16
-
-
 static char buf[MAX_NAME_LEN + 1];
 
 

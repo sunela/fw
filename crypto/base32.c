@@ -71,6 +71,8 @@ ssize_t base32_decode(void *res, size_t res_size, const char *s)
 		if (strchr(ignore, ch))
 			continue;
 		c = strchr(alphabet, ch);
+		if (!c)
+			return -1;
 		buf = buf << 5 | (c - alphabet);
 		got += 5;
 		if (got > 7) {

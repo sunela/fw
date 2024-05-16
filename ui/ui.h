@@ -25,6 +25,7 @@
 #define	IDLE_SETUP_S	15	/* keep it short, in case we got there by
 				   accident */
 #define	IDLE_SET_TIME_S	30	/* long - the page is complex */
+#define	IDLE_CONFIRM_S	10	/* keep it short, but not rushing */
 
 #define	MAX_INPUT_LEN	32	/* for ui_entry */
 
@@ -97,6 +98,7 @@ extern const struct ui ui_field_add;
 extern const struct ui ui_field_edit;
 extern const struct ui ui_entry;
 extern const struct ui ui_overlay;
+extern const struct ui ui_confirm;
 extern const struct ui ui_setup;
 extern const struct ui ui_time;
 extern const struct ui ui_storage;

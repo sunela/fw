@@ -23,6 +23,7 @@
 #include "db.h"
 #include "wi_list.h"
 #include "ui_overlay.h"
+#include "ui_entry.h"
 #include "ui_field.h"
 #include "ui.h"
 
@@ -173,17 +174,61 @@ static void ui_account_tap(unsigned x, unsigned y)
 }
 
 
+/* --- Edit account name --------------------------------------------------- */
+
+
+/*
+ * @@@ Not great: we have account name editing both here and in ui_accounts.c
+ */
+
+
+static char buf[MAX_NAME_LEN + 1];
+
+
+static void changed_account_name(void)
+{
+	if (!*buf || !strcmp(buf, selected_account->name))
+		return;
+	db_change_field(selected_account, ft_id, buf, strlen(buf));
+	/* @@@ handle errors */
+}
+
+
+static bool name_is_different(void *user, struct db_entry *de)
+{
+	const char *s = user;
+
+	return de == selected_account || strcmp(de->name, s);
+}
+
+
+static bool validate_name_change(void *user, const char *s)
+{
+        return db_iterate(&main_db, name_is_different, (void *) s);
+}
+
+
+static void edit_account_name(void *user)
+{
+	struct ui_entry_params params = {
+		.buf		= buf,
+		.max_len	= sizeof(buf) - 1,
+		.validate	= validate_name_change,
+		.title		= "Account name",
+	};
+
+	strcpy(buf, selected_account->name);
+	resume_action = changed_account_name;
+	ui_switch(&ui_entry, &params);
+}
+
+
 /* --- Long press ---------------------------------------------------------- */
 
 
 static void power_off(void *user)
 {
 	turn_off();
-}
-
-
-static void edit_account_name(void *user)
-{
 }
 
 

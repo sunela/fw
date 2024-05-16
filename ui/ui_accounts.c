@@ -62,7 +62,7 @@ static void new_account_name(void)
 {
 	if (!*buf)
 		return;
-	/* handle errors */
+	/* @@@ handle errors */
 	db_new_entry(&main_db, buf);
 }
 

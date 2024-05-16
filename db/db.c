@@ -216,7 +216,7 @@ struct db_entry *db_new_entry(struct db *db, const char *name)
 }
 
 
-bool db_change(struct db_entry *de, enum field_type type,
+bool db_change_field(struct db_entry *de, enum field_type type,
     const void *data, unsigned size)
 {
 	struct db *db = de->db;
@@ -265,7 +265,7 @@ bool db_change(struct db_entry *de, enum field_type type,
 }
 
 
-bool db_delete(struct db_entry *de)
+bool db_delete_entry(struct db_entry *de)
 {
 	struct db *db = de->db;
 	struct db_entry **anchor;

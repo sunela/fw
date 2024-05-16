@@ -175,7 +175,7 @@ static void ui_account_tap(unsigned x, unsigned y)
 	update_display(&da);
 
 	counter++;
-	if (!db_change(de, ft_hotp_counter, &counter, sizeof(counter)))
+	if (!db_change_field(de, ft_hotp_counter, &counter, sizeof(counter)))
 		debug("HOTP counter increment failed\n");
 }
 
@@ -198,7 +198,7 @@ static void delete_account(void *user)
 {
 	/* @@@ ask for confirmation */
 	resume_action = ui_return;
-	db_delete(selected_account);
+	db_delete_entry(selected_account);
 	selected_account = NULL;
 	ui_return();
 }

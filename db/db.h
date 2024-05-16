@@ -91,9 +91,9 @@ struct db {
 
 
 struct db_entry *db_new_entry(struct db *db, const char *name);
-bool db_change(struct db_entry *de, enum field_type type,
+bool db_change_field(struct db_entry *de, enum field_type type,
     const void *data, unsigned size);
-bool db_delete(struct db_entry *de);
+bool db_delete_entry(struct db_entry *de);
 
 bool db_iterate(struct db *db, bool (*fn)(void *user, struct db_entry *de),
     void *user);

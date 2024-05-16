@@ -25,6 +25,13 @@
 #define	LIST_Y0			(TOP_H + TOP_LINE_WIDTH + 1)
 
 
+struct ui_accounts_ctx {
+	void (*resume_action)(struct ui_accounts_ctx *c);
+	struct wi_list list;
+	char buf[MAX_NAME_LEN + 1];
+};
+
+
 static const struct wi_list_style style = {
 	y0:	LIST_Y0,
 	y1:	GFX_HEIGHT - 1,
@@ -33,9 +40,7 @@ static const struct wi_list_style style = {
 	min_h:	40,
 };
 
-static struct wi_list list;
-static struct wi_list *lists[1] = { &list };
-static void (*resume_action)(void) = NULL;
+static struct wi_list *lists[1];
 
 
 /* --- Tap event ----------------------------------------------------------- */
@@ -43,9 +48,10 @@ static void (*resume_action)(void) = NULL;
 
 static void ui_accounts_tap(void *ctx, unsigned x, unsigned y)
 {
+	struct ui_accounts_ctx *c = ctx;
 	const struct wi_list_entry *entry;
 
-	entry = wi_list_pick(&list, x, y);
+	entry = wi_list_pick(&c->list, x, y);
 	if (!entry)
 		return;
 	ui_call(&ui_account, wi_list_user(entry));
@@ -55,15 +61,12 @@ static void ui_accounts_tap(void *ctx, unsigned x, unsigned y)
 /* --- New account --------------------------------------------------------- */
 
 
-static char buf[MAX_NAME_LEN + 1];
-
-
-static void new_account_name(void)
+static void new_account_name(struct ui_accounts_ctx *c)
 {
-	if (!*buf)
+	if (!*c->buf)
 		return;
 	/* @@@ handle errors */
-	db_new_entry(&main_db, buf);
+	db_new_entry(&main_db, c->buf);
 }
 
 
@@ -83,15 +86,16 @@ static bool validate_new_account(void *user, const char *s)
 
 static void new_account(void *user)
 {
+	struct ui_accounts_ctx *c = user;
 	struct ui_entry_params params = {
-		.buf		= buf,
-		.max_len	= sizeof(buf) - 1,
+		.buf		= c->buf,
+		.max_len	= sizeof(c->buf) - 1,
 		.validate	= validate_new_account,
 		.title		= "New account",
 	};
 
-	*buf = 0;
-	resume_action = new_account_name;
+	*c->buf = 0;
+	c->resume_action = new_account_name;
 	ui_switch(&ui_entry, &params);
 }
 
@@ -113,11 +117,13 @@ static void enter_setup(void *user)
 
 static void ui_accounts_long(void *ctx, unsigned x, unsigned y)
 {
+	unsigned i;
+
 	/* @@@ future: if in sub-folder, edit folder name */
 	if (y < LIST_Y0)
 		return;
 
-	static const struct ui_overlay_button buttons[] = {
+	static struct ui_overlay_button buttons[] = {
 		{ ui_overlay_sym_power,	power_off, NULL },
 		{ ui_overlay_sym_add,	new_account, NULL },
 		{ NULL, },
@@ -128,6 +134,8 @@ static void ui_accounts_long(void *ctx, unsigned x, unsigned y)
 		.n_buttons	= 4,
         };
 
+	for (i = 0; i != prm.n_buttons; i++)
+		buttons[i].user = ctx;
 	ui_call(&ui_overlay, &prm);
 }
 
@@ -137,22 +145,26 @@ static void ui_accounts_long(void *ctx, unsigned x, unsigned y)
 
 static bool add_account(void *user, struct db_entry *de)
 {
-	wi_list_add(&list, de->name, NULL, de);
+	struct ui_accounts_ctx *c = user;
+
+	wi_list_add(&c->list, de->name, NULL, de);
 	return 1;
 }
 
 
 static void ui_accounts_open(void *ctx, void *params)
 {
-	resume_action = NULL;
+	struct ui_accounts_ctx *c = ctx;
+
+	lists[0] = &c->list;
 
 	gfx_rect_xy(&da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH, GFX_WHITE);
 	text_text(&da, GFX_WIDTH / 2, TOP_H / 2, "Accounts",
 	    &FONT_TOP, GFX_CENTER, GFX_CENTER, GFX_WHITE);
 
-	wi_list_begin(&list, &style);
-	db_iterate(&main_db, add_account, NULL);
-	wi_list_end(&list);
+	wi_list_begin(&c->list, &style);
+	db_iterate(&main_db, add_account, c);
+	wi_list_end(&c->list);
 
 	set_idle(IDLE_ACCOUNTS_S);
 }
@@ -160,19 +172,23 @@ static void ui_accounts_open(void *ctx, void *params)
 
 static void ui_accounts_close(void *ctx)
 {
-	wi_list_destroy(&list);
+	struct ui_accounts_ctx *c = ctx;
+
+	wi_list_destroy(&c->list);
 }
 
 
 static void ui_accounts_resume(void *ctx)
 {
+	struct ui_accounts_ctx *c = ctx;
+
 	/*
 	 * @@@ once we have vertical scrolling, we'll also need to restore the
 	 * position.
 	 */
 	ui_accounts_close(ctx);
-	if (resume_action)
-		resume_action();
+	if (c->resume_action)
+		c->resume_action(c);
 	ui_accounts_open(ctx, NULL);
 	progress();
 }
@@ -189,6 +205,7 @@ static const struct ui_events ui_accounts_events = {
 };
 
 const struct ui ui_accounts = {
+	.ctx_size = sizeof(struct ui_accounts_ctx),
 	.open = ui_accounts_open,
 	.close = ui_accounts_close,
 	.resume = ui_accounts_resume,

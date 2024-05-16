@@ -93,6 +93,8 @@ extern const struct ui ui_fail;
 extern const struct ui ui_cooldown;
 extern const struct ui ui_accounts;
 extern const struct ui ui_account;
+extern const struct ui ui_field_add;
+extern const struct ui ui_field_edit;
 extern const struct ui ui_entry;
 extern const struct ui ui_overlay;
 extern const struct ui ui_setup;

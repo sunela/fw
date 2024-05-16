@@ -23,6 +23,7 @@
 #include "db.h"
 #include "wi_list.h"
 #include "ui_overlay.h"
+#include "ui_field.h"
 #include "ui.h"
 
 
@@ -84,17 +85,10 @@ static void render_account(const struct wi_list *l,
 static void show_totp(struct wi_list *l,
     struct wi_list_entry *entry, void *user)
 {
-	struct db_entry *de = wi_list_user(entry);
-	const struct db_field *f;
+	struct db_field *f = wi_list_user(entry);
 
-	if (!de)
+	if (f->type != ft_totp_secret)
 		return;
-	for (f = de->fields; f; f = f->next)
-		if (f->type == ft_totp_secret)
-			break;
-	if (!f)
-		return;
-
 	assert(f->len > 0);
 
 	uint64_t counter = (time_us() + time_offset) / 1000000 / 30;
@@ -104,7 +98,7 @@ static void show_totp(struct wi_list *l,
 
 	code = hotp64(f->data, f->len, counter);
 	format(add_char, &p, "%06u", (unsigned) code % 1000000);
-	wi_list_update_entry(l, entry, "TOTP", s, de);
+	wi_list_update_entry(l, entry, "TOTP", s, f);
 	wi_list_render_entry(l, entry);
 	update_display(&da);
 }
@@ -133,7 +127,6 @@ static void ui_account_tick(void)
 static void ui_account_tap(unsigned x, unsigned y)
 {
 	struct wi_list_entry *entry;
-	struct db_entry *de;
 	struct db_field *f;
 	const struct db_field *hotp_secret = NULL;
 	unsigned hotp_secret_len;
@@ -147,22 +140,21 @@ static void ui_account_tap(unsigned x, unsigned y)
 	entry = wi_list_pick(&list, x, y);
 	if (!entry)
 		return;
-	de = wi_list_user(entry);
-	if (!de)
+	f = wi_list_user(entry);
+	if (!f)
 		return;
-	for (f = de->fields; f; f = f->next)
-		switch (f->type) {
-		case ft_hotp_secret:
-			hotp_secret = f->data;
-			hotp_secret_len = f->len;
-			break;
-		case ft_hotp_counter:
-			hotp_counter = f->data;
-			assert(f->len == sizeof(counter));
-			break;
-		default:
-			break;
-		}
+	switch (f->type) {
+	case ft_hotp_secret:
+		hotp_secret = f->data;
+		hotp_secret_len = f->len;
+		break;
+	case ft_hotp_counter:
+		hotp_counter = f->data;
+		assert(f->len == sizeof(counter));
+		break;
+	default:
+		break;
+	}
 	if (!hotp_secret || !hotp_counter)
 		return;
 
@@ -171,11 +163,12 @@ static void ui_account_tap(unsigned x, unsigned y)
 	memcpy(&counter, hotp_counter, sizeof(counter));
 	code = hotp64(hotp_secret, hotp_secret_len, counter);
 	format(add_char, &p, "%06u", (unsigned) code % 1000000);
-	wi_list_update_entry(&list, entry, "HOTP", s, de);
+	wi_list_update_entry(&list, entry, "HOTP", s, f);
 	update_display(&da);
 
 	counter++;
-	if (!db_change_field(de, ft_hotp_counter, &counter, sizeof(counter)))
+	if (!db_change_field(selected_account, ft_hotp_counter,
+	    &counter, sizeof(counter)))
 		debug("HOTP counter increment failed\n");
 }
 
@@ -220,10 +213,66 @@ static void account_overlay(void)
 }
 
 
+static void add_field(void *user)
+{
+	ui_switch(&ui_field_add, selected_account);
+}
+
+
+static void edit_field(void *user)
+{
+	struct db_field *f = user;
+	struct ui_field_edit_ctx prm = {
+		.de	= selected_account,
+		.type	= f->type,
+	};
+
+	ui_switch(&ui_field_edit, &prm);
+}
+
+
+static void delete_field(void *user)
+{
+}
+
+
+static void fields_overlay(struct db_field *f)
+{
+	static struct ui_overlay_button buttons[] = {
+		{ ui_overlay_sym_power,	power_off, NULL },
+		{ ui_overlay_sym_add,	add_field, NULL },
+		{ ui_overlay_sym_edit,	edit_field, NULL },
+		{ ui_overlay_sym_delete, delete_field, NULL },
+	};
+	static struct ui_overlay_params prm = {
+		.buttons	= buttons,
+		.n_buttons	= 0,
+	};
+	struct db_entry *de = selected_account;
+	unsigned i;
+
+	if (ui_field_more(de)) {
+		buttons[1].draw = ui_overlay_sym_add;
+		prm.n_buttons = f ? 4 : 2;
+	} else {
+		buttons[1].draw = NULL;
+		prm.n_buttons = f ? 4 : 1;
+	}
+	for (i = 0; i != prm.n_buttons; i++)
+		buttons[i].user = f;
+	ui_call(&ui_overlay, &prm);
+}
+
+
 static void ui_account_long(unsigned x, unsigned y)
 {
-	if (y < LIST_Y0)
+	if (y < LIST_Y0) {
                 account_overlay();
+	} else {
+		struct wi_list_entry *entry = wi_list_pick(&list, x, y);
+
+		fields_overlay(entry ? wi_list_user(entry) : NULL);
+	}
 }
 
 
@@ -256,7 +305,7 @@ static void add_string(const char *label, const char *s, unsigned len,
 static void ui_account_open(void *params)
 {
 	struct db_entry *de = selected_account = params;
-	const struct db_field *f;
+	struct db_field *f;
 
 	resume_action = NULL;
 
@@ -271,21 +320,21 @@ static void ui_account_open(void *params)
 		case ft_prev:
 			break;
 		case ft_user:
-			add_string("User", f->data, f->len, NULL);
+			add_string("User", f->data, f->len, f);
 			break;
 		case ft_email:
-			add_string("E-Mail", f->data, f->len, NULL);
+			add_string("E-Mail", f->data, f->len, f);
 			break;
 		case ft_pw:
-			add_string("Password", f->data, f->len, NULL);
+			add_string("Password", f->data, f->len, f);
 			break;
 		case ft_hotp_secret:
-			wi_list_add(&list, "HOTP", "------", de);
+			wi_list_add(&list, "HOTP", "------", f);
 			break;
 		case ft_hotp_counter:
 			break;
 		case ft_totp_secret:
-			wi_list_add(&list, "TOTP", "------", de);
+			wi_list_add(&list, "TOTP", "------", f);
 			break;
 		default:
 			abort();

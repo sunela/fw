@@ -13,8 +13,8 @@ OBJS = ui.o demo.o timer.o debug.o mbox.o rnd.o hmac.o hotp.o base32.o \
     fmt.o imath.o \
     basic.o poly.o shape.o long_text.o font.o text.o \
     dbcrypt.o block.o span.o db.o \
-    ui_off.o ui_pin.o ui_fail.o ui_accounts.o ui_account.o wi_list.o \
-    ui_entry.o ui_time.o ui_overlay.o ui_setup.o ui_storage.o
+    ui_off.o ui_pin.o ui_fail.o ui_accounts.o ui_account.o ui_field.o \
+    wi_list.o ui_entry.o ui_time.o ui_overlay.o ui_setup.o ui_storage.o
 
 include Makefile.c-common
 
@@ -49,6 +49,7 @@ vpath ui_off.c ui
 vpath ui_fail.c ui
 vpath ui_accounts.c ui
 vpath ui_account.c ui
+vpath ui_field.c ui
 vpath ui_entry.c ui
 vpath ui_time.c ui
 vpath ui_overlay.c ui

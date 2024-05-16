@@ -23,6 +23,7 @@
 #include "db.h"
 #include "wi_list.h"
 #include "ui_overlay.h"
+#include "ui_confirm.h"
 #include "ui_entry.h"
 #include "ui_field.h"
 #include "ui.h"
@@ -232,13 +233,25 @@ static void power_off(void *user)
 }
 
 
+static void confirm_entry_deletion(void *user, bool confirm)
+{
+	if (confirm) {
+		db_delete_entry(selected_account);
+		selected_account = NULL;
+		resume_action = ui_return;
+	}
+}
+
+
 static void delete_account(void *user)
 {
-	/* @@@ ask for confirmation */
-	resume_action = ui_return;
-	db_delete_entry(selected_account);
-	selected_account = NULL;
-	ui_return();
+	struct ui_confirm_params prm = {
+		.action	= "remove",
+		.name	= selected_account->name,
+		.fn	= confirm_entry_deletion,
+	};
+
+	ui_switch(&ui_confirm, &prm);
 }
 
 
@@ -276,8 +289,46 @@ static void edit_field(void *user)
 }
 
 
+static void confirm_field_deletion(void *user, bool confirm)
+{
+	struct db_field *f = user;
+
+	if (confirm) {
+		// @@@ if deleting ft_hotp_secret, also delete ft_hotp_counter
+		db_delete_field(selected_account, f);
+	}
+}
+
+
 static void delete_field(void *user)
 {
+	struct db_field *f = user;
+
+	struct ui_confirm_params prm = {
+		.action	= "remove field",
+		.fn	= confirm_field_deletion,
+		.user	= f,
+	};
+	switch (f->type) {
+	case ft_user:
+		prm.name = "user name";
+		break;
+	case ft_email:
+		prm.name = "e-mail";
+		break;
+	case ft_pw:
+		prm.name = "password";
+		break;
+	case ft_hotp_secret:
+		prm.name = "HOTP";
+		break;
+	case ft_totp_secret:
+		prm.name = "TOTP";
+		break;
+	default:
+		abort();
+	}
+	ui_switch(&ui_confirm, &prm);
 }
 
 

@@ -81,9 +81,6 @@ bool ui_field_more(const struct db_entry *de)
 /*
  * @@@ HOTP/TOTP secrets need more work:
  * - the entry page should only accept characters from the base32 alphabet.
- * - the entry page needs a separate validation function accepting the whole
- *   input, so that we can show the right arrow only when then entire input
- *   string is valid base32..
  * - we need to integrate alternative input options, e.g., USB.
  *
  * Also the HOTP counter needs more work:
@@ -165,6 +162,21 @@ static void copy_base32(char *to, const struct db_field *from)
 }
 
 
+static bool validate_base32(void *user, const char *s)
+{
+	return base32_decode_size(s) > 0;
+}
+
+
+static bool validate_decimal(void *user, const char *s)
+{
+	char *end;
+
+	strtoull(s, &end, 10);
+	return !*end;
+}
+
+
 static void ui_field_edit_open(void *params)
 {
 	const struct ui_field_edit_ctx *ctx = params;
@@ -194,15 +206,15 @@ static void ui_field_edit_open(void *params)
 		copy_value(buf, f);	
 		break;
 	case ft_hotp_secret:
-		PARAMS("HOTP Secret", MAX_STRING_LEN, NULL);
+		PARAMS("HOTP Secret", MAX_STRING_LEN, validate_base32);
 		copy_base32(buf, f);
 		break;
 	case ft_hotp_counter:
-		PARAMS("Counter", MAX_STRING_LEN, NULL);
+		PARAMS("Counter", MAX_STRING_LEN, validate_decimal);
 		copy_base32(buf, f);
 		break;
 	case ft_totp_secret:
-		PARAMS("TOTP Secret", MAX_STRING_LEN, NULL);
+		PARAMS("TOTP Secret", MAX_STRING_LEN, validate_base32);
 		copy_base32(buf, f);
 		break;
 	default:

@@ -42,6 +42,15 @@
 #define	LIST_Y0			(TOP_H + TOP_LINE_WIDTH + 1)
 
 
+struct ui_account_ctx {
+	struct db_entry *selected_account;
+	struct wi_list list;
+	void (*resume_action)(struct ui_account_ctx *c);
+	char buf[MAX_NAME_LEN + 1];
+	int64_t last_tick;
+	struct db_field *field_ref;	/* for passing a field with context */
+};
+
 static void render_account(const struct wi_list *l,
     const struct wi_list_entry *entry, struct gfx_drawable *d,
     const struct gfx_rect *bb, bool odd);
@@ -56,10 +65,7 @@ static const struct wi_list_style style = {
 	.render	= render_account,
 };
 
-static struct db_entry *selected_account = NULL;
-static struct wi_list list;
-static struct wi_list *lists[1] = { &list };
-static void (*resume_action)(void) = NULL;
+static struct wi_list *lists[1];
 
 
 /* --- Extra account rendering --------------------------------------------- */
@@ -69,14 +75,10 @@ static void render_account(const struct wi_list *l,
     const struct wi_list_entry *entry, struct gfx_drawable *d,
     const struct gfx_rect *bb, bool odd)
 {
-	const struct db_entry *de = selected_account;
-	const struct db_field *f;
+	struct db_field *f = wi_list_user(entry);
 	unsigned passed_s = (time_us() / 1000000 + 1) % 30;
 
-	for (f = de->fields; f; f = f->next)
-		if (f->type == ft_totp_secret)
-			break;
-	if (!f)
+	if (!f || f->type != ft_totp_secret)
 		return;
 	gfx_arc(d, bb->x + bb->w - 1 - bb->h / 2, bb->y + bb->h / 2,
 	    bb->h / 4, 12 * passed_s, 0,
@@ -89,7 +91,7 @@ static void show_totp(struct wi_list *l,
 {
 	struct db_field *f = wi_list_user(entry);
 
-	if (f->type != ft_totp_secret)
+	if (!f || f->type != ft_totp_secret)
 		return;
 	assert(f->len > 0);
 
@@ -108,18 +110,18 @@ static void show_totp(struct wi_list *l,
 
 static void ui_account_tick(void *ctx)
 {
-	static int64_t last_tick = -1;
+	struct ui_account_ctx *c = ctx;
 	int64_t this_tick = time_us() / 1000000;
 
-	if (last_tick == this_tick)
+	if (c->last_tick == this_tick)
                 return;
-	last_tick = this_tick;
+	c->last_tick = this_tick;
 	/*
 	 * @@@ we update every second for the "time left" display. The code
 	 * changes only every 30 seconds.
 	 */
 
-	wi_list_forall(&list, show_totp, NULL);
+	wi_list_forall(&c->list, show_totp, NULL);
 }
 
 
@@ -128,6 +130,7 @@ static void ui_account_tick(void *ctx)
 
 static void ui_account_tap(void *ctx, unsigned x, unsigned y)
 {
+	struct ui_account_ctx *c = ctx;
 	struct wi_list_entry *entry;
 	struct db_field *f;
 	const struct db_field *hotp_secret = NULL;
@@ -139,24 +142,22 @@ static void ui_account_tap(void *ctx, unsigned x, unsigned y)
 	char *p = s;
 	uint32_t code;
 
-	entry = wi_list_pick(&list, x, y);
+	entry = wi_list_pick(&c->list, x, y);
 	if (!entry)
 		return;
-	f = wi_list_user(entry);
-	if (!f)
-		return;
-	switch (f->type) {
-	case ft_hotp_secret:
-		hotp_secret = f->data;
-		hotp_secret_len = f->len;
-		break;
-	case ft_hotp_counter:
-		hotp_counter = f->data;
-		assert(f->len == sizeof(counter));
-		break;
-	default:
-		break;
-	}
+	for (f = c->selected_account->fields; f; f = f->next)
+		switch (f->type) {
+		case ft_hotp_secret:
+			hotp_secret = f->data;
+			hotp_secret_len = f->len;
+			break;
+		case ft_hotp_counter:
+			hotp_counter = f->data;
+			assert(f->len == sizeof(counter));
+			break;
+		default:
+			break;
+		}
 	if (!hotp_secret || !hotp_counter)
 		return;
 
@@ -165,11 +166,11 @@ static void ui_account_tap(void *ctx, unsigned x, unsigned y)
 	memcpy(&counter, hotp_counter, sizeof(counter));
 	code = hotp64(hotp_secret, hotp_secret_len, counter);
 	format(add_char, &p, "%06u", (unsigned) code % 1000000);
-	wi_list_update_entry(&list, entry, "HOTP", s, f);
+	wi_list_update_entry(&c->list, entry, "HOTP", s, f);
 	update_display(&da);
 
 	counter++;
-	if (!db_change_field(selected_account, ft_hotp_counter,
+	if (!db_change_field(c->selected_account, ft_hotp_counter,
 	    &counter, sizeof(counter)))
 		debug("HOTP counter increment failed\n");
 }
@@ -183,43 +184,49 @@ static void ui_account_tap(void *ctx, unsigned x, unsigned y)
  */
 
 
-static char buf[MAX_NAME_LEN + 1];
-
-
-static void changed_account_name(void)
+static void changed_account_name(struct ui_account_ctx *c)
 {
-	if (!*buf || !strcmp(buf, selected_account->name))
+	if (!*c->buf || !strcmp(c->buf, c->selected_account->name))
 		return;
-	db_change_field(selected_account, ft_id, buf, strlen(buf));
+	db_change_field(c->selected_account, ft_id, c->buf, strlen(c->buf));
 	/* @@@ handle errors */
 }
 
 
 static bool name_is_different(void *user, struct db_entry *de)
 {
-	const char *s = user;
+	struct ui_account_ctx *c = user;
 
-	return de == selected_account || strcmp(de->name, s);
+	return de == c->selected_account || strcmp(de->name, c->buf);
 }
 
 
 static bool validate_name_change(void *user, const char *s)
 {
-        return db_iterate(&main_db, name_is_different, (void *) s);
+	struct ui_account_ctx *c = user;
+
+	/*
+	 * We don't use "s" but instead c->buf. Not very pretty, but it keeps
+	 * things simple.
+	 */
+        return db_iterate(&main_db, name_is_different, c);
 }
 
 
 static void edit_account_name(void *user)
 {
+	struct ui_account_ctx *c = user;
+
 	struct ui_entry_params params = {
-		.buf		= buf,
-		.max_len	= sizeof(buf) - 1,
+		.buf		= c->buf,
+		.max_len	= sizeof(c->buf) - 1,
 		.validate	= validate_name_change,
+		.user		= c,
 		.title		= "Account name",
 	};
 
-	strcpy(buf, selected_account->name);
-	resume_action = changed_account_name;
+	strcpy(c->buf, c->selected_account->name);
+	c->resume_action = changed_account_name;
 	ui_switch(&ui_entry, &params);
 }
 
@@ -233,21 +240,31 @@ static void power_off(void *user)
 }
 
 
+static void do_return(struct ui_account_ctx *c)
+{
+	ui_return();
+}
+
+
 static void confirm_entry_deletion(void *user, bool confirm)
 {
+	struct ui_account_ctx *c = user;
+
 	if (confirm) {
-		db_delete_entry(selected_account);
-		selected_account = NULL;
-		resume_action = ui_return;
+		db_delete_entry(c->selected_account);
+		c->selected_account = NULL;
+		c->resume_action = do_return;
 	}
 }
 
 
 static void delete_account(void *user)
 {
+	struct ui_account_ctx *c = user;
+
 	struct ui_confirm_params prm = {
 		.action	= "remove",
-		.name	= selected_account->name,
+		.name	= c->selected_account->name,
 		.fn	= confirm_entry_deletion,
 	};
 
@@ -255,9 +272,9 @@ static void delete_account(void *user)
 }
 
 
-static void account_overlay(void)
+static void account_overlay(struct ui_account_ctx *c)
 {
-	static const struct ui_overlay_button buttons[] = {
+	static struct ui_overlay_button buttons[] = {
 		{ ui_overlay_sym_power,	power_off, NULL },
 		{ ui_overlay_sym_edit,	edit_account_name, NULL },
 		{ ui_overlay_sym_delete, delete_account, NULL },
@@ -266,22 +283,28 @@ static void account_overlay(void)
 		.buttons	= buttons,
 		.n_buttons	= 3,
 	};
+	unsigned i;
 
+	for (i = 0; i != prm.n_buttons; i++)
+		buttons[i].user = c;
 	ui_call(&ui_overlay, &prm);
 }
 
 
 static void add_field(void *user)
 {
-	ui_switch(&ui_field_add, selected_account);
+	struct ui_account_ctx *c = user;
+
+	ui_switch(&ui_field_add, c->selected_account);
 }
 
 
 static void edit_field(void *user)
 {
-	struct db_field *f = user;
+	struct ui_account_ctx *c = user;
+	struct db_field *f = c->field_ref;
 	struct ui_field_edit_params prm = {
-		.de	= selected_account,
+		.de	= c->selected_account,
 		.type	= f->type,
 	};
 
@@ -291,24 +314,26 @@ static void edit_field(void *user)
 
 static void confirm_field_deletion(void *user, bool confirm)
 {
-	struct db_field *f = user;
+	struct ui_account_ctx *c = user;
+	struct db_field *f = c->field_ref;
 
 	if (confirm) {
 		// @@@ if deleting ft_hotp_secret, also delete ft_hotp_counter
-		db_delete_field(selected_account, f);
+		db_delete_field(c->selected_account, f);
 	}
 }
 
 
 static void delete_field(void *user)
 {
-	struct db_field *f = user;
-
+	struct ui_account_ctx *c = user;
+	struct db_field *f = c->field_ref;
 	struct ui_confirm_params prm = {
 		.action	= "remove field",
 		.fn	= confirm_field_deletion,
-		.user	= f,
+		.user	= c,
 	};
+
 	switch (f->type) {
 	case ft_user:
 		prm.name = "user name";
@@ -332,7 +357,7 @@ static void delete_field(void *user)
 }
 
 
-static void fields_overlay(struct db_field *f)
+static void fields_overlay(struct ui_account_ctx *c, struct db_field *f)
 {
 	static struct ui_overlay_button buttons[] = {
 		{ ui_overlay_sym_power,	power_off, NULL },
@@ -344,7 +369,7 @@ static void fields_overlay(struct db_field *f)
 		.buttons	= buttons,
 		.n_buttons	= 0,
 	};
-	struct db_entry *de = selected_account;
+	struct db_entry *de = c->selected_account;
 	unsigned i;
 
 	if (ui_field_more(de)) {
@@ -354,20 +379,23 @@ static void fields_overlay(struct db_field *f)
 		buttons[1].draw = NULL;
 		prm.n_buttons = f ? 4 : 1;
 	}
+	c->field_ref = f;
 	for (i = 0; i != prm.n_buttons; i++)
-		buttons[i].user = f;
+		buttons[i].user = c;
 	ui_call(&ui_overlay, &prm);
 }
 
 
 static void ui_account_long(void *ctx, unsigned x, unsigned y)
 {
-	if (y < LIST_Y0) {
-                account_overlay();
-	} else {
-		struct wi_list_entry *entry = wi_list_pick(&list, x, y);
+	struct ui_account_ctx *c = ctx;
 
-		fields_overlay(entry ? wi_list_user(entry) : NULL);
+	if (y < LIST_Y0) {
+                account_overlay(c);
+	} else {
+		struct wi_list_entry *entry = wi_list_pick(&c->list, x, y);
+
+		fields_overlay(c, entry ? wi_list_user(entry) : NULL);
 	}
 }
 
@@ -386,56 +414,60 @@ static void ui_account_to(void *ctx, unsigned from_x, unsigned from_y,
 /* --- Open/close ---------------------------------------------------------- */
 
 
-static void add_string(const char *label, const char *s, unsigned len,
-    void *user)
+static void add_string(struct ui_account_ctx *c, const char *label,
+    const char *s, unsigned len, void *user)
 {
 	char *tmp = alloc_size(len + 1);
 
 	memcpy(tmp, s, len);
 	tmp[len] = 0;
-	wi_list_add(&list, label, tmp, user);
+	wi_list_add(&c->list, label, tmp, user);
 	free(tmp);
 }
 
 
 static void ui_account_open(void *ctx, void *params)
 {
-	struct db_entry *de = selected_account = params;
+	struct ui_account_ctx *c = ctx;
+	struct db_entry *de = params;
 	struct db_field *f;
 
-	resume_action = NULL;
+	lists[0] = &c->list;
+	c->selected_account = de;
+	c->resume_action = NULL;
+	c->last_tick = -1;
 
 	gfx_rect_xy(&da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH, GFX_WHITE);
 	text_text(&da, GFX_WIDTH / 2, TOP_H / 2, de->name, &FONT_TOP,
 	    GFX_CENTER, GFX_CENTER, TITLE_FG);
 
-	wi_list_begin(&list, &style);
+	wi_list_begin(&c->list, &style);
 	for (f = de->fields; f; f = f->next)
 		switch (f->type) {
 		case ft_id:
 		case ft_prev:
 			break;
 		case ft_user:
-			add_string("User", f->data, f->len, f);
+			add_string(c, "User", f->data, f->len, f);
 			break;
 		case ft_email:
-			add_string("E-Mail", f->data, f->len, f);
+			add_string(c, "E-Mail", f->data, f->len, f);
 			break;
 		case ft_pw:
-			add_string("Password", f->data, f->len, f);
+			add_string(c, "Password", f->data, f->len, f);
 			break;
 		case ft_hotp_secret:
-			wi_list_add(&list, "HOTP", "------", f);
+			wi_list_add(&c->list, "HOTP", "------", f);
 			break;
 		case ft_hotp_counter:
 			break;
 		case ft_totp_secret:
-			wi_list_add(&list, "TOTP", "------", f);
+			wi_list_add(&c->list, "TOTP", "------", f);
 			break;
 		default:
 			abort();
 		}
-	wi_list_end(&list);
+	wi_list_end(&c->list);
 
 	set_idle(IDLE_ACCOUNT_S);
 }
@@ -443,17 +475,21 @@ static void ui_account_open(void *ctx, void *params)
 
 static void ui_account_close(void *ctx)
 {
-	wi_list_destroy(&list);
+	struct ui_account_ctx *c = ctx;
+
+	wi_list_destroy(&c->list);
 }
 
 
 static void ui_account_resume(void *ctx)
 {
+	struct ui_account_ctx *c = ctx;
+
 	ui_account_close(ctx);
-	if (resume_action)
-		resume_action();
-	if (selected_account)
-		ui_account_open(ctx, selected_account);
+	if (c->resume_action)
+		c->resume_action(c);
+	if (c->selected_account)
+		ui_account_open(ctx, c->selected_account);
 	progress();
 }
 
@@ -471,6 +507,7 @@ static const struct ui_events ui_account_events = {
 };
 
 const struct ui ui_account = {
+	.ctx_size = sizeof(struct ui_account_ctx),
 	.open = ui_account_open,
 	.close = ui_account_close,
 	.resume	= ui_account_resume,

@@ -103,6 +103,8 @@ bool db_iterate(struct db *db, bool (*fn)(void *user, struct db_entry *de),
 
 void db_stats(const struct db *db, struct db_stats *s);
 
+bool db_open_progress(struct db *db, const struct dbcrypt *c,
+    void (*progress)(void *user, unsigned i, unsigned n), void *user);
 bool db_open(struct db *db, const struct dbcrypt *c);
 void db_close(struct db *db);
 

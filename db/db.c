@@ -431,7 +431,8 @@ static bool process_payload(struct db *db, unsigned block, uint16_t seq,
 }
 
 
-bool db_open(struct db *db, const struct dbcrypt *c)
+bool db_open_progress(struct db *db, const struct dbcrypt *c,
+    void (*progress)(void *user, unsigned i, unsigned n), void *user)
 {
 	unsigned i;
 	uint16_t seq;
@@ -440,7 +441,9 @@ bool db_open(struct db *db, const struct dbcrypt *c)
 	db->c = c;
 	db->stats.total = storage_blocks();
 	db->entries = NULL;
-	for (i = 0; i != db->stats.total; i++)
+	for (i = 0; i != db->stats.total; i++) {
+		if (progress)
+			progress(user, i, db->stats.total);
 		switch (block_read(c, &seq, payload_buf, i)) {
 		case bt_error:
 			db->stats.error++;
@@ -470,8 +473,17 @@ bool db_open(struct db *db, const struct dbcrypt *c)
 		default:
 			abort();
 		}
+	}
+	if (progress)
+		progress(user, i, i);
 	memset(payload_buf, 0, sizeof(payload_buf));
 	return 1;
+}
+
+
+bool db_open(struct db *db, const struct dbcrypt *c)
+{
+	return db_open_progress(db, c, NULL, NULL);
 }
 
 

@@ -212,7 +212,7 @@ static unsigned draw_list(struct wi_list *list)
 	unsigned y = style->y0;
 	unsigned i = 0;
 
-debug("  up %u\n", list->up);
+//debug("  up %u\n", list->up);
 	for (e = list->list; e; e = e->next) {
 		unsigned h;
 
@@ -237,9 +237,11 @@ bool list_scroll(struct wi_list *list, int dy)
 {
 	const struct wi_list_style *style = list->style;
 
+#if 0
 debug("scrolling %u up %u scroll_from %u dy %d y0 %u y1 %u th %u\n",
     list->scrolling, list->up, list->scroll_from, dy, style->y0, style->y1,
     list->total_height);
+#endif
 	if (dy > 0) {
 		if (dy > (int) list->up)
 			dy = list->up;
@@ -320,7 +322,7 @@ void wi_list_begin(struct wi_list *list, const struct wi_list_style *style)
 	text_query(0, 0, "", list_font(list),
 	    GFX_TOP | GFX_MAX, GFX_TOP | GFX_MAX, &q);
 	list->text_height = q.h;
-	debug("height %d\n", q.h);
+//	debug("height %d\n", q.h);
 
 	list->list = NULL;
 	list->anchor = &list->list;

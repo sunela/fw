@@ -254,7 +254,7 @@ void touch_down_event(unsigned x, unsigned y)
 {
 	const struct ui_events *e = current_events();
 
-	debug("mouse down %u %u\n", x, y);
+//	debug("mouse down %u %u\n", x, y);
 	if (x >= GFX_WIDTH || y >= GFX_HEIGHT)
 		return;
 	if (e && e->touch_down)
@@ -323,7 +323,7 @@ void touch_move_event(unsigned x, unsigned y)
 	int dx = (int) x - (int) touch_start_x;
 	int dy = (int) y - (int) touch_start_y;
 
-	debug("mouse move %u %u\n", x, y);
+//	debug("mouse move %u %u\n", x, y);
 	if (x >= GFX_WIDTH || y >= GFX_HEIGHT)
 		return;
 	touch_last_x = x;
@@ -344,7 +344,7 @@ void touch_up_event(void)
 {
 	const struct ui_events *e = current_events();
 
-	debug("mouse up\n");
+//	debug("mouse up\n");
 	timer_cancel(&long_timer);
 	if (touch_is_long) {
 		assert(!touch_dragging);

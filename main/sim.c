@@ -102,7 +102,7 @@ void update_display(struct gfx_drawable *da)
 		return;
 	gfx_reset(da);
 
-debug("update\n");
+//debug("update\n");
 	assert(da->w == GFX_WIDTH);
 	assert(da->h == GFX_HEIGHT);
 	assert(da->damage.w <= GFX_WIDTH);
@@ -168,7 +168,7 @@ static bool process_events(void)
 	case SDL_MOUSEMOTION:
 		if (!touch_is_down)
 			return 1;
-debug("SDL_MOUSEMOTION\n");
+//debug("SDL_MOUSEMOTION\n");
 		if (event.motion.state & SDL_BUTTON_LMASK)
 			touch_move_event(event.motion.x / zoom,
 			    event.motion.y / zoom);
@@ -176,7 +176,7 @@ debug("SDL_MOUSEMOTION\n");
 			touch_up_event();
 		break;
 	case SDL_MOUSEBUTTONDOWN:
-debug("SDL_MOUSEBUTTONDOWN\n");
+//debug("SDL_MOUSEBUTTONDOWN\n");
 		assert(!touch_is_down);
 		if (event.button.state == SDL_BUTTON_LEFT)
 			touch_down_event(event.motion.x / zoom,
@@ -184,7 +184,7 @@ debug("SDL_MOUSEBUTTONDOWN\n");
 		touch_is_down = 1;
 		break;
 	case SDL_MOUSEBUTTONUP:
-debug("SDL_MOUSEBUTTONUP\n");
+//debug("SDL_MOUSEBUTTONUP\n");
 		/*
 		 * SDL sends mouse up and move events when hovering. Our touch
 		 * screen (probably) can't do this, so we filter such events.

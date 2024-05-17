@@ -157,6 +157,7 @@ static void ui_accounts_open(void *ctx, void *params)
 	struct ui_accounts_ctx *c = ctx;
 
 	lists[0] = &c->list;
+	c->resume_action = NULL;
 
 	gfx_rect_xy(&da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH, GFX_WHITE);
 	text_text(&da, GFX_WIDTH / 2, TOP_H / 2, "Accounts",

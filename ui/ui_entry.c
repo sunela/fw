@@ -479,6 +479,7 @@ static const struct ui_events ui_entry_events = {
 
 
 const struct ui ui_entry = {
+	.name = "entry",
 	.open = ui_entry_open,
 	.close = ui_entry_close,
 	.events	= &ui_entry_events,

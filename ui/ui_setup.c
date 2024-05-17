@@ -107,6 +107,7 @@ static const struct ui_events ui_setup_events = {
 };
 
 const struct ui ui_setup = {
+	.name = "setup",
 	.open = ui_setup_open,
 	.close = ui_setup_close,
 	.resume = ui_setup_resume,

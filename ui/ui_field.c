@@ -297,6 +297,7 @@ static  void ui_field_add_close(void *ctx)
 
 
 const struct ui ui_field_edit = {
+	.name = "field_edit",
 	.open = ui_field_edit_open,
 	.close = ui_field_edit_close,
 	.resume = ui_field_edit_resume,
@@ -309,6 +310,7 @@ static const struct ui_events ui_field_add_events = {
 };
 
 const struct ui ui_field_add = {
+	.name = "field_add",
 	.open = ui_field_add_open,
 	.close = ui_field_add_close,
 	.events = &ui_field_add_events,

@@ -406,7 +406,9 @@ void tick_event(void)
 
 void ui_switch(const struct ui *ui, void *params)
 {
-	debug("ui_switch (%p -> %p)\n", current_ui(), ui);
+	debug("ui_switch %u:%s(%p) -> %u:%s(%p)\n",
+	    sp, current_ui() ? current_ui()->name : "", current_ui(),
+	    sp, ui->name, ui);
 	if (current_ui()) {
 		if (current_ui()->close)
 			current_ui()->close(current_ctx());
@@ -425,7 +427,9 @@ void ui_switch(const struct ui *ui, void *params)
 
 void ui_call(const struct ui *ui, void *params)
 {
-	debug("ui_call(%p -> %p)\n", current_ui(), ui);
+	debug("ui_call %u:%s(%p) -> %u:%s(%p)\n",
+	    sp, current_ui() ? current_ui()->name : "", current_ui(),
+	    sp + 1, ui->name, ui);
 	if (current_ui() && current_ui()->close)
 		current_ui()->close(current_ctx());
 	assert(sp < UI_STACK_SIZE);
@@ -442,6 +446,11 @@ void ui_call(const struct ui *ui, void *params)
 
 void ui_return(void)
 {
+	debug("ui_return %u:%s(%p) -> %d:%s(%p)\n",
+	    sp, current_ui()->name, current_ui,
+	    (int) sp - 1,
+	    sp ? stack[sp - 1].ui ? stack[sp -1].ui->name : "" : "?",
+	    sp ? stack[sp - 1].ui : NULL);
 	assert(sp);
 	if (current_ui()) {
 		if (current_ui()->close)
@@ -464,6 +473,11 @@ void ui_empty_stack(void)
 	while (sp) {
 		const struct ui *ui;
 
+		debug("empty_stack %u:%s{%p) -> %d:%s(%p)\n",
+		    sp, current_ui() ? current_ui()->name : "", current_ui(),
+		    (int) sp - 1,
+		    sp ? stack[sp - 1].ui ? stack[sp -1].ui->name : "" : "?",
+		    sp ? stack[sp - 1].ui : NULL);
 		ui = current_ui();
 		if (ui->close)
 			ui->close(current_ctx());

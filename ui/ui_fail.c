@@ -87,6 +87,7 @@ static void ui_fail_close(void *ctx)
 
 
 const struct ui ui_fail = {
+	.name = "fail",
 	.open = ui_fail_open,
 	.close = ui_fail_close,
 };

@@ -22,6 +22,7 @@ static void ui_off_close(void *ctx)
 
 
 const struct ui ui_off = {
+	.name	= "off",
 	.open	= ui_off_open,
 	.close	= ui_off_close,
 };

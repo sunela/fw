@@ -71,6 +71,7 @@ struct ui_events {
 };
 
 struct ui {
+	const char *name;	/* for tracing (debug) output */
 	size_t ctx_size;
 	void (*open)(void *ctx, void *params);
 	void (*close)(void *ctx);

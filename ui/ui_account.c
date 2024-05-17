@@ -240,12 +240,6 @@ static void power_off(void *user)
 }
 
 
-static void do_return(struct ui_account_ctx *c)
-{
-	ui_return();
-}
-
-
 static void confirm_entry_deletion(void *user, bool confirm)
 {
 	struct ui_account_ctx *c = user;
@@ -253,7 +247,6 @@ static void confirm_entry_deletion(void *user, bool confirm)
 	if (confirm) {
 		db_delete_entry(c->selected_account);
 		c->selected_account = NULL;
-		c->resume_action = do_return;
 	}
 }
 
@@ -266,6 +259,7 @@ static void delete_account(void *user)
 		.action	= "remove",
 		.name	= c->selected_account->name,
 		.fn	= confirm_entry_deletion,
+		.user	= c,
 	};
 
 	ui_switch(&ui_confirm, &prm);
@@ -490,6 +484,8 @@ static void ui_account_resume(void *ctx)
 		c->resume_action(c);
 	if (c->selected_account)
 		ui_account_open(ctx, c->selected_account);
+	else
+		ui_return();
 	progress();
 }
 

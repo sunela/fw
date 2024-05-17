@@ -54,6 +54,16 @@
 #define	IND_CX			(GFX_WIDTH / 2)
 #define	IND_CY			(IND_TOP_OFFSET + IND_R)
 
+/* --- Database opening progress ------------------------------------------- */
+
+#define	PROGRESS_TOTAL_COLOR	GFX_HEX(0x202020)
+#define	PROGRESS_DONE_COLOR	GFX_GREEN
+
+#define	PROGRESS_W		180
+#define	PROGRESS_H		20
+#define	PROGRESS_X0		((GFX_WIDTH - PROGRESS_W) / 2)
+#define	PROGRESS_Y0		((GFX_HEIGHT - PROGRESS_H) / 2)
+
 
 static uint32_t pin = 0xffffffff;
 static unsigned pin_len = 0;
@@ -155,13 +165,32 @@ debug("release_button 0x%x\n", n);
 }
 
 
+static void open_progress(void *user, unsigned i, unsigned n)
+{
+	unsigned *progress = user;
+	unsigned w = n ? i * PROGRESS_W / n : 0;
+
+	if (*progress == w)
+		return;
+	gfx_rect_xy(&da, PROGRESS_X0 + *progress, PROGRESS_Y0,
+	    w - *progress, PROGRESS_H, PROGRESS_DONE_COLOR);
+	update_display(&da);
+	*progress = w;
+}
+
+
 static bool accept_pin(void)
 {
 	struct db_stats s;
+	unsigned progress = 0;
 
 	if (pin != DUMMY_PIN)
 		return 0;
-	if (!db_open(&main_db, NULL))
+	gfx_clear(&da, GFX_BLACK);
+	gfx_rect_xy(&da, PROGRESS_X0, PROGRESS_Y0, PROGRESS_W, PROGRESS_H,
+	    PROGRESS_TOTAL_COLOR);
+	update_display(&da);	/* give immediate visual feedback */
+	if (!db_open_progress(&main_db, NULL, open_progress, &progress))
 		return 0;
 	db_stats(&main_db, &s);
 	return s.data || s.empty;

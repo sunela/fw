@@ -205,10 +205,10 @@ static const struct ui_events ui_accounts_events = {
 };
 
 const struct ui ui_accounts = {
-	.name = "accounts",
-	.ctx_size = sizeof(struct ui_accounts_ctx),
-	.open = ui_accounts_open,
-	.close = ui_accounts_close,
-	.resume = ui_accounts_resume,
-	.events = &ui_accounts_events,
+	.name		= "accounts",
+	.ctx_size	= sizeof(struct ui_accounts_ctx),
+	.open		= ui_accounts_open,
+	.close		= ui_accounts_close,
+	.resume		= ui_accounts_resume,
+	.events		= &ui_accounts_events,
 };

@@ -371,8 +371,8 @@ static const struct ui_events ui_overlay_events = {
 
 
 const struct ui ui_overlay = {
-	.name = "overlay",
-	.open = ui_overlay_open,
-	.close = ui_overlay_close,
-	.events	= &ui_overlay_events,
+	.name		= "overlay",
+	.open		= ui_overlay_open,
+	.close		= ui_overlay_close,
+	.events		= &ui_overlay_events,
 };

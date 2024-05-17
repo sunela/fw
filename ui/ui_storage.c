@@ -169,8 +169,8 @@ static const struct ui_events ui_storage_events = {
 };
 
 const struct ui ui_storage = {
-	.name = "storage",
-	.open = ui_storage_open,
-	.close = ui_storage_close,
-	.events = &ui_storage_events,
+	.name		= "storage",
+	.open		= ui_storage_open,
+	.close		= ui_storage_close,
+	.events		= &ui_storage_events,
 };

@@ -295,8 +295,8 @@ static const struct ui_events ui_pin_events = {
 
 
 const struct ui ui_pin = {
-	.name = "pin",
-	.open = ui_pin_open,
-	.close = ui_pin_close,
-	.events	= &ui_pin_events,
+	.name		= "pin",
+	.open		= ui_pin_open,
+	.close		= ui_pin_close,
+	.events		= &ui_pin_events,
 };

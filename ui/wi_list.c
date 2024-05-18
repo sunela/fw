@@ -140,6 +140,15 @@ void wi_list_forall(struct wi_list *list,
 }
 
 
+/* --- List properties ----------------------------------------------------- */
+
+
+bool list_is_empty(const struct wi_list *list)
+{
+	return !list->list;
+}
+
+
 /* --- List drawing -------------------------------------------------------- */
 
 

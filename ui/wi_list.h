@@ -57,6 +57,8 @@ void wi_list_forall(struct wi_list *list,
     void (*fn)(struct wi_list *list, struct wi_list_entry *entry, void *user),
     void *user);
 
+bool list_is_empty(const struct wi_list *list);
+
 /*
  * Negative dy scrolls up.
  */

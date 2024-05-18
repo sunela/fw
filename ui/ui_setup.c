@@ -21,6 +21,11 @@
 #define	LIST_Y0			(TOP_H + TOP_LINE_WIDTH + 1)
 
 
+struct ui_setup_ctx {
+	struct wi_list list;
+};
+
+
 static const struct wi_list_style style = {
 	y0:	LIST_Y0,
 	y1:	GFX_HEIGHT - 1,
@@ -29,8 +34,7 @@ static const struct wi_list_style style = {
 	min_h:	40,
 };
 
-static struct wi_list list;
-static struct wi_list *lists[1] = { &list };
+static struct wi_list *lists[1];
 
 
 /* --- Event handling ------------------------------------------------------ */
@@ -38,10 +42,11 @@ static struct wi_list *lists[1] = { &list };
 
 static void ui_setup_tap(void *ctx, unsigned x, unsigned y)
 {
+	struct ui_setup_ctx *c = ctx;
 	const struct wi_list_entry *entry;
 	const struct ui *next;
 
-	entry = wi_list_pick(&list, x, y);
+	entry = wi_list_pick(&c->list, x, y);
 	if (!entry)
 		return;
 	next = wi_list_user(entry);
@@ -64,15 +69,19 @@ static void ui_setup_to(void *ctx, unsigned from_x, unsigned from_y,
 
 static void ui_setup_open(void *ctx, void *params)
 {
+	struct ui_setup_ctx *c = ctx;
+
+	lists[0] = &c->list;
+
 	gfx_rect_xy(&da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH, GFX_WHITE);
 	text_text(&da, GFX_WIDTH / 2, TOP_H / 2, "Setup",
 	    &FONT_TOP, GFX_CENTER, GFX_CENTER, GFX_WHITE);
 
-	wi_list_begin(&list, &style);
-	wi_list_add(&list, "Change PIN", NULL, NULL);
-	wi_list_add(&list, "Time & date", NULL, (void *) &ui_time);
-	wi_list_add(&list, "Storage", NULL, (void *) &ui_storage);
-	wi_list_end(&list);
+	wi_list_begin(&c->list, &style);
+	wi_list_add(&c->list, "Change PIN", NULL, NULL);
+	wi_list_add(&c->list, "Time & date", NULL, (void *) &ui_time);
+	wi_list_add(&c->list, "Storage", NULL, (void *) &ui_storage);
+	wi_list_end(&c->list);
 
 	set_idle(IDLE_SETUP_S);
 }
@@ -80,7 +89,9 @@ static void ui_setup_open(void *ctx, void *params)
 
 static void ui_setup_close(void *ctx)
 {
-	wi_list_destroy(&list);
+	struct ui_setup_ctx *c = ctx;
+
+	wi_list_destroy(&c->list);
 }
 
 
@@ -108,6 +119,7 @@ static const struct ui_events ui_setup_events = {
 
 const struct ui ui_setup = {
 	.name		= "setup",
+	.ctx_size	= sizeof(struct ui_setup_ctx),
 	.open		= ui_setup_open,
 	.close		= ui_setup_close,
 	.resume		= ui_setup_resume,

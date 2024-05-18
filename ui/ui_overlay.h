@@ -37,6 +37,9 @@ struct ui_overlay_params {
 };
 
 
+bool button_in(unsigned cx, unsigned cy, unsigned, unsigned y);
+void button_draw_add(unsigned x, unsigned y);
+
 void ui_overlay_sym_power(struct gfx_drawable *tmp_da,
     const struct ui_overlay_params *params, unsigned x, unsigned y, void *user);
 void ui_overlay_sym_delete(struct gfx_drawable *tmp_da,

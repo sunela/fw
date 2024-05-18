@@ -6,6 +6,7 @@
  */
 
 #include <stddef.h>
+#include <stdlib.h>
 
 #include "hal.h"
 #include "debug.h"
@@ -20,6 +21,8 @@
 #define	NAME_COLOR		GFX_YELLOW
 #define	CHEVRONS_PASSIVE_COLOR	GFX_WHITE
 #define	CHEVRONS_ACTIVE_COLOR	GFX_YELLOW
+#define	CHEVRONS_ACCEPT_COLOR	GFX_GREEN
+#define	CHEVRONS_REJECT_COLOR	GFX_RED
 
 #define	TEXT_FONT		mono18
 #define	NAME_FONT		mono24
@@ -37,6 +40,7 @@ struct ui_confirm_ctx {
 	void (*cb)(void *user, bool confirm);
 	void *cb_user;
 	int current_x;
+	int last_decision;
 };
 
 
@@ -47,6 +51,16 @@ struct ui_confirm_ctx {
 static bool in_band(unsigned y)
 {
 	return y >= CHEVRONS_Y - CHEVRONS_R && y <= CHEVRONS_Y + CHEVRONS_R;
+}
+
+
+static int do_accept(unsigned from_y, unsigned to_y, enum ui_swipe swipe)
+{
+	if (!in_band(from_y))
+		return 0;
+	if (swipe != us_right)
+		return 0;
+	return in_band(to_y) ? 1 : -1;
 }
 
 
@@ -94,14 +108,40 @@ static void ui_confirm_moving(void *ctx, unsigned from_x, unsigned from_y,
     unsigned to_x, unsigned to_y, enum ui_swipe swipe)
 {
 	struct ui_confirm_ctx *c = ctx;
+	int decision = do_accept(from_y, to_y, swipe);
+	gfx_color color;
 
-	if (!in_band(from_y) || !in_band(to_y))
+	if (!in_band(from_y))
 		return;
-	if (c->current_x < 0)
-		c->current_x = from_x;
-	if ((unsigned) c->current_x == to_x)
-		return;
-	chevrons(c->current_x, to_x, CHEVRONS_ACTIVE_COLOR);
+
+	switch (decision) {
+	case 0:
+		color = CHEVRONS_ACTIVE_COLOR;
+		break;
+	case -1:
+		color = CHEVRONS_REJECT_COLOR;
+		break;
+	case 1:
+		color = CHEVRONS_ACCEPT_COLOR;
+		break;
+	default:
+		abort();
+	}
+
+	if (decision == c->last_decision) {
+		if (c->current_x < 0)
+			c->current_x = from_x;
+		if ((unsigned) c->current_x == to_x)
+			return;
+		chevrons(c->current_x, to_x, color);
+	} else {
+		chevrons(from_x, to_x, color);
+		c->last_decision = decision;
+	}
+	if (c->current_x > (int) to_x)
+		chevrons(to_x + 1, c->current_x,
+		    CHEVRONS_PASSIVE_COLOR);
+	c->current_x = to_x;
 	update_display(&da);
 }
 
@@ -111,11 +151,10 @@ static void ui_confirm_to(void *ctx, unsigned from_x, unsigned from_y,
 {
 	struct ui_confirm_ctx *c = ctx;
 
-	debug("ui_confirm_to %u in %u-%u\n",
-	    from_y, CHEVRONS_Y - CHEVRONS_R, CHEVRONS_Y + CHEVRONS_R);
+	debug("ui_confirm_to %u-%u in %u-%u\n",
+	    from_y, to_y, CHEVRONS_Y - CHEVRONS_R, CHEVRONS_Y + CHEVRONS_R);
 	if (c->cb)
-		c->cb(c->cb_user, swipe == us_right &&
-		    in_band(from_y) && in_band(to_y));
+		c->cb(c->cb_user, do_accept(from_y, to_y, swipe) == 1);
 	ui_return();
 }
 
@@ -140,6 +179,7 @@ static void ui_confirm_open(void *ctx, void *params)
 
 	chevrons(0, GFX_WIDTH - 1, CHEVRONS_PASSIVE_COLOR);
 	c->current_x = -1;
+	c->last_decision = 0;
 
 	c->cb = p->fn;
 	c->cb_user = p->user;

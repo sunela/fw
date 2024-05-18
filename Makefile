@@ -20,18 +20,28 @@ sim:
 fw:
 	$(MAKE) -f Makefile.fw
 
-CONSOLE = /dev/ttyACM1
-
 sdk:
 	$(MAKE) -f Makefile.sdk
 	$(MAKE) -C sdk redo
 
-flash:
-	$(MAKE) -C sdk flash COMX=$(CONSOLE)
+# --- Generated files ---------------------------------------------------------
+
+fonts:	$(FONTS:%=font/%)
+
+$(FONTS:%=font/%): font/Makefile font/cvtfont.py
+	$(MAKE) -C font
+
+dummy.db: tools/accenc.py accounts.json
+	$(BUILD) $^ >$@ || { rm -f $@; exit 1; }
+
+# --- Flashing ----------------------------------------------------------------
 
 SDK = $(shell pwd)/../bouffalo_sdk/
 FLASH = $(SDK)/tools/bflb_tools/bouffalo_flash_cube/BLFlashCommand-ubuntu
 COMX = /dev/ttyACM1
+
+flash:
+	$(MAKE) -C sdk flash COMX=$(COMX)
 
 upload:	$(shell pwd)/dummy.db
 	$(FLASH) --interface uart --baudrate 2000000 --port=$(COMX) \
@@ -50,11 +60,17 @@ erase:
 	    --chipname bl808 --cpu_id m0 \
 	    --flash --erase --whole_chip
 
+# --- BL808 console -----------------------------------------------------------
+
+CONSOLE = /dev/ttyACM1
+
 # For convenience: invoke picocom with flashing on ^A^S (+ Enter)
 
 picocom:
 	picocom --send-cmd 'sh -c "make flash 1>&2"' --receive-cmd '' \
 	    -b 2000000 $(CONSOLE)
+
+# --- Debugging ---------------------------------------------------------------
 
 # For convenience: invoke gdb on the target (SDK) executable
 # E.g., for  info line *0x...
@@ -62,13 +78,7 @@ picocom:
 gdb:
 	riscv64-unknown-elf-gdb sdk/build/build_out/sunela_bl808_m0.elf
 
-fonts:	$(FONTS:%=font/%)
-
-$(FONTS:%=font/%): font/Makefile font/cvtfont.py
-	$(MAKE) -C font
-
-dummy.db: tools/accenc.py accounts.json
-	$(BUILD) $^ >$@ || { rm -f $@; exit 1; }
+# --- Cleanup -----------------------------------------------------------------
 
 clean:
 	for n in $(TARGETS); do $(MAKE) -f Makefile.$$n clean; done

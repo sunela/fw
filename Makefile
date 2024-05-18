@@ -36,29 +36,26 @@ dummy.db: tools/accenc.py accounts.json
 
 # --- Flashing ----------------------------------------------------------------
 
-SDK = $(shell pwd)/../bouffalo_sdk/
-FLASH = $(SDK)/tools/bflb_tools/bouffalo_flash_cube/BLFlashCommand-ubuntu
 COMX = /dev/ttyACM1
+
+SDK = $(shell pwd)/../bouffalo_sdk/
+FLASH_CUBE = $(SDK)/tools/bflb_tools/bouffalo_flash_cube/BLFlashCommand-ubuntu
+FLASH = $(FLASH_CUBE)  --interface uart --baudrate 2000000 --port=$(COMX) \
+	--chipname bl808 --cpu_id m0 --flash
 
 flash:
 	$(MAKE) -C sdk flash COMX=$(COMX)
 
 upload:	$(shell pwd)/dummy.db
-	$(FLASH) --interface uart --baudrate 2000000 --port=$(COMX) \
-	    --chipname bl808 --cpu_id m0 \
-	    --flash --write --start 0x800000 --len 0x200000 --file $<
+	$(FLASH) --write --start 0x800000 --len 0x200000 --file $<
 # --config=sdk/flash_prog_cfg.ini \
 
 download:	
-	$(FLASH) --interface uart --baudrate 2000000 --port=$(COMX) \
-	    --chipname bl808 --cpu_id m0 \
-	    --flash --read --start 0x0 --len 0x1000000 \
+	$(FLASH) --read --start 0x0 --len 0x1000000 \
 	    --file $(shell pwd)/foo
 
 erase:
-	$(FLASH) --interface uart --baudrate 2000000 --port=$(COMX) \
-	    --chipname bl808 --cpu_id m0 \
-	    --flash --erase --whole_chip
+	$(FLASH) --erase --whole_chip
 
 # --- BL808 console -----------------------------------------------------------
 

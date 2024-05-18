@@ -43,21 +43,6 @@ static const struct wi_list_style style = {
 static struct wi_list *lists[1];
 
 
-/* --- Tap event ----------------------------------------------------------- */
-
-
-static void ui_accounts_tap(void *ctx, unsigned x, unsigned y)
-{
-	struct ui_accounts_ctx *c = ctx;
-	const struct wi_list_entry *entry;
-
-	entry = wi_list_pick(&c->list, x, y);
-	if (!entry)
-		return;
-	ui_call(&ui_account, wi_list_user(entry));
-}
-
-
 /* --- New account --------------------------------------------------------- */
 
 
@@ -84,9 +69,9 @@ static bool validate_new_account(void *user, const char *s)
 }
 
 
-static void new_account(void *user)
+static void make_new_account(struct ui_accounts_ctx *c,
+    void (*call)(const struct ui *ui, void *user))
 {
-	struct ui_accounts_ctx *c = user;
 	struct ui_entry_params params = {
 		.buf		= c->buf,
 		.max_len	= sizeof(c->buf) - 1,
@@ -96,7 +81,36 @@ static void new_account(void *user)
 
 	*c->buf = 0;
 	c->resume_action = new_account_name;
-	ui_switch(&ui_entry, &params);
+	call(&ui_entry, &params);
+}
+
+
+static void new_account(void *user)
+{
+	struct ui_accounts_ctx *c = user;
+
+	make_new_account(c, ui_switch);
+}
+
+
+/* --- Tap event ----------------------------------------------------------- */
+
+
+static void ui_accounts_tap(void *ctx, unsigned x, unsigned y)
+{
+	struct ui_accounts_ctx *c = ctx;
+	const struct wi_list_entry *entry;
+
+	if (list_is_empty(&c->list)) {
+		if (button_in(GFX_WIDTH / 2, (GFX_HEIGHT + LIST_Y0) / 2, x, y))
+			make_new_account(c, ui_call);
+		return;
+	}
+
+	entry = wi_list_pick(&c->list, x, y);
+	if (!entry)
+		return;
+	ui_call(&ui_account, wi_list_user(entry));
 }
 
 
@@ -166,6 +180,9 @@ static void ui_accounts_open(void *ctx, void *params)
 	wi_list_begin(&c->list, &style);
 	db_iterate(&main_db, add_account, c);
 	wi_list_end(&c->list);
+
+	if (list_is_empty(&c->list))
+		button_draw_add(GFX_WIDTH / 2, (GFX_HEIGHT + LIST_Y0) / 2);
 
 	set_idle(IDLE_ACCOUNTS_S);
 }

@@ -142,6 +142,12 @@ static void ui_account_tap(void *ctx, unsigned x, unsigned y)
 	char *p = s;
 	uint32_t code;
 
+	if (list_is_empty(&c->list)) {
+		if (button_in(GFX_WIDTH / 2, (GFX_HEIGHT + LIST_Y0) / 2, x, y))
+			ui_call(&ui_field_add, c->selected_account);
+		return;
+	}
+
 	entry = wi_list_pick(&c->list, x, y);
 	if (!entry)
 		return;
@@ -462,6 +468,9 @@ static void ui_account_open(void *ctx, void *params)
 			abort();
 		}
 	wi_list_end(&c->list);
+
+	if (list_is_empty(&c->list))
+		button_draw_add(GFX_WIDTH / 2, (GFX_HEIGHT + LIST_Y0) / 2);
 
 	set_idle(IDLE_ACCOUNT_S);
 }

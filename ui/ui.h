@@ -57,7 +57,7 @@ struct ui_events {
 	void (*touch_tap)(void *ctx, unsigned x, unsigned y);
 	void (*touch_long)(void *ctx, unsigned x, unsigned y);
 	void (*touch_moving)(void *ctx, unsigned from_x, unsigned from_y,
-	    unsigned to_x, unsigned to_y);
+	    unsigned to_x, unsigned to_y, enum ui_swipe swipe);
 	void (*touch_to)(void *ctx, unsigned from_x, unsigned from_y,
 	    unsigned to_x, unsigned to_y, enum ui_swipe swipe);
 	void (*touch_cancel)(void *ctx);

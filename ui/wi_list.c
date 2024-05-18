@@ -265,7 +265,7 @@ debug("scrolling %u up %u scroll_from %u dy %d y0 %u y1 %u th %u\n",
 
 
 bool wi_list_moving(struct wi_list *list, unsigned from_x, unsigned from_y,
-    unsigned to_x, unsigned to_y)
+    unsigned to_x, unsigned to_y, enum ui_swipe swipe)
 {
 	const struct wi_list_style *style = list->style;
 
@@ -290,7 +290,7 @@ bool wi_list_to(struct wi_list *list, unsigned from_x, unsigned from_y,
 		wi_list_cancel(list);
 		return 0;
 	}
-	res = wi_list_moving(list, from_x, from_y, to_x, to_y);
+	res = wi_list_moving(list, from_x, from_y, to_x, to_y, swipe);
 	list->scrolling = 0;
 	return res;
 }

@@ -86,7 +86,7 @@ static void ui_confirm_tap(void *ctx, unsigned x, unsigned y)
 
 
 static void ui_confirm_moving(void *ctx, unsigned from_x, unsigned from_y,
-    unsigned to_x, unsigned to_y)
+    unsigned to_x, unsigned to_y, enum ui_swipe swipe)
 {
 	if (!in_band(from_y) || !in_band(to_y))
 		return;

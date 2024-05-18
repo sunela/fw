@@ -273,23 +273,26 @@ static void moving_event(unsigned from_x, unsigned from_y,
     unsigned to_x, unsigned to_y)
 {
 	const struct ui_events *e = current_events();
+	enum ui_swipe swipe = classify_swipe(from_x, from_y, to_x, to_y);
 	unsigned i;
 
 	if (!e)
 		return;
 	for (i = 0; i != e->n_lists; i++)
 		if (e->lists[i] && wi_list_moving(e->lists[i],
-		    from_x, from_y, to_x, to_y))
+		    from_x, from_y, to_x, to_y, swipe))
 			return;
 	if (e->touch_moving)
-		e->touch_moving(current_ctx(), from_x, from_y, to_x, to_y);
+		e->touch_moving(current_ctx(), from_x, from_y, to_x, to_y,
+		    swipe);
 }
 
 
 static void to_event(unsigned from_x, unsigned from_y,
-    unsigned to_x, unsigned to_y, enum ui_swipe swipe)
+    unsigned to_x, unsigned to_y)
 {
 	const struct ui_events *e = current_events();
+	enum ui_swipe swipe = classify_swipe(from_x, from_y, to_x, to_y);
 	unsigned i;
 
 	if (!e)
@@ -372,9 +375,7 @@ void touch_up_event(void)
 		 */
 		progress();
 		to_event(touch_start_x, touch_start_y,
-		    touch_last_x, touch_last_y,
-		    classify_swipe(touch_start_x, touch_start_y,
-		    touch_last_x, touch_last_y));
+		    touch_last_x, touch_last_y);
 	} else 	{
 		if (touch_dragging) {
 			cancel_event();

@@ -61,7 +61,7 @@ static const struct wi_list_style style = {
 	.y1	= GFX_HEIGHT - 1,
 	.fg	= { ENTRY_FG, ENTRY_FG },
 	.bg	= { EVEN_BG, ODD_BG },
-	.min_h	= 40,
+	.min_h	= 50,
 	.render	= render_account,
 };
 

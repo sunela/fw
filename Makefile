@@ -12,7 +12,7 @@ FONTS = mono18.font mono24.font mono34.font mono36.font mono58.font
 .PHONY:	all sim fw sdk fonts gdb clean spotless
 .PHONY:	flash picocom upload download erase
 
-all:	fonts $(TARGETS) _storage
+all:	fonts $(TARGETS) dummy.db
 
 sim:
 	$(MAKE) -f Makefile.sim
@@ -33,7 +33,7 @@ SDK = $(shell pwd)/../bouffalo_sdk/
 FLASH = $(SDK)/tools/bflb_tools/bouffalo_flash_cube/BLFlashCommand-ubuntu
 COMX = /dev/ttyACM1
 
-upload:	$(shell pwd)/_storage
+upload:	$(shell pwd)/dummy.db
 	$(FLASH) --interface uart --baudrate 2000000 --port=$(COMX) \
 	    --chipname bl808 --cpu_id m0 \
 	    --flash --write --start 0x800000 --len 0x200000 --file $<
@@ -67,7 +67,7 @@ fonts:	$(FONTS:%=font/%)
 $(FONTS:%=font/%): font/Makefile font/cvtfont.py
 	$(MAKE) -C font
 
-_storage: tools/accenc.py accounts.json
+dummy.db: tools/accenc.py accounts.json
 	$(BUILD) $^ >$@ || { rm -f $@; exit 1; }
 
 clean:
@@ -76,4 +76,4 @@ clean:
 
 spotless:
 	for n in $(TARGETS); do $(MAKE) -f Makefile.$$n spotless; done
-	rm -f _storage
+	rm -f dummy.db

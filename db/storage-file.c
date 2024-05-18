@@ -28,7 +28,7 @@
 #include "storage.h"
 
 
-#define	DEFAULT_FILE_NAME	"_storage"
+#define	DEFAULT_FILE_NAME	"dummy.db"
 #define	DEFAULT_FILE_BLOCKS	2048
 #define	ERASE_SIZE		4	/* erasing erases four blocks */
 

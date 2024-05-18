@@ -73,7 +73,15 @@
 
 
 struct ui_entry_ctx {
-	struct ui_entry_params entry_params;
+	/* from ui_entry_params */
+	const char *title;
+	const struct ui_entry_style *style;
+	char *buf;
+	unsigned max_len;
+	bool (*validate)(void *user, const char *s);
+	void *user;
+
+	/* run-time variables */
 	unsigned input_max_height;
 	const char *second;
 	struct timer t_button;
@@ -132,8 +140,7 @@ static const char *second_maps[] = {
 
 static bool valid(struct ui_entry_ctx *c)
 {
-	return !*c->entry_params.buf || !c->entry_params.validate ||
-	    c->entry_params.validate(c->entry_params.user, c->entry_params.buf);
+	return !*c->buf || !c->validate || c->validate(c->user, c->buf);
 }
 
 
@@ -144,13 +151,10 @@ static bool valid(struct ui_entry_ctx *c)
 
 static void clear_input(struct ui_entry_ctx *c)
 {
-	const struct ui_entry_style *style =
-	    c->entry_params.style ? c->entry_params.style : &default_style;
-
 	gfx_rect_xy(&da, 0, 0, GFX_WIDTH,
 	    INPUT_PAD_TOP + c->input_max_height + INPUT_PAD_BOTTOM,
-	    !*c->entry_params.buf && c->entry_params.title ? style->title_bg :
-	    valid(c) ? style->input_valid_bg : style->input_invalid_bg);
+	    !*c->buf && c->title ? c->style->title_bg :
+	    valid(c) ? c->style->input_valid_bg : c->style->input_invalid_bg);
 }
 
 
@@ -182,7 +186,7 @@ static void draw_top(struct ui_entry_ctx *c, const char *s,
 	 * somewhat inconsistent.)
 	 */
 	text_query(0, 0, s, font, GFX_LEFT, GFX_TOP | GFX_MAX, &q);
-	assert(q.next <= c->entry_params.max_len * c->input_max_height);
+	assert(q.next <= c->max_len * c->input_max_height);
 	assert((unsigned) q.h <=
 	    INPUT_PAD_TOP + c->input_max_height + INPUT_PAD_BOTTOM);
 	gfx_da_init(&buf, q.next, q.h, fb);
@@ -203,21 +207,21 @@ static void draw_top(struct ui_entry_ctx *c, const char *s,
 
 static void draw_input(struct ui_entry_ctx *c)
 {
-	const struct ui_entry_style *style =
-	    c->entry_params.style ? c->entry_params.style : &default_style;
-
-	if (!*c->entry_params.buf && c->entry_params.title)
+	if (!*c->buf && c->title)
 		text_text(&da, GFX_WIDTH / 2,
 		    (INPUT_PAD_TOP + c->input_max_height +
 		    INPUT_PAD_BOTTOM) / 2,
-		    c->entry_params.title,
-		    style->title_font ? style->title_font : &DEFAULT_TITLE_FONT,
-		    GFX_CENTER, GFX_CENTER, style->title_fg);
+		    c->title,
+		    c->style->title_font ? c->style->title_font :
+		    &DEFAULT_TITLE_FONT,
+		    GFX_CENTER, GFX_CENTER, c->style->title_fg);
 	else
-		draw_top(c, c->entry_params.buf,
-		    style->input_font ? style->input_font : &DEFAULT_INPUT_FONT,
-		    style->input_fg,
-		    valid(c) ? style->input_valid_bg : style->input_invalid_bg);
+		draw_top(c, c->buf,
+		    c->style->input_font ? c->style->input_font :
+		    &DEFAULT_INPUT_FONT,
+		    c->style->input_fg,
+		    valid(c) ? c->style->input_valid_bg :
+		    c->style->input_invalid_bg);
 }
 
 
@@ -256,7 +260,7 @@ static void first_button(struct ui_entry_ctx *c, unsigned col, unsigned row,
 		first_label(x, y, first_map[1 + col + (3 - row) * 3]);
 	} else if (col == 0) {	// X
 		base(x, y, bg);
-		if (*c->entry_params.buf)
+		if (*c->buf)
 			gfx_equilateral(&da, x, y, BUTTON_H * 0.7, -1,
 			    GFX_BLACK);
 		else
@@ -266,7 +270,7 @@ static void first_button(struct ui_entry_ctx *c, unsigned col, unsigned row,
 		base(x, y, bg);
 		first_label(x, y, first_map[0]);
 	} else {	// >
-		if (*c->entry_params.buf) {
+		if (*c->buf) {
 			base(x, y, valid(c) ? bg : SPECIAL_DISABLED_BG);
 			gfx_equilateral(&da, x, y, BUTTON_H * 0.7, 1,
 			    GFX_BLACK);
@@ -366,7 +370,7 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 	    x < BUTTON_X0 + 1.5 * BUTTON_X_SPACING ? 1 : 2;
 	unsigned row = 0;
 	unsigned n;
-	char *end = strchr(c->entry_params.buf, 0);
+	char *end = strchr(c->buf, 0);
 
 	if (y < BUTTON_Y0 - BUTTON_Y_SPACING + BUTTON_R)
 		return;
@@ -388,7 +392,7 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 			update_display(&da);
 			return;
 		}
-		if (!*c->entry_params.buf) {
+		if (!*c->buf) {
 			ui_return();
 			return;
 		}
@@ -401,21 +405,21 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 		end[-1] = 0;
 		clear_input(c);
 		draw_input(c);
-		if (!*c->entry_params.buf)
+		if (!*c->buf)
 			first_button(c, 2, 0, SPECIAL_UP_BG);
-		if (end - c->entry_params.buf == (int) c->entry_params.max_len)
+		if (end - c->buf == (int) c->max_len)
 			draw_first_text(c, 1);
 		update_display(&da);
 		return;
 	}
 	if (col == 2 && row == 0) { // enter
-		if (c->second || !*c->entry_params.buf)
+		if (c->second || !*c->buf)
 			return;
 		if (valid(c))
 			ui_return();
 		return;
 	}
-	if (end - c->entry_params.buf == (int) c->entry_params.max_len)
+	if (end - c->buf == (int) c->max_len)
 		return;
 	progress();
 	timer_flush(&c->t_button);
@@ -430,8 +434,7 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 		draw_input(c);
 		first_button(c, 0, 0, SPECIAL_UP_BG);
 		first_button(c, 2, 0, SPECIAL_UP_BG);
-		draw_first_text(c,
-		    strlen(c->entry_params.buf) != c->entry_params.max_len);
+		draw_first_text(c, strlen(c->buf) != c->max_len);
 	} else {
 		c->second = second_maps[n];
 		draw_second(c->second);
@@ -446,7 +449,7 @@ static void ui_entry_to(void *ctx, unsigned from_x, unsigned from_y,
 	struct ui_entry_ctx *c = ctx;
 
 	if (swipe == us_left) {
-		*c->entry_params.buf = 0;
+		*c->buf = 0;
 		ui_return();
 	}
 }
@@ -459,16 +462,19 @@ static void ui_entry_open(void *ctx, void *params)
 {
 	struct ui_entry_ctx *c = ctx;
 	const struct ui_entry_params *prm = params;
-	const struct ui_entry_style *style =
-	    prm->style ? prm->style : &default_style;
 	struct text_query q;
 
 	assert(strlen(prm->buf) <= prm->max_len);
-	c->entry_params = *prm;
+	c->title = prm->title;
+	c->style = prm->style ? prm->style : &default_style;
+	c->buf = prm->buf;
+	c->max_len = prm->max_len;
+	c->validate = prm->validate;
+	c->user = prm->user;
 	c->second = NULL;
 
 	text_query(0, 0, "",
-	    style->input_font ? style->input_font : &DEFAULT_INPUT_FONT,
+	    c->style->input_font ? c->style->input_font : &DEFAULT_INPUT_FONT,
 	    GFX_TOP | GFX_MAX, GFX_TOP | GFX_MAX, &q);
 	c->input_max_height = q.h;
 

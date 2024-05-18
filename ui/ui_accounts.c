@@ -20,7 +20,7 @@
 
 #define	FONT_TOP		mono18
 
-#define	TOP_H			30
+#define	TOP_H			34
 #define	TOP_LINE_WIDTH		2
 #define	LIST_Y0			(TOP_H + TOP_LINE_WIDTH + 1)
 

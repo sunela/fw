@@ -37,7 +37,7 @@
 #define	EVEN_BG			GFX_BLACK
 #define	ODD_BG			GFX_HEX(0x202020)
 
-#define	TOP_H			30
+#define	TOP_H			34
 #define	TOP_LINE_WIDTH		2
 #define	LIST_Y0			(TOP_H + TOP_LINE_WIDTH + 1)
 

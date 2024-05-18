@@ -437,6 +437,16 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 }
 
 
+static void ui_entry_to(void *ctx, unsigned from_x, unsigned from_y,
+    unsigned to_x, unsigned to_y, enum ui_swipe swipe)
+{
+	if (swipe == us_left) {
+		*entry_params.buf = 0;
+		ui_return();
+	}
+}
+
+
 /* --- Open/close ---------------------------------------------------------- */
 
 
@@ -475,6 +485,7 @@ static void ui_entry_close(void *ctx)
 
 static const struct ui_events ui_entry_events = {
 	.touch_tap	= ui_entry_tap,
+	.touch_to	= ui_entry_to,
 };
 
 

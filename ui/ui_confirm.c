@@ -33,9 +33,12 @@
 #define	CHEVRONS_X_STEP		20
 
 
-static void (*cb)(void *user, bool confirm);
-static void *cb_user;
-static int current_x;
+struct ui_confirm_ctx {
+	void (*cb)(void *user, bool confirm);
+	void *cb_user;
+	int current_x;
+};
+
 
 
 /* --- Helper functions ---------------------------------------------------- */
@@ -78,9 +81,11 @@ static void chevrons(unsigned x0, unsigned x1, gfx_color color)
 
 static void ui_confirm_tap(void *ctx, unsigned x, unsigned y)
 {
+	struct ui_confirm_ctx *c = ctx;
+
 	debug("ui_confirm_tap\n");
-	if (cb)
-		cb(cb_user, 0);
+	if (c->cb)
+		c->cb(c->cb_user, 0);
 	ui_return();
 }
 
@@ -88,13 +93,15 @@ static void ui_confirm_tap(void *ctx, unsigned x, unsigned y)
 static void ui_confirm_moving(void *ctx, unsigned from_x, unsigned from_y,
     unsigned to_x, unsigned to_y, enum ui_swipe swipe)
 {
+	struct ui_confirm_ctx *c = ctx;
+
 	if (!in_band(from_y) || !in_band(to_y))
 		return;
-	if (current_x < 0)
-		current_x = from_x;
-	if ((unsigned) current_x == to_x)
+	if (c->current_x < 0)
+		c->current_x = from_x;
+	if ((unsigned) c->current_x == to_x)
 		return;
-	chevrons(current_x, to_x, CHEVRONS_ACTIVE_COLOR);
+	chevrons(c->current_x, to_x, CHEVRONS_ACTIVE_COLOR);
 	update_display(&da);
 }
 
@@ -102,10 +109,12 @@ static void ui_confirm_moving(void *ctx, unsigned from_x, unsigned from_y,
 static void ui_confirm_to(void *ctx, unsigned from_x, unsigned from_y,
     unsigned to_x, unsigned to_y, enum ui_swipe swipe)
 {
+	struct ui_confirm_ctx *c = ctx;
+
 	debug("ui_confirm_to %u in %u-%u\n",
 	    from_y, CHEVRONS_Y - CHEVRONS_R, CHEVRONS_Y + CHEVRONS_R);
-	if (cb)
-		cb(cb_user, swipe == us_right &&
+	if (c->cb)
+		c->cb(c->cb_user, swipe == us_right &&
 		    in_band(from_y) && in_band(to_y));
 	ui_return();
 }
@@ -116,6 +125,7 @@ static void ui_confirm_to(void *ctx, unsigned from_x, unsigned from_y,
 
 static void ui_confirm_open(void *ctx, void *params)
 {
+	struct ui_confirm_ctx *c = ctx;
 	const struct ui_confirm_params *p = params;
 	unsigned y = TEXT_Y0;
 
@@ -129,10 +139,10 @@ static void ui_confirm_open(void *ctx, void *params)
 	    GFX_CENTER, GFX_ORIGIN, NAME_COLOR);
 
 	chevrons(0, GFX_WIDTH - 1, CHEVRONS_PASSIVE_COLOR);
-	current_x = -1;
+	c->current_x = -1;
 
-	cb = p->fn;
-	cb_user = p->user;
+	c->cb = p->fn;
+	c->cb_user = p->user;
 	set_idle(IDLE_CONFIRM_S);
 }
 
@@ -147,7 +157,8 @@ static const struct ui_events ui_confirm_events = {
 };
 
 const struct ui ui_confirm = {
-	.name	= "confirm",
-	.open	= ui_confirm_open,
-	.events	= &ui_confirm_events,
+	.name		= "confirm",
+	.ctx_size	= sizeof(struct ui_confirm_ctx),
+	.open		= ui_confirm_open,
+	.events		= &ui_confirm_events,
 };

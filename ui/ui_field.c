@@ -261,6 +261,14 @@ static void ui_field_add_tap(void *ctx, unsigned x, unsigned y)
 }
 
 
+static void ui_field_add_to(void *ctx, unsigned from_x, unsigned from_y,
+    unsigned to_x, unsigned to_y, enum ui_swipe swipe)
+{
+	if (swipe == us_left)
+		ui_return();
+}
+
+
 static void ui_field_add_open(void *ctx, void *params)
 {
 	struct ui_field_add_ctx *c = ctx;
@@ -313,6 +321,7 @@ const struct ui ui_field_edit = {
 
 static const struct ui_events ui_field_add_events = {
 	.touch_tap	= ui_field_add_tap,
+	.touch_to	= ui_field_add_to,
 	.lists		= lists,
 	.n_lists	= 1,
 };

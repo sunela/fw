@@ -123,13 +123,31 @@ static void enter_setup(void *user)
 }
 
 
-static void ui_accounts_long(void *ctx, unsigned x, unsigned y)
+static void long_top(void *ctx, unsigned x, unsigned y)
 {
+	/* @@@ future: if in sub-folder, edit folder name */
+	static struct ui_overlay_button buttons[] = {
+		{ ui_overlay_sym_power,	power_off, NULL },
+		{ ui_overlay_sym_setup,	enter_setup, NULL },
+	};
+	static struct ui_overlay_params prm = {
+		.buttons	= buttons,
+		.n_buttons	= 2,
+        };
 	unsigned i;
 
-	/* @@@ future: if in sub-folder, edit folder name */
-	if (y < LIST_Y0)
+	for (i = 0; i != prm.n_buttons; i++)
+		buttons[i].user = ctx;
+	ui_call(&ui_overlay, &prm);
+}
+
+
+static void ui_accounts_long(void *ctx, unsigned x, unsigned y)
+{
+	if (y < LIST_Y0) {
+		long_top(ctx, x, y);
 		return;
+	}
 
 	static struct ui_overlay_button buttons[] = {
 		{ ui_overlay_sym_power,	power_off, NULL },
@@ -141,6 +159,7 @@ static void ui_accounts_long(void *ctx, unsigned x, unsigned y)
 		.buttons	= buttons,
 		.n_buttons	= 4,
         };
+	unsigned i;
 
 	for (i = 0; i != prm.n_buttons; i++)
 		buttons[i].user = ctx;

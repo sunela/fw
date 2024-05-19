@@ -15,14 +15,8 @@
 #include "ui_overlay.h"
 #include "ui_entry.h"
 #include "db.h"
+#include "style.h"
 #include "ui.h"
-
-
-#define	FONT_TOP		mono18
-
-#define	TOP_H			34
-#define	TOP_LINE_WIDTH		2
-#define	LIST_Y0			(TOP_H + TOP_LINE_WIDTH + 1)
 
 
 struct ui_accounts_ctx {

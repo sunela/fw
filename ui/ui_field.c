@@ -16,18 +16,13 @@
 #include "base32.h"
 #include "db.h"
 #include "gfx.h"
+#include "style.h"
 #include "ui.h"
 #include "wi_list.h"
 #include "ui_overlay.h"
 #include "ui_entry.h"
 #include "ui_field.h"
 
-
-#define	FONT_TOP		mono18
-
-#define	TOP_H			30
-#define	TOP_LINE_WIDTH		2
-#define	LIST_Y0			(TOP_H + TOP_LINE_WIDTH + 1)
 
 #define	FIELD_FG		GFX_WHITE
 #define	EVEN_BG			GFX_BLACK

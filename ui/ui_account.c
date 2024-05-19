@@ -26,20 +26,15 @@
 #include "ui_confirm.h"
 #include "ui_entry.h"
 #include "ui_field.h"
+#include "style.h"
 #include "ui.h"
 
-
-#define	FONT_TOP		mono18
 
 #define	TITLE_FG		GFX_YELLOW
 #define	TIMER_FG		GFX_HEX(0x8080ff)
 #define	ENTRY_FG		GFX_WHITE
 #define	EVEN_BG			GFX_BLACK
 #define	ODD_BG			GFX_HEX(0x202020)
-
-#define	TOP_H			34
-#define	TOP_LINE_WIDTH		2
-#define	LIST_Y0			(TOP_H + TOP_LINE_WIDTH + 1)
 
 
 struct ui_account_ctx {

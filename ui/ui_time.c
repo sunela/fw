@@ -25,14 +25,8 @@
 #include "gfx.h"
 #include "text.h"
 #include "wi_list.h"
+#include "style.h"
 #include "ui.h"
-
-
-#define	FONT_TOP		mono24
-
-#define	TOP_H			31
-#define	TOP_LINE_WIDTH		2
-#define	LIST_Y0			(TOP_H + TOP_LINE_WIDTH + 1)
 
 
 enum sync_mode {

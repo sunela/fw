@@ -5,7 +5,7 @@
 # A copy of the license can be found in the file LICENSE.MIT
 #
 
-TARGETS = sim fw sdk
+TARGETS = sim sdk
 
 FONTS = mono18.font mono24.font mono34.font mono36.font mono58.font
 
@@ -17,8 +17,12 @@ all:	fonts $(TARGETS) dummy.db
 sim:
 	$(MAKE) -f Makefile.sim
 
-fw:
-	$(MAKE) -f Makefile.fw
+# The "fw" target built the application for running on the M1s under Linux.
+# We don't use this anymore, but let's keep it around in case something
+# changes.
+#
+#fw:
+#	$(MAKE) -f Makefile.fw
 
 sdk:
 	$(MAKE) -f Makefile.sdk

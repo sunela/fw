@@ -31,7 +31,7 @@
 #define	Y_STEP			30
 
 #define	CHEVRONS_Y		(TEXT_Y0 + 3 * Y_STEP + CHEVRONS_R + 20)
-#define	CHEVRONS_R		20
+#define	CHEVRONS_R		30
 #define	CHEVRONS_W		5
 #define	CHEVRONS_X_STEP		20
 

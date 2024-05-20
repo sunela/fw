@@ -122,7 +122,7 @@ void wi_list_render_entry(struct wi_list *list, struct wi_list_entry *entry)
 		bb.y += style->min_h < h ? h : style->min_h;
 		odd = !odd;
 	}
-	list->style->render(list, entry, &da, &bb, odd);
+	list->style->render(list, entry, &main_da, &bb, odd);
 }
 
 
@@ -225,7 +225,8 @@ static unsigned draw_list(struct wi_list *list)
 	for (e = list->list; e; e = e->next) {
 		unsigned h;
 
-		h = draw_entry(list, e, &da, (int) y - (int) list->up, i & 1);
+		h = draw_entry(list, e, &main_da, (int) y - (int) list->up,
+		    i & 1);
 		i++;
 		y += h;
 	}
@@ -233,7 +234,7 @@ static unsigned draw_list(struct wi_list *list)
 	int ys = (int) y - (int) list->up;
 
 	if (ys >= 0 && ys <= (int) style->y1)
-		gfx_rect_xy(&da, 0, ys, GFX_WIDTH, style->y1 - ys + 1,
+		gfx_rect_xy(&main_da, 0, ys, GFX_WIDTH, style->y1 - ys + 1,
 		    GFX_BLACK);
 	return y - style->y0;
 }
@@ -268,7 +269,7 @@ debug("scrolling %u up %u scroll_from %u dy %d y0 %u y1 %u th %u\n",
 		return 0;
 	list->up -= dy;
 	draw_list(list);
-	update_display(&da);
+	update_display(&main_da);
 	return 1;
 }
 
@@ -312,7 +313,7 @@ debug("wi_list_cancel\n");
 		if (list->scroll_from != list->up) {
 			list->up = list->scroll_from;
 			draw_list(list);
-			update_display(&da);
+			update_display(&main_da);
 		}
 		list->scrolling = 0;
 	}
@@ -384,7 +385,7 @@ void wi_list_update_entry(struct wi_list *list, struct wi_list_entry *entry,
 		y += h < style->min_h ? style->min_h : h;
 		odd = !odd;
 	}
-	draw_entry(list, entry, &da, y, odd);
+	draw_entry(list, entry, &main_da, y, odd);
 }
 
 

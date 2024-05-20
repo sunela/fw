@@ -81,10 +81,10 @@ static void chevrons(unsigned x0, unsigned x1, gfx_color color)
 			if (from <= to) {
 				unsigned w = to - from + 1;
 
-				gfx_rect_xy(&da, from, CHEVRONS_Y - d, w, 1,
-				    color);
-				gfx_rect_xy(&da, from, CHEVRONS_Y + d, w, 1,
-				    color);
+				gfx_rect_xy(&main_da, from, CHEVRONS_Y - d,
+				    w, 1, color);
+				gfx_rect_xy(&main_da, from, CHEVRONS_Y + d,
+				    w, 1, color);
 			}
 		}
 }
@@ -142,7 +142,7 @@ static void ui_confirm_moving(void *ctx, unsigned from_x, unsigned from_y,
 		chevrons(to_x + 1, c->current_x,
 		    CHEVRONS_PASSIVE_COLOR);
 	c->current_x = to_x;
-	update_display(&da);
+	update_display(&main_da);
 }
 
 
@@ -168,13 +168,13 @@ static void ui_confirm_open(void *ctx, void *params)
 	const struct ui_confirm_params *p = params;
 	unsigned y = TEXT_Y0;
 
-	text_text(&da, GFX_WIDTH / 2, y, "Swipe right to", &TEXT_FONT,
+	text_text(&main_da, GFX_WIDTH / 2, y, "Swipe right to", &TEXT_FONT,
 	    GFX_CENTER, GFX_ORIGIN, TEXT_COLOR);
 	y += Y_STEP;
-	text_text(&da, GFX_WIDTH / 2, y, p->action, &TEXT_FONT,
+	text_text(&main_da, GFX_WIDTH / 2, y, p->action, &TEXT_FONT,
 	    GFX_CENTER, GFX_ORIGIN, TEXT_COLOR);
 	y += Y_STEP;
-	text_text(&da, GFX_WIDTH / 2, y, p->name, &NAME_FONT,
+	text_text(&main_da, GFX_WIDTH / 2, y, p->name, &NAME_FONT,
 	    GFX_CENTER, GFX_ORIGIN, NAME_COLOR);
 
 	chevrons(0, GFX_WIDTH - 1, CHEVRONS_PASSIVE_COLOR);

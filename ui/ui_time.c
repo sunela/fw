@@ -93,7 +93,7 @@ static void set_time(struct ui_time_ctx *c, uint64_t t)
 {
 	time_offset = t - time_us() / 1000000;
 	show_time(c);
-	update_display(&da);
+	update_display(&main_da);
 }
 
 
@@ -113,7 +113,7 @@ static void change_sync_mode(struct ui_time_ctx *c)
 
 	c->sync_mode = (c->sync_mode + 1) % sm_end;
 	show_sync_mode(c);
-	update_display(&da);
+	update_display(&main_da);
 
 	if (c->sync_mode == sm_usb)
 		mbox_enable_buf(&time_mbox, &time_buf, sizeof(time_buf));
@@ -156,8 +156,8 @@ static void ui_time_open(void *ctx, void *params)
 	lists[0] = &c->list;
 	c->sync_mode = sm_manual;
 
-	gfx_rect_xy(&da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH, GFX_WHITE);
-	text_text(&da, GFX_WIDTH / 2, TOP_H / 2, "Set Time",
+	gfx_rect_xy(&main_da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH, GFX_WHITE);
+	text_text(&main_da, GFX_WIDTH / 2, TOP_H / 2, "Set Time",
 	    &FONT_TOP, GFX_CENTER, GFX_CENTER, GFX_WHITE);
 
 	wi_list_begin(&c->list, &style);
@@ -199,7 +199,7 @@ static void ui_time_tick(void *ctx)
 		return;
 	last_tick = this_tick;
 	show_time(c);
-	update_display(&da);
+	update_display(&main_da);
 }
 
 

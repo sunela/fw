@@ -151,7 +151,7 @@ static bool valid(struct ui_entry_ctx *c)
 
 static void clear_input(struct ui_entry_ctx *c)
 {
-	gfx_rect_xy(&da, 0, 0, GFX_WIDTH,
+	gfx_rect_xy(&main_da, 0, 0, GFX_WIDTH,
 	    INPUT_PAD_TOP + c->input_max_height + INPUT_PAD_BOTTOM,
 	    !*c->buf && c->title ? c->style->title_bg :
 	    valid(c) ? c->style->input_valid_bg : c->style->input_invalid_bg);
@@ -194,21 +194,21 @@ static void draw_top(struct ui_entry_ctx *c, const char *s,
 	text_text(&buf, 0, 0, s, font, GFX_LEFT, GFX_TOP | GFX_MAX,
 	    color);
 	if ((GFX_WIDTH + q.next) / 2 < INPUT_MAX_X)
-		gfx_copy(&da, (GFX_WIDTH - q.next) / 2, INPUT_PAD_TOP, &buf,
-		    0, 0, q.next, q.h, -1);
+		gfx_copy(&main_da, (GFX_WIDTH - q.next) / 2, INPUT_PAD_TOP,
+		    &buf, 0, 0, q.next, q.h, -1);
 	else if (q.next < INPUT_MAX_X)
-		gfx_copy(&da, INPUT_MAX_X - q.next, INPUT_PAD_TOP, &buf, 0, 0,
-		    q.next, q.h, -1);
+		gfx_copy(&main_da, INPUT_MAX_X - q.next, INPUT_PAD_TOP,
+		    &buf, 0, 0, q.next, q.h, -1);
 	else
-		gfx_copy(&da, 0, INPUT_PAD_TOP, &buf, q.next - INPUT_MAX_X, 0,
-		    INPUT_MAX_X, q.h, -1);
+		gfx_copy(&main_da, 0, INPUT_PAD_TOP,
+		    &buf, q.next - INPUT_MAX_X, 0, INPUT_MAX_X, q.h, -1);
 }
 
 
 static void draw_input(struct ui_entry_ctx *c)
 {
 	if (!*c->buf && c->title)
-		text_text(&da, GFX_WIDTH / 2,
+		text_text(&main_da, GFX_WIDTH / 2,
 		    (INPUT_PAD_TOP + c->input_max_height +
 		    INPUT_PAD_BOTTOM) / 2,
 		    c->title,
@@ -230,7 +230,7 @@ static void draw_input(struct ui_entry_ctx *c)
 
 static void base(unsigned x, unsigned y, gfx_color bg)
 {
-	gfx_rrect_xy(&da, x - BUTTON_W / 2, y - BUTTON_H / 2,
+	gfx_rrect_xy(&main_da, x - BUTTON_W / 2, y - BUTTON_H / 2,
 	    BUTTON_W, BUTTON_H, BUTTON_R, bg);
 }
 
@@ -242,9 +242,9 @@ static void first_label(unsigned x, unsigned y, const char *s)
 {
 	char top[] = { *s, 0 };
 
-	text_text(&da, x, y + LABEL_TOP_OFFSET, top, &FONT_1_TOP,
+	text_text(&main_da, x, y + LABEL_TOP_OFFSET, top, &FONT_1_TOP,
 	    GFX_CENTER, GFX_CENTER, GFX_BLACK);
-	text_text(&da, x, y + LABEL_BOTTOM_OFFSET, s + 1, &FONT_1_BOTTOM,
+	text_text(&main_da, x, y + LABEL_BOTTOM_OFFSET, s + 1, &FONT_1_BOTTOM,
 	    GFX_CENTER, GFX_CENTER, GFX_BLACK);
 }
 
@@ -261,10 +261,10 @@ static void first_button(struct ui_entry_ctx *c, unsigned col, unsigned row,
 	} else if (col == 0) {	// X
 		base(x, y, bg);
 		if (*c->buf)
-			gfx_equilateral(&da, x, y, BUTTON_H * 0.7, -1,
+			gfx_equilateral(&main_da, x, y, BUTTON_H * 0.7, -1,
 			    GFX_BLACK);
 		else
-			gfx_diagonal_cross(&da, x, y, BUTTON_H * 0.4, 4,
+			gfx_diagonal_cross(&main_da, x, y, BUTTON_H * 0.4, 4,
 			    GFX_BLACK);
 	} else if (col == 1) {	// "0"
 		base(x, y, bg);
@@ -272,7 +272,7 @@ static void first_button(struct ui_entry_ctx *c, unsigned col, unsigned row,
 	} else {	// >
 		if (*c->buf) {
 			base(x, y, valid(c) ? bg : SPECIAL_DISABLED_BG);
-			gfx_equilateral(&da, x, y, BUTTON_H * 0.7, 1,
+			gfx_equilateral(&main_da, x, y, BUTTON_H * 0.7, 1,
 			    GFX_BLACK);
 		} else {
 			base(x, y, GFX_BLACK);
@@ -308,7 +308,7 @@ static void second_label(unsigned x, unsigned y, char ch)
 	 */
 	bool tricky = strchr("'\"`_,.", ch);
 
-	text_text(&da, x, y, s, &FONT_2, GFX_CENTER,
+	text_text(&main_da, x, y, s, &FONT_2, GFX_CENTER,
 	    tricky ? GFX_CENTER | GFX_MAX : GFX_CENTER, GFX_BLACK);
 }
 
@@ -328,7 +328,7 @@ static void second_button(const char *map, unsigned col, unsigned row,
 		second_label(x, y, map[n]);
 	} else if (col == 0) {	// X
 		base(x, y, SPECIAL_UP_BG);
-		gfx_equilateral(&da, x, y, BUTTON_H * 0.7, -1, GFX_BLACK);
+		gfx_equilateral(&main_da, x, y, BUTTON_H * 0.7, -1, GFX_BLACK);
 	} else if (col == 1) {	// "0"
 		base(x, y, bg);
 		second_label(x, y, map[0]);
@@ -343,7 +343,7 @@ static void draw_second(const char *map)
 	const unsigned h = 4 * BUTTON_H + 2 * BUTTON_X_GAP;
 	unsigned row, col;
 
-	gfx_rect_xy(&da, 0, GFX_HEIGHT - h - BUTTON_BOTTOM_OFFSET,
+	gfx_rect_xy(&main_da, 0, GFX_HEIGHT - h - BUTTON_BOTTOM_OFFSET,
 	    GFX_WIDTH, h, GFX_BLACK);
 	for (col = 0; col != 3; col++)
 		for (row = 0; row != 4; row++)
@@ -359,7 +359,7 @@ static void release_button(void *user)
 	struct ui_entry_ctx *c = user;
 
 	first_button(c, c->n >> 4, c->n & 15, SPECIAL_UP_BG);
-	update_display(&da);
+	update_display(&main_da);
 }
 
 
@@ -389,7 +389,7 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 			draw_first_text(c, 1);
 			first_button(c, 0, 0, SPECIAL_UP_BG);
 			first_button(c, 2, 0, SPECIAL_UP_BG);
-			update_display(&da);
+			update_display(&main_da);
 			return;
 		}
 		if (!*c->buf) {
@@ -409,7 +409,7 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 			first_button(c, 2, 0, SPECIAL_UP_BG);
 		if (end - c->buf == (int) c->max_len)
 			draw_first_text(c, 1);
-		update_display(&da);
+		update_display(&main_da);
 		return;
 	}
 	if (col == 2 && row == 0) { // enter
@@ -439,7 +439,7 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 		c->second = second_maps[n];
 		draw_second(c->second);
 	}
-	update_display(&da);
+	update_display(&main_da);
 }
 
 

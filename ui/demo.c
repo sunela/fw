@@ -45,9 +45,9 @@ static bool demo_rgb(char *const *args, unsigned n_args)
 		return 0;
 
 	/* red, green, blue rectangle */
-	gfx_rect_xy(&da, 50, 50, 150, 50, gfx_hex(0xff0000));
-	gfx_rect_xy(&da, 50, 130, 150, 50, gfx_hex(0x00ff00));
-	gfx_rect_xy(&da, 50, 210, 150, 50, gfx_hex(0x0000ff));
+	gfx_rect_xy(&main_da, 50, 50, 150, 50, gfx_hex(0xff0000));
+	gfx_rect_xy(&main_da, 50, 130, 150, 50, gfx_hex(0x00ff00));
+	gfx_rect_xy(&main_da, 50, 210, 150, 50, gfx_hex(0x0000ff));
 
 	return 1;
 }
@@ -68,7 +68,7 @@ void show_citrine(void)
 	h = img[1];
 
 	gfx_da_init(&da_img, w, h, (uint16_t *) img + 2);
-	gfx_copy(&da, (GFX_WIDTH - w) / 2, (GFX_HEIGHT - h) / 2,
+	gfx_copy(&main_da, (GFX_WIDTH - w) / 2, (GFX_HEIGHT - h) / 2,
 	    &da_img, 0, 0, w, h, -1);
 #endif
 }
@@ -96,8 +96,8 @@ static bool demo_composit(char *const *args, unsigned n_args)
 	show_citrine();
 
 #if 1
-	gfx_copy(&da, 0, 0, &da2, 0, 0, GFX_WIDTH, GFX_HEIGHT, GFX_BLACK);
-	gfx_copy(&da, 10, 150, &da3, 0, 0, GFX_WIDTH - 30, 10, -1);
+	gfx_copy(&main_da, 0, 0, &da2, 0, 0, GFX_WIDTH, GFX_HEIGHT, GFX_BLACK);
+	gfx_copy(&main_da, 10, 150, &da3, 0, 0, GFX_WIDTH - 30, 10, -1);
 #endif
 	return 1;
 }
@@ -113,8 +113,8 @@ static bool demo_poly(char *const *args, unsigned n_args)
 	if (n_args)
 		return 0;
 
-	gfx_poly(&da, 3, v, GFX_MAGENTA);
-	gfx_poly(&da, 3, v2, GFX_YELLOW);
+	gfx_poly(&main_da, 3, v, GFX_MAGENTA);
+	gfx_poly(&main_da, 3, v2, GFX_YELLOW);
 
 	return 1;
 }
@@ -135,7 +135,7 @@ static bool demo_text(char *const *args, unsigned n_args)
 		return 0;
 
 	for (i = 0; i != 3; i++)
-		text_char(&da, 100, 50 + 50 * i, fonts[i], '5', GFX_WHITE);
+		text_char(&main_da, 100, 50 + 50 * i, fonts[i], '5', GFX_WHITE);
 
 	return 1;
 }
@@ -158,15 +158,15 @@ static bool demo_long(char *const *args, unsigned n_args)
 	if (n_args)
 		return 0;
 
-	long_text_setup(&lt, &da, 0, (GFX_HEIGHT - DEMO_LONG_HEIGHT) / 2,
+	long_text_setup(&lt, &main_da, 0, (GFX_HEIGHT - DEMO_LONG_HEIGHT) / 2,
 	    GFX_WIDTH, DEMO_LONG_HEIGHT, "THIS IS A SCROLLING TEXT.",
 	    &DEMO_LONG_FONT, GFX_WHITE, GFX_BLUE);
 	while (i) {
 		bool hold;
 
 		t0();
-		hold = long_text_scroll(&lt, &da, -DEMO_LONG_STEP);
-		update_display(&da);
+		hold = long_text_scroll(&lt, &main_da, -DEMO_LONG_STEP);
+		update_display(&main_da);
 		t1("scroll & update");
 		if (hold) {
 			msleep(DEMO_LONG_HOLD_MS - DEMO_LONG_DELAY_MS);
@@ -193,22 +193,23 @@ static void demo_vscroll_pattern(void)
 {
 	unsigned x;
 
-	gfx_rect_xy(&da, 0, 0, GFX_WIDTH, DEMO_VSCROLL_TOP, GFX_GREEN);
-	gfx_rect_xy(&da, 0, DEMO_VSCROLL_TOP + DEMO_VSCROLL_MIDDLE, GFX_WIDTH,
-	    DEMO_VSCROLL_BOTTOM, GFX_CYAN);
+	gfx_rect_xy(&main_da, 0, 0, GFX_WIDTH, DEMO_VSCROLL_TOP, GFX_GREEN);
+	gfx_rect_xy(&main_da, 0, DEMO_VSCROLL_TOP + DEMO_VSCROLL_MIDDLE,
+	    GFX_WIDTH, DEMO_VSCROLL_BOTTOM, GFX_CYAN);
 	for (x = 0; x != DEMO_VSCROLL_TOP; x++)
 		if (x & 1)
-			gfx_rect_xy(&da, x, x, DEMO_VSCROLL_MARK, 1, GFX_BLACK);
+			gfx_rect_xy(&main_da, x, x, DEMO_VSCROLL_MARK, 1,
+			    GFX_BLACK);
 	for (x = 0; x != DEMO_VSCROLL_MIDDLE; x++)
 		if (x & 1)
-			gfx_rect_xy(&da, x, DEMO_VSCROLL_TOP + x,
+			gfx_rect_xy(&main_da, x, DEMO_VSCROLL_TOP + x,
 			    DEMO_VSCROLL_MARK, 1, GFX_WHITE);
 	for (x = 0; x != DEMO_VSCROLL_BOTTOM; x++)
 		if (x & 1)
-			gfx_rect_xy(&da, x,
+			gfx_rect_xy(&main_da, x,
 			    DEMO_VSCROLL_TOP + DEMO_VSCROLL_MIDDLE + x,
 			    DEMO_VSCROLL_MARK, 1, GFX_BLACK);
-	gfx_rect_xy(&da, 0, DEMO_VSCROLL_TOP + DEMO_VSCROLL_SCROLL,
+	gfx_rect_xy(&main_da, 0, DEMO_VSCROLL_TOP + DEMO_VSCROLL_SCROLL,
 	    GFX_WIDTH, 1, GFX_RED);
 }
 
@@ -478,22 +479,26 @@ static bool demo_align(char *const *args, unsigned n_args)
 	 * Draw text once for the next character position, which we want to
 	 * draw below everything else, then draw it again later.
 	 */
-	next = text_text(&da, ox, oy, s, &DEMO_ALIGN_FONT,
+	next = text_text(&main_da, ox, oy, s, &DEMO_ALIGN_FONT,
 	    ax, ay, DEMO_ALIGN_TEXT_FG);
-	gfx_rect_xy(&da, next, bb.y - DEMO_ALIGN_NEXT_H,
+	gfx_rect_xy(&main_da, next, bb.y - DEMO_ALIGN_NEXT_H,
 	    DEMO_ALIGN_NEXT_W, bb.h + 2 * DEMO_ALIGN_NEXT_H,
 	    DEMO_ALIGN_NEXT_FG);
 
-	gfx_rect(&da, &bb, DEMO_ALIGN_BG);
+	gfx_rect(&main_da, &bb, DEMO_ALIGN_BG);
 
 	for (i = 0; i != DEMO_ALIGN_ORIGIN_R; i++) {
-		gfx_rect_xy(&da, ox + i, oy + i, 1, 1, DEMO_ALIGN_ORIGIN_FG);
-		gfx_rect_xy(&da, ox + i, oy - i, 1, 1, DEMO_ALIGN_ORIGIN_FG);
-		gfx_rect_xy(&da, ox - i, oy + i, 1, 1, DEMO_ALIGN_ORIGIN_FG);
-		gfx_rect_xy(&da, ox - i, oy - i, 1, 1, DEMO_ALIGN_ORIGIN_FG);
+		gfx_rect_xy(&main_da, ox + i, oy + i, 1, 1,
+		    DEMO_ALIGN_ORIGIN_FG);
+		gfx_rect_xy(&main_da, ox + i, oy - i, 1, 1,
+		    DEMO_ALIGN_ORIGIN_FG);
+		gfx_rect_xy(&main_da, ox - i, oy + i, 1, 1,
+		    DEMO_ALIGN_ORIGIN_FG);
+		gfx_rect_xy(&main_da, ox - i, oy - i, 1, 1,
+		    DEMO_ALIGN_ORIGIN_FG);
 	}
 
-	text_text(&da, ox, oy, s, &DEMO_ALIGN_FONT,
+	text_text(&main_da, ox, oy, s, &DEMO_ALIGN_FONT,
 	    ax, ay, DEMO_ALIGN_TEXT_FG);
 
 	return 1;
@@ -520,7 +525,7 @@ static bool demo_arc(char *const *args, unsigned n_args)
 	if (n_args != 2)
 		return 0;
 
-	gfx_arc(&da, GFX_WIDTH / 2, GFX_HEIGHT / 2, GFX_WIDTH * .4,
+	gfx_arc(&main_da, GFX_WIDTH / 2, GFX_HEIGHT / 2, GFX_WIDTH * .4,
 	    atoi(args[0]), atoi(args[1]), GFX_WHITE, GFX_BLUE);
 
 	return 1;
@@ -547,7 +552,7 @@ static bool demo_powersym(char *const *args, unsigned n_args)
 		return 0;
 	}
 
-	gfx_power_sym(&da, GFX_WIDTH / 2, GFX_HEIGHT / 2, r, lw,
+	gfx_power_sym(&main_da, GFX_WIDTH / 2, GFX_HEIGHT / 2, r, lw,
 	    GFX_WHITE, GFX_BLACK);
 	return 1;
 }
@@ -578,7 +583,8 @@ static bool demo_gearsym(char *const *args, unsigned n_args)
 		return 0;
 	}
 
-	gfx_gear_sym(&da, GFX_WIDTH / 2, GFX_HEIGHT / 2, ro, ri, tb, tt, th,
+	gfx_gear_sym(&main_da, GFX_WIDTH / 2, GFX_HEIGHT / 2,
+	    ro, ri, tb, tt, th,
 	    GFX_WHITE, GFX_BLACK);
 	return 1;
 }
@@ -679,7 +685,8 @@ static bool demo_movesym(char *const *args, unsigned n_args)
 		return 0;
 	}
 
-	gfx_move_sym(&da, GFX_WIDTH / 2, GFX_HEIGHT / 2, bs, br, lw, from, to,
+	gfx_move_sym(&main_da, GFX_WIDTH / 2, GFX_HEIGHT / 2,
+	    bs, br, lw, from, to,
 	    GFX_WHITE, GFX_BLACK);
 	return 1;
 }

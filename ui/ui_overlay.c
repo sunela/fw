@@ -118,7 +118,7 @@ void button_draw_add(unsigned x, unsigned y)
 	static const struct ui_overlay_button button =
 	    { .draw = ui_overlay_sym_add };
 
-	draw_button(&da, &params, &button, x, y);
+	draw_button(&main_da, &params, &button, x, y);
 }
 
 
@@ -299,9 +299,9 @@ static void ui_overlay_open(void *ctx, void *params)
 	unsigned w, h, ix, iy;
 	unsigned r = DEFAULT_BUTTON_R;
 
-	gfx_da_init(&old_da, da.w, da.h, old_fb);
-	gfx_da_init(&tmp_da, da.w, da.h, tmp_fb);
-	gfx_copy(&old_da, 0, 0, &da, 0, 0, da.w, da.h, -1);
+	gfx_da_init(&old_da, main_da.w, main_da.h, old_fb);
+	gfx_da_init(&tmp_da, main_da.w, main_da.h, tmp_fb);
+	gfx_copy(&old_da, 0, 0, &main_da, 0, 0, main_da.w, main_da.h, -1);
 	gfx_clear(&tmp_da, GFX_TRANSPARENT);
 
 	switch (p->n_buttons) {
@@ -362,7 +362,8 @@ static void ui_overlay_open(void *ctx, void *params)
 			}
 			b++;
 		}
-	gfx_copy(&da, 0, 0, &tmp_da, 0, 0, da.w, da.h, GFX_TRANSPARENT);
+	gfx_copy(&main_da, 0, 0, &tmp_da, 0, 0, main_da.w, main_da.h,
+	    GFX_TRANSPARENT);
 
 	while (ref != refs + MAX_BUTTONS) {
 		ref->fn = NULL;
@@ -379,7 +380,7 @@ static void ui_overlay_open(void *ctx, void *params)
 
 static void ui_overlay_close(void *ctx)
 {
-	gfx_copy(&da, 0, 0, &old_da, 0, 0, da.w, da.h, -1);
+	gfx_copy(&main_da, 0, 0, &old_da, 0, 0, main_da.w, main_da.h, -1);
 	timer_cancel(&t_overlay_idle);
 	progress();
 }

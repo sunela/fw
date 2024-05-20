@@ -159,7 +159,7 @@ static bool process_events(void)
 	case SDL_KEYDOWN:
 		switch (event.key.keysym.sym) {
 		case SDLK_s:
-			if (!screenshot(&da, screenshot_name,
+			if (!screenshot(&main_da, screenshot_name,
 			    screenshot_number))
 				return 1;
 			fprintf(stderr, "screenshut %u\n", screenshot_number);

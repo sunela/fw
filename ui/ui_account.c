@@ -99,7 +99,7 @@ static void show_totp(struct wi_list *l,
 	format(add_char, &p, "%06u", (unsigned) code % 1000000);
 	wi_list_update_entry(l, entry, "TOTP", s, f);
 	wi_list_render_entry(l, entry);
-	update_display(&da);
+	update_display(&main_da);
 }
 
 
@@ -168,7 +168,7 @@ static void ui_account_tap(void *ctx, unsigned x, unsigned y)
 	code = hotp64(hotp_secret, hotp_secret_len, counter);
 	format(add_char, &p, "%06u", (unsigned) code % 1000000);
 	wi_list_update_entry(&c->list, entry, "HOTP", s, f);
-	update_display(&da);
+	update_display(&main_da);
 
 	counter++;
 	if (!db_change_field(c->selected_account, ft_hotp_counter,
@@ -432,8 +432,8 @@ static void ui_account_open(void *ctx, void *params)
 	c->resume_action = NULL;
 	c->last_tick = -1;
 
-	gfx_rect_xy(&da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH, GFX_WHITE);
-	text_text(&da, GFX_WIDTH / 2, TOP_H / 2, de->name, &FONT_TOP,
+	gfx_rect_xy(&main_da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH, GFX_WHITE);
+	text_text(&main_da, GFX_WIDTH / 2, TOP_H / 2, de->name, &FONT_TOP,
 	    GFX_CENTER, GFX_CENTER, TITLE_FG);
 
 	wi_list_begin(&c->list, &style);

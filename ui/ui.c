@@ -29,7 +29,7 @@
 #define	UI_TIMERS	3
 
 
-struct gfx_drawable da;
+struct gfx_drawable main_da;
 struct db main_db;
 
 unsigned pin_cooldown = 0;
@@ -91,11 +91,11 @@ static void crosshair_remove(void)
 {
 #if CROSSHAIR
 	if (crosshair_shown) {
-		gfx_copy(&da, 0, crosshair_y, &backing_da_x, 0, 0,
+		gfx_copy(&main_da, 0, crosshair_y, &backing_da_x, 0, 0,
 		    GFX_WIDTH, 1, -1);
-		gfx_copy(&da, crosshair_x, 0, &backing_da_y, 0, 0,
+		gfx_copy(&main_da, crosshair_x, 0, &backing_da_y, 0, 0,
 		    1, GFX_HEIGHT, -1);
-		update_display(&da);
+		update_display(&main_da);
 		crosshair_shown = 0;
 	}
 #endif /* CROSSHAIR */
@@ -109,13 +109,13 @@ static void crosshair_show(unsigned x, unsigned y)
 		crosshair_remove();
 	gfx_da_init(&backing_da_x, GFX_WIDTH, 1, backing_fb_x);
 	gfx_da_init(&backing_da_y, 1, GFX_HEIGHT, backing_fb_y);
-	gfx_copy(&backing_da_x, 0, 0, &da, 0, y, GFX_WIDTH, 1, -1);
-	gfx_copy(&backing_da_y, 0, 0, &da, x, 0, 1, GFX_HEIGHT -1, -1);
+	gfx_copy(&backing_da_x, 0, 0, &main_da, 0, y, GFX_WIDTH, 1, -1);
+	gfx_copy(&backing_da_y, 0, 0, &main_da, x, 0, 1, GFX_HEIGHT -1, -1);
 	crosshair_x = x;
 	crosshair_y = y;
-	gfx_rect_xy(&da, x, 0, 1, GFX_HEIGHT - 1, GFX_RED);
-	gfx_rect_xy(&da, 0, y, GFX_WIDTH - 1, 1, GFX_RED);
-	update_display(&da);
+	gfx_rect_xy(&main_da, x, 0, 1, GFX_HEIGHT - 1, GFX_RED);
+	gfx_rect_xy(&main_da, 0, y, GFX_WIDTH - 1, 1, GFX_RED);
+	update_display(&main_da);
 	crosshair_shown = 1;
 #endif /* CROSSHAIR */
 }
@@ -416,13 +416,13 @@ void ui_switch(const struct ui *ui, void *params)
 		memset(current_ctx(), 0, current_ui()->ctx_size);
 	}
 	free(current_ctx());
-	gfx_clear(&da, GFX_BLACK);
+	gfx_clear(&main_da, GFX_BLACK);
 	stack[sp].ui = ui;
 	stack[sp].ctx = ui->ctx_size ? alloc_size(ui->ctx_size) : NULL;
 	memset(current_ctx(), 0, ui->ctx_size);
 	if (ui->open)
 		ui->open(current_ctx(), params);
-	update_display(&da);
+	update_display(&main_da);
 }
 
 
@@ -434,14 +434,14 @@ void ui_call(const struct ui *ui, void *params)
 	if (current_ui() && current_ui()->close)
 		current_ui()->close(current_ctx());
 	assert(sp < UI_STACK_SIZE);
-	gfx_clear(&da, GFX_BLACK);
+	gfx_clear(&main_da, GFX_BLACK);
 	sp++;
 	stack[sp].ui = ui;
 	stack[sp].ctx = ui->ctx_size ? alloc_size(ui->ctx_size) : NULL;
 	memset(current_ctx(), 0, ui->ctx_size);
 	if (ui->open)
 		ui->open(current_ctx(), params);
-	update_display(&da);
+	update_display(&main_da);
 }
 
 
@@ -459,11 +459,11 @@ void ui_return(void)
 		memset(current_ctx(), 0, current_ui()->ctx_size);
 	}
 	free(current_ctx());
-	gfx_clear(&da, GFX_BLACK);
+	gfx_clear(&main_da, GFX_BLACK);
 	sp--;
 	assert(current_ui()->resume);
 	current_ui()->resume(current_ctx());
-	update_display(&da);
+	update_display(&main_da);
 }
 
 
@@ -495,8 +495,8 @@ void ui_empty_stack(void)
 
 bool app_init(char **args, unsigned n_args)
 {
-	gfx_da_init(&da, GFX_WIDTH, GFX_HEIGHT, fb);
-	gfx_clear(&da, gfx_hex(0));
+	gfx_da_init(&main_da, GFX_WIDTH, GFX_HEIGHT, fb);
+	gfx_clear(&main_da, gfx_hex(0));
 
 	timer_init(&idle_timer);
 	timer_init(&long_timer);
@@ -511,6 +511,6 @@ bool app_init(char **args, unsigned n_args)
 		ui_switch(&ui_off, NULL);
 	}
 
-	update_display(&da);
+	update_display(&main_da);
 	return 1;
 }

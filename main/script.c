@@ -207,7 +207,7 @@ static bool process_cmd(const char *cmd)
 	/* screenshots */
 
 	if (!strcmp("screen", cmd)) {
-		if (!screenshot(&da, screenshot_name, screenshot_number))
+		if (!screenshot(&main_da, screenshot_name, screenshot_number))
 			return 0;
 		screenshot_number++;
 		return 1;
@@ -215,7 +215,7 @@ static bool process_cmd(const char *cmd)
 	arg = cmd_arg("screen", cmd);
 	if (arg) {
 		screenshot_name = arg;
-		if (!screenshot(&da, screenshot_name, screenshot_number))
+		if (!screenshot(&main_da, screenshot_name, screenshot_number))
 			return 0;
 		screenshot_number++;
 		return 1;

@@ -79,7 +79,7 @@ static void clear_indicators(unsigned n)
 	unsigned side = (IND_SPACING * (n - 1) + 1) / 2 + IND_R;
 
 	if (n)
-		gfx_rect_xy(&da, IND_CX - side, IND_CY - IND_R,
+		gfx_rect_xy(&main_da, IND_CX - side, IND_CY - IND_R,
 		    2 * side + 1, 2 * IND_R + 1, GFX_BLACK);
 }
 
@@ -90,7 +90,8 @@ static void draw_indicators(unsigned n)
 	unsigned i;
 
 	for (i = 0; i != n; i++)
-		gfx_disc(&da, x + IND_SPACING * i, IND_CY, IND_R, IND_COLOR);
+		gfx_disc(&main_da, x + IND_SPACING * i, IND_CY, IND_R,
+		    IND_COLOR);
 }
 
 
@@ -102,7 +103,7 @@ static void clear_button(unsigned col, unsigned row)
 	unsigned x = BUTTON_X0 + BUTTON_X_SPACING * col;
 	unsigned y = BUTTON_Y1 - BUTTON_Y_SPACING * row;
 
-	gfx_rect_xy(&da, x - BUTTON_R, y - BUTTON_R,
+	gfx_rect_xy(&main_da, x - BUTTON_R, y - BUTTON_R,
 	    2 * BUTTON_R + 1, 2 * BUTTON_R + 1 , GFX_BLACK);
 }
 
@@ -111,7 +112,7 @@ static void pin_char(unsigned x, unsigned y, char ch)
 {
 	char s[] = { ch, 0 };
 
-	text_text(&da, x + X_ADJUST(ch), y + Y_ADJUST(ch), s, &FONT,
+	text_text(&main_da, x + X_ADJUST(ch), y + Y_ADJUST(ch), s, &FONT,
 	    GFX_CENTER, GFX_CENTER, GFX_BLACK);
 }
 
@@ -127,15 +128,16 @@ static void pin_button(unsigned col, unsigned row, gfx_color bg)
 	unsigned x = BUTTON_X0 + BUTTON_X_SPACING * col;
 	unsigned y = BUTTON_Y1 - BUTTON_Y_SPACING * row;
 
-	gfx_disc(&da, x, y, BUTTON_R, bg);
+	gfx_disc(&main_da, x, y, BUTTON_R, bg);
 	if (row > 0) {
 		pin_digit(x, y, 1 + col + (3 - row) * 3);
 	} else if (col == 0) {	// X
-		gfx_diagonal_cross(&da, x, y, BUTTON_R * 0.8, 4, GFX_BLACK);
+		gfx_diagonal_cross(&main_da, x, y, BUTTON_R * 0.8, 4,
+		    GFX_BLACK);
 	} else if (col == 1) {	// "0"
 		pin_digit(x, y, 0);
 	} else {	// >
-		gfx_equilateral(&da, x, y, BUTTON_R * 1.4, 1, GFX_BLACK);
+		gfx_equilateral(&main_da, x, y, BUTTON_R * 1.4, 1, GFX_BLACK);
 	}
 }
 
@@ -161,7 +163,7 @@ static void release_button(void *user)
 debug("release_button 0x%x\n", n);
 	pin_button(n >> 4, n & 15,
 	    pin_len < MAX_PIN_LEN ? UP_BG : DISABLED_BG);
-	update_display(&da);
+	update_display(&main_da);
 }
 
 
@@ -172,9 +174,9 @@ static void open_progress(void *user, unsigned i, unsigned n)
 
 	if (*progress == w)
 		return;
-	gfx_rect_xy(&da, PROGRESS_X0 + *progress, PROGRESS_Y0,
+	gfx_rect_xy(&main_da, PROGRESS_X0 + *progress, PROGRESS_Y0,
 	    w - *progress, PROGRESS_H, PROGRESS_DONE_COLOR);
-	update_display(&da);
+	update_display(&main_da);
 	*progress = w;
 }
 
@@ -186,10 +188,10 @@ static bool accept_pin(void)
 
 	if (pin != DUMMY_PIN)
 		return 0;
-	gfx_clear(&da, GFX_BLACK);
-	gfx_rect_xy(&da, PROGRESS_X0, PROGRESS_Y0, PROGRESS_W, PROGRESS_H,
+	gfx_clear(&main_da, GFX_BLACK);
+	gfx_rect_xy(&main_da, PROGRESS_X0, PROGRESS_Y0, PROGRESS_W, PROGRESS_H,
 	    PROGRESS_TOTAL_COLOR);
-	update_display(&da);	/* give immediate visual feedback */
+	update_display(&main_da);	/* give immediate visual feedback */
 	if (!db_open_progress(&main_db, NULL, open_progress, &progress))
 		return 0;
 	db_stats(&main_db, &s);
@@ -228,7 +230,7 @@ static void ui_pin_tap(void *ctx, unsigned x, unsigned y)
 			draw_digits(UP_BG);
 		pin_len = 0;
 		pin = 0xffffffff;
-		update_display(&da);
+		update_display(&main_da);
 		return;
 	}
 	if (col == 2 && row == 0) { // enter
@@ -263,7 +265,7 @@ debug("%08lx\n", (unsigned long) pin);
 		draw_digits(DISABLED_BG);
 	clear_indicators(pin_len - 1);
 	draw_indicators(pin_len);
-	update_display(&da);
+	update_display(&main_da);
 }
 
 

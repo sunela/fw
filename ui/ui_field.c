@@ -271,8 +271,8 @@ static void ui_field_add_open(void *ctx, void *params)
 	lists[0] = &c->list;
 	c->de = params;
 
-	gfx_rect_xy(&da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH, GFX_WHITE);
-	text_text(&da, GFX_WIDTH / 2, TOP_H / 2, "Field type",
+	gfx_rect_xy(&main_da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH, GFX_WHITE);
+	text_text(&main_da, GFX_WIDTH / 2, TOP_H / 2, "Field type",
 	    &FONT_TOP, GFX_CENTER, GFX_CENTER, GFX_WHITE);
 
 	wi_list_begin(&c->list, &style);

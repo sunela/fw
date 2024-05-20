@@ -43,13 +43,13 @@ static void show_cooldown(void *user)
 		s /= 10;
 	}
 	if (user)
-		gfx_rect(&da, &bb, GFX_BLACK);
+		gfx_rect(&main_da, &bb, GFX_BLACK);
 
-	text_text(&da, GFX_WIDTH / 2, GFX_HEIGHT / 2, t, &FONT,
+	text_text(&main_da, GFX_WIDTH / 2, GFX_HEIGHT / 2, t, &FONT,
 	    GFX_CENTER, GFX_CENTER, GFX_RED);
 	text_text_bbox(GFX_WIDTH / 2, GFX_HEIGHT / 2, t, &FONT,
 	    GFX_CENTER, GFX_CENTER, &bb);
-	update_display(&da);
+	update_display(&main_da);
 
 	timer_set(&t_tick, 1000, show_cooldown, show_cooldown);
 }

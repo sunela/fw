@@ -147,6 +147,8 @@ void update_display(struct gfx_drawable *da)
 static bool process_events(void)
 {
 	static bool touch_is_down = 0;
+	static int last_x = 0;
+	static int last_y = 0;
 	SDL_Event event;
 
 	if (!SDL_PollEvent(&event))
@@ -158,6 +160,9 @@ static bool process_events(void)
 		return 1;
 	case SDL_KEYDOWN:
 		switch (event.key.keysym.sym) {
+		case SDLK_c:
+			printf("X %d Y %d\n", last_x, last_y);
+			break;
 		case SDLK_s:
 			if (!screenshot(&main_da, screenshot_name,
 			    screenshot_number))
@@ -183,25 +188,29 @@ static bool process_events(void)
 		}
 		break;
 	case SDL_MOUSEMOTION:
+		last_x = event.motion.x / zoom;
+		last_y = event.motion.y / zoom;
 		if (!touch_is_down)
 			return 1;
 //debug("SDL_MOUSEMOTION\n");
 		if (event.motion.state & SDL_BUTTON_LMASK)
-			touch_move_event(event.motion.x / zoom,
-			    event.motion.y / zoom);
+			touch_move_event(last_x, last_y);
 		else
 			touch_up_event();
 		break;
 	case SDL_MOUSEBUTTONDOWN:
 //debug("SDL_MOUSEBUTTONDOWN\n");
 		assert(!touch_is_down);
+		last_x = event.button.x / zoom;
+		last_y = event.button.y / zoom;
 		if (event.button.state == SDL_BUTTON_LEFT)
-			touch_down_event(event.motion.x / zoom,
-			    event.motion.y / zoom);
+			touch_down_event(last_x, last_y);
 		touch_is_down = 1;
 		break;
 	case SDL_MOUSEBUTTONUP:
 //debug("SDL_MOUSEBUTTONUP\n");
+		last_x = event.button.x / zoom;
+		last_y = event.button.y / zoom;
 		/*
 		 * SDL sends mouse up and move events when hovering. Our touch
 		 * screen (probably) can't do this, so we filter such events.

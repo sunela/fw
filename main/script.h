@@ -17,5 +17,6 @@
 
 void dump_db(const struct db *db, bool pointers);
 bool screenshot(const struct gfx_drawable *da, const char *fmt, ...);
+bool run_script(char **args, int n_args);
 
 #endif /* !SCRIPT_H */

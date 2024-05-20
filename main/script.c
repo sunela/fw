@@ -13,7 +13,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "hal.h"
 #include "db.h"
+#include "ui.h"
+#include "sim.h"
 #include "script.h"
 
 
@@ -143,4 +146,158 @@ bool screenshot(const struct gfx_drawable *da, const char *fmt, ...)
 	if (s != fmt)
 		free(s);
 	return ok;
+}
+
+
+/* --- Scripting actions --------------------------------------------------- */
+
+
+static void show_help(void)
+{
+	printf("Commands:\n\n"
+"echo MESSAGE\tdisplay a message, can contain spaces\n"
+"system COMMAND\trun a shell command\n"
+"screen\t\ttake a screenshot (PPM)\n"
+"screen PPMFILE\ttake a screenshot in a specific file, remember the name\n"
+"press\t\tpress the side button\n"
+"release\t\trelease the side button\n"
+"down X Y\ttouch the touch screen\n"
+"move X Y\tmove on the touch screen\n"
+"up\t\tstop touching the touch screen\n"
+"tick\t\tgenerate one timer tick\n"
+"tick N\t\tgenerate N timer ticks\n" 
+"time UNIX-TIME\tset the system time (and hold it until changed)\n" 
+"help\t\tthis help text\n");
+}
+
+
+static const char *cmd_arg(const char *c, const char *arg)
+{
+	int len = strlen(c);
+
+	if (strncmp(c, arg, len))
+		return NULL;
+	if (arg[len] != ' ')
+		return NULL;
+	return arg + len + 1;
+}
+
+
+static bool process_cmd(const char *cmd)
+{
+	const char *arg;
+	unsigned x, y;
+	unsigned n, i;
+
+	/* system interaction */
+
+	arg = cmd_arg("echo", cmd);
+	if (arg) {
+		printf("%s\n", arg);
+		return 1;
+	}
+	arg = cmd_arg("system", cmd);
+	if (arg) {
+		system(arg);
+		return 1;
+	}
+	if (!strcmp("quit", cmd))
+		exit(0);
+
+	/* screenshots */
+
+	if (!strcmp("screen", cmd)) {
+		if (!screenshot(&da, screenshot_name, screenshot_number))
+			return 0;
+		screenshot_number++;
+		return 1;
+	}
+	arg = cmd_arg("screen", cmd);
+	if (arg) {
+		screenshot_name = arg;
+		if (!screenshot(&da, screenshot_name, screenshot_number))
+			return 0;
+		screenshot_number++;
+		return 1;
+	}
+
+	/* button */
+
+	if (!strcmp("press", cmd)) {
+		button_event(1);
+		return 1;
+	}
+	if (!strcmp("release", cmd)) {
+		button_event(0);
+		return 1;
+	}
+
+	/* touch screen */
+
+	arg = cmd_arg("down", cmd);
+	if (arg) {
+		if (sscanf(arg, "%u %u", &x, &y) != 2)
+			goto fail;
+		touch_down_event(x, y);
+		return 1;
+	}
+	arg = cmd_arg("move", cmd);
+	if (arg) {
+		if (sscanf(arg, "%u %u", &x, &y) != 2)
+			goto fail;
+		touch_move_event(x, y);
+		return 1;
+	}
+	if (!strcmp("up", cmd)) {
+		touch_up_event();
+		return 1;
+	}
+
+	/* timer ticks */
+
+	if (!strcmp("tick", cmd)) {
+		tick_event();
+		return 1;
+	}
+	arg = cmd_arg("tick", cmd);
+	if (arg) {
+		if (sscanf(arg, "%u", &n) != 1)
+			goto fail;
+		for (i = 0; i != n; i++)
+			tick_event();
+		return 1;
+	}
+
+	/* time override */
+
+	arg = cmd_arg("time", cmd);
+	if (arg) {
+		unsigned long long t;
+
+		if (sscanf(arg, "%llu", &t) != 1)
+			goto fail;
+		time_override = t;
+		return 1;
+	}
+
+	/* help */
+
+	if (!strcmp("help", cmd)) {
+		show_help();
+		return 1;
+	}
+
+fail:
+	fprintf(stderr, "bad command \"%s\n", cmd);
+	return 0;
+}
+
+
+bool run_script(char **args, int n_args)
+{
+	db_open(&main_db, NULL);
+	while (n_args--)
+		if (!process_cmd(*args++))
+			return 0;
+	return 1;
 }

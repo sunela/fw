@@ -26,10 +26,15 @@ int64_t time_offset;
 
 #ifndef SDK
 
+uint64_t time_override  = 0;
+
+
 uint64_t time_us(void)
 {
 	struct timeval tv;
 
+	if (time_override)
+		return time_override * 1e6;
 	gettimeofday(&tv, NULL);
 	return (uint64_t) tv.tv_sec * 1000000UL + tv.tv_usec;
 }

@@ -25,6 +25,7 @@
 #endif
 
 extern int64_t time_offset;
+extern uint64_t time_override;
 
 
 void console_char(char c);

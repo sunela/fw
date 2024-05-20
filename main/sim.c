@@ -23,6 +23,14 @@
 #include "ui.h"
 #include "storage.h"
 #include "script.h"
+#include "sim.h"
+
+
+#define	DEFAULT_SCREENSHOT_NAME	"screen%04u.ppm"
+
+
+const char *screenshot_name = DEFAULT_SCREENSHOT_NAME;
+unsigned screenshot_number = 0;
 
 
 static SDL_Window *win;
@@ -134,13 +142,6 @@ void update_display(struct gfx_drawable *da)
 
 
 /* --- Event loop ---------------------------------------------------------- */
-
-
-#define	DEFAULT_SCREENSHOT_NAME	"screen%04u.ppm"
-
-
-static char *screenshot_name = DEFAULT_SCREENSHOT_NAME;
-static unsigned screenshot_number = 0;
 
 
 static bool process_events(void)
@@ -291,25 +292,27 @@ static void init_sdl(void)
 static void usage(const char *name)
 {
 	fprintf(stderr,
-"usage: %s [-2] [-d database] [-s screenshot] [demo-number [demo-arg ...]]\n"
+"usage: %s [options]\n"
+"%6s %s [options] demo-name [demo-arg ...]] [-C command ...]\n"
 "\n"
 "-2  double the pixel size\n"
+"-c  receive user interaction from a script\n"
 "-d database\n"
 "    set the database file (default: %s)\n"
 "-s screenshot\n"
 "    set the screenshot file name. if present, %%u is converted to the\n"
 "    screenshot number (starts at 0). The usual printf conversion\n"
 "    specifications can be used. (default: %s)\n"
-    , name, DEFAULT_DB_FILE_NAME, DEFAULT_SCREENSHOT_NAME);
+    , name, "", name, DEFAULT_DB_FILE_NAME, DEFAULT_SCREENSHOT_NAME);
 	exit(1);
 }
 
 
 int main(int argc, char **argv)
 {
-	int c;
+	int c, i;
 
-	while ((c = getopt(argc, argv, "2d:s:")) != EOF)
+	while ((c = getopt(argc, argv, "+2d:s:")) != EOF)
 		switch (c) {
 		case '2':
 			zoom = 2;
@@ -324,9 +327,19 @@ int main(int argc, char **argv)
 			usage(*argv);
 		}
 
+	for (i = optind; i != argc; i++)
+		if (!strcmp(argv[i], "-C"))
+			break;
 	init_sdl();
-	if (!app_init(argv + optind, argc - optind))
-		usage(*argv);
+	if (i == argc) {
+		if (!app_init(argv + optind, argc - optind))
+			usage(*argv);
+	} else {
+		if (!app_init(argv + optind, i - optind)) 
+			usage(*argv);
+		if (!run_script(argv + i + 1, argc - i - 1))
+			return 1;
+	}
 	event_loop();
 
 	return 0;

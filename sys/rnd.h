@@ -11,6 +11,9 @@
 #include <stdint.h>
 
 
+extern uint8_t rnd_fixed;	/* for testing, only in simulator */
+
+
 uint32_t rnd(uint32_t range);
 void rnd_bytes(void *buf, unsigned size);
 

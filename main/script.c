@@ -14,6 +14,7 @@
 #include <string.h>
 
 #include "hal.h"
+#include "rnd.h"
 #include "timer.h"
 #include "db.h"
 #include "ui.h"
@@ -172,6 +173,8 @@ static void show_help(void)
 "echo MESSAGE\tdisplay a message, can contain spaces\n"
 "system COMMAND\trun a shell command\n"
 "interact\tshow the display and interact with the user\n"
+"random\t\tenable random number generation\n"
+"random BYTE\t\tset random number generator to fixed value\n"
 "screen\t\ttake a screenshot (PPM)\n"
 "screen PPMFILE\ttake a screenshot in a specific file, remember the name\n"
 "press\t\tpress the side button\n"
@@ -223,6 +226,17 @@ static bool process_cmd(const char *cmd)
 	if (!strcmp("interact", cmd)) {
 		headless = 0;
 		return 1;
+	}
+	if (!strcmp("random", cmd)) {
+		rnd_fixed = 0;
+		return 1;
+	}
+	arg = cmd_arg("random", cmd);
+	if (arg) {
+		char *end;
+
+		rnd_fixed = strtoul(arg, &end, 0);
+		return !*end;
 	}
 
 	/* screenshots */

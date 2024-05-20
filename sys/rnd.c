@@ -10,6 +10,7 @@
  */
 
 #include <stdint.h>
+#include <string.h>
 
 #include "rnd.h"
 
@@ -27,9 +28,17 @@
 #define	DEV_RANDOM	"/dev/random"
 
 
+uint8_t rnd_fixed = 0;	/* for testing */
+
+
 void rnd_bytes(void *buf, unsigned size)
 {
 	static int fd = -1;
+
+	if (rnd_fixed) {
+		memset(buf, rnd_fixed, size);
+		return;
+	}
 
 	if (fd == -1) {
 		fd = open(DEV_RANDOM, O_RDONLY);

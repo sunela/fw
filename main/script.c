@@ -171,6 +171,7 @@ static void show_help(void)
 	printf("Commands:\n\n"
 "echo MESSAGE\tdisplay a message, can contain spaces\n"
 "system COMMAND\trun a shell command\n"
+"interact\tshow the display and interact with the user\n"
 "screen\t\ttake a screenshot (PPM)\n"
 "screen PPMFILE\ttake a screenshot in a specific file, remember the name\n"
 "press\t\tpress the side button\n"
@@ -219,8 +220,10 @@ static bool process_cmd(const char *cmd)
 		system(arg);
 		return 1;
 	}
-	if (!strcmp("quit", cmd))
-		exit(0);
+	if (!strcmp("interact", cmd)) {
+		headless = 0;
+		return 1;
+	}
 
 	/* screenshots */
 
@@ -353,7 +356,7 @@ fail:
 bool run_script(char **args, int n_args)
 {
 	db_open(&main_db, NULL);
-	while (n_args--)
+	while (n_args-- && headless)
 		if (!process_cmd(*args++))
 			return 0;
 	return 1;

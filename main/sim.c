@@ -29,6 +29,7 @@
 #define	DEFAULT_SCREENSHOT_NAME	"screen%04u.ppm"
 
 
+bool headless = 0;
 const char *screenshot_name = DEFAULT_SCREENSHOT_NAME;
 unsigned screenshot_number = 0;
 
@@ -108,6 +109,8 @@ void update_display(struct gfx_drawable *da)
 	const gfx_color *p;
 	unsigned x, y;
 
+	if (headless)
+		return;
 	if (!da->changed)
 		return;
 	gfx_reset(da);
@@ -339,15 +342,20 @@ int main(int argc, char **argv)
 	for (i = optind; i != argc; i++)
 		if (!strcmp(argv[i], "-C"))
 			break;
-	init_sdl();
 	if (i == argc) {
+		init_sdl();
 		if (!app_init(argv + optind, argc - optind))
 			usage(*argv);
 	} else {
+		headless = 1;
 		if (!app_init(argv + optind, i - optind)) 
 			usage(*argv);
 		if (!run_script(argv + i + 1, argc - i - 1))
 			return 1;
+		if (headless)
+			return 0;
+		init_sdl();
+		update_display(&main_da);
 	}
 	event_loop();
 

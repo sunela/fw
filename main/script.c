@@ -14,6 +14,7 @@
 #include <string.h>
 
 #include "hal.h"
+#include "timer.h"
 #include "db.h"
 #include "ui.h"
 #include "sim.h"
@@ -152,6 +153,19 @@ bool screenshot(const struct gfx_drawable *da, const char *fmt, ...)
 /* --- Scripting actions --------------------------------------------------- */
 
 
+static void ticks(unsigned n)
+{
+	static unsigned uptime = 1;
+	unsigned i;
+
+	for (i = 0; i != n; i++) {
+		timer_tick(uptime);
+		tick_event();
+		uptime += 10;
+	}
+}
+
+
 static void show_help(void)
 {
 	printf("Commands:\n\n"
@@ -161,9 +175,13 @@ static void show_help(void)
 "screen PPMFILE\ttake a screenshot in a specific file, remember the name\n"
 "press\t\tpress the side button\n"
 "release\t\trelease the side button\n"
+"button\t\tpress the button long enough to debounce, then release it\n"
 "down X Y\ttouch the touch screen\n"
 "move X Y\tmove on the touch screen\n"
 "up\t\tstop touching the touch screen\n"
+"tap X Y\ttap the touch screen\n"
+"long X Y\tlong press the touch screen\n"
+"drag X0 Y0 X1 Y1\tdrag gesture\n"
 "tick\t\tgenerate one timer tick\n"
 "tick N\t\tgenerate N timer ticks\n" 
 "time UNIX-TIME\tset the system time (and hold it until changed)\n" 
@@ -187,7 +205,7 @@ static bool process_cmd(const char *cmd)
 {
 	const char *arg;
 	unsigned x, y;
-	unsigned n, i;
+	unsigned n;
 
 	/* system interaction */
 
@@ -221,7 +239,7 @@ static bool process_cmd(const char *cmd)
 		return 1;
 	}
 
-	/* button */
+	/* button: low-level */
 
 	if (!strcmp("press", cmd)) {
 		button_event(1);
@@ -232,7 +250,16 @@ static bool process_cmd(const char *cmd)
 		return 1;
 	}
 
-	/* touch screen */
+	/* button: high-level */
+
+	if (!strcmp("button", cmd)) {
+		button_event(1);
+		ticks(2);
+		button_event(0);
+		return 1;
+	}
+
+	/* touch screen: low-level */
 
 	arg = cmd_arg("down", cmd);
 	if (arg) {
@@ -253,18 +280,48 @@ static bool process_cmd(const char *cmd)
 		return 1;
 	}
 
+	/* touch screen: high-level */
+
+	arg = cmd_arg("tap", cmd);
+	if (arg) {
+		if (sscanf(arg, "%u %u", &x, &y) != 2)
+			goto fail;
+		touch_down_event(x, y);
+		touch_up_event();
+		return 1;
+	}
+	arg = cmd_arg("long", cmd);
+	if (arg) {
+		if (sscanf(arg, "%u %u", &x, &y) != 2)
+			goto fail;
+		touch_down_event(x, y);
+		ticks(50);
+		touch_up_event();
+		return 1;
+	}
+	arg = cmd_arg("drag", cmd);
+	if (arg) {
+		unsigned x0, y0, x1, y1;
+
+		if (sscanf(arg, "%u %u %u %u", &x0, &y0, &x1, &y1) != 4)
+			goto fail;
+		touch_down_event(x0, y0);
+		touch_move_event(x1, y1);
+		touch_up_event();
+		return 1;
+	}
+
 	/* timer ticks */
 
 	if (!strcmp("tick", cmd)) {
-		tick_event();
+		ticks(1);
 		return 1;
 	}
 	arg = cmd_arg("tick", cmd);
 	if (arg) {
 		if (sscanf(arg, "%u", &n) != 1)
 			goto fail;
-		for (i = 0; i != n; i++)
-			tick_event();
+		ticks(n);
 		return 1;
 	}
 

@@ -40,25 +40,25 @@ struct ui_overlay_params {
 bool button_in(unsigned cx, unsigned cy, unsigned, unsigned y);
 void button_draw_add(unsigned x, unsigned y);
 
-void ui_overlay_sym_power(struct gfx_drawable *tmp_da,
+void ui_overlay_sym_power(struct gfx_drawable *da,
     const struct ui_overlay_params *params, unsigned x, unsigned y, void *user);
-void ui_overlay_sym_delete(struct gfx_drawable *tmp_da,
+void ui_overlay_sym_delete(struct gfx_drawable *da,
     const struct ui_overlay_params *params, unsigned x, unsigned y, void *user);
-void ui_overlay_sym_add(struct gfx_drawable *tmp_da,
+void ui_overlay_sym_add(struct gfx_drawable *da,
     const struct ui_overlay_params *params, unsigned x, unsigned y, void *user);
-void ui_overlay_sym_back(struct gfx_drawable *tmp_da,
+void ui_overlay_sym_back(struct gfx_drawable *da,
     const struct ui_overlay_params *params, unsigned x, unsigned y, void *user);
-void ui_overlay_sym_next(struct gfx_drawable *tmp_da,
+void ui_overlay_sym_next(struct gfx_drawable *da,
     const struct ui_overlay_params *params, unsigned x, unsigned y, void *user);
-void ui_overlay_sym_edit(struct gfx_drawable *tmp_da,
+void ui_overlay_sym_edit(struct gfx_drawable *da,
     const struct ui_overlay_params *params, unsigned x, unsigned y, void *user);
-void ui_overlay_sym_setup(struct gfx_drawable *tmp_da,
+void ui_overlay_sym_setup(struct gfx_drawable *da,
     const struct ui_overlay_params *params, unsigned x, unsigned y, void *user);
-void ui_overlay_sym_move_from(struct gfx_drawable *tmp_da,
+void ui_overlay_sym_move_from(struct gfx_drawable *da,
     const struct ui_overlay_params *params, unsigned x, unsigned y, void *user);
-void ui_overlay_sym_move_to(struct gfx_drawable *tmp_da,
+void ui_overlay_sym_move_to(struct gfx_drawable *da,
     const struct ui_overlay_params *params, unsigned x, unsigned y, void *user);
-void ui_overlay_sym_move_cancel(struct gfx_drawable *tmp_da,
+void ui_overlay_sym_move_cancel(struct gfx_drawable *da,
     const struct ui_overlay_params *params, unsigned x, unsigned y, void *user);
 
 #endif /* !UI_ENTRY_H */

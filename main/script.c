@@ -5,9 +5,13 @@
  * A copy of the license can be found in the file LICENSE.MIT
  */
 
-
+#define	_GNU_SOURCE	/* for vasprintf */
+#include <stddef.h>
+#include <stdarg.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "db.h"
 #include "script.h"
@@ -86,4 +90,57 @@ void dump_db(const struct db *db, bool pointers)
 			printf("\n");
 		}
 	}
+}
+
+
+/* --- Screen dump --------------------------------------------------------- */
+
+
+static bool write_ppm(const struct gfx_drawable *da, const char *name)
+{
+	FILE *file;
+	const gfx_color *p;
+
+	file = fopen(name, "wb");
+	if (!file)
+		return 0;
+	if (fprintf(file, "P6\n%u %u\n%u\n", da->w, da->h, 255) < 0)
+		return 0;
+	for (p = da->fb; p != da->fb + da->h * da->w; p++) {
+		uint8_t rgb[3] = {
+			gfx_decode_r(*p),
+			gfx_decode_g(*p),
+			gfx_decode_b(*p)
+		};
+
+		if (fwrite(rgb, 1, 3, file) != 3)
+			return 0;
+	}
+	if (fclose(file) < 0)
+		return 0;
+	return 1;
+}
+
+
+bool screenshot(const struct gfx_drawable *da, const char *fmt, ...)
+{
+	char *s = (char *) fmt;
+	bool ok;
+
+	if (strchr(fmt, '%')) {
+		va_list ap;
+
+		va_start(ap, fmt);
+		if (vasprintf(&s, fmt, ap) < 0) {
+			perror(fmt);
+			return 0;
+		}
+		va_end(ap);
+	}
+	ok = write_ppm(da, s);
+	if (!ok)
+		perror(s);
+	if (s != fmt)
+		free(s);
+	return ok;
 }

@@ -11,9 +11,11 @@
 
 #include <stdbool.h>
 
+#include "gfx.h"
 #include "db.h"
 
 
 void dump_db(const struct db *db, bool pointers);
+bool screenshot(const struct gfx_drawable *da, const char *fmt, ...);
 
 #endif /* !SCRIPT_H */

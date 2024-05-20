@@ -63,6 +63,26 @@ static inline gfx_color gfx_rgb(uint8_t r, uint8_t g, uint8_t b)
 }
 
 
+/* @@@ can we use this also in sim.c:update_display ? */
+
+static inline uint8_t gfx_decode_r(gfx_color c)
+{
+	return c & 0xf8;
+}
+
+
+static inline uint8_t gfx_decode_g(gfx_color c)
+{
+	return (c & 7) << 5 | (c & 0xe000) << 2;
+}
+
+
+static inline uint8_t gfx_decode_b(gfx_color c)
+{
+	return (c & 0x1f00) >> 5;
+}
+
+
 /* Encoding: 0xrrggbb */
 
 #define	GFX_HEX(hex) GFX_RGB((hex) >> 16, (hex) >> 8, (hex))

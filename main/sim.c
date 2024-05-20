@@ -20,7 +20,9 @@
 #include "debug.h"
 #include "timer.h"
 #include "gfx.h"
+#include "ui.h"
 #include "storage.h"
+#include "script.h"
 
 
 static SDL_Window *win;
@@ -134,6 +136,10 @@ void update_display(struct gfx_drawable *da)
 /* --- Event loop ---------------------------------------------------------- */
 
 
+static char *screenshot_name = NULL;
+static unsigned screenshot_number = 0;
+
+
 static bool process_events(void)
 {
 	static bool touch_is_down = 0;
@@ -148,6 +154,15 @@ static bool process_events(void)
 		return 1;
 	case SDL_KEYDOWN:
 		switch (event.key.keysym.sym) {
+		case SDLK_s:
+			if (!screenshot_name)
+				screenshot_name = "screen%04u";
+			if (!screenshot(&da, screenshot_name,
+			    screenshot_number))
+				return 1;
+			fprintf(stderr, "screenshut %u\n", screenshot_number);
+			screenshot_number++;
+			break;
 		case SDLK_q:
 			quit = 1;
 			return 1;
@@ -275,7 +290,7 @@ static void init_sdl(void)
 static void usage(const char *name)
 {
 	fprintf(stderr,
-"usage: %s [-2] [-d database] [demo-number [demo-arg ...]]\n",
+"usage: %s [-2] [-d database] [-s screenshot] [demo-number [demo-arg ...]]\n",
     name);
 	exit(1);
 }
@@ -285,13 +300,16 @@ int main(int argc, char **argv)
 {
 	int c;
 
-	while ((c = getopt(argc, argv, "2d:")) != EOF)
+	while ((c = getopt(argc, argv, "2d:s:")) != EOF)
 		switch (c) {
 		case '2':
 			zoom = 2;
 			break;
 		case 'd':
 			storage_file = optarg;
+			break;
+		case 's':
+			screenshot_name = optarg;
 			break;
 		default:
 			usage(*argv);

@@ -322,12 +322,16 @@ static void usage(const char *name)
 
 int main(int argc, char **argv)
 {
+	bool scripting = 0;
 	int c, i;
 
-	while ((c = getopt(argc, argv, "+2d:s:")) != EOF)
+	while ((c = getopt(argc, argv, "+2Cd:s:")) != EOF)
 		switch (c) {
 		case '2':
 			zoom = 2;
+			break;
+		case 'C':
+			scripting = 1;
 			break;
 		case 'd':
 			storage_file = optarg;
@@ -342,16 +346,22 @@ int main(int argc, char **argv)
 	for (i = optind; i != argc; i++)
 		if (!strcmp(argv[i], "-C"))
 			break;
-	if (i == argc) {
+	if (i == argc && !scripting) {
 		init_sdl();
 		if (!app_init(argv + optind, argc - optind))
 			usage(*argv);
 	} else {
 		headless = 1;
-		if (!app_init(argv + optind, i - optind)) 
-			usage(*argv);
-		if (!run_script(argv + i + 1, argc - i - 1))
-			return 1;
+		if (scripting) {
+			app_init(NULL, 0);
+			if (!run_script(argv + optind, argc - optind))
+				return 1;
+		} else {
+			if (!app_init(argv + optind, i - optind)) 
+				usage(*argv);
+			if (!run_script(argv + i + 1, argc - i - 1))
+				return 1;
+		}
 		if (headless)
 			return 0;
 		init_sdl();

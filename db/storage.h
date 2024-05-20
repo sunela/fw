@@ -15,8 +15,13 @@
 
 
 #ifndef SDK
+
+#define	DEFAULT_DB_FILE_NAME	"dummy.db"
+
+
 extern const char *storage_file;
-#endif
+
+#endif /* !SDK */
 
 
 unsigned storage_blocks(void);

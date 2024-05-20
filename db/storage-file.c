@@ -28,12 +28,11 @@
 #include "storage.h"
 
 
-#define	DEFAULT_FILE_NAME	"dummy.db"
 #define	DEFAULT_FILE_BLOCKS	2048
 #define	ERASE_SIZE		4	/* erasing erases four blocks */
 
 
-const char *storage_file = DEFAULT_FILE_NAME;
+const char *storage_file = DEFAULT_DB_FILE_NAME;
 
 static int fd = -1;
 static unsigned total_blocks;

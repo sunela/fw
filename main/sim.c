@@ -136,7 +136,10 @@ void update_display(struct gfx_drawable *da)
 /* --- Event loop ---------------------------------------------------------- */
 
 
-static char *screenshot_name = NULL;
+#define	DEFAULT_SCREENSHOT_NAME	"screen%04u.ppm"
+
+
+static char *screenshot_name = DEFAULT_SCREENSHOT_NAME;
 static unsigned screenshot_number = 0;
 
 
@@ -155,8 +158,6 @@ static bool process_events(void)
 	case SDL_KEYDOWN:
 		switch (event.key.keysym.sym) {
 		case SDLK_s:
-			if (!screenshot_name)
-				screenshot_name = "screen%04u";
 			if (!screenshot(&da, screenshot_name,
 			    screenshot_number))
 				return 1;
@@ -290,8 +291,16 @@ static void init_sdl(void)
 static void usage(const char *name)
 {
 	fprintf(stderr,
-"usage: %s [-2] [-d database] [-s screenshot] [demo-number [demo-arg ...]]\n",
-    name);
+"usage: %s [-2] [-d database] [-s screenshot] [demo-number [demo-arg ...]]\n"
+"\n"
+"-2  double the pixel size\n"
+"-d database\n"
+"    set the database file (default: %s)\n"
+"-s screenshot\n"
+"    set the screenshot file name. if present, %%u is converted to the\n"
+"    screenshot number (starts at 0). The usual printf conversion\n"
+"    specifications can be used. (default: %s)\n"
+    , name, DEFAULT_DB_FILE_NAME, DEFAULT_SCREENSHOT_NAME);
 	exit(1);
 }
 

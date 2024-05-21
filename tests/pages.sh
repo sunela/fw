@@ -17,6 +17,13 @@
 # https://stackoverflow.com/q/5132749/11496135
 #
 
+#
+# Make PNG reproducible:
+# https://superuser.com/a/1220703
+#
+reproducible="-define png:exclude-chunks=date,time"
+
+
 page()
 {
 	local json=
@@ -49,21 +56,15 @@ page()
 	last)	return;;
 	show)	display "$dir/_tmp.ppm";;
 	run)	;;
-	test)	convert "$dir/_tmp.ppm" "$dir/_tmp.png"
-		#
-		# @@@ weird: without -metric, "compare" always thinks there is
-		# a difference (there is, but only in the metadata). With
-		# -metric we get unwanted output, thus the redirect to
-		# /dev/null.
-		#
-		compare -metric AE "$dir/$name.png" "$dir/_tmp.png" null: \
-		    >/dev/null|| {
+	test)	convert $reproducible "$dir/_tmp.ppm" "$dir/_tmp.png"
+		[ "`md5sum <\"$dir/$name.png\"`" = \
+		  "`md5sum <\"$dir/_tmp.png\"`" ] || {
 			compare "$dir/$name.png" "$dir/_tmp.png" - |
 			    display
 			exit
 		}
 		rm -f "$dir/_tmp.png";;
-	store)	convert "$dir/_tmp.ppm" "$dir/$name.png" || exit;;
+	store)	convert $reproducible "$dir/_tmp.ppm" "$dir/$name.png" || exit;;
 	esac
 
 	rm -f "$dir/_tmp.ppm" "$dir/_db"

@@ -206,17 +206,65 @@ accounts $mode accounts-demo-add-m1 "long 45 69" "tap 153 110" "tap 200 136"
 # ---  accounts overlay add M, level 2 (demo) ---------------------------------
 
 accounts $mode accounts-demo-add-m2 "long 45 69" "tap 153 110" \
-    "tap 200 136"  "tap 42 81"
+    "tap 200 136" "tap 42 81"
 
 # ---  accounts overlay add Me ------------------------------------------------
 
 accounts $mode accounts-demo-add-me "long 45 69" "tap 153 110" \
-    "tap 200 136"  "tap 42 81" "tap 194 83" "tap 119 137"
+    "tap 200 136" "tap 42 81" "tap 194 83" "tap 119 137"
 
-# ---  accounts overlay added Me ----------------------------------------------
+# ---  accounts added Me ------------------------------------------------------
 
 accounts $mode accounts-demo-added-me "long 45 69" "tap 153 110" \
-    "tap 200 136"  "tap 42 81" "tap 194 83" "tap 119 137" "tap 201 247"
+    "tap 200 136" "tap 42 81" "tap 194 83" "tap 119 137" "tap 201 247"
+
+# ---  account Me -------------------------------------------------------------
+
+accounts $mode account-me "long 45 69" "tap 153 110" \
+    "tap 200 136" "tap 42 81" "tap 194 83" "tap 119 137" "tap 201 247" \
+    "tap 23 68"
+
+# ---  account Me: fields list ------------------------------------------------
+
+accounts $mode account-me-fields "long 45 69" "tap 153 110" \
+    "tap 200 136" "tap 42 81" "tap 194 83" "tap 119 137" "tap 201 247" \
+    "tap 23 68" "tap 119 165"
+
+# ---  account Me: enter Password ---------------------------------------------
+
+accounts $mode account-me-pw "long 45 69" "tap 153 110" \
+    "tap 200 136" "tap 42 81" "tap 194 83" "tap 119 137" "tap 201 247" \
+    "tap 23 68" "tap 119 165" "tap 71 167"
+
+# ---  account Me: password Secr3t --------------------------------------------
+
+ENTRY_1="tap 43 84"
+ENTRY_2="tap 119 84"
+ENTRY_3="tap 200 84"
+ENTRY_4="tap 43 137"
+ENTRY_5="tap 119 137"
+ENTRY_6="tap 200 137"
+ENTRY_7="tap 43 191"
+ENTRY_8="tap 119 191"
+ENTRY_9="tap 200 191"
+ENTRY_L="tap 43 245"
+ENTRY_0="tap 119 245"
+ENTRY_R="tap 200 245"
+
+accounts $mode account-me-pw-secret "long 45 69" "tap 153 110" \
+    "tap 200 136" "tap 42 81" "tap 194 83" "tap 119 137" "tap 201 247" \
+    "tap 23 68" "tap 119 165" "tap 71 167" \
+    "$ENTRY_7" "$ENTRY_7" "$ENTRY_3" "$ENTRY_5" "$ENTRY_2" "$ENTRY_6" \
+    "$ENTRY_7" "$ENTRY_6" "$ENTRY_3" "$ENTRY_0" "$ENTRY_8" "$ENTRY_4"
+
+# ---  account Me: password added ---------------------------------------------
+
+accounts $mode account-me-pw-added "long 45 69" "tap 153 110" \
+    "tap 200 136" "tap 42 81" "tap 194 83" "tap 119 137" "tap 201 247" \
+    "tap 23 68" "tap 119 165" "tap 71 167" \
+    "$ENTRY_7" "$ENTRY_7" "$ENTRY_3" "$ENTRY_5" "$ENTRY_2" "$ENTRY_6" \
+    "$ENTRY_7" "$ENTRY_6" "$ENTRY_3" "$ENTRY_0" "$ENTRY_8" "$ENTRY_4" \
+    "$ENTRY_R"
 
 # --- setup -------------------------------------------------------------------
 

@@ -195,7 +195,13 @@ static bool accept_pin(void)
 	if (!db_open_progress(&main_db, NULL, open_progress, &progress))
 		return 0;
 	db_stats(&main_db, &s);
-	return s.data || s.empty;
+	/*
+	 * @@@ also let us in if there Flash has been erased. This is for
+	 * development - in the end, an erased Flash should bypass the PIN
+	 * dialog and go through a setup procedure, e.g., asking for a new PIN,
+	 * and writing some record (configuration ?), to "pin" the PIN.
+	 */
+	return s.data || s.empty || (s.erased == s.total);
 }
 
 

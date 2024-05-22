@@ -148,7 +148,7 @@ static void area_max(struct text_area *a, unsigned len,
 
 
 static void text_align(struct text_query *q, const struct text_area *a,
-    unsigned x, unsigned y, int8_t align_x, int8_t align_y)
+    int x, int y, int8_t align_x, int8_t align_y)
 {
 #ifdef DEBUG
 	debug("A ll %d %d ur %d %d\n", a->x0, a->y0, a->x1, a->y1);
@@ -208,7 +208,7 @@ static void text_align(struct text_query *q, const struct text_area *a,
 }
 
 
-static void query_rendered(struct text_query *q, unsigned x, unsigned y,
+static void query_rendered(struct text_query *q, int x, int y,
     const char *s, const struct font *font, int8_t align_x, int8_t align_y)
 {
 	struct text_area a;
@@ -218,7 +218,7 @@ static void query_rendered(struct text_query *q, unsigned x, unsigned y,
 }
 
 
-static void query_max(struct text_query *q, unsigned x, unsigned y,
+static void query_max(struct text_query *q, int x, int y,
     unsigned len, const struct font *font, int8_t align_x, int8_t align_y)
 {
 	struct text_area a;
@@ -228,7 +228,7 @@ static void query_max(struct text_query *q, unsigned x, unsigned y,
 }
 
 
-void text_query(unsigned x, unsigned y, const char *s,
+void text_query(int x, int y, const char *s,
     const struct font *font, int8_t align_x, int8_t align_y,
     struct text_query *q)
 {
@@ -261,7 +261,7 @@ void text_query(unsigned x, unsigned y, const char *s,
 }
 
 
-void text_text_bbox(unsigned x, unsigned y, const char *s,
+void text_text_bbox(int x, int y, const char *s,
     const struct font *font, int8_t align_x, int8_t align_y,
     struct gfx_rect *bb)
 {
@@ -278,7 +278,7 @@ void text_text_bbox(unsigned x, unsigned y, const char *s,
 /* --- Align and render text string ---------------------------------------- */
 
 
-unsigned text_text(struct gfx_drawable *da, unsigned x, unsigned y,
+unsigned text_text(struct gfx_drawable *da, int x, int y,
     const char *s, const struct font *font, int8_t align_x, int8_t align_y,
     gfx_color color)
 {

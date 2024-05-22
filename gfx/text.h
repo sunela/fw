@@ -18,7 +18,7 @@
 struct text_query {
 	int x, y, w, h;		/* bounding box */
 	int ox, oy;		/* origin (y of baseline) */
-	unsigned next;		/* x coordinate of the next character */
+	int next;		/* x coordinate of the next character */
 };
 
 
@@ -37,11 +37,11 @@ extern const struct font mono58;
 unsigned text_char(struct gfx_drawable *da, int x1, int y1,
     const struct font *font, uint16_t ch, gfx_color color);
 
-void text_query(unsigned x, unsigned y, const char *s,
+void text_query(int x, int y, const char *s,
     const struct font *font, int8_t align_x, int8_t align_y,
     struct text_query *q);
 
-void text_text_bbox(unsigned x, unsigned y, const char *s,
+void text_text_bbox(int x, int y, const char *s,
     const struct font *font, int8_t align_x, int8_t align_y,
     struct gfx_rect *bb);
 
@@ -51,7 +51,7 @@ void text_text_bbox(unsigned x, unsigned y, const char *s,
  * it may not begin at the left edge of the character cell.)
  */
 
-unsigned text_text(struct gfx_drawable *da, unsigned x, unsigned y,
+unsigned text_text(struct gfx_drawable *da, int x, int y,
     const char *s, const struct font *font, int8_t align_x, int8_t align_y,
     gfx_color color);
 

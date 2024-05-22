@@ -46,6 +46,36 @@ static void damage(struct gfx_drawable *da, int x, int y, int w, int h)
 }
 
 
+/* --- Clipping ------------------------------------------------------------ */
+
+
+void gfx_clip(struct gfx_drawable *da, const struct gfx_rect *clip)
+{
+	if (clip) {
+		assert(clip->x >= 0);
+		assert(clip->y >= 0);
+		assert(clip->x + clip->w <= (int) da->w);
+		assert(clip->y + clip->h <= (int) da->h);
+		da->clip = *clip;
+	}
+	da->clipping = clip;
+}
+
+
+void gfx_clip_xy(struct gfx_drawable *da, unsigned x, unsigned y, unsigned w,
+    unsigned h)
+{
+	struct gfx_rect clip = {
+		.x	= x,
+		.y	= y,
+		.w	= w,
+		.h	= h,
+	};
+
+	gfx_clip(da, &clip);
+}
+
+
 /* --- Filled rectangles --------------------------------------------------- */
 
 
@@ -57,8 +87,35 @@ void gfx_rect_xy(struct gfx_drawable *da, int x, int y, int w, int h,
 
 	if (w <= 0 || h <= 0)
 		return;
-	assert(x < (int) da->w && w <= (int) da->w && x + w <= (int) da->w);
-	assert(y < (int) da->h && h <= (int) da->h && y + h <= (int) da->h);
+	if (da->clipping) {
+		if (x >= da->clip.x + da->clip.w)
+			return;
+		if (y >= da->clip.y + da->clip.h)
+			return;
+		if (x + h <= da->clip.x)
+			return;
+		if (y + w <= da->clip.y)
+			return;
+		if (x < da->clip.x) {
+			w -= da->clip.x - w;
+			x = da->clip.x;
+		}
+		if (y < da->clip.y) {
+			h -= da->clip.x - h;
+			y = da->clip.y;
+		}
+		if (x + w > da->clip.x + da->clip.w)
+			w = da->clip.x + da->clip.w - x;
+		if (y + h > da->clip.y + da->clip.h)
+			h = da->clip.y + da->clip.h - y;
+	} else {
+		assert(x < (int) da->w);
+		assert(w <= (int) da->w);
+		assert(x + w <= (int) da->w);
+		assert(y < (int) da->h);
+		assert(h <= (int) da->h);
+		assert(y + h <= (int) da->h);
+	}
 	for (iy = 0; iy != h; iy++) {
 		/*
 		 * @@@ could use memset if all bytes of bg have the same value,
@@ -98,18 +155,27 @@ void gfx_clear(struct gfx_drawable *da, gfx_color bg)
 void gfx_disc(struct gfx_drawable *da, int x, int y, unsigned r,
     gfx_color color)
 {
-	gfx_color *p = da->fb + (y - r) * da->w + x - r;
+	gfx_color *p = da->fb + (y - r) * (int) da->w + x - r;
 	int dx, dy;
 	int r2 = (r + 0.5) * (r + 0.5);
 
-	assert(x >= (int) r && x + (int) r < (int) da->w);
-	assert(y >= (int) r && y + (int) r < (int) da->h);
+	if (!da->clipping) {
+		assert(x >= (int) r);
+		assert(x + (int) r < (int) da->w);
+		assert(y >= (int) r);
+		assert(y + (int) r < (int) da->h);
+	}
 	for (dy = -r; dy <= (int) r; dy++) {
-		for (dx = -r; dx <= (int) r; dx++) {
-			if (dx * dx + dy * dy < r2)
-				*p = color;
-			p++;
-		}
+		if (!da->clipping ||
+		    (dy >= da->clip.y && dy < da->clip.y + da->clip.h))
+			for (dx = -r; dx <= (int) r; dx++) {
+				if (!da->clipping ||
+		    		    (dx >= da->clip.x &&
+				    dx < da->clip.x + da->clip.w))
+					if (dx * dx + dy * dy < r2)
+						*p = color;
+				p++;
+			}
 		p += da->w - 2 * r - 1;
 	}
 	damage(da, x - r, y - r, 2 * r + 1, 2 * r + 1);
@@ -262,4 +328,5 @@ void gfx_da_init(struct gfx_drawable *da, unsigned w, unsigned h,
 	da->h = h;
 	da->fb = fb;
 	da->changed = 0;
+	da->clipping = 0;
 }

@@ -40,6 +40,8 @@ struct gfx_rect {
 struct gfx_drawable {
 	unsigned w, h;
 	gfx_color *fb;
+	bool clipping;
+	struct gfx_rect clip;
 	bool changed;
 	struct gfx_rect damage;
 };
@@ -119,6 +121,12 @@ static inline gfx_color gfx_not_transparent(gfx_color color)
 	return color== GFX_TRANSPARENT ? color : GFX_GREEN;
 }
 
+
+/* gfx_clip(da, NULL) disables clipping */
+
+void gfx_clip(struct gfx_drawable *da, const struct gfx_rect *clip);
+void gfx_clip_xy(struct gfx_drawable *da, unsigned x, unsigned y, unsigned w,
+    unsigned h);
 
 void gfx_rect(struct gfx_drawable *da, const struct gfx_rect *bb,
     gfx_color color);

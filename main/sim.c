@@ -118,6 +118,8 @@ void update_display(struct gfx_drawable *da)
 //debug("update\n");
 	assert(da->w == GFX_WIDTH);
 	assert(da->h == GFX_HEIGHT);
+	assert(da->damage.x >= 0);
+	assert(da->damage.y >= 0);
 	assert(da->damage.w <= GFX_WIDTH);
 	assert(da->damage.h <= GFX_HEIGHT);
 	for (y = da->damage.y; y != da->damage.y + da->damage.h; y++) {

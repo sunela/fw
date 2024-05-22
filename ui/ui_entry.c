@@ -158,22 +158,9 @@ static void clear_input(struct ui_entry_ctx *c)
 }
 
 
-/*
- * @@@ the "fb" allocation was
- *
- * gfx_color
- *	fb[entry_params.max_len * input_max_height * input_max_height];
- *
- * in function draw_top. This caused stack problems.
- */
-
-static PSRAM gfx_color fb[100000];
-
-
 static void draw_top(struct ui_entry_ctx *c, const char *s,
     const struct font *font, gfx_color color, gfx_color bg)
 {
-	struct gfx_drawable buf;
 	struct text_query q;
 
 	if (!*s)
@@ -186,22 +173,17 @@ static void draw_top(struct ui_entry_ctx *c, const char *s,
 	 * somewhat inconsistent.)
 	 */
 	text_query(0, 0, s, font, GFX_LEFT, GFX_TOP | GFX_MAX, &q);
-	assert(q.next <= c->max_len * c->input_max_height);
-	assert((unsigned) q.h <=
-	    INPUT_PAD_TOP + c->input_max_height + INPUT_PAD_BOTTOM);
-	gfx_da_init(&buf, q.next, q.h, fb);
-	gfx_clear(&buf, bg);
-	text_text(&buf, 0, 0, s, font, GFX_LEFT, GFX_TOP | GFX_MAX,
-	    color);
+	assert(q.next <= (int) (c->max_len * c->input_max_height));
+
+	gfx_rect_xy(&main_da, 0, INPUT_PAD_TOP, GFX_WIDTH, q.h, bg);
+	gfx_clip_xy(&main_da, 0, INPUT_PAD_TOP, GFX_WIDTH, q.h);
 	if ((GFX_WIDTH + q.next) / 2 < INPUT_MAX_X)
-		gfx_copy(&main_da, (GFX_WIDTH - q.next) / 2, INPUT_PAD_TOP,
-		    &buf, 0, 0, q.next, q.h, -1);
-	else if (q.next < INPUT_MAX_X)
-		gfx_copy(&main_da, INPUT_MAX_X - q.next, INPUT_PAD_TOP,
-		    &buf, 0, 0, q.next, q.h, -1);
+		text_text(&main_da, (GFX_WIDTH - q.next) / 2, INPUT_PAD_TOP,
+		    s, font, GFX_LEFT, GFX_TOP | GFX_MAX, color);
 	else
-		gfx_copy(&main_da, 0, INPUT_PAD_TOP,
-		    &buf, q.next - INPUT_MAX_X, 0, INPUT_MAX_X, q.h, -1);
+		text_text(&main_da, INPUT_MAX_X - q.next, INPUT_PAD_TOP,
+		    s, font, GFX_LEFT, GFX_TOP | GFX_MAX, color);
+	gfx_clip(&main_da, NULL);
 }
 
 

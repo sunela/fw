@@ -73,6 +73,15 @@ bool ui_field_more(const struct db_entry *de)
 		return 1;
 	if (!have(de, ft_pw))
 		return 1;
+	if (!have(de, ft_comment))
+		return 1;
+
+	/*
+	 * All other fields must be checked before ft_hotp_secret and
+	 * ft_totp_secret, * since the latter two are mutually exclusive, and
+	 * the logic changes.
+	 */
+
 	if (have(de, ft_hotp_secret))
 		return !have(de, ft_hotp_counter);
 	return !have(de, ft_totp_secret);
@@ -114,6 +123,7 @@ static void field_edited(struct ui_field_edit_ctx *c)
 	case ft_user:
 	case ft_email:
 	case ft_pw:
+	case ft_comment:
 		/* @@@ report errors */
 		db_change_field(c->de, c->type, c->buf, strlen(c->buf));
 		break;
@@ -213,6 +223,10 @@ static void ui_field_edit_open(void *ctx, void *params)
 		PARAMS("TOTP Secret", MAX_STRING_LEN, validate_base32);
 		copy_base32(c->buf, f);
 		break;
+	case ft_comment:
+		PARAMS("Comment", MAX_STRING_LEN, NULL);
+		copy_value(c->buf, f);	
+		break;
 	default:
 		abort();
 	}
@@ -291,6 +305,9 @@ static void ui_field_add_open(void *ctx, void *params)
 		wi_list_add(&c->list, "TOTP", NULL,
 		    (void *) (uintptr_t) ft_totp_secret);
 	}
+	if (!have(c->de, ft_comment))
+		wi_list_add(&c->list, "Comment", NULL,
+		    (void *) (uintptr_t) ft_comment);
 	wi_list_end(&c->list);
 }
 

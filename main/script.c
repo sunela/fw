@@ -68,6 +68,9 @@ void dump_db(const struct db *db, bool pointers)
 			case ft_totp_secret:
 				printf("totp_secret");
 				break;
+			case ft_comment:
+				printf("Comment");
+				break;
 			default:
 				printf("%u", f->type);
 				break;

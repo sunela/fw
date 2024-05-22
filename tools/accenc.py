@@ -21,12 +21,12 @@ STORAGE_BLOCKS = 2048
 
 
 keys = ( "id", "prev", "user", "email", "pw", "hotp_secret", "hotp_counter",
-    "totp_secret" )
+    "totp_secret", "comment" )
 
 
 def encode(key, code, v):
 	if key == "id" or key == "prev" or key == "user" or key == "email" or \
-	    key == "pw":
+	    key == "pw" or key == "comment":
 		return struct.pack("BB", code, len(v)) + v.encode()
 	if key == "hotp_secret" or key == "totp_secret":
 		s = base64.b32decode(v)

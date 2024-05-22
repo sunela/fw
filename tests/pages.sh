@@ -24,7 +24,14 @@
 reproducible="-define png:exclude-chunks=date,time"
 
 
-page()
+json()
+{
+	"$top/tools/accenc.py" /dev/stdin >"$dir/_db" ||
+	    { rm -f "$dir/_dn"; exit 1; }
+}
+
+
+page_inner()
 {
 	local json=
 
@@ -49,11 +56,15 @@ page()
 
 	echo === $name ===
 
-	if [ "$json" ]; then
-		echo "$json" |
-		    "$top/tools/accenc.py" /dev/stdin >"$dir/_db" || exit
-	else
-		"$top/tools/accenc.py" "$top/accounts.json" >"$dir/_db" || exit
+	if [ ! -r "$dir/_db" ]; then
+		if [ "$json" ]; then
+			echo "$json" |
+			    "$top/tools/accenc.py" /dev/stdin >"$dir/_db" ||
+			    exit
+		else
+			"$top/tools/accenc.py" "$top/accounts.json" \
+			    >"$dir/_db" || exit
+		fi
 	fi
 	$top/sim -d "$dir/_db" -C "$@" "screen $dir/_tmp.ppm" || exit
 
@@ -71,8 +82,15 @@ page()
 		rm -f "$dir/_tmp.png";;
 	store)	convert $reproducible "$dir/_tmp.ppm" "$dir/$name.png" || exit;;
 	esac
+}
 
+
+page()
+{
+	page_inner "$@"
+	local rc=$?
 	rm -f "$dir/_tmp.ppm" "$dir/_db"
+	return $rc
 }
 
 
@@ -109,6 +127,7 @@ esac
 
 select=$2
 
+rm -f "$dir/_db"
 
 # --- on ----------------------------------------------------------------------
 
@@ -357,6 +376,15 @@ accounts $mode account-demo-pw-geheimx "tap 86 67" "long 199 119" \
 
 accounts $mode account-hotp-secret "drag 158 243 159 196" "tap 50 221" \
     "long 75 66" "tap 91 173"
+
+# --- account with "comment" field --------------------------------------------
+
+json <<EOF
+[ { "id":"id", "user":"user", "email":"email", "pw":"pw",
+    "comment":"comment" } ]
+EOF
+
+accounts $mode account-comment "tap 86 67"
 
 # -----------------------------------------------------------------------------
 

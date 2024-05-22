@@ -345,6 +345,9 @@ static void delete_field(void *user)
 	case ft_totp_secret:
 		prm.name = "TOTP";
 		break;
+	case ft_comment:
+		prm.name = "comment";
+		break;
 	default:
 		abort();
 	}
@@ -458,6 +461,9 @@ static void ui_account_open(void *ctx, void *params)
 			break;
 		case ft_totp_secret:
 			wi_list_add(&c->list, "TOTP", "------", f);
+			break;
+		case ft_comment:
+			add_string(c, "Comment", f->data, f->len, f);
 			break;
 		default:
 			abort();

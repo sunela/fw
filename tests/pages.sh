@@ -40,6 +40,11 @@ page()
 	local name=$2
 	shift 2
 
+	if [ "$mode" = names ]; then
+		echo $name
+		return
+	fi
+
 	[ "$mode" = last ] || [ -z "$select" -o "$name" = "$select" ] || return
 
 	echo === $name ===
@@ -74,7 +79,7 @@ page()
 usage()
 {
 	cat <<EOF 1>&2
-usage: $0 [-x] [run|show|last|test|store [page-name]]
+usage: $0 [-x] [run|show|last|test|store|names [page-name]]
 
 -x  set shell tracing with set -x
 EOF
@@ -96,7 +101,7 @@ while [ "$1" ]; do
 done
 
 case "$1" in
-run|show|test|store|last)
+run|show|test|store|last|names)
 	mode=$1;;
 "")	mode=test;;
 *)	usage;;

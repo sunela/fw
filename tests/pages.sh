@@ -191,7 +191,7 @@ accounts $mode account-hotp "drag 158 243 159 196" "tap 50 221"
 accounts $mode account-hotp-reveal \
     "drag 158 243 159 196" "tap 50 221" "tap 38 80"
 
-# --- account (HOTP)-----------------------------------------------------------
+# --- account (TOTP)-----------------------------------------------------------
 
 # Unix time 1716272769:
 # UTC 2024-05-21 06:26:09
@@ -199,7 +199,6 @@ accounts $mode account-hotp-reveal \
 
 accounts $mode account-totp \
     "time 1716272769" "drag 158 243 159 180" "tap 41 241" tick
-#"tap 50 221" "tap 38 80"
 
 # --- accounts overlay (top) --------------------------------------------------
 
@@ -335,6 +334,29 @@ accounts $mode account-demo-pw-delete "tap 86 67" "long 199 119" \
 
 accounts $mode account-demo-pw-deleted "tap 86 67" "long 199 119" \
     "tap 153 174" "drag 53 189 180 200"
+
+# --- account overlay (bottom) ------------------------------------------------
+
+accounts $mode account-demo-bottom-over "tap 86 67" "long 107 194"
+
+# --- account overlay (bottom) ------------------------------------------------
+
+accounts $mode account-demo-bottom-over "tap 86 67" "long 107 194"
+
+# --- account edit password (Geheimx) -----------------------------------------
+
+# Adding an "x" to "Geheim" makes the text too long for centering, but doesn't
+# yet require cutting any off-screen part.
+
+accounts $mode account-demo-pw-geheimx "tap 86 67" "long 199 119" \
+    "tap 88 172" "$ENTRY_9" "$ENTRY_5"
+
+# --- account show secret (HOTP) ----------------------------------------------
+
+# The secret is a long base32 string that gets cut off at the screen edge.
+
+accounts $mode account-hotp-secret "drag 158 243 159 196" "tap 50 221" \
+    "long 75 66" "tap 91 173"
 
 # -----------------------------------------------------------------------------
 

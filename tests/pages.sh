@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 #
 # pages.sh - Show/record/compare UI pages
 #
@@ -73,7 +73,11 @@ page()
 
 usage()
 {
-	echo "usage: $0 [run|show|last|test|store [page-name]]" 1>&2
+	cat <<EOF 1>&2
+usage: $0 [-x] [run|show|last|test|store [page-name]]
+
+-x  set shell tracing with set -x
+EOF
 	exit 1
 }
 
@@ -81,6 +85,15 @@ usage()
 self=`which "$0"`
 dir=`dirname "$self"`
 top=$dir/..
+
+while [ "$1" ]; do
+	case "$1" in
+	-x)	set -x
+		shift;;
+	-*)	usage;;
+	*)	break;;
+	esac
+done
 
 case "$1" in
 run|show|test|store|last)

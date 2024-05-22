@@ -153,26 +153,26 @@ bool list_is_empty(const struct wi_list *list)
 
 
 static void do_draw_entry(const struct wi_list *list,
-    const struct wi_list_entry *e, struct gfx_drawable *d,
+    const struct wi_list_entry *e, struct gfx_drawable *da,
     const struct gfx_rect *bb, unsigned y, bool odd)
 {
 	const struct wi_list_style *style = list->style;
 
-	gfx_rect(d, bb, style->bg[odd]);
-	text_text(d, 0, y + opad(list, e), e->first, list_font(list),
+	gfx_rect(da, bb, style->bg[odd]);
+	text_text(da, 0, y + opad(list, e), e->first, list_font(list),
 	    GFX_LEFT, GFX_TOP | GFX_MAX, style->fg[odd]);
 	if (e->second)
-		text_text(d, 0,
+		text_text(da, 0,
 		    y + opad(list, e) + ipad(list, e) + list->text_height,
 		    e->second, list_font(list),
 		    GFX_LEFT, GFX_TOP | GFX_MAX, style->fg[odd]);
 	if (style->render)
-		style->render(list, e, d, bb, odd);
+		style->render(list, e, da, bb, odd);
 }
 
 
 static unsigned draw_entry(const struct wi_list *list,
-    const struct wi_list_entry *e, struct gfx_drawable *d, int y, bool odd)
+    const struct wi_list_entry *e, struct gfx_drawable *da, int y, bool odd)
 {
 	const struct wi_list_style *style = list->style;
 	unsigned h = entry_height(list, e);
@@ -190,7 +190,7 @@ static unsigned draw_entry(const struct wi_list *list,
 	if (top > (int) style->y1)
 		return bb.h;
 	if (top >= (int) style->y0 && top + (int) bb.h - 1 <= (int) style->y1) {
-		do_draw_entry(list, e, d, &bb, y, odd);
+		do_draw_entry(list, e, da, &bb, y, odd);
 		return bb.h;
 	}
 
@@ -205,10 +205,10 @@ static unsigned draw_entry(const struct wi_list *list,
 	gfx_clear(&tmp_da, style->bg[odd]); /* better safe than sorry */
 	do_draw_entry(list, e, &tmp_da, &tmp_bb, y - bb.y, odd);
 	if (top < (int) style->y0)
-		gfx_copy(d, 0, style->y0, &tmp_da, 0, style->y0 - top,
+		gfx_copy(da, 0, style->y0, &tmp_da, 0, style->y0 - top,
 		    GFX_WIDTH, bb.h - ((int) style->y0 - top), -1);
 	else
-		gfx_copy(d, 0, top, &tmp_da, 0, 0,
+		gfx_copy(da, 0, top, &tmp_da, 0, 0,
 		    GFX_WIDTH, style->y1 - top + 1, -1);
 	return bb.h;
 }

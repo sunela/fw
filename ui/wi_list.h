@@ -27,7 +27,7 @@ struct wi_list_style {
 	unsigned		min_h;	/* including padding */
 	const struct font *font;/* NULL for default */
 	void (*render)(const struct wi_list *list,
-	    const struct wi_list_entry *entry, struct gfx_drawable *d,
+	    const struct wi_list_entry *entry, struct gfx_drawable *da,
 	    const struct gfx_rect *bb, bool odd);
 };
 

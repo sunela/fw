@@ -258,9 +258,9 @@ static void ui_overlay_tap(void *ctx, unsigned x, unsigned y)
 	for (ref = refs; ref != refs + MAX_BUTTONS; ref++) {
 		if (!ref->fn)
 			continue;
-		if (x < ref->bb.x || x >= ref->bb.x + ref->bb.w)
+		if ((int) x < ref->bb.x || (int) x >= ref->bb.x + ref->bb.w)
 			continue;
-		if (y < ref->bb.y || y >= ref->bb.y + ref->bb.h)
+		if ((int) y < ref->bb.y || (int) y >= ref->bb.y + ref->bb.h)
 			continue;
 		ref->fn(ref->user);
 		return;

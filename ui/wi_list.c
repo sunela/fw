@@ -114,7 +114,7 @@ void wi_list_render_entry(struct wi_list *list, struct wi_list_entry *entry)
 
 	if (!style->render)
 		return;
-	if (bb.h < style->min_h)
+	if (bb.h < (int) style->min_h)
 		bb.h = style->min_h;
 	for (e = list->list; e != entry; e = e->next) {
 		unsigned h = entry_height(list, e);
@@ -183,7 +183,7 @@ static unsigned draw_entry(const struct wi_list *list,
 		y += (style->min_h - h) / 2;
 		bb.h = style->min_h;
 	}
-	assert(bb.h <= style->y1 - style->y0 + 1);
+	assert((unsigned) bb.h <= style->y1 - style->y0 + 1);
 
 	if (top + (int) bb.h <= (int) style->y0)
 		return bb.h;

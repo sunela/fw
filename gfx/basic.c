@@ -14,11 +14,13 @@
 /* --- Damage rectangle ---------------------------------------------------- */
 
 
-static void damage(struct gfx_drawable *da, unsigned x, unsigned y,
-    unsigned w, unsigned h)
+static void damage(struct gfx_drawable *da, int x, int y, int w, int h)
 {
 	struct gfx_rect *r = &da->damage;
 
+	assert(x >= 0 && y >= 0);
+	assert(w >= 0 && h >= 0);
+	assert(x + w <= (int) da->w && y + h <= (int) da->h);
 	if (!w || !h)
 		return;
 	if (!da->changed) {
@@ -47,14 +49,16 @@ static void damage(struct gfx_drawable *da, unsigned x, unsigned y,
 /* --- Filled rectangles --------------------------------------------------- */
 
 
-void gfx_rect_xy(struct gfx_drawable *da, unsigned x, unsigned y, unsigned w,
-    unsigned h, gfx_color color)
+void gfx_rect_xy(struct gfx_drawable *da, int x, int y, int w, int h,
+    gfx_color color)
 {
 	gfx_color *p = da->fb + y * da->w + x;
-	unsigned ix, iy;
+	int ix, iy;
 
-	assert(x < da->w && w <= da->w && x + w <= da->w);
-	assert(y < da->h && h <= da->h && y + h <= da->h);
+	if (w <= 0 || h <= 0)
+		return;
+	assert(x < (int) da->w && w <= (int) da->w && x + w <= (int) da->w);
+	assert(y < (int) da->h && h <= (int) da->h && y + h <= (int) da->h);
 	for (iy = 0; iy != h; iy++) {
 		/*
 		 * @@@ could use memset if all bytes of bg have the same value,
@@ -91,15 +95,15 @@ void gfx_clear(struct gfx_drawable *da, gfx_color bg)
  * https://gamedev.stackexchange.com/q/176036
  */
 
-void gfx_disc(struct gfx_drawable *da, unsigned x, unsigned y, unsigned r,
+void gfx_disc(struct gfx_drawable *da, int x, int y, unsigned r,
     gfx_color color)
 {
 	gfx_color *p = da->fb + (y - r) * da->w + x - r;
 	int dx, dy;
 	int r2 = (r + 0.5) * (r + 0.5);
 
-	assert(x >= r && x + r < da->w);
-	assert(y >= r && y + r < da->h);
+	assert(x >= (int) r && x + (int) r < (int) da->w);
+	assert(y >= (int) r && y + (int) r < (int) da->h);
 	for (dy = -r; dy <= (int) r; dy++) {
 		for (dx = -r; dx <= (int) r; dx++) {
 			if (dx * dx + dy * dy < r2)

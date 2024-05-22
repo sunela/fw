@@ -33,8 +33,8 @@ typedef uint16_t gfx_color;
 
 
 struct gfx_rect {
-	unsigned x, y;
-	unsigned w, h;
+	int x, y;
+	int w, h;
 };
 
 struct gfx_drawable {
@@ -122,9 +122,9 @@ static inline gfx_color gfx_not_transparent(gfx_color color)
 
 void gfx_rect(struct gfx_drawable *da, const struct gfx_rect *bb,
     gfx_color color);
-void gfx_rect_xy(struct gfx_drawable *da, unsigned x, unsigned y, unsigned w,
-    unsigned h, gfx_color color);
-void gfx_disc(struct gfx_drawable *da, unsigned x, unsigned y, unsigned r,
+void gfx_rect_xy(struct gfx_drawable *da, int x, int y, int w, int h,
+    gfx_color color);
+void gfx_disc(struct gfx_drawable *da, int x, int y, unsigned r,
     gfx_color color);
 void gfx_clear(struct gfx_drawable *da, gfx_color bg);
 

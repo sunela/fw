@@ -107,7 +107,7 @@ static void cut_corners(void)
 void update_display(struct gfx_drawable *da)
 {
 	const gfx_color *p;
-	unsigned x, y;
+	int x, y;
 
 	if (headless)
 		return;

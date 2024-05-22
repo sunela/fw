@@ -82,7 +82,7 @@ void gfx_clip_xy(struct gfx_drawable *da, unsigned x, unsigned y, unsigned w,
 void gfx_rect_xy(struct gfx_drawable *da, int x, int y, int w, int h,
     gfx_color color)
 {
-	gfx_color *p = da->fb + y * da->w + x;
+	gfx_color *p;
 	int ix, iy;
 
 	if (w <= 0 || h <= 0)
@@ -92,30 +92,34 @@ void gfx_rect_xy(struct gfx_drawable *da, int x, int y, int w, int h,
 			return;
 		if (y >= da->clip.y + da->clip.h)
 			return;
-		if (x + h <= da->clip.x)
+		if (x + w <= da->clip.x)
 			return;
-		if (y + w <= da->clip.y)
+		if (y + h <= da->clip.y)
 			return;
 		if (x < da->clip.x) {
-			w -= da->clip.x - w;
+			w -= da->clip.x - x;
 			x = da->clip.x;
 		}
 		if (y < da->clip.y) {
-			h -= da->clip.x - h;
+			h -= da->clip.y - y;
 			y = da->clip.y;
 		}
 		if (x + w > da->clip.x + da->clip.w)
 			w = da->clip.x + da->clip.w - x;
 		if (y + h > da->clip.y + da->clip.h)
 			h = da->clip.y + da->clip.h - y;
-	} else {
-		assert(x < (int) da->w);
-		assert(w <= (int) da->w);
-		assert(x + w <= (int) da->w);
-		assert(y < (int) da->h);
-		assert(h <= (int) da->h);
-		assert(y + h <= (int) da->h);
 	}
+
+	assert(w >= 0);
+	assert(h >= 0);
+	assert(x < (int) da->w);
+	assert(w <= (int) da->w);
+	assert(x + w <= (int) da->w);
+	assert(y < (int) da->h);
+	assert(h <= (int) da->h);
+	assert(y + h <= (int) da->h);
+
+	p = da->fb + y * da->w + x;
 	for (iy = 0; iy != h; iy++) {
 		/*
 		 * @@@ could use memset if all bytes of bg have the same value,

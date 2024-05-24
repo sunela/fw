@@ -93,6 +93,11 @@ struct db {
 };
 
 
+extern const enum field_type order2ft[];
+extern uint8_t ft2order[];
+extern const unsigned field_types;
+
+
 struct db_entry *db_new_entry(struct db *db, const char *name);
 bool db_change_field(struct db_entry *de, enum field_type type,
     const void *data, unsigned size);
@@ -109,5 +114,7 @@ bool db_open_progress(struct db *db, const struct dbcrypt *c,
     void (*progress)(void *user, unsigned i, unsigned n), void *user);
 bool db_open(struct db *db, const struct dbcrypt *c);
 void db_close(struct db *db);
+
+void db_init(void);
 
 #endif /* !DB_H */

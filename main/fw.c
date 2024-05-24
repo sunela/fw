@@ -175,6 +175,7 @@ int main(int argc, char **argv)
 
 	cst816_init(TOUCH_I2C, TOUCH_I2C_ADDR, TOUCH_INT);
 
+	db_init();
 	if (!app_init(argv + optind, argc - optind))
 		usage(*argv);
 	event_loop();

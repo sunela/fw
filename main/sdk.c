@@ -25,6 +25,7 @@
 #include "sdk-hal.h"
 #include "debug.h"
 #include "timer.h"
+#include "db.h"
 #include "gfx.h"
 
 
@@ -151,6 +152,7 @@ void sdk_main(void)
 
 	cst816_init(TOUCH_I2C, TOUCH_I2C_ADDR, TOUCH_INT);
 
+	db_init();
 	app_init(NULL, 0);
 	event_loop();
 }

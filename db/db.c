@@ -21,6 +21,12 @@
 #include "db.h"
 
 
+const enum field_type order2ft[] = {
+    ft_end, ft_id, ft_prev, ft_user, ft_email, ft_pw,
+    ft_hotp_secret, ft_hotp_counter, ft_totp_secret, ft_comment };
+uint8_t ft2order[sizeof(order2ft) / sizeof(*order2ft)];
+const unsigned field_types = sizeof(ft2order);
+
 static PSRAM uint8_t payload_buf[BLOCK_PAYLOAD_SIZE];
 
 
@@ -509,4 +515,13 @@ void db_close(struct db *db)
 	span_free_all(db->erased);
 	span_free_all(db->deleted);
 	span_free_all(db->empty);
+}
+
+
+void db_init(void)
+{
+	unsigned i;
+
+	for (i = 0; i != sizeof(ft2order); i++)
+		ft2order[order2ft[i]] = i;
 }

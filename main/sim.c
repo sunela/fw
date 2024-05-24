@@ -348,6 +348,7 @@ int main(int argc, char **argv)
 	for (i = optind; i != argc; i++)
 		if (!strcmp(argv[i], "-C"))
 			break;
+	db_init();
 	if (i == argc && !scripting) {
 		init_sdl();
 		if (!app_init(argv + optind, argc - optind))

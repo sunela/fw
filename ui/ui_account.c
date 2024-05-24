@@ -429,6 +429,7 @@ static void ui_account_open(void *ctx, void *params)
 	struct ui_account_ctx *c = ctx;
 	struct db_entry *de = params;
 	struct db_field *f;
+	unsigned i;
 
 	lists[0] = &c->list;
 	c->selected_account = de;
@@ -440,7 +441,10 @@ static void ui_account_open(void *ctx, void *params)
 	    GFX_CENTER, GFX_CENTER, TITLE_FG);
 
 	wi_list_begin(&c->list, &style);
-	for (f = de->fields; f; f = f->next)
+	for (i = 0; i != field_types; i++) {
+		f = db_field_find(de, order2ft[i]);
+		if (!f)
+			continue;
 		switch (f->type) {
 		case ft_id:
 		case ft_prev:
@@ -468,6 +472,7 @@ static void ui_account_open(void *ctx, void *params)
 		default:
 			abort();
 		}
+	}
 	wi_list_end(&c->list);
 
 	if (list_is_empty(&c->list))

@@ -54,26 +54,15 @@ static struct wi_list *lists[1];
 /* --- Determine what fields we can add ------------------------------------ */
 
 
-static bool have(const struct db_entry *de, enum field_type type)
-{
-	const struct db_field *f;
-
-	for (f = de->fields; f; f = f->next)
-		if (f->type == type)
-			return 1;
-	return 0;
-}
-
-
 bool ui_field_more(const struct db_entry *de)
 {
-	if (!have(de, ft_user))
+	if (!db_field_find(de, ft_user))
 		return 1;
-	if (!have(de, ft_email))
+	if (!db_field_find(de, ft_email))
 		return 1;
-	if (!have(de, ft_pw))
+	if (!db_field_find(de, ft_pw))
 		return 1;
-	if (!have(de, ft_comment))
+	if (!db_field_find(de, ft_comment))
 		return 1;
 
 	/*
@@ -82,9 +71,9 @@ bool ui_field_more(const struct db_entry *de)
 	 * the logic changes.
 	 */
 
-	if (have(de, ft_hotp_secret))
-		return !have(de, ft_hotp_counter);
-	return !have(de, ft_totp_secret);
+	if (db_field_find(de, ft_hotp_secret))
+		return !db_field_find(de, ft_hotp_counter);
+	return !db_field_find(de, ft_totp_secret);
 }
 
 
@@ -294,22 +283,23 @@ static void ui_field_add_open(void *ctx, void *params)
 	    &FONT_TOP, GFX_CENTER, GFX_CENTER, GFX_WHITE);
 
 	wi_list_begin(&c->list, &style);
-	if (!have(c->de, ft_user))
+	if (!db_field_find(c->de, ft_user))
 		wi_list_add(&c->list, "User", NULL,
 		    (void *) (uintptr_t) ft_user);
-	if (!have(c->de, ft_email))
+	if (!db_field_find(c->de, ft_email))
 		wi_list_add(&c->list, "E-Mail", NULL,
 		    (void *) (uintptr_t) ft_email);
-	if (!have(c->de, ft_pw))
+	if (!db_field_find(c->de, ft_pw))
 		wi_list_add(&c->list, "Password", NULL,
 		    (void *) (uintptr_t) ft_pw);
-	if (!have(c->de, ft_hotp_secret) && !have(c->de, ft_totp_secret)) {
+	if (!db_field_find(c->de, ft_hotp_secret) &&
+	    !db_field_find(c->de, ft_totp_secret)) {
 		wi_list_add(&c->list, "HOTP", NULL,
 		    (void *) (uintptr_t) ft_hotp_secret);
 		wi_list_add(&c->list, "TOTP", NULL,
 		    (void *) (uintptr_t) ft_totp_secret);
 	}
-	if (!have(c->de, ft_comment))
+	if (!db_field_find(c->de, ft_comment))
 		wi_list_add(&c->list, "Comment", NULL,
 		    (void *) (uintptr_t) ft_comment);
 	wi_list_end(&c->list);

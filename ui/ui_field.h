@@ -18,6 +18,7 @@ struct ui_field_edit_params {
 	enum field_type type;
 };
 
+
 bool ui_field_more(const struct db_entry *de);
 
 #endif /* !UI_FIELD_H */

@@ -99,6 +99,7 @@ bool db_change_field(struct db_entry *de, enum field_type type,
 bool db_delete_field(struct db_entry *de, struct db_field *f);
 bool db_delete_entry(struct db_entry *de);
 
+struct db_field *db_field_find(const struct db_entry *de, enum field_type type);
 bool db_iterate(struct db *db, bool (*fn)(void *user, struct db_entry *de),
     void *user);
 

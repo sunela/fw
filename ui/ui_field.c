@@ -258,9 +258,13 @@ static void ui_field_add_tap(void *ctx, unsigned x, unsigned y)
 	struct ui_field_add_ctx *c = ctx;
 	const struct wi_list_entry *entry;
 
-	entry = wi_list_pick(&c->list, x, y);
-	if (!entry)
+	if (y < LIST_Y0)
 		return;
+	entry = wi_list_pick(&c->list, x, y);
+	if (!entry) {
+		ui_return();
+		return;
+	}
 
 	struct ui_field_edit_params prm = {
 		.de = c->de,

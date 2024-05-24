@@ -39,6 +39,7 @@ enum __attribute__((__packed__)) field_type {
 	ft_hotp_counter	= 7,
 	ft_totp_secret	= 8,
 	ft_comment	= 9,
+	ft_pw2		= 10,
 };
 
 /*

@@ -71,6 +71,9 @@ void dump_db(const struct db *db, bool pointers)
 			case ft_comment:
 				printf("Comment");
 				break;
+			case ft_pw2:
+				printf("pw2");
+				break;
 			default:
 				printf("%u", f->type);
 				break;

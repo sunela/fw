@@ -62,6 +62,8 @@ bool ui_field_more(const struct db_entry *de)
 		return 1;
 	if (!db_field_find(de, ft_pw))
 		return 1;
+	if (!db_field_find(de, ft_pw2))
+		return 1;
 	if (!db_field_find(de, ft_comment))
 		return 1;
 
@@ -112,6 +114,7 @@ static void field_edited(struct ui_field_edit_ctx *c)
 	case ft_user:
 	case ft_email:
 	case ft_pw:
+	case ft_pw2:
 	case ft_comment:
 		/* @@@ report errors */
 		db_change_field(c->de, c->type, c->buf, strlen(c->buf));
@@ -197,7 +200,12 @@ static void ui_field_edit_open(void *ctx, void *params)
 		copy_value(c->buf, f);	
 		break;
 	case ft_pw:
-		PARAMS("Password", MAX_STRING_LEN, NULL);
+		PARAMS(db_field_find(c->de, ft_pw2) ? "Password 1" : "Password",
+		    MAX_STRING_LEN, NULL);
+		copy_value(c->buf, f);	
+		break;
+	case ft_pw2:
+		PARAMS("Password 2", MAX_STRING_LEN, NULL);
 		copy_value(c->buf, f);	
 		break;
 	case ft_hotp_secret:
@@ -292,6 +300,9 @@ static void ui_field_add_open(void *ctx, void *params)
 	if (!db_field_find(c->de, ft_pw))
 		wi_list_add(&c->list, "Password", NULL,
 		    (void *) (uintptr_t) ft_pw);
+	if (db_field_find(c->de, ft_pw) && !db_field_find(c->de, ft_pw2))
+		wi_list_add(&c->list, "Password 2", NULL,
+		    (void *) (uintptr_t) ft_pw2);
 	if (!db_field_find(c->de, ft_hotp_secret) &&
 	    !db_field_find(c->de, ft_totp_secret)) {
 		wi_list_add(&c->list, "HOTP", NULL,

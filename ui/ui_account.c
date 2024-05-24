@@ -314,6 +314,8 @@ static void confirm_field_deletion(void *user, bool confirm)
 
 	if (confirm) {
 		// @@@ if deleting ft_hotp_secret, also delete ft_hotp_counter
+		// @@@ if deleting ft_pw, also change fw_pw2 (if present) to
+		// ft_pw
 		db_delete_field(c->selected_account, f);
 	}
 }
@@ -338,6 +340,9 @@ static void delete_field(void *user)
 		break;
 	case ft_pw:
 		prm.name = "password";
+		break;
+	case ft_pw2:
+		prm.name = "2nd password";
 		break;
 	case ft_hotp_secret:
 		prm.name = "HOTP";
@@ -428,7 +433,7 @@ static void ui_account_open(void *ctx, void *params)
 {
 	struct ui_account_ctx *c = ctx;
 	struct db_entry *de = params;
-	struct db_field *f;
+	struct db_field *f, *f2;
 	unsigned i;
 
 	lists[0] = &c->list;
@@ -456,7 +461,16 @@ static void ui_account_open(void *ctx, void *params)
 			add_string(c, "E-Mail", f->data, f->len, f);
 			break;
 		case ft_pw:
-			add_string(c, "Password", f->data, f->len, f);
+			f2 = db_field_find(de, ft_pw2);
+			if (f2) {
+				add_string(c, "Password 1", f->data, f->len, f);
+				add_string(c, "Password 2", f2->data, f2->len,
+				    f2);
+			} else {
+				add_string(c, "Password", f->data, f->len, f);
+			}
+			break;
+		case ft_pw2:
 			break;
 		case ft_hotp_secret:
 			wi_list_add(&c->list, "HOTP", "------", f);

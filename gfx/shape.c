@@ -131,7 +131,7 @@ static void octant(int *ox, int *oy, int *dx, int *dy, uint8_t oct)
 }
 
 
-static void point_on_arc(short **p, unsigned x, unsigned y, unsigned r,
+static void point_on_arc(short **p, int x, int y, unsigned r,
     unsigned a)
 {
 	uint8_t pos = isin(a % 45, r);
@@ -143,7 +143,7 @@ static void point_on_arc(short **p, unsigned x, unsigned y, unsigned r,
 }
 
 
-void gfx_arc(struct gfx_drawable *da, unsigned x, unsigned y, unsigned r,
+void gfx_arc(struct gfx_drawable *da, int x, int y, unsigned r,
     unsigned a0, unsigned a1, gfx_color color, gfx_color bg)
 {
 	short v[22];	/* center, arc start, end, and up to 8 octants */

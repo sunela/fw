@@ -42,7 +42,7 @@ void gfx_rrect_xy(struct gfx_drawable *da, unsigned x, unsigned y, unsigned w,
  * position. For a0 = a1. we draw a full circle.
  */
 
-void gfx_arc(struct gfx_drawable *da, unsigned x, unsigned y, unsigned r, 
+void gfx_arc(struct gfx_drawable *da, int x, int y, unsigned r, 
     unsigned a0, unsigned a1, gfx_color color, gfx_color bg);
 
 /*

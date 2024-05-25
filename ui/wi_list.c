@@ -97,6 +97,24 @@ void *wi_list_user(const struct wi_list_entry *entry)
 }
 
 
+/* --- Shared clipping function -------------------------------------------- */
+
+
+static void clip_bb(struct gfx_drawable *da, const struct wi_list_style *style,
+    const struct gfx_rect *bb)
+{
+	struct gfx_rect clip = *bb;
+
+	if (clip.y < (int) style->y0) {
+		clip.h -= style->y0 - clip.y;
+		clip.y = style->y0;
+	}
+	if (clip.y + clip.h > (int) style->y1 + 1)
+		clip.h = style->y1 + 1 - clip.y;
+	gfx_clip(da, &clip);
+}
+
+
 /* --- Render callback ----------------------------------------------------- */
 
 
@@ -104,7 +122,7 @@ void wi_list_render_entry(struct wi_list *list, struct wi_list_entry *entry)
 {
 	struct gfx_rect bb = {
 		.x = 0,
-		.y = list->style->y0,
+		.y = list->style->y0 - list->up,
 		.w = GFX_WIDTH,
 		.h = entry_height(list, entry),
 	};
@@ -122,7 +140,9 @@ void wi_list_render_entry(struct wi_list *list, struct wi_list_entry *entry)
 		bb.y += style->min_h < h ? h : style->min_h;
 		odd = !odd;
 	}
+	clip_bb(&main_da, style, &bb);
 	list->style->render(list, entry, &main_da, &bb, odd);
+	gfx_clip(&main_da, NULL);
 }
 
 
@@ -158,6 +178,7 @@ static void do_draw_entry(const struct wi_list *list,
 {
 	const struct wi_list_style *style = list->style;
 
+	clip_bb(da, style, bb);
 	gfx_rect(da, bb, style->bg[odd]);
 	text_text(da, 0, y + opad(list, e), e->first, list_font(list),
 	    GFX_LEFT, GFX_TOP | GFX_MAX, style->fg[odd]);
@@ -168,6 +189,7 @@ static void do_draw_entry(const struct wi_list *list,
 		    GFX_LEFT, GFX_TOP | GFX_MAX, style->fg[odd]);
 	if (style->render)
 		style->render(list, e, da, bb, odd);
+	gfx_clip(da, NULL);
 }
 
 
@@ -194,22 +216,7 @@ static unsigned draw_entry(const struct wi_list *list,
 		return bb.h;
 	}
 
-	// @@@ if we allocate from the stack here, the SDK version crashes ...
-	// gfx_color tmp_fb[GFX_WIDTH * bb.h];
-	static PSRAM gfx_color tmp_fb[GFX_WIDTH * GFX_HEIGHT];
-	struct gfx_drawable tmp_da;
-	struct gfx_rect tmp_bb = bb;
-
-	tmp_bb.y = 0;
-	gfx_da_init(&tmp_da, GFX_WIDTH, bb.h, tmp_fb);
-	gfx_clear(&tmp_da, style->bg[odd]); /* better safe than sorry */
-	do_draw_entry(list, e, &tmp_da, &tmp_bb, y - bb.y, odd);
-	if (top < (int) style->y0)
-		gfx_copy(da, 0, style->y0, &tmp_da, 0, style->y0 - top,
-		    GFX_WIDTH, bb.h - ((int) style->y0 - top), -1);
-	else
-		gfx_copy(da, 0, top, &tmp_da, 0, 0,
-		    GFX_WIDTH, style->y1 - top + 1, -1);
+	do_draw_entry(list, e, da, &bb, y, odd);
 	return bb.h;
 }
 
@@ -367,7 +374,7 @@ void wi_list_update_entry(struct wi_list *list, struct wi_list_entry *entry,
 	    (second ? !entry->second || strcmp(second, entry->second) :
 	    !!entry->second);
 	const struct wi_list_entry *e;
-	unsigned y = list->style->y0;
+	unsigned y = list->style->y0 - list->up;
 	int odd = 0;
 
 	entry->user = user;

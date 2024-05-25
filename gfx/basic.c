@@ -52,11 +52,14 @@ static void damage(struct gfx_drawable *da, int x, int y, int w, int h)
 void gfx_clip(struct gfx_drawable *da, const struct gfx_rect *clip)
 {
 	if (clip) {
+		assert(!da->clipping);
 		assert(clip->x >= 0);
 		assert(clip->y >= 0);
 		assert(clip->x + clip->w <= (int) da->w);
 		assert(clip->y + clip->h <= (int) da->h);
 		da->clip = *clip;
+	} else {
+		assert(da->clipping);
 	}
 	da->clipping = clip;
 }

@@ -386,6 +386,23 @@ EOF
 
 accounts $mode account-comment "tap 86 67"
 
+# --- account with 2nd password field -----------------------------------------
+
+json <<EOF
+[ { "id":"id", "user":"user", "email":"email", "pw":"pw", "pw2":"pw2" } ]
+EOF
+
+accounts $mode account-pw2 "tap 86 67"
+
+# --- account with 2nd password and TOTP --------------------------------------
+
+json <<EOF
+[ { "id":"id", "user":"user", "email":"email", "pw":"pw", "pw2":"pw2",
+    "totp_secret": "GZ4FORKTNBVFGQTFJJGEIRDOKY======" } ]
+EOF
+
+accounts $mode account-pw2-totp "time 0" "tap 86 67"
+
 # -----------------------------------------------------------------------------
 
 [ "$1" = last ] && display "$dir/_tmp.ppm"

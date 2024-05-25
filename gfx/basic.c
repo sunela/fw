@@ -18,9 +18,34 @@ static void damage(struct gfx_drawable *da, int x, int y, int w, int h)
 {
 	struct gfx_rect *r = &da->damage;
 
+	if (w <= 0 || h <= 0)
+		return;
+	if (da->clipping) {
+		if (x >= da->clip.x + da->clip.w)
+			return;
+		if (y >= da->clip.y + da->clip.h)
+			return;
+		if (x + w <= da->clip.x)
+			return;
+		if (y + h <= da->clip.y)
+			return;
+		if (x < da->clip.x) {
+			w -= da->clip.x - x;
+			x = da->clip.x;
+		}
+		if (x + w > da->clip.x + da->clip.w)
+			w = da->clip.x + da->clip.w - x;
+		if (y < da->clip.y) {
+			h -= da->clip.y - y;
+			y = da->clip.y;
+		}
+		if (y + h > da->clip.y + da->clip.h)
+			h = da->clip.y + da->clip.h - y;
+	}
 	assert(x >= 0 && y >= 0);
 	assert(w >= 0 && h >= 0);
 	assert(x + w <= (int) da->w && y + h <= (int) da->h);
+
 	if (!w || !h)
 		return;
 	if (!da->changed) {
@@ -174,11 +199,11 @@ void gfx_disc(struct gfx_drawable *da, int x, int y, unsigned r,
 	}
 	for (dy = -r; dy <= (int) r; dy++) {
 		if (!da->clipping ||
-		    (dy >= da->clip.y && dy < da->clip.y + da->clip.h))
+		    (y + dy >= da->clip.y && y + dy < da->clip.y + da->clip.h))
 			for (dx = -r; dx <= (int) r; dx++) {
 				if (!da->clipping ||
-		    		    (dx >= da->clip.x &&
-				    dx < da->clip.x + da->clip.w))
+		    		    (x + dx >= da->clip.x &&
+				    x + dx < da->clip.x + da->clip.w))
 					if (dx * dx + dy * dy < r2)
 						*p = color;
 				p++;

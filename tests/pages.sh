@@ -66,7 +66,15 @@ page_inner()
 			    >"$dir/_db" || exit
 		fi
 	fi
-	if [ "$mode" = interact ]; then
+	if $gdb; then
+		if [ "$mode" = interact ]; then
+			interact=interact
+		else
+			interact=
+		fi
+		gdb --args $top/sim $quiet -d "$dir/_db" -C "$@" $interact
+		exit
+	elif [ "$mode" = interact ]; then
 		$top/sim $quiet -d "$dir/_db" -C "$@" interact
 		exit
 	else
@@ -103,8 +111,11 @@ page()
 usage()
 {
 	cat <<EOF 1>&2
-usage: $0 [-v] [-x] [run|show|interact|last|test|store|names [page-name]]
+usage: $0 [--gdb] [-v] [-x] [run|show|interact|last|test|store|names
+          [page-name]]
 
+--gdb
+    run the simulator under gdb
 -v  enable debug output of the simulator
 -x  set shell command tracing with set -x
 EOF
@@ -116,10 +127,13 @@ self=`which "$0"`
 dir=`dirname "$self"`
 top=$dir/..
 
+gdb=false
 quiet=-q
 
 while [ "$1" ]; do
 	case "$1" in
+	--gdb)	gdb=true
+		shift;;
 	-v)	quiet=
 		shift;;
 	-x)	set -x

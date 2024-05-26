@@ -68,6 +68,7 @@ struct db_entry {
 	char		*name;
 	uint16_t	seq;
 	unsigned	block;
+	bool		defer;	/* defer writing changes to storage */
 	struct db_field	*fields;
 	struct db_entry	*next;
 };
@@ -99,13 +100,23 @@ extern uint8_t ft2order[];
 extern const unsigned field_types;
 
 
-struct db_entry *db_new_entry(struct db *db, const char *name);
+struct db_field *db_field_find(const struct db_entry *de, enum field_type type);
 bool db_change_field(struct db_entry *de, enum field_type type,
     const void *data, unsigned size);
 bool db_delete_field(struct db_entry *de, struct db_field *f);
-bool db_delete_entry(struct db_entry *de);
 
-struct db_field *db_field_find(const struct db_entry *de, enum field_type type);
+/*
+ * db_entry_defer_update(..., 1) disables writing changes to the entry back to
+ * storage. db_entry_defer_update(..., 0) rewrites the entry. (We currently
+ * assume that is has been changed, so we always rewrite it. This may change in
+ * the future.)
+ *
+ * db_entry_defer_update returns 0 if an update was attempted but failed. It
+ * returns 1 in all other cases.
+ */
+bool db_entry_defer_update(struct db_entry *de, bool defer);
+struct db_entry *db_new_entry(struct db *db, const char *name);
+bool db_delete_entry(struct db_entry *de);
 bool db_iterate(struct db *db, bool (*fn)(void *user, struct db_entry *de),
     void *user);
 

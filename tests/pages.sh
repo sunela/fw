@@ -460,6 +460,24 @@ EOF
 accounts $mode account-pw2-totp-up-31 \
     "time 31" "tap 86 67" "drag 158 243 159 196"
 
+# --- delete 2nd password field -----------------------------------------------
+
+json <<EOF
+[ { "id":"id", "user":"user", "email":"email", "pw":"pw", "pw2":"pw2" } ]
+EOF
+
+accounts $mode delete-pw2 "tap 86 67" \
+    "long 119 233" "tap 154 173" "drag 56 190 183 191"
+
+# --- delete 1st password field -----------------------------------------------
+
+json <<EOF
+[ { "id":"id", "user":"user", "email":"email", "pw":"pw", "pw2":"pw2" } ]
+EOF
+
+accounts $mode delete-pw1 "tap 86 67" \
+    "long 119 177" "tap 154 173" "drag 56 190 183 191"
+
 # -----------------------------------------------------------------------------
 
 [ "$1" = last ] && display "$dir/_tmp.ppm"

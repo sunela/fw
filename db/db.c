@@ -262,9 +262,11 @@ bool db_change_field(struct db_entry *de, enum field_type type,
 	struct db_field *f;
 	int new;
 
-	new = get_erased_block(db);
-	if (new < 0)
-		return 0;
+	if (!de->defer) {
+		new = get_erased_block(db);
+		if (new < 0)
+			return 0;
+	}
 
 	for (anchor = &de->fields; *anchor; anchor = &(*anchor)->next)
 		if ((*anchor)->type >= type)
@@ -289,7 +291,7 @@ bool db_change_field(struct db_entry *de, enum field_type type,
 		de->name[size] = 0;
 	}
 
-	return update_entry(de, new);
+	return de->defer || update_entry(de, new);
 }
 
 
@@ -299,15 +301,34 @@ bool db_delete_field(struct db_entry *de, struct db_field *f)
 	struct db_field **anchor;
 	int new;
 
-	new = get_erased_block(db);
-	if (new < 0)
-		return 0;
+	if (!de->defer) {
+		new = get_erased_block(db);
+		if (new < 0)
+			return 0;
+	}
 
 	for (anchor = &de->fields; *anchor != f; anchor = &(*anchor)->next);
 	*anchor = f->next;
 	free_field(f);
 
-	return update_entry(de, new);
+	return de->defer || update_entry(de, new);
+}
+
+
+bool db_entry_defer_update(struct db_entry *de, bool defer)
+{
+	if (!defer) {
+		int new;
+
+		new = get_erased_block(de->db);
+		if (new < 0)
+			return 0;
+		if (!update_entry(de, new))
+			return 0;
+	}
+		
+	de->defer = defer;
+	return 1;
 }
 
 

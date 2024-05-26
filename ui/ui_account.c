@@ -310,13 +310,23 @@ static void edit_field(void *user)
 static void confirm_field_deletion(void *user, bool confirm)
 {
 	struct ui_account_ctx *c = user;
+	struct db_entry *de = c->selected_account;
 	struct db_field *f = c->field_ref;
+	struct db_field *f2 = NULL;
 
-	if (confirm) {
-		// @@@ if deleting ft_hotp_secret, also delete ft_hotp_counter
-		// @@@ if deleting ft_pw, also change fw_pw2 (if present) to
-		// ft_pw
-		db_delete_field(c->selected_account, f);
+	if (!confirm)
+		return;
+	if (f->type == ft_pw)
+		f2 = db_field_find(de, ft_pw2);
+	if (f2) {
+		db_entry_defer_update(de, 1);
+		db_change_field(de, ft_pw, f2->data, f2->len);
+		db_delete_field(de, f2);
+		db_entry_defer_update(de, 0);
+		// @@@ handle errors
+	} else {
+		db_delete_field(de, f);
+		// @@@ handle errors
 	}
 }
 

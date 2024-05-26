@@ -18,6 +18,9 @@
 #include "debug.h"
 
 
+bool quiet = 0;
+
+
 /* --- gettimeofday wrapper ------------------------------------------------ */
 
 
@@ -73,6 +76,8 @@ void vdebug(const char *fmt, va_list ap)
 		first = 0;
 	}
 	t -= t_start;
+	if (quiet)
+		return;
 	if (nl)
 		format(console_cb, NULL, "[%3llu.%03llu] ",
 		    (unsigned long long) t / 1000000,

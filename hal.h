@@ -24,6 +24,8 @@
 #define	PSRAM
 #endif
 
+
+extern bool quiet;
 extern int64_t time_offset;
 extern uint64_t time_override;
 

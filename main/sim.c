@@ -313,6 +313,7 @@ static void usage(const char *name)
 "-c  receive user interaction from a script\n"
 "-d database\n"
 "    set the database file (default: %s)\n"
+"-q  quiet. Disable debugging output.\n"
 "-s screenshot\n"
 "    set the screenshot file name. if present, %%u is converted to the\n"
 "    screenshot number (starts at 0). The usual printf conversion\n"
@@ -327,7 +328,7 @@ int main(int argc, char **argv)
 	bool scripting = 0;
 	int c, i;
 
-	while ((c = getopt(argc, argv, "+2Cd:s:")) != EOF)
+	while ((c = getopt(argc, argv, "+2Cd:qs:")) != EOF)
 		switch (c) {
 		case '2':
 			zoom = 2;
@@ -337,6 +338,9 @@ int main(int argc, char **argv)
 			break;
 		case 'd':
 			storage_file = optarg;
+			break;
+		case 'q':
+			quiet = 1;
 			break;
 		case 's':
 			screenshot_name = optarg;

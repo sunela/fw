@@ -66,7 +66,7 @@ page_inner()
 			    >"$dir/_db" || exit
 		fi
 	fi
-	$top/sim -d "$dir/_db" -C "$@" "screen $dir/_tmp.ppm" || exit
+	$top/sim $quiet -d "$dir/_db" -C "$@" "screen $dir/_tmp.ppm" || exit
 
 	case "$mode" in
 	last)	return;;
@@ -97,9 +97,10 @@ page()
 usage()
 {
 	cat <<EOF 1>&2
-usage: $0 [-x] [run|show|last|test|store|names [page-name]]
+usage: $0 [-v] [-x] [run|show|last|test|store|names [page-name]]
 
--x  set shell tracing with set -x
+-v  enable debug output of the simulator
+-x  set shell command tracing with set -x
 EOF
 	exit 1
 }
@@ -109,8 +110,12 @@ self=`which "$0"`
 dir=`dirname "$self"`
 top=$dir/..
 
+quiet=-q
+
 while [ "$1" ]; do
 	case "$1" in
+	-v)	quiet=
+		shift;;
 	-x)	set -x
 		shift;;
 	-*)	usage;;

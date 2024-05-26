@@ -430,6 +430,36 @@ EOF
 
 accounts $mode account-pw2-totp "time 0" "tap 86 67"
 
+# --- account with 2nd password and TOTP, scrolled up, at 5 s -----------------
+
+json <<EOF
+[ { "id":"id", "user":"user", "email":"email", "pw":"pw", "pw2":"pw2",
+    "totp_secret": "GZ4FORKTNBVFGQTFJJGEIRDOKY======" } ]
+EOF
+
+accounts $mode account-pw2-totp-up-5 \
+    "time 5" "tap 86 67" "drag 158 243 159 196"
+
+# --- account with 2nd password and TOTP, scrolled up, at 20 s ----------------
+
+json <<EOF
+[ { "id":"id", "user":"user", "email":"email", "pw":"pw", "pw2":"pw2",
+    "totp_secret": "GZ4FORKTNBVFGQTFJJGEIRDOKY======" } ]
+EOF
+
+accounts $mode account-pw2-totp-up-20 \
+    "time 20" "tap 86 67" "drag 158 243 159 196"
+
+# --- account with 2nd password and TOTP, scrolled up, at 31 s ----------------
+
+json <<EOF
+[ { "id":"id", "user":"user", "email":"email", "pw":"pw", "pw2":"pw2",
+    "totp_secret": "GZ4FORKTNBVFGQTFJJGEIRDOKY======" } ]
+EOF
+
+accounts $mode account-pw2-totp-up-31 \
+    "time 31" "tap 86 67" "drag 158 243 159 196"
+
 # -----------------------------------------------------------------------------
 
 [ "$1" = last ] && display "$dir/_tmp.ppm"

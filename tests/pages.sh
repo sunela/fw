@@ -66,7 +66,13 @@ page_inner()
 			    >"$dir/_db" || exit
 		fi
 	fi
-	$top/sim $quiet -d "$dir/_db" -C "$@" "screen $dir/_tmp.ppm" || exit
+	if [ "$mode" = interact ]; then
+		$top/sim $quiet -d "$dir/_db" -C "$@" interact
+		exit
+	else
+		$top/sim $quiet -d "$dir/_db" -C "$@" "screen $dir/_tmp.ppm" ||
+		    exit
+	fi
 
 	case "$mode" in
 	last)	return;;
@@ -97,7 +103,7 @@ page()
 usage()
 {
 	cat <<EOF 1>&2
-usage: $0 [-v] [-x] [run|show|last|test|store|names [page-name]]
+usage: $0 [-v] [-x] [run|show|interact|last|test|store|names [page-name]]
 
 -v  enable debug output of the simulator
 -x  set shell command tracing with set -x
@@ -126,6 +132,8 @@ done
 case "$1" in
 run|show|test|store|last|names)
 	mode=$1;;
+inter|interact)
+	mode=interact;;
 "")	mode=test;;
 *)	usage;;
 esac

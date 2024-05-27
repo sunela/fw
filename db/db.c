@@ -260,7 +260,7 @@ bool db_change_field(struct db_entry *de, enum field_type type,
 	struct db *db = de->db;
 	struct db_field **anchor;
 	struct db_field *f;
-	int new;
+	int new = -1;
 
 	if (!de->defer) {
 		new = get_erased_block(db);
@@ -299,7 +299,7 @@ bool db_delete_field(struct db_entry *de, struct db_field *f)
 {
 	struct db *db = de->db;
 	struct db_field **anchor;
-	int new;
+	int new = -1;
 
 	if (!de->defer) {
 		new = get_erased_block(db);

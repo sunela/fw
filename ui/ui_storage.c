@@ -44,7 +44,7 @@ static void initialize_storage(void)
 	unsigned total = storage_blocks();
 
 	gfx_clear(&main_da, GFX_BLACK);
-	update_display(&main_da);
+	ui_update_display(&main_da);
 	db_close(&main_db);
 	storage_erase_blocks(0, total);
 	// @@@ create at least one empty entry, so that we can verify the PIN
@@ -93,7 +93,7 @@ static void ui_storage_open(void *ctx, void *params)
 	text_text(&main_da, GFX_WIDTH / 2, TOP_H / 2, "Storage",
 	    &FONT_TOP, GFX_CENTER, GFX_CENTER, GFX_WHITE);
 
-	update_display(&main_da);
+	ui_update_display(&main_da);
 
 	db_stats(&main_db, &s);
 

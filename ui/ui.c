@@ -73,7 +73,7 @@ static inline void *current_ctx(void)
 }
 
 
-/* --- Crosshair ----------------------------------------------------------- */
+/* --- Display update with crosshair --------------------------------------- */
 
 
 #if CROSSHAIR
@@ -118,6 +118,12 @@ static void crosshair_show(unsigned x, unsigned y)
 	update_display(&main_da);
 	crosshair_shown = 1;
 #endif /* CROSSHAIR */
+}
+
+
+void ui_update_display(struct gfx_drawable *da)
+{
+	update_display(da);
 }
 
 
@@ -422,7 +428,7 @@ void ui_switch(const struct ui *ui, void *params)
 	memset(current_ctx(), 0, ui->ctx_size);
 	if (ui->open)
 		ui->open(current_ctx(), params);
-	update_display(&main_da);
+	ui_update_display(&main_da);
 }
 
 
@@ -441,7 +447,7 @@ void ui_call(const struct ui *ui, void *params)
 	memset(current_ctx(), 0, ui->ctx_size);
 	if (ui->open)
 		ui->open(current_ctx(), params);
-	update_display(&main_da);
+	ui_update_display(&main_da);
 }
 
 
@@ -463,7 +469,7 @@ void ui_return(void)
 	sp--;
 	assert(current_ui()->resume);
 	current_ui()->resume(current_ctx());
-	update_display(&main_da);
+	ui_update_display(&main_da);
 }
 
 
@@ -511,6 +517,6 @@ bool app_init(char **args, unsigned n_args)
 		ui_switch(&ui_off, NULL);
 	}
 
-	update_display(&main_da);
+	ui_update_display(&main_da);
 	return 1;
 }

@@ -111,6 +111,8 @@ void turn_off(void);
 
 void show_citrine(void);
 
+void ui_update_display(struct gfx_drawable *da);
+
 void ui_switch(const struct ui *ui, void *params);
 void ui_call(const struct ui *ui, void *params);
 void ui_return(void);

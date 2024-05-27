@@ -276,7 +276,7 @@ debug("scrolling %u up %u scroll_from %u dy %d y0 %u y1 %u th %u\n",
 		return 0;
 	list->up -= dy;
 	draw_list(list);
-	update_display(&main_da);
+	ui_update_display(&main_da);
 	return 1;
 }
 
@@ -320,7 +320,7 @@ debug("wi_list_cancel\n");
 		if (list->scroll_from != list->up) {
 			list->up = list->scroll_from;
 			draw_list(list);
-			update_display(&main_da);
+			ui_update_display(&main_da);
 		}
 		list->scrolling = 0;
 	}

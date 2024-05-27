@@ -142,7 +142,7 @@ static void ui_confirm_moving(void *ctx, unsigned from_x, unsigned from_y,
 		chevrons(to_x + 1, c->current_x,
 		    CHEVRONS_PASSIVE_COLOR);
 	c->current_x = to_x;
-	update_display(&main_da);
+	ui_update_display(&main_da);
 }
 
 

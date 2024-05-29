@@ -21,8 +21,9 @@ at all.
 Build instructions
 ------------------
 
-To do: document setting up the toolchain (we're based on OpenBouffalo, but
+To do: document setting up the toolchain (we're based on the Bouffalo SDK, but
 there are some issues we need to work around.)
+
 
 Prerequisites
 -------------
@@ -31,6 +32,8 @@ The following packages are needed (the names given here are for Ubuntu 22.04):
 Liberation fonts: fonts-liberation
 Font configuration utility fc-list: fontconfig
 OpenType/TrueType BDF converter otf2bdf: otf2bdf
+Simple Directmedia Layer (SDL2): libsdl2-dev
+GNU Crypto library: libgcrypt20-dev
 
 
 Running on the Sipeed M1s Dock

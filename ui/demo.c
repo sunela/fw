@@ -166,7 +166,7 @@ static bool demo_long(char *const *args, unsigned n_args)
 
 		t0();
 		hold = long_text_scroll(&lt, &main_da, -DEMO_LONG_STEP);
-		ui_update_display(&main_da);
+		ui_update_display();
 		t1("scroll & update");
 		if (hold) {
 			msleep(DEMO_LONG_HOLD_MS - DEMO_LONG_DELAY_MS);

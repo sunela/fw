@@ -163,7 +163,7 @@ static void release_button(void *user)
 debug("release_button 0x%x\n", n);
 	pin_button(n >> 4, n & 15,
 	    pin_len < MAX_PIN_LEN ? UP_BG : DISABLED_BG);
-	ui_update_display(&main_da);
+	ui_update_display();
 }
 
 
@@ -176,7 +176,7 @@ static void open_progress(void *user, unsigned i, unsigned n)
 		return;
 	gfx_rect_xy(&main_da, PROGRESS_X0 + *progress, PROGRESS_Y0,
 	    w - *progress, PROGRESS_H, PROGRESS_DONE_COLOR);
-	ui_update_display(&main_da);
+	ui_update_display();
 	*progress = w;
 }
 
@@ -191,7 +191,7 @@ static bool accept_pin(void)
 	gfx_clear(&main_da, GFX_BLACK);
 	gfx_rect_xy(&main_da, PROGRESS_X0, PROGRESS_Y0, PROGRESS_W, PROGRESS_H,
 	    PROGRESS_TOTAL_COLOR);
-	ui_update_display(&main_da);	/* give immediate visual feedback */
+	ui_update_display();	/* give immediate visual feedback */
 	if (!db_open_progress(&main_db, NULL, open_progress, &progress))
 		return 0;
 	db_stats(&main_db, &s);
@@ -236,7 +236,7 @@ static void ui_pin_tap(void *ctx, unsigned x, unsigned y)
 			draw_digits(UP_BG);
 		pin_len = 0;
 		pin = 0xffffffff;
-		ui_update_display(&main_da);
+		ui_update_display();
 		return;
 	}
 	if (col == 2 && row == 0) { // enter
@@ -271,7 +271,7 @@ debug("%08lx\n", (unsigned long) pin);
 		draw_digits(DISABLED_BG);
 	clear_indicators(pin_len - 1);
 	draw_indicators(pin_len);
-	ui_update_display(&main_da);
+	ui_update_display();
 }
 
 

@@ -341,7 +341,7 @@ static void release_button(void *user)
 	struct ui_entry_ctx *c = user;
 
 	first_button(c, c->n >> 4, c->n & 15, SPECIAL_UP_BG);
-	ui_update_display(&main_da);
+	ui_update_display();
 }
 
 
@@ -371,7 +371,7 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 			draw_first_text(c, 1);
 			first_button(c, 0, 0, SPECIAL_UP_BG);
 			first_button(c, 2, 0, SPECIAL_UP_BG);
-			ui_update_display(&main_da);
+			ui_update_display();
 			return;
 		}
 		if (!*c->buf) {
@@ -391,7 +391,7 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 			first_button(c, 2, 0, SPECIAL_UP_BG);
 		if (end - c->buf == (int) c->max_len)
 			draw_first_text(c, 1);
-		ui_update_display(&main_da);
+		ui_update_display();
 		return;
 	}
 	if (col == 2 && row == 0) { // enter
@@ -421,7 +421,7 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 		c->second = second_maps[n];
 		draw_second(c->second);
 	}
-	ui_update_display(&main_da);
+	ui_update_display();
 }
 
 

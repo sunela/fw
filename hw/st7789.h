@@ -27,6 +27,8 @@ static inline uint16_t st7789_rgb(uint8_t r, uint8_t g, uint8_t b)
 }
 
 
+void st7789_update_partial(const void *fb, unsigned bx, unsigned by,
+    unsigned sx, unsigned sy, unsigned w, unsigned h, unsigned stride);
 void st7789_update(const void *fb, unsigned x0, unsigned y0, unsigned x1,
     unsigned y1);
 

@@ -133,30 +133,60 @@ static void st7789_send(uint8_t cmd, const void *buf, unsigned len)
 /* --- API ----------------------------------------------------------------- */
 
 
-void st7789_update(const void *fb, unsigned x0, unsigned y0, unsigned x1,
-    unsigned y1)
+static void st7789_set_area(unsigned x0, unsigned y0, unsigned x1, unsigned y1)
 {
 	st7789_cmd32(ST7789_CASET,
 	    (x0 + st7789_xoff) << 16 | (x1 + st7789_xoff));
 	st7789_cmd32(ST7789_RASET,
 	    (y0 + st7789_yoff) << 16 | (y1 + st7789_yoff));
+}
 
-	if (x0 == 0 && x1 == st7789_width - 1) {
-		st7789_send(ST7789_RAMWR, fb + y0 * st7789_width * 2,
-		    st7789_width * (y1 - y0 + 1) * 2);
-	} else {
-		const void *p = fb + (y0 * st7789_width + x0) * 2;
 
-		st7789_send_begin(ST7789_RAMWR);
-		for (unsigned y = y0; y <= y1; y++) {
-			st7789_send_data(p, (x1 - x0 + 1) * 2);
-			p += st7789_width * 2;
-		}
-		st7789_send_end();
+static void st7789_send_buf(const void *p, unsigned w, unsigned h,
+    unsigned stride)
+{
+	st7789_send_begin(ST7789_RAMWR);
+	while (h--) {
+		st7789_send_data(p, w * 2);
+		p += stride * 2;
 	}
+	st7789_send_end();
+}
+
+
+void st7789_update_partial(const void *fb, unsigned bx, unsigned by,
+    unsigned sx, unsigned sy, unsigned w, unsigned h, unsigned stride)
+{
+	st7789_set_area(sx, sy, sx + w - 1, sy + h - 1);
+
+	if ((bx | sx) == 0 && w == st7789_width && w == stride)
+		st7789_send(ST7789_RAMWR, fb + by * w * 2, w * h * 2);
+	else
+		st7789_send_buf(fb + (by * stride + bx) * 2, w, h, stride);
 
 	/* @@@ we need a small delay between frames */
 	mdelay(1);
+}
+
+
+void st7789_update(const void *fb, unsigned x0, unsigned y0, unsigned x1,
+    unsigned y1)
+{
+	st7789_update_partial(fb, x0, y0, x0, y0, x1 - x0 + 1, y1 - y0 + 1,
+	    st7789_width);
+#if 0
+	st7789_set_area(x0, y0, x1, y1);
+
+	if (x0 == 0 && x1 == st7789_width - 1)
+		st7789_send(ST7789_RAMWR, fb + y0 * st7789_width * 2,
+		    st7789_width * (y1 - y0 + 1) * 2);
+	else
+		st7789_send_buf(fb + (y0 * st7789_width + x0) * 2,
+		    x1 - x0 + 1, y1 - y0 + 1, st7789_width);
+
+	/* @@@ we need a small delay between frames */
+	mdelay(1);
+#endif
 }
 
 

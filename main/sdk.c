@@ -101,6 +101,12 @@ static void event_loop(void)
 /* --- Display update ------------------------------------------------------ */
 
 
+void update_display_partial(struct gfx_drawable *da, unsigned x, unsigned y)
+{
+	st7789_update_partial(da->fb, 0, 0, x, y, da->w, da->h, da->w);
+}
+
+
 void update_display(struct gfx_drawable *da)
 {
 	if (!da->changed)

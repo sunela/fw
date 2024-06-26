@@ -104,6 +104,40 @@ static void cut_corners(void)
 }
 
 
+static void pixel(unsigned x, unsigned y, gfx_color c)
+{
+	SDL_Rect rect = {
+		.x = x * zoom,
+		.y = y * zoom,
+		.w = zoom,
+		.h = zoom
+	};
+
+	SDL_FillRect(surf, &rect, SDL_MapRGB(surf->format,
+	    c & 0xf8,
+	    (c & 7) << 5 | (c & 0xe000) << 2,
+	    (c & 0x1f00) >> 5));
+}
+
+
+void update_display_partial(struct gfx_drawable *da, unsigned x, unsigned y)
+{
+	const gfx_color *p = da->fb;
+	unsigned h, i;
+
+debug("update_display_partial(w %u, h %u, x %u, y %u)\n", da->w, da->h, x, y);
+	for (h = da->h; h; h--) {
+		for (i = 0; i != da->w; i++)
+			pixel(x + i, y, *p++);
+		y++;
+	}
+	cut_corners();
+
+	SDL_UpdateTexture(tex, NULL, surf->pixels, surf->pitch);
+	render();
+}
+
+
 void update_display(struct gfx_drawable *da)
 {
 	const gfx_color *p;
@@ -124,20 +158,8 @@ void update_display(struct gfx_drawable *da)
 	assert(da->damage.h <= GFX_HEIGHT);
 	for (y = da->damage.y; y != da->damage.y + da->damage.h; y++) {
 		p = da->fb + y * da->w + da->damage.x;
-		for (x = da->damage.x; x != da->damage.x + da->damage.w; x++) {
-			SDL_Rect rect = {
-				.x = x * zoom,
-				.y = y * zoom,
-				.w = zoom,
-				.h = zoom
-			};
-
-			SDL_FillRect(surf, &rect, SDL_MapRGB(surf->format,
-			    *p & 0xf8,
-			    (*p & 7) << 5 | (*p & 0xe000) << 2,
-			    (*p & 0x1f00) >> 5));
-			p++;
-		}
+		for (x = da->damage.x; x != da->damage.x + da->damage.w; x++)
+			pixel(x, y, *p++);
 	}
 	cut_corners();
 

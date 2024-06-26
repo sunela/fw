@@ -48,6 +48,7 @@ void msleep(unsigned ms);
 
 uint64_t time_us(void);
 
+void update_display_partial(struct gfx_drawable *da, unsigned x, unsigned y);
 void update_display(struct gfx_drawable *da);
 void display_on(bool on);
 

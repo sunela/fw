@@ -23,7 +23,7 @@
 #include "ui.h"
 
 
-#define	CROSSHAIR	0
+#define	CROSSHAIR	1
 
 #define	UI_STACK_SIZE	5
 #define	UI_TIMERS	3
@@ -77,27 +77,23 @@ static inline void *current_ctx(void)
 
 
 #if CROSSHAIR
+static bool show_crosshair = 0;
 static bool crosshair_shown = 0;
 static unsigned crosshair_x = 0;
 static unsigned crosshair_y = 0;
-static gfx_color backing_fb_x[GFX_WIDTH];
-static gfx_color backing_fb_y[GFX_HEIGHT];
-static struct gfx_drawable backing_da_x;
-static struct gfx_drawable backing_da_y;
+static unsigned crosshair_shown_x = 0;
+static unsigned crosshair_shown_y = 0;
+static gfx_color crosshair_fb_x[GFX_WIDTH];
+static gfx_color crosshair_fb_y[GFX_HEIGHT];
+static struct gfx_drawable crosshair_da_x;
+static struct gfx_drawable crosshair_da_y;
 #endif /* CROSSHAIR */
 
 
 static void crosshair_remove(void)
 {
 #if CROSSHAIR
-	if (crosshair_shown) {
-		gfx_copy(&main_da, 0, crosshair_y, &backing_da_x, 0, 0,
-		    GFX_WIDTH, 1, -1);
-		gfx_copy(&main_da, crosshair_x, 0, &backing_da_y, 0, 0,
-		    1, GFX_HEIGHT, -1);
-		update_display(&main_da);
-		crosshair_shown = 0;
-	}
+	show_crosshair = 0;
 #endif /* CROSSHAIR */
 }
 
@@ -105,25 +101,40 @@ static void crosshair_remove(void)
 static void crosshair_show(unsigned x, unsigned y)
 {
 #if CROSSHAIR
-	if (crosshair_shown)
-		crosshair_remove();
-	gfx_da_init(&backing_da_x, GFX_WIDTH, 1, backing_fb_x);
-	gfx_da_init(&backing_da_y, 1, GFX_HEIGHT, backing_fb_y);
-	gfx_copy(&backing_da_x, 0, 0, &main_da, 0, y, GFX_WIDTH, 1, -1);
-	gfx_copy(&backing_da_y, 0, 0, &main_da, x, 0, 1, GFX_HEIGHT -1, -1);
 	crosshair_x = x;
 	crosshair_y = y;
-	gfx_rect_xy(&main_da, x, 0, 1, GFX_HEIGHT - 1, GFX_RED);
-	gfx_rect_xy(&main_da, 0, y, GFX_WIDTH - 1, 1, GFX_RED);
-	update_display(&main_da);
-	crosshair_shown = 1;
+	show_crosshair = 1;
 #endif /* CROSSHAIR */
 }
 
 
 void ui_update_display(void)
 {
+#if CROSSHAIR
+	if (crosshair_shown) {
+		update_display_partial(&crosshair_da_x, 0, crosshair_shown_y);
+		update_display_partial(&crosshair_da_y, crosshair_shown_x, 0);
+		crosshair_shown = 0;
+	}
+#endif /* CROSSHAIR */
 	update_display(&main_da);
+#if CROSSHAIR
+	if (show_crosshair) {
+		gfx_da_init(&crosshair_da_x, GFX_WIDTH, 1, crosshair_fb_x);
+		gfx_da_init(&crosshair_da_y, 1, GFX_HEIGHT, crosshair_fb_y);
+		gfx_rect_xy(&crosshair_da_x, 0, 0, GFX_WIDTH - 1, 1, GFX_RED);
+		gfx_rect_xy(&crosshair_da_y, 0, 0, 1, GFX_HEIGHT - 1, GFX_RED);
+		update_display_partial(&crosshair_da_x, 0, crosshair_y);
+		update_display_partial(&crosshair_da_y, crosshair_x, 0);
+		gfx_copy(&crosshair_da_x, 0, 0, &main_da, 0, crosshair_y,
+		    GFX_WIDTH, 1, -1);
+		gfx_copy(&crosshair_da_y, 0, 0, &main_da, crosshair_x, 0,
+		    1, GFX_HEIGHT, -1);
+		crosshair_shown = 1;
+		crosshair_shown_x = crosshair_x;
+		crosshair_shown_y = crosshair_y;
+	}
+#endif /* CROSSHAIR */
 }
 
 

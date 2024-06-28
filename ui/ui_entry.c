@@ -79,7 +79,7 @@ struct ui_entry_ctx {
 	const struct ui_entry_maps *maps;
 	char *buf;
 	unsigned max_len;
-	bool (*validate)(void *user, const char *s);
+	int (*validate)(void *user, const char *s);
 	void *user;
 
 	/* run-time variables */
@@ -138,7 +138,7 @@ const struct ui_entry_maps ui_entry_text_maps = {
 
 static bool valid(struct ui_entry_ctx *c)
 {
-	return !*c->buf || !c->validate || c->validate(c->user, c->buf);
+	return !*c->buf || !c->validate || c->validate(c->user, c->buf) > 0;
 }
 
 
@@ -410,10 +410,14 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 		end[0] = c->second[n];
 		end[1] = 0;
 		c->second = NULL;
-		clear_input(c);
-		draw_input(c);
-		first_button(c, 0, 0, SPECIAL_UP_BG);
-		first_button(c, 2, 0, SPECIAL_UP_BG);
+		if (c->validate && c->validate(c->user, c->buf) < 0) {
+			*end = 0;
+		} else {
+			clear_input(c);
+			draw_input(c);
+			first_button(c, 0, 0, SPECIAL_UP_BG);
+			first_button(c, 2, 0, SPECIAL_UP_BG);
+		}
 		draw_first_text(c, strlen(c->buf) != c->max_len);
 	} else {
 		c->second = c->maps->second[n];

@@ -43,7 +43,12 @@ struct ui_entry_params {
 	const char	*title;
 	char		*buf;
 	unsigned	max_len;
-	bool		(*validate)(void *user, const char *s);
+	/*
+	 * 1: accept input. String in buffer is valid for "accept".
+	 * 0: accept input, but string in buffer is NOT valid.
+	 * -1: ignore input
+	 */
+	int		(*validate)(void *user, const char *s);
 	void		*user;
 	const struct ui_entry_style *style;
 	const struct ui_entry_maps *maps;

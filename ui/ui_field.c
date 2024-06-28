@@ -157,13 +157,13 @@ static void copy_base32(char *to, const struct db_field *from)
 }
 
 
-static bool validate_base32(void *user, const char *s)
+static int validate_base32(void *user, const char *s)
 {
 	return base32_decode_size(s) > 0;
 }
 
 
-static bool validate_decimal(void *user, const char *s)
+static int validate_decimal(void *user, const char *s)
 {
 	char *end;
 

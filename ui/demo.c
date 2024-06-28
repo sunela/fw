@@ -246,7 +246,7 @@ static bool demo_vscroll(char *const *args, unsigned n_args)
 
 /* Text entry */
 
-static bool demo_entry_validate(void *user, const char *s)
+static int demo_entry_validate(void *user, const char *s)
 {
 	return !strchr(s, 'x');
 }

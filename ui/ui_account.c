@@ -202,7 +202,7 @@ static bool name_is_different(void *user, struct db_entry *de)
 }
 
 
-static bool validate_name_change(void *user, const char *s)
+static int validate_name_change(void *user, const char *s)
 {
 	struct ui_account_ctx *c = user;
 

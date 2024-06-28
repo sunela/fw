@@ -57,7 +57,7 @@ static bool name_is_different(void *user, struct db_entry *de)
 }
 
 
-static bool validate_new_account(void *user, const char *s)
+static int validate_new_account(void *user, const char *s)
 {
 	return db_iterate(&main_db, name_is_different, (void *) s);
 }

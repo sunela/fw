@@ -18,6 +18,7 @@
 #include "gfx.h"
 #include "wi_list.h"
 #include "db.h"
+#include "settings.h"
 #include "pin.h"
 #include "demo.h"
 #include "ui.h"
@@ -76,7 +77,6 @@ static inline void *current_ctx(void)
 /* --- Display update with crosshair --------------------------------------- */
 
 
-#if CROSSHAIR
 static bool show_crosshair = 0;
 static bool crosshair_shown = 0;
 static unsigned crosshair_x = 0;
@@ -87,38 +87,32 @@ static gfx_color crosshair_fb_x[GFX_WIDTH];
 static gfx_color crosshair_fb_y[GFX_HEIGHT];
 static struct gfx_drawable crosshair_da_x;
 static struct gfx_drawable crosshair_da_y;
-#endif /* CROSSHAIR */
 
 
 static void crosshair_remove(void)
 {
-#if CROSSHAIR
 	show_crosshair = 0;
-#endif /* CROSSHAIR */
 }
 
 
 static void crosshair_show(unsigned x, unsigned y)
 {
-#if CROSSHAIR
-	crosshair_x = x;
-	crosshair_y = y;
-	show_crosshair = 1;
-#endif /* CROSSHAIR */
+	if (settings.crosshair) {
+		crosshair_x = x;
+		crosshair_y = y;
+		show_crosshair = 1;
+	}
 }
 
 
 void ui_update_display(void)
 {
-#if CROSSHAIR
 	if (crosshair_shown) {
 		update_display_partial(&crosshair_da_x, 0, crosshair_shown_y);
 		update_display_partial(&crosshair_da_y, crosshair_shown_x, 0);
 		crosshair_shown = 0;
 	}
-#endif /* CROSSHAIR */
 	update_display(&main_da);
-#if CROSSHAIR
 	if (show_crosshair) {
 		gfx_da_init(&crosshair_da_x, GFX_WIDTH, 1, crosshair_fb_x);
 		gfx_da_init(&crosshair_da_y, 1, GFX_HEIGHT, crosshair_fb_y);
@@ -134,7 +128,6 @@ void ui_update_display(void)
 		crosshair_shown_x = crosshair_x;
 		crosshair_shown_y = crosshair_y;
 	}
-#endif /* CROSSHAIR */
 }
 
 
@@ -512,6 +505,8 @@ void ui_empty_stack(void)
 
 bool app_init(char **args, unsigned n_args)
 {
+	settings.crosshair = CROSSHAIR;
+
 	gfx_da_init(&main_da, GFX_WIDTH, GFX_HEIGHT, fb);
 	gfx_clear(&main_da, gfx_hex(0));
 

@@ -24,7 +24,7 @@
 #include "ui.h"
 
 
-#define	CROSSHAIR	1
+#define	CROSSHAIR	0
 
 #define	UI_STACK_SIZE	5
 #define	UI_TIMERS	3

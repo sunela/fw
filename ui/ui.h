@@ -104,6 +104,7 @@ extern const struct ui ui_confirm;
 extern const struct ui ui_setup;
 extern const struct ui ui_time;
 extern const struct ui ui_storage;
+extern const struct ui ui_rd;
 
 void progress(void);
 void set_idle(unsigned seconds);

@@ -15,7 +15,7 @@ OBJS = ui.o demo.o timer.o debug.o mbox.o rnd.o hmac.o hotp.o base32.o \
     dbcrypt.o block.o span.o db.o settings.o \
     ui_off.o ui_pin.o ui_fail.o ui_accounts.o ui_account.o ui_field.o \
     wi_list.o ui_entry.o ui_time.o ui_overlay.o ui_confirm.o ui_setup.o \
-    ui_storage.o
+    ui_storage.o ui_rd.o
 
 include Makefile.c-common
 
@@ -58,6 +58,7 @@ vpath ui_overlay.c ui
 vpath ui_confirm.c ui
 vpath ui_setup.c ui
 vpath ui_storage.c ui
+vpath ui_rd.c ui
 
 vpath wi_list.c ui
 vpath demo.c ui

@@ -75,6 +75,7 @@ static void ui_setup_open(void *ctx, void *params)
 	wi_list_add(&c->list, "Change PIN", NULL, NULL);
 	wi_list_add(&c->list, "Time & date", NULL, (void *) &ui_time);
 	wi_list_add(&c->list, "Storage", NULL, (void *) &ui_storage);
+	wi_list_add(&c->list, "R&D", NULL, (void *) &ui_rd);
 	wi_list_end(&c->list);
 
 	set_idle(IDLE_SETUP_S);

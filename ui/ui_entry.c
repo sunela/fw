@@ -76,6 +76,7 @@ struct ui_entry_ctx {
 	/* from ui_entry_params */
 	const char *title;
 	const struct ui_entry_style *style;
+	const struct ui_entry_maps *maps;
 	char *buf;
 	unsigned max_len;
 	bool (*validate)(void *user, const char *s);
@@ -104,34 +105,31 @@ static const struct ui_entry_style default_style = {
 /* --- First page ---------------------------------------------------------- */
 
 
-static const char *first_map[] = {
-	"0 /!?",
-	"1@\"+#",
-	"2ABC",
-	"3DEF",
-	"4GHI",
-	"5JKL",
-	"6MNO",
-	"7PQRS",
-	"8TUV",
-	"9WXYZ"
-};
-
-
-/* --- Second pages -------------------------------------------------------- */
-
-
-static const char *second_maps[] = {
-	"0&!?:;/ .,",
-	"1'\"`+-*@#$",
-	"2ABCabc(&)",
-	"3DEFdef<=>",
-	"4GHIghi[\\]",
-	"5JKLjkl{|}",
-	"6MNOmno^_~",
-	"7PQRpqrSs",
-	"8TUVtuv%",
-	"9WXYwxyZz"
+const struct ui_entry_maps ui_entry_text_maps = {
+	{
+		"0 /!?",
+		"1@\"+#",
+		"2ABC",
+		"3DEF",
+		"4GHI",
+		"5JKL",
+		"6MNO",
+		"7PQRS",
+		"8TUV",
+		"9WXYZ"
+	},
+	{
+		"0&!?:;/ .,",
+		"1'\"`+-*@#$",
+		"2ABCabc(&)",
+		"3DEFdef<=>",
+		"4GHIghi[\\]",
+		"5JKLjkl{|}",
+		"6MNOmno^_~",
+		"7PQRpqrSs",
+		"8TUVtuv%",
+		"9WXYwxyZz"
+	}
 };
 
 
@@ -239,7 +237,7 @@ static void first_button(struct ui_entry_ctx *c, unsigned col, unsigned row,
 
 	if (row > 0) {
 		base(x, y, bg);
-		first_label(x, y, first_map[1 + col + (3 - row) * 3]);
+		first_label(x, y, c->maps->first[1 + col + (3 - row) * 3]);
 	} else if (col == 0) {	// X
 		base(x, y, bg);
 		if (*c->buf)
@@ -250,7 +248,7 @@ static void first_button(struct ui_entry_ctx *c, unsigned col, unsigned row,
 			    GFX_BLACK);
 	} else if (col == 1) {	// "0"
 		base(x, y, bg);
-		first_label(x, y, first_map[0]);
+		first_label(x, y, c->maps->first[0]);
 	} else {	// >
 		if (*c->buf) {
 			base(x, y, valid(c) ? bg : SPECIAL_DISABLED_BG);
@@ -418,7 +416,7 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 		first_button(c, 2, 0, SPECIAL_UP_BG);
 		draw_first_text(c, strlen(c->buf) != c->max_len);
 	} else {
-		c->second = second_maps[n];
+		c->second = c->maps->second[n];
 		draw_second(c->second);
 	}
 	ui_update_display();
@@ -449,6 +447,7 @@ static void ui_entry_open(void *ctx, void *params)
 	assert(strlen(prm->buf) <= prm->max_len);
 	c->title = prm->title;
 	c->style = prm->style ? prm->style : &default_style;
+	c->maps = prm->maps ? prm->maps : &ui_entry_text_maps;
 	c->buf = prm->buf;
 	c->max_len = prm->max_len;
 	c->validate = prm->validate;

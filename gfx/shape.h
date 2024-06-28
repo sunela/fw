@@ -11,6 +11,9 @@
 #include "gfx.h"
 
 
+/* --- Simple shapes ------------------------------------------------------- */
+
+
 /*
  * Diagonal cross centered at (x, y), with radius r.
  */
@@ -44,6 +47,10 @@ void gfx_rrect_xy(struct gfx_drawable *da, unsigned x, unsigned y, unsigned w,
 
 void gfx_arc(struct gfx_drawable *da, int x, int y, unsigned r, 
     unsigned a0, unsigned a1, gfx_color color, gfx_color bg);
+
+
+/* --- Symbols ------------------------------------------------------------- */
+
 
 /*
  * Power symbol (arc with vertical bar) centered at (x, y), with arc radius r.
@@ -97,5 +104,18 @@ void gfx_gear_sym(struct gfx_drawable *da, unsigned x, unsigned y,
 void gfx_move_sym(struct gfx_drawable *da, unsigned x, unsigned y,
     unsigned box_size, unsigned box_ro, unsigned lw,
     bool from, int to, gfx_color color, gfx_color bg);
+
+
+/* --- Other UI items ------------------------------------------------------ */
+
+
+/*
+ * Checkbox. Draws a square box centered at (x, y) with outer width w (pixels)
+ * and linewidth lw. The inside is cleared in the background color. If "on" is
+ * set, a diagonal cross is then drawn inside the box, also using lw.
+ */
+
+void gfx_checkbox(struct gfx_drawable *da, unsigned x, unsigned y,
+    unsigned w, unsigned lw, bool on, gfx_color color, gfx_color bg);
 
 #endif /* !SHAPE_H */

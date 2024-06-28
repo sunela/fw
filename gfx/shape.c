@@ -375,3 +375,26 @@ void gfx_move_sym(struct gfx_drawable *da, unsigned x, unsigned y,
 		    color);
 	}
 }
+
+
+/* --- Checkbox ------------------------------------------------------------ */
+
+
+void gfx_checkbox(struct gfx_drawable *da, unsigned x, unsigned y,
+    unsigned w, unsigned lw, bool on, gfx_color color, gfx_color bg)
+{
+	unsigned iw = w - 2 * lw;
+	unsigned cw = lw * 1.414 + 1;	/* sqrt(2), crudely rounded up */
+	unsigned i;
+
+	assert(lw < w / 2);
+	gfx_rect_xy(da, x - w / 2, y - w / 2, w, w, color);
+	gfx_rect_xy(da, x - iw / 2, y - iw / 2, iw, iw, bg);
+	if (on)
+		for (i = 0; i != iw; i++) {
+			gfx_rect_xy(da, x - iw / 2 - cw / 2 + i,
+			    y - iw / 2 + i, cw, 1, color);
+			gfx_rect_xy(da, x + (iw + 1) / 2 - (cw + 1) / 2 - i,
+			    y - iw / 2 + i, cw, 1, color);
+		}
+}

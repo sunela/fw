@@ -12,6 +12,7 @@
 
 #include "hal.h"
 #include "debug.h"
+#include "util.h"
 #include "gfx.h"
 #include "shape.h"
 #include "text.h"
@@ -174,8 +175,7 @@ static void ui_rd_open(void *ctx, void *params)
 	    GFX_CENTER, GFX_CENTER, GFX_WHITE);
 
 	wi_list_begin(&c->list, &style);
-	for (item = items; item != items + sizeof(items) / sizeof(*items);
-	    item++)
+	for (item = items; item != items + ARRAY_ENTRIES(items); item++)
 		wi_list_add(&c->list, item->label, NULL, (void *) item);
 	wi_list_end(&c->list);
 }

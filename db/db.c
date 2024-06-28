@@ -13,6 +13,7 @@
 
 #include "hal.h"
 #include "debug.h"
+#include "util.h"
 #include "alloc.h"
 #include "rnd.h"
 #include "span.h"
@@ -24,7 +25,7 @@
 const enum field_type order2ft[] = {
     ft_end, ft_id, ft_prev, ft_user, ft_email, ft_pw, ft_pw2,
     ft_hotp_secret, ft_hotp_counter, ft_totp_secret, ft_comment };
-uint8_t ft2order[sizeof(order2ft) / sizeof(*order2ft)];
+uint8_t ft2order[ARRAY_ENTRIES(order2ft)];
 const unsigned field_types = sizeof(ft2order);
 
 static PSRAM uint8_t payload_buf[BLOCK_PAYLOAD_SIZE];

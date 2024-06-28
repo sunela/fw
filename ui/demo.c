@@ -14,6 +14,7 @@
 
 #include "hal.h"
 #include "debug.h"
+#include "util.h"
 #include "mbox.h"
 #include "gfx.h"
 #include "shape.h"
@@ -775,7 +776,7 @@ void demo(char **args, unsigned n_args)
 	n = strtoul(args[0], &end, 0);
 	if (*end)
 		n = 0;
-	for (i = 0; i != sizeof(demos) / sizeof(*demos); i++) {
+	for (i = 0; i != ARRAY_ENTRIES(demos); i++) {
 		const struct demo *d = demos + i;
 
 		if (i + 1 == n || (d->name && !strcmp(d->name, args[0]))) {
@@ -786,7 +787,7 @@ void demo(char **args, unsigned n_args)
 			exit(1);
 		}
 	}
-	for (i = 0; i != sizeof(demos) / sizeof(*demos); i++)
+	for (i = 0; i != ARRAY_ENTRIES(demos); i++)
 		if (demos[i].name)
 			help(demos + i);
 	exit(1);
@@ -809,7 +810,7 @@ void poll_demo_mbox(void)
 		return;
 	}
 	while (p != buf + got) {
-		if (n_args == sizeof(args) / sizeof(*args)) {
+		if (n_args == ARRAY_ENTRIES(args)) {
 			debug("poll_demo_mbox: too many arguments\n");
 			return;
 		}

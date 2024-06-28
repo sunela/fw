@@ -692,6 +692,35 @@ static bool demo_movesym(char *const *args, unsigned n_args)
 }
 
 
+/* Draw a movement symbol */
+
+static bool demo_checkbox(char *const *args, unsigned n_args)
+{
+	unsigned w = 20;
+	unsigned lw = 2;
+	bool on;
+
+	switch (n_args) {
+	case 1:
+		break;
+	case 3:
+		lw = atoi(args[1]);
+		/* fall through */
+	case 2:
+		w = atoi(args[0]);
+		break;
+	default:
+		return 0;
+	}
+	on = strcmp(args[n_args - 1], "0");
+
+	gfx_checkbox(&main_da, GFX_WIDTH / 2, GFX_HEIGHT / 2,
+	    w, lw, on,
+	    GFX_WHITE, GFX_BLACK);
+	return 1;
+}
+
+
 /* --- Initialization ------------------------------------------------------ */
 
 
@@ -726,6 +755,7 @@ static const struct demo {
 	{ "overlay",	demo_overlay,	"[n]" },
 	{ "movesym",	demo_movesym,	"[from to [bs br lw]]" },
 	{ "overlay2",	demo_overlay2,	"[n]" },
+	{ "checkbox",	demo_checkbox,	"[w [lw]] 0|1" },
 };
 
 

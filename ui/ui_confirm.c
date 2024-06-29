@@ -26,6 +26,7 @@
 
 #define	TEXT_FONT		mono18
 #define	NAME_FONT		mono24
+#define	NAME_FONT_SMALLER	mono18
 
 #define	TEXT_Y0			50
 #define	Y_STEP			30
@@ -167,6 +168,7 @@ static void ui_confirm_open(void *ctx, void *params)
 	struct ui_confirm_ctx *c = ctx;
 	const struct ui_confirm_params *p = params;
 	unsigned y = TEXT_Y0;
+	struct gfx_rect bb;
 
 	text_text(&main_da, GFX_WIDTH / 2, y, "Swipe right to", &TEXT_FONT,
 	    GFX_CENTER, GFX_ORIGIN, TEXT_COLOR);
@@ -174,8 +176,16 @@ static void ui_confirm_open(void *ctx, void *params)
 	text_text(&main_da, GFX_WIDTH / 2, y, p->action, &TEXT_FONT,
 	    GFX_CENTER, GFX_ORIGIN, TEXT_COLOR);
 	y += Y_STEP;
-	text_text(&main_da, GFX_WIDTH / 2, y, p->name, &NAME_FONT,
-	    GFX_CENTER, GFX_ORIGIN, NAME_COLOR);
+
+	text_bbox(0, 0, p->name, &NAME_FONT, GFX_LEFT, GFX_CENTER, &bb);
+	if (bb.w <= GFX_WIDTH) {
+		text_text(&main_da, GFX_WIDTH / 2, y, p->name, &NAME_FONT,
+		    GFX_CENTER, GFX_ORIGIN, NAME_COLOR);
+	} else {
+		text_text(&main_da, GFX_WIDTH / 2, y, p->name,
+		    &NAME_FONT_SMALLER, GFX_CENTER, GFX_ORIGIN, NAME_COLOR);
+	}
+	/* @@@ should also handle overflowing with NAME_FONT_SMALLER */
 
 	chevrons(0, GFX_WIDTH - 1, CHEVRONS_PASSIVE_COLOR);
 	c->current_x = -1;

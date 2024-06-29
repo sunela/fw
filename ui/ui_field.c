@@ -14,6 +14,7 @@
 
 #include "hal.h"
 #include "base32.h"
+#include "fmt.h"
 #include "db.h"
 #include "gfx.h"
 #include "style.h"
@@ -157,6 +158,22 @@ static void copy_base32(char *to, const struct db_field *from)
 }
 
 
+static void copy_decimal(char *to, const struct db_field *from)
+{
+	uint64_t tmp;
+
+	/* Copy, in case from->data isn't properly aligned. */
+	memcpy(&tmp, from->data, from->len);
+	switch (from->len) {
+	case sizeof(uint64_t):
+		format(add_char, &to, "%llu", (unsigned long long) tmp);
+		break;
+	default:
+		abort();
+	}
+}
+
+
 static int validate_base32(void *user, const char *s)
 {
 	return base32_decode_size(s) > 0;
@@ -213,8 +230,9 @@ static void ui_field_edit_open(void *ctx, void *params)
 		copy_base32(c->buf, f);
 		break;
 	case ft_hotp_counter:
-		PARAMS("Counter", MAX_STRING_LEN, validate_decimal);
-		copy_base32(c->buf, f);
+		PARAMS("Counter", 64 / 10 * 3, validate_decimal);
+		copy_decimal(c->buf, f);
+		entry_params.maps = &ui_entry_decimal_maps;
 		break;
 	case ft_totp_secret:
 		PARAMS("TOTP Secret", MAX_STRING_LEN, validate_base32);

@@ -123,6 +123,41 @@ static void ui_account_tick(void *ctx)
 /* --- Tap ----------------------------------------------------------------- */
 
 
+static void find_counter(struct wi_list *list, struct wi_list_entry *entry,
+    void *user)
+{
+	struct wi_list_entry **res = user;
+	struct db_field *f = wi_list_user(entry);
+
+	if (f->type == ft_hotp_counter)
+		*res = entry;
+}
+
+
+static void set_counter_entry(struct ui_account_ctx *c, struct db_field *f)
+{
+	struct wi_list_entry *entry = NULL;
+	uint64_t counter;
+	char s[10+1];
+	char *p = s;
+
+	wi_list_forall(&c->list, find_counter, &entry);
+	if (entry) {
+		assert(!f);
+		f = wi_list_user(entry);
+	} else {
+		assert(f);
+	}
+	assert(f->len == sizeof(counter));
+	memcpy(&counter, f->data, sizeof(counter));
+	format(add_char, &p, "%u", (unsigned) counter);
+	if (entry)
+		wi_list_update_entry(&c->list, entry, "Counter", s, f);
+	else
+		wi_list_add(&c->list, "Counter", s, f);
+}
+
+
 static void ui_account_tap(void *ctx, unsigned x, unsigned y)
 {
 	struct ui_account_ctx *c = ctx;
@@ -164,16 +199,23 @@ static void ui_account_tap(void *ctx, unsigned x, unsigned y)
 
 	progress();
 
+	f = wi_list_user(entry);
+	if (f->type != ft_hotp_secret)
+		return;
+
 	memcpy(&counter, hotp_counter, sizeof(counter));
 	code = hotp64(hotp_secret, hotp_secret_len, counter);
 	format(add_char, &p, "%06u", (unsigned) code % 1000000);
 	wi_list_update_entry(&c->list, entry, "HOTP", s, f);
-	ui_update_display();
 
 	counter++;
 	if (!db_change_field(c->selected_account, ft_hotp_counter,
 	    &counter, sizeof(counter)))
 		debug("HOTP counter increment failed\n");
+
+	set_counter_entry(c, NULL);
+
+	ui_update_display();
 }
 
 
@@ -486,6 +528,7 @@ static void ui_account_open(void *ctx, void *params)
 			wi_list_add(&c->list, "HOTP", "------", f);
 			break;
 		case ft_hotp_counter:
+			set_counter_entry(c, f);
 			break;
 		case ft_totp_secret:
 			wi_list_add(&c->list, "TOTP", "------", f);

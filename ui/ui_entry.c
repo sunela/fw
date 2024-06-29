@@ -55,6 +55,7 @@
 #define	FONT_2			mono34
 
 #define	LABEL_TOP_OFFSET	-12
+#define	LABEL_CENTER_OFFSET	0
 #define	LABEL_BOTTOM_OFFSET	13
 
 #define	BUTTON_BOTTOM_OFFSET	8
@@ -102,7 +103,7 @@ static const struct ui_entry_style default_style = {
 };
 
 
-/* --- First page ---------------------------------------------------------- */
+/* --- Keypad maps --------------------------------------------------------- */
 
 
 const struct ui_entry_maps ui_entry_text_maps = {
@@ -129,6 +130,34 @@ const struct ui_entry_maps ui_entry_text_maps = {
 		"7PQRpqrSs",
 		"8TUVtuv%",
 		"9WXYwxyZz"
+	}
+};
+
+
+const struct ui_entry_maps ui_entry_decimal_maps = {
+	{
+		"0",
+		"1",
+		"2",
+		"3",
+		"4",
+		"5",
+		"6",
+		"7",
+		"8",
+		"9"
+	},
+	{
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
 	}
 };
 
@@ -222,10 +251,15 @@ static void first_label(unsigned x, unsigned y, const char *s)
 {
 	char top[] = { *s, 0 };
 
-	text_text(&main_da, x, y + LABEL_TOP_OFFSET, top, &FONT_1_TOP,
-	    GFX_CENTER, GFX_CENTER, GFX_BLACK);
-	text_text(&main_da, x, y + LABEL_BOTTOM_OFFSET, s + 1, &FONT_1_BOTTOM,
-	    GFX_CENTER, GFX_CENTER, GFX_BLACK);
+	if (s[1]) {
+		text_text(&main_da, x, y + LABEL_TOP_OFFSET, top,
+		    &FONT_1_TOP, GFX_CENTER, GFX_CENTER, GFX_BLACK);
+		text_text(&main_da, x, y + LABEL_BOTTOM_OFFSET, s + 1,
+		    &FONT_1_BOTTOM, GFX_CENTER, GFX_CENTER, GFX_BLACK);
+	} else {
+		text_text(&main_da, x, y + LABEL_CENTER_OFFSET, top,
+		    &FONT_1_TOP, GFX_CENTER, GFX_CENTER, GFX_BLACK);
+	}
 }
 
 
@@ -404,10 +438,17 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 	progress();
 	timer_flush(&c->t_button);
 	n = row ? (3 - row) * 3 + col + 1 : 0;
-	if (c->second) {
-		if (n >= strlen(c->second))
-			return;
-		end[0] = c->second[n];
+	if (c->second || !c->maps->second[n]) {
+		char ch;
+
+		if (c->second) {
+			if (n >= strlen(c->second))
+				return;
+			ch = c->second[n];
+		} else {
+			ch = *c->maps->first[n];
+		}
+		end[0] = ch;
 		end[1] = 0;
 		c->second = NULL;
 		if (c->validate && c->validate(c->user, c->buf) < 0) {

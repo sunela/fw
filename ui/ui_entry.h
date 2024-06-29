@@ -33,8 +33,9 @@ struct ui_entry_maps {
 	 */
 	const char *first[10];
 	/*
-	 * One entry for each first-level key, 0 to 9. Each entry is a string
-	 * with one character for the keys 0 to 9.
+	 * One entry for each first-level key, 0 to 9. Each entry is either
+	 * NULL, in which case the first character from the first level is
+	 * used, or a string with one character for each of the keys 0 to 9.
 	 */
 	const char *second[10];
 };
@@ -56,5 +57,6 @@ struct ui_entry_params {
 
 
 extern const struct ui_entry_maps ui_entry_text_maps;
+extern const struct ui_entry_maps ui_entry_decimal_maps;
 
 #endif /* !UI_ENTRY_H */

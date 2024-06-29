@@ -18,7 +18,7 @@ static void prepare(struct long_text *lt, const char *s,
 {
 	struct gfx_rect bb;
 
-	text_text_bbox(0, 0, s, font, GFX_LEFT, GFX_TOP, &bb);
+	text_bbox(0, 0, s, font, GFX_LEFT, GFX_TOP, &bb);
 	assert(bb.w <= MAX_W);
 	assert(bb.h <= MAX_H);
 

@@ -474,7 +474,7 @@ static bool demo_align(char *const *args, unsigned n_args)
 	struct gfx_rect bb;
 	unsigned i, next;
 
-	text_text_bbox(ox, oy, s, &DEMO_ALIGN_FONT, ax, ay, &bb);
+	text_bbox(ox, oy, s, &DEMO_ALIGN_FONT, ax, ay, &bb);
 
 	/*
 	 * Draw text once for the next character position, which we want to

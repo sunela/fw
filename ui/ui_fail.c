@@ -47,7 +47,7 @@ static void show_cooldown(void *user)
 
 	text_text(&main_da, GFX_WIDTH / 2, GFX_HEIGHT / 2, t, &FONT,
 	    GFX_CENTER, GFX_CENTER, GFX_RED);
-	text_text_bbox(GFX_WIDTH / 2, GFX_HEIGHT / 2, t, &FONT,
+	text_bbox(GFX_WIDTH / 2, GFX_HEIGHT / 2, t, &FONT,
 	    GFX_CENTER, GFX_CENTER, &bb);
 	ui_update_display();
 

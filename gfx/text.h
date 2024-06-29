@@ -41,7 +41,7 @@ void text_query(int x, int y, const char *s,
     const struct font *font, int8_t align_x, int8_t align_y,
     struct text_query *q);
 
-void text_text_bbox(int x, int y, const char *s,
+void text_bbox(int x, int y, const char *s,
     const struct font *font, int8_t align_x, int8_t align_y,
     struct gfx_rect *bb);
 

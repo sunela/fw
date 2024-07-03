@@ -176,6 +176,10 @@ static void ticks(unsigned n)
 static void show_help(void)
 {
 	printf("Commands:\n\n"
+"dummy\t\tuse a dummy database. This must be the first command in the script.\n"
+"dummy NAME [PREV]\n\t\tadd an entry to the dummy database\n"
+"dummy dump\tprint the content of the dummy database\n"
+"dummy sort\tsort the dummy database\n"
 "echo MESSAGE\tdisplay a message, can contain spaces\n"
 "system COMMAND\trun a shell command\n"
 "interact\tshow the display and interact with the user\n"
@@ -360,6 +364,50 @@ static bool process_cmd(const char *cmd)
 		return 1;
 	}
 
+	/* dummy database */
+
+	if (!strcmp("dummy", cmd)) {
+		db_open_empty(&main_db, NULL);
+		return 1;
+	}
+	arg = cmd_arg("dummy", cmd);
+	if (arg) {
+		int args;
+		char name[MAX_NAME_LEN + 1];
+		char prev[MAX_NAME_LEN + 1];
+
+		args = sscanf(arg, "%s %s", name, prev);
+		switch (args) {
+		case 1:
+			if (!strcmp(name, "sort")) {
+				db_tsort(&main_db);
+				return 1;
+			}
+			if (!strcmp(name, "dump")) {
+				const struct db_entry *de;
+				const struct db_field *f;
+
+				for (de = main_db.entries; de; de = de->next) {
+					for (f = de->fields; f; f = f->next)
+						if (f->type == ft_prev)
+							break;
+					printf("%s %.*s\n", de->name,
+					    f ? f->len : 1,
+					    f ? (char *) f->data : "-");
+				}
+				return 1;
+			}
+			db_dummy_entry(&main_db, name, NULL);
+			break;
+		case 2:
+			db_dummy_entry(&main_db, name, prev);
+			break;
+		default:
+			goto fail;
+		}
+		return 1;
+	}
+
 	/* help */
 
 	if (!strcmp("help", cmd)) {
@@ -375,7 +423,8 @@ fail:
 
 bool run_script(char **args, int n_args)
 {
-	db_open(&main_db, NULL);
+	if (!n_args || strcmp(args[0], "dummy"))
+		db_open(&main_db, NULL);
 	while (n_args-- && headless)
 		if (!process_cmd(*args++))
 			return 0;

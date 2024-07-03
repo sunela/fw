@@ -100,6 +100,12 @@ extern uint8_t ft2order[];
 extern const unsigned field_types;
 
 
+/* Functions only exported only for testing of the topological sort. */
+unsigned db_tsort(struct db *db);
+struct db_entry *db_dummy_entry(struct db *db, const char *name,
+    const char *prev);
+void db_open_empty(struct db *db, const struct dbcrypt *c);
+
 struct db_field *db_field_find(const struct db_entry *de, enum field_type type);
 bool db_change_field(struct db_entry *de, enum field_type type,
     const void *data, unsigned size);

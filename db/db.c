@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "hal.h"
 #include "debug.h"
@@ -138,29 +139,120 @@ static void free_entry(struct db_entry *de)
  * [3] https://en.wikipedia.org/wiki/Referential_integrity
  */
 
+/*
+ * Update:
+ * new_entry only sorts alphabetically. We now have db_tsort for proper
+ * topological sorting.
+ */
+
 static struct db_entry *new_entry(struct db *db, const char *name,
     const char *prev)
 {
 	struct db_entry *de, **anchor;
-	struct db_entry *e = NULL;
+//	struct db_entry *e = NULL;
 
 	de = alloc_type(struct db_entry);
 	memset(de, 0, sizeof(*de));
 	de->db = db;
-	if (prev)
-		for (e = db->entries; e; e = e->next)
-			if (!strcmp(e->name, prev))
-				break;
-	if (e) {
-		anchor = &e->next;
-	} else {
+//	if (prev)
+//		for (e = db->entries; e; e = e->next)
+//			if (!strcmp(e->name, prev))
+//				break;
+//	if (e) {
+//		anchor = &e->next;
+//	} else {
 		for (anchor = &db->entries; *anchor; anchor = &(*anchor)->next)
 			if (strcmp((*anchor)->name, name) > 0)
 				break;
-	}
+//	}
 	de->next = *anchor;
 	*anchor = de;
 	return de;
+}
+
+
+unsigned db_tsort(struct db *db)
+{
+	struct tmp {
+		struct db_entry *in;
+		const struct db_entry *prev;
+		struct db_entry *out;
+	} *tmp, *t, *t2;
+	struct db_entry *e, *e2;
+	unsigned n = 0;
+	unsigned i;
+
+	for (e = db->entries; e; e = e->next)
+		n++;
+	if (!n)
+		return 0;
+
+	/* allocate temporary variables */
+	tmp = t = alloc_type_n(struct tmp, n);
+	for (e = db->entries; e; e = e->next) {
+		struct db_field *f;
+
+		t->in = e;
+		t->prev = NULL;
+		for (f = e->fields; f; f = f->next)
+			if (f->type == ft_prev)
+				break;
+		if (f)
+			for (e2 = db->entries; e2; e2 = e2->next)
+				if (f->len == strlen(e2->name) &&
+				    !memcmp(f->data, e2->name, f->len)) {
+					t->prev = e2;
+					break;
+				}
+			/* ignore unmatched references */
+		t++;
+	}
+
+	/*
+	 * Based on Kahn's algorithm
+	 * https://en.wikipedia.org/wiki/Topological_sorting#Kahn's_algorithm
+	 */
+	i = 0;
+	while (1) {
+		bool more = 0;
+		bool progress = 0;
+
+		for (t = tmp; t != tmp + n; t++) {
+			if (!t->in)
+				continue;
+			if (t->prev) {
+				more = 1;
+			} else {
+				progress = 1;
+				tmp[i].out = t->in;
+				i++;
+				for (t2 = tmp; t2 != tmp + n; t2++)
+					if (t2->prev == t->in)
+						t2->prev = NULL;
+				t->in = NULL;
+			}
+		}
+		if (!more)
+			break;
+
+		/* break cycles */
+		if (!progress)
+			for (t = tmp; t != tmp + n; t++)
+				if (t->in && t->prev) {
+					t->prev = NULL;
+					break;
+				}
+	}
+	assert(i == n);
+
+	/* apply new order */
+	db->entries = tmp[0].out;
+	for (t = tmp; t != tmp + n; t++)
+		t->out->next = t + 1 == tmp + n ? NULL : t[1].out;
+
+	free(tmp);
+
+	return n;
 }
 
 
@@ -226,6 +318,20 @@ struct db_entry *db_new_entry(struct db *db, const char *name)
 		db->stats.deleted++;
 	}
 	return NULL;
+}
+
+
+struct db_entry *db_dummy_entry(struct db *db, const char *name,
+    const char *prev)
+{
+	struct db_entry *de;
+
+	de = new_entry(db, name, NULL);
+	de->name = stralloc(name);
+	de->block = -1;
+	if (prev)
+		add_field(de, ft_prev, prev, strlen(prev));
+	return de;
 }
 
 
@@ -470,16 +576,22 @@ static bool process_payload(struct db *db, unsigned block, uint16_t seq,
 }
 
 
+void db_open_empty(struct db *db, const struct dbcrypt *c)
+{
+	memset(db, 0, sizeof(*db));
+	db->c = c;
+	db->stats.total = storage_blocks();
+	db->entries = NULL;
+}
+
+
 bool db_open_progress(struct db *db, const struct dbcrypt *c,
     void (*progress)(void *user, unsigned i, unsigned n), void *user)
 {
 	unsigned i;
 	uint16_t seq;
 
-	memset(db, 0, sizeof(*db));
-	db->c = c;
-	db->stats.total = storage_blocks();
-	db->entries = NULL;
+	db_open_empty(db, c);
 	for (i = 0; i != db->stats.total; i++) {
 		if (progress)
 			progress(user, i, db->stats.total);

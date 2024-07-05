@@ -332,7 +332,7 @@ static void usage(const char *name)
 "%6s %s [options] demo-name [demo-arg ...]] [-C command ...]\n"
 "\n"
 "-2  double the pixel size\n"
-"-c  receive user interaction from a script\n"
+"-C  receive user interaction from a script\n"
 "-d database\n"
 "    set the database file (default: %s)\n"
 "-q  quiet. Disable debugging output.\n"

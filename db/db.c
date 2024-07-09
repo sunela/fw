@@ -310,6 +310,7 @@ struct db_entry *db_new_entry(struct db *db, const char *name)
 	de->block = new;
 	rnd_bytes(&de->seq, sizeof(de->seq));
 	add_field(de, ft_id, name, strlen(name));
+	db_tsort(db);
 	if (write_entry(de))
 		return de;
 	// @@@ complain
@@ -391,11 +392,19 @@ bool db_change_field(struct db_entry *de, enum field_type type,
 	f->data = alloc_size(size);
 	memcpy(f->data, data, size);
 
-	if (type == ft_id) {
+	switch (type) {
+	case ft_id:
 		free(de->name);
 		de->name = alloc_size(size + 1);
 		memcpy(de->name, data, size);
 		de->name[size] = 0;
+		db_tsort(db);
+		break;
+	case ft_prev:
+		db_tsort(db);
+		break;
+	default:
+		break;
 	}
 
 	return de->defer || update_entry(de, new);
@@ -417,6 +426,9 @@ bool db_delete_field(struct db_entry *de, struct db_field *f)
 	for (anchor = &de->fields; *anchor != f; anchor = &(*anchor)->next);
 	*anchor = f->next;
 	free_field(f);
+
+	/* just in case we deleted ft_prev */
+	db_tsort(db);
 
 	return de->defer || update_entry(de, new);
 }
@@ -447,6 +459,8 @@ bool db_delete_entry(struct db_entry *de)
 	for (anchor = &db->entries; *anchor != de;
 	    anchor = &(*anchor)->next);
 	*anchor = de->next;
+
+	db_tsort(db);
 
 	if (!block_delete(de->block))
 		return 0;
@@ -628,6 +642,7 @@ bool db_open_progress(struct db *db, const struct dbcrypt *c,
 	if (progress)
 		progress(user, i, i);
 	memset(payload_buf, 0, sizeof(payload_buf));
+	db_tsort(db);
 	return 1;
 }
 

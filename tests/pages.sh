@@ -91,7 +91,7 @@ page_inner()
 		  "`md5sum <\"$dir/_tmp.png\"`" ] || {
 			compare "$dir/$name.png" "$dir/_tmp.png" - |
 			    display
-			exit
+			$all || exit
 		}
 		rm -f "$dir/_tmp.png";;
 	store)	convert $reproducible "$dir/_tmp.ppm" "$dir/$name.png" || exit;;
@@ -111,9 +111,12 @@ page()
 usage()
 {
 	cat <<EOF 1>&2
-usage: $0 [--gdb] [-v] [-x] [run|show|interact|last|test|store|names
+usage: $0 [-a] [--gdb] [-v] [-x] [run|show|interact|last|test|store|names
           [page-name]]
 
+-a  applies to "test": run all test cases and show the ones where differences
+    are detected. Without -a, "test" stops after the first difference. The exit
+    code is non-zero if the last test run produced a difference.
 --gdb
     run the simulator under gdb
 -v  enable debug output of the simulator
@@ -127,11 +130,14 @@ self=`which "$0"`
 dir=`dirname "$self"`
 top=$dir/..
 
+all=false
 gdb=false
 quiet=-q
 
 while [ "$1" ]; do
 	case "$1" in
+	-a)	all=true
+		shift;;
 	--gdb)	gdb=true
 		shift;;
 	-v)	quiet=

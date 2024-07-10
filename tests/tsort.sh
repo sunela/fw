@@ -9,15 +9,15 @@
 run()
 {
 	local title=$1
-	local s="../sim -q -C dummy"
+	local s="../sim -q -C 'db dummy'"
 
 	shift
 	echo -n "$title: " 1>&2
 
 	for n in "$@"; do
-		s="$s 'dummy $n'"
+		s="$s 'db $n'"
 	done
-	if ! eval $s "'dummy sort' 'dummy dump'" 2>&1 >_out; then
+	if ! eval $s "'db sort' 'db dump'" 2>&1 >_out; then
 		echo "FAILED" 1>&2
 		exit 1
 	else
@@ -54,7 +54,7 @@ done
 
 # --- Alphabetic sequence -----------------------------------------------------
 
-run "alphabetic" a b c <<EOF
+run "alphabetic" "add a" "add b" "add c" <<EOF
 a -
 b -
 c -
@@ -62,7 +62,7 @@ EOF
 
 # --- Reversed alphabetic sequence --------------------------------------------
 
-run "reversed alphabetic" c b a <<EOF
+run "reversed alphabetic" "add c" "add b" "add a" <<EOF
 a -
 b -
 c -
@@ -70,7 +70,7 @@ EOF
 
 # --- Total order (forward) ---------------------------------------------------
 
-run "total forward" a "b a" "c b" <<EOF
+run "total forward" "add a" "add b a" "add c b" <<EOF
 a -
 b a
 c b
@@ -78,7 +78,7 @@ EOF
 
 # --- Total order (forward, due to alphabetical insertion) --------------------
 
-run "total forward alpha" "c b" "b a" a <<EOF
+run "total forward alpha" "add c b" "add b a" "add a" <<EOF
 a -
 b a
 c b
@@ -86,7 +86,7 @@ EOF
 
 # --- Total order (backward) --------------------------------------------------
 
-run "total backward" "a b" "b c" c <<EOF
+run "total backward" "add a b" "add b c" "add c" <<EOF
 c -
 b c
 a b
@@ -94,7 +94,7 @@ EOF
 
 # --- Partial order (tie) -----------------------------------------------------
 
-run "partial tie" a "b a" "c a" <<EOF
+run "partial tie" "add a" "add b a" "add c a" <<EOF
 a -
 b a
 c a
@@ -102,7 +102,7 @@ EOF
 
 # --- Partial order (incomplete) ----------------------------------------------
 
-run "partial incomplete" a b "c a" <<EOF
+run "partial incomplete" "add a" "add b" "add c a" <<EOF
 a -
 b -
 c a
@@ -110,7 +110,7 @@ EOF
 
 # --- Partial reorder (incomplete) --------------------------------------------
 
-run "partial reorder incomplete" a "b c" c <<EOF
+run "partial reorder incomplete" "add a" "add b c" "add c" <<EOF
 a -
 c -
 b c
@@ -118,7 +118,7 @@ EOF
 
 # --- Loop (abc)---------------------------------------------------------------
 
-run "loop (abc)" "a c" "b a" "c b" <<EOF
+run "loop (abc)" "add a c" "add b a" "add c b" <<EOF
 a c
 b a
 c b
@@ -126,7 +126,7 @@ EOF
 
 # --- Loop (cba)---------------------------------------------------------------
 
-run "loop (cba)" "a b" "b c" "c a" <<EOF
+run "loop (cba)" "add a b" "add b c" "add c a" <<EOF
 a b
 c a
 b c
@@ -134,7 +134,7 @@ EOF
 
 # --- Disjoint (ab cd)---------------------------------------------------------
 
-run "disjoint (ab cd)" a "b a" c "d c" <<EOF
+run "disjoint (ab cd)" "add a" "add b a" "add c" "add d c" <<EOF
 a -
 b a
 c -
@@ -143,7 +143,7 @@ EOF
 
 # --- Disjoint (ab cd)---------------------------------------------------------
 
-run "disjoint (ab dc)" a "b a" "c d" d <<EOF
+run "disjoint (ab dc)" "add a" "add b a" "add c d" "add d" <<EOF
 a -
 b a
 d -

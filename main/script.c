@@ -176,11 +176,11 @@ static void ticks(unsigned n)
 static void show_help(void)
 {
 	printf("Commands:\n\n"
-"dummy\t\tuse a dummy database. This must be the first command in the\n"
+"db dummy\t\tuse a dummy database. This must be the first command in the\n"
 "\t\tscript.\n"
-"dummy NAME [PREV]\n\t\tadd an entry to the dummy database\n"
-"dummy dump\tprint the content of the dummy database\n"
-"dummy sort\tsort the dummy database\n"
+"db add NAME [PREV]\n\t\tadd an entry to the dummy database\n"
+"db dump\tprint the content of the database\n"
+"db sort\tsort the database\n"
 "echo MESSAGE\tdisplay a message, can contain spaces\n"
 "system COMMAND\trun a shell command\n"
 "interact\tshow the display and interact with the user\n"
@@ -366,47 +366,51 @@ static bool process_cmd(const char *cmd)
 		return 1;
 	}
 
-	/* dummy database */
+	/* database */
 
-	if (!strcmp("dummy", cmd)) {
-		db_open_empty(&main_db, NULL);
-		return 1;
-	}
-	arg = cmd_arg("dummy", cmd);
+	arg = cmd_arg("db", cmd);
 	if (arg) {
 		int args;
+		char op[MAX_NAME_LEN + 1];
 		char name[MAX_NAME_LEN + 1];
 		char prev[MAX_NAME_LEN + 1];
 
-		args = sscanf(arg, "%s %s", name, prev);
-		switch (args) {
-		case 1:
-			if (!strcmp(name, "sort")) {
-				db_tsort(&main_db);
-				return 1;
-			}
-			if (!strcmp(name, "dump")) {
-				const struct db_entry *de;
-				const struct db_field *f;
-
-				for (de = main_db.entries; de; de = de->next) {
-					for (f = de->fields; f; f = f->next)
-						if (f->type == ft_prev)
-							break;
-					printf("%s %.*s\n", de->name,
-					    f ? f->len : 1,
-					    f ? (char *) f->data : "-");
-				}
-				return 1;
-			}
-			db_dummy_entry(&main_db, name, NULL);
-			break;
-		case 2:
-			db_dummy_entry(&main_db, name, prev);
-			break;
-		default:
+		args = sscanf(arg, "%s %s %s", op, name, prev);
+		if (args < 1)
 			goto fail;
+		if (!strcmp(op, "dummy") && args == 1) {
+			db_open_empty(&main_db, NULL);
+			return 1;
 		}
+		if (!strcmp(op, "sort") && args == 1) {
+			db_tsort(&main_db);
+			return 1;
+		}
+		if (!strcmp(op, "dump") && args == 1) {
+			const struct db_entry *de;
+			const struct db_field *f;
+
+			for (de = main_db.entries; de; de = de->next) {
+				for (f = de->fields; f; f = f->next)
+					if (f->type == ft_prev)
+						break;
+				printf("%s %.*s\n", de->name,
+				    f ? f->len : 1,
+				    f ? (char *) f->data : "-");
+			}
+			return 1;
+		}
+		if (!strcmp(op, "add"))
+			switch (args) {
+			case 2:
+				db_dummy_entry(&main_db, name, NULL);
+				return 1;
+			case 3:
+				db_dummy_entry(&main_db, name, prev);
+				return 1;
+			default:
+				goto fail;
+			}
 		return 1;
 	}
 
@@ -425,7 +429,7 @@ fail:
 
 bool run_script(char **args, int n_args)
 {
-	if (!n_args || strcmp(args[0], "dummy"))
+	if (!n_args || strncmp(args[0], "db ", 3))
 		db_open(&main_db, NULL);
 	while (n_args-- && headless)
 		if (!process_cmd(*args++))

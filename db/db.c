@@ -23,6 +23,9 @@
 #include "db.h"
 
 
+static bool update_entry(struct db_entry *de, unsigned new);
+
+
 const enum field_type order2ft[] = {
     ft_end, ft_id, ft_prev, ft_user, ft_email, ft_pw, ft_pw2,
     ft_hotp_secret, ft_hotp_counter, ft_totp_secret, ft_comment };
@@ -97,8 +100,180 @@ static void free_entry(struct db_entry *de)
 }
 
 
-/* --- Database entries ---------------------------------------------------- */
+/* --- Fields of database entries ------------------------------------------ */
 
+
+static void add_field(struct db_entry *de, enum field_type type,
+    const void *data, unsigned len)
+{
+	struct db_field **anchor;
+	struct db_field *f;
+
+	for (anchor = &de->fields; *anchor; anchor = &(*anchor)->next)
+		if ((*anchor)->type > type)
+			break;
+	f = alloc_type(struct db_field);
+	f->type = type;
+	f->len = len;
+	f->data = alloc_size(len);
+	memcpy(f->data, data, len);
+	f->next = *anchor;
+	*anchor = f;
+}
+
+
+bool db_change_field(struct db_entry *de, enum field_type type,
+    const void *data, unsigned size)
+{
+	struct db *db = de->db;
+	struct db_field **anchor;
+	struct db_field *f;
+	int new = -1;
+
+	if (!de->defer) {
+		new = get_erased_block(db);
+		if (new < 0)
+			return 0;
+	}
+
+	for (anchor = &de->fields; *anchor; anchor = &(*anchor)->next)
+		if ((*anchor)->type >= type)
+			break;
+	if (*anchor && (*anchor)->type == type) {
+		f = *anchor;
+		free(f->data);
+	} else {
+		f = alloc_type(struct db_field);
+		f->type = type;
+		f->next = *anchor;
+		*anchor = f;
+	}
+	f->len = size;
+	f->data = alloc_size(size);
+	memcpy(f->data, data, size);
+
+	switch (type) {
+	case ft_id:
+		free(de->name);
+		de->name = alloc_size(size + 1);
+		memcpy(de->name, data, size);
+		de->name[size] = 0;
+		db_tsort(db);
+		break;
+	case ft_prev:
+		db_tsort(db);
+		break;
+	default:
+		break;
+	}
+
+	return de->defer || update_entry(de, new);
+}
+
+
+bool db_delete_field(struct db_entry *de, struct db_field *f)
+{
+	struct db *db = de->db;
+	struct db_field **anchor;
+	int new = -1;
+
+	if (!de->defer) {
+		new = get_erased_block(db);
+		if (new < 0)
+			return 0;
+	}
+
+	for (anchor = &de->fields; *anchor != f; anchor = &(*anchor)->next);
+	*anchor = f->next;
+	free_field(f);
+
+	/* just in case we deleted ft_prev */
+	db_tsort(db);
+
+	return de->defer || update_entry(de, new);
+}
+
+
+struct db_field *db_field_find(const struct db_entry *de, enum field_type type)
+{
+	struct db_field *f;
+
+	for (f = de->fields; f; f = f->next)
+		if (f->type == type)
+			return f;
+	return NULL;
+}
+
+
+/* --- Database entries: storage operations -------------------------------- */
+
+
+static bool write_entry(const struct db_entry *de)
+{
+	const void *end = payload_buf + sizeof(payload_buf);
+	uint8_t *p = payload_buf;
+	const struct db_field *f;
+
+	memset(payload_buf, 0, sizeof(payload_buf));
+	for (f = de->fields; f; f = f->next) {
+		if ((const void *) p + f->len + 2 > end) {
+			debug("write_entry: %p + %u + 2 > %p\n",
+			    p, f->len, end);
+			return 0;
+		}
+		*p++ = f->type;
+		*p++ = f->len;
+		memcpy(p, f->data, f->len);
+		p += f->len;
+	}
+	return block_write(de->db->c, ct_data, de->seq, payload_buf, de->block);
+}
+
+
+static bool update_entry(struct db_entry *de, unsigned new)
+{
+	struct db *db = de->db;
+	unsigned old = de->block;
+
+	old = de->block;
+	de->block = new;
+	de->seq++;
+
+	if (!write_entry(de)) {
+		// @@@ complain more if block_delete fails ?
+		if (block_delete(new)) {
+			span_add(&db->deleted, new, 1);
+			db->stats.deleted++;
+		}
+		return 0;
+	}
+	// @@@ complain if block_delete fails ?
+	if (block_delete(old)) {
+		span_add(&db->deleted, old, 1);
+		db->stats.deleted++;
+	}
+	return 1;
+}
+
+
+bool db_entry_defer_update(struct db_entry *de, bool defer)
+{
+	if (!defer) {
+		int new;
+
+		new = get_erased_block(de->db);
+		if (new < 0)
+			return 0;
+		if (!update_entry(de, new))
+			return 0;
+	}
+		
+	de->defer = defer;
+	return 1;
+}
+
+
+/* --- Database entries: creation  ----------------------------------------- */
 
 /*
  * Sorting: "prev" establishes a partial order [1]. The idea is that entries
@@ -169,6 +344,48 @@ static struct db_entry *new_entry(struct db *db, const char *name,
 	*anchor = de;
 	return de;
 }
+
+
+struct db_entry *db_new_entry(struct db *db, const char *name)
+{
+	struct db_entry *de;
+	int new;
+
+	new = get_erased_block(db);
+	if (new < 0)
+		return NULL;
+	de = new_entry(db, name, NULL);
+	de->name = stralloc(name);
+	de->block = new;
+	rnd_bytes(&de->seq, sizeof(de->seq));
+	add_field(de, ft_id, name, strlen(name));
+	db_tsort(db);
+	if (write_entry(de))
+		return de;
+	// @@@ complain
+	if (block_delete(new)) {
+		span_add(&db->deleted, new, 1);
+		db->stats.deleted++;
+	}
+	return NULL;
+}
+
+
+struct db_entry *db_dummy_entry(struct db *db, const char *name,
+    const char *prev)
+{
+	struct db_entry *de;
+
+	de = new_entry(db, name, NULL);
+	de->name = stralloc(name);
+	de->block = -1;
+	if (prev)
+		add_field(de, ft_prev, prev, strlen(prev));
+	return de;
+}
+
+
+/* --- Database entries: sorting ------------------------------------------- */
 
 
 unsigned db_tsort(struct db *db)
@@ -256,199 +473,7 @@ unsigned db_tsort(struct db *db)
 }
 
 
-static bool write_entry(const struct db_entry *de)
-{
-	const void *end = payload_buf + sizeof(payload_buf);
-	uint8_t *p = payload_buf;
-	const struct db_field *f;
-
-	memset(payload_buf, 0, sizeof(payload_buf));
-	for (f = de->fields; f; f = f->next) {
-		if ((const void *) p + f->len + 2 > end) {
-			debug("write_entry: %p + %u + 2 > %p\n",
-			    p, f->len, end);
-			return 0;
-		}
-		*p++ = f->type;
-		*p++ = f->len;
-		memcpy(p, f->data, f->len);
-		p += f->len;
-	}
-	return block_write(de->db->c, ct_data, de->seq, payload_buf, de->block);
-}
-
-
-static void add_field(struct db_entry *de, enum field_type type,
-    const void *data, unsigned len)
-{
-	struct db_field **anchor;
-	struct db_field *f;
-
-	for (anchor = &de->fields; *anchor; anchor = &(*anchor)->next)
-		if ((*anchor)->type > type)
-			break;
-	f = alloc_type(struct db_field);
-	f->type = type;
-	f->len = len;
-	f->data = alloc_size(len);
-	memcpy(f->data, data, len);
-	f->next = *anchor;
-	*anchor = f;
-}
-
-
-struct db_entry *db_new_entry(struct db *db, const char *name)
-{
-	struct db_entry *de;
-	int new;
-
-	new = get_erased_block(db);
-	if (new < 0)
-		return NULL;
-	de = new_entry(db, name, NULL);
-	de->name = stralloc(name);
-	de->block = new;
-	rnd_bytes(&de->seq, sizeof(de->seq));
-	add_field(de, ft_id, name, strlen(name));
-	db_tsort(db);
-	if (write_entry(de))
-		return de;
-	// @@@ complain
-	if (block_delete(new)) {
-		span_add(&db->deleted, new, 1);
-		db->stats.deleted++;
-	}
-	return NULL;
-}
-
-
-struct db_entry *db_dummy_entry(struct db *db, const char *name,
-    const char *prev)
-{
-	struct db_entry *de;
-
-	de = new_entry(db, name, NULL);
-	de->name = stralloc(name);
-	de->block = -1;
-	if (prev)
-		add_field(de, ft_prev, prev, strlen(prev));
-	return de;
-}
-
-
-static bool update_entry(struct db_entry *de, unsigned new)
-{
-	struct db *db = de->db;
-	unsigned old = de->block;
-
-	old = de->block;
-	de->block = new;
-	de->seq++;
-
-	if (!write_entry(de)) {
-		// @@@ complain more if block_delete fails ?
-		if (block_delete(new)) {
-			span_add(&db->deleted, new, 1);
-			db->stats.deleted++;
-		}
-		return 0;
-	}
-	// @@@ complain if block_delete fails ?
-	if (block_delete(old)) {
-		span_add(&db->deleted, old, 1);
-		db->stats.deleted++;
-	}
-	return 1;
-}
-
-
-bool db_change_field(struct db_entry *de, enum field_type type,
-    const void *data, unsigned size)
-{
-	struct db *db = de->db;
-	struct db_field **anchor;
-	struct db_field *f;
-	int new = -1;
-
-	if (!de->defer) {
-		new = get_erased_block(db);
-		if (new < 0)
-			return 0;
-	}
-
-	for (anchor = &de->fields; *anchor; anchor = &(*anchor)->next)
-		if ((*anchor)->type >= type)
-			break;
-	if (*anchor && (*anchor)->type == type) {
-		f = *anchor;
-		free(f->data);
-	} else {
-		f = alloc_type(struct db_field);
-		f->type = type;
-		f->next = *anchor;
-		*anchor = f;
-	}
-	f->len = size;
-	f->data = alloc_size(size);
-	memcpy(f->data, data, size);
-
-	switch (type) {
-	case ft_id:
-		free(de->name);
-		de->name = alloc_size(size + 1);
-		memcpy(de->name, data, size);
-		de->name[size] = 0;
-		db_tsort(db);
-		break;
-	case ft_prev:
-		db_tsort(db);
-		break;
-	default:
-		break;
-	}
-
-	return de->defer || update_entry(de, new);
-}
-
-
-bool db_delete_field(struct db_entry *de, struct db_field *f)
-{
-	struct db *db = de->db;
-	struct db_field **anchor;
-	int new = -1;
-
-	if (!de->defer) {
-		new = get_erased_block(db);
-		if (new < 0)
-			return 0;
-	}
-
-	for (anchor = &de->fields; *anchor != f; anchor = &(*anchor)->next);
-	*anchor = f->next;
-	free_field(f);
-
-	/* just in case we deleted ft_prev */
-	db_tsort(db);
-
-	return de->defer || update_entry(de, new);
-}
-
-
-bool db_entry_defer_update(struct db_entry *de, bool defer)
-{
-	if (!defer) {
-		int new;
-
-		new = get_erased_block(de->db);
-		if (new < 0)
-			return 0;
-		if (!update_entry(de, new))
-			return 0;
-	}
-		
-	de->defer = defer;
-	return 1;
-}
+/* --- Database entries: deletion ------------------------------------------ */
 
 
 bool db_delete_entry(struct db_entry *de)
@@ -471,15 +496,7 @@ bool db_delete_entry(struct db_entry *de)
 }
 
 
-struct db_field *db_field_find(const struct db_entry *de, enum field_type type)
-{
-	struct db_field *f;
-
-	for (f = de->fields; f; f = f->next)
-		if (f->type == type)
-			return f;
-	return NULL;
-}
+/* --- Database entries: iteration ----------------------------------------- */
 
 
 bool db_iterate(struct db *db, bool (*fn)(void *user, struct db_entry *de),

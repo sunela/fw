@@ -101,6 +101,7 @@ extern const unsigned field_types;
 
 
 /* Functions only exported only for testing of the topological sort. */
+
 unsigned db_tsort(struct db *db);
 struct db_entry *db_dummy_entry(struct db *db, const char *name,
     const char *prev);
@@ -117,11 +118,39 @@ bool db_delete_field(struct db_entry *de, struct db_field *f);
  * assume that is has been changed, so we always rewrite it. This may change in
  * the future.)
  *
+ * db_entry_defer_update(..., 1) can be used multiple times on an entry before
+ * db_entry_defer_update(..., 0). Also, any number of entries may defer updates
+ * concurrently.
+ *
  * db_entry_defer_update returns 0 if an update was attempted but failed. It
  * returns 1 in all other cases.
  */
+
 bool db_entry_defer_update(struct db_entry *de, bool defer);
+
 struct db_entry *db_new_entry(struct db *db, const char *name);
+
+/*
+ * Adjusts "prev" fields in the database such that entry "e" is sorted after
+ * entry "after":
+ * - the "prev" field of "e" is set up point to "after"
+ * - all "prev" fields pointing to "e" are changed to the value of "e"'s "prev"
+ *   field
+ * - all "prev" fields pointing to "after" are changed to point to "e"
+ * If "after" is NULL, the entry is inserted at the beginning of the database.
+ */
+
+void db_move_after(struct db_entry *e, const struct db_entry *after);
+
+/*
+ * Adjusts "prev" fields in the database such that entry "e" is sorted before
+ * entry "after", or at the end of the list if "after" is NULL.
+ *
+ * See "move_after" for details.
+ */
+
+void db_move_before(struct db_entry *e, const struct db_entry *before);
+
 bool db_delete_entry(struct db_entry *de);
 bool db_iterate(struct db *db, bool (*fn)(void *user, struct db_entry *de),
     void *user);

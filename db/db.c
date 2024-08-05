@@ -130,6 +130,9 @@ bool db_change_field(struct db_entry *de, enum field_type type,
 	struct db_field *f;
 	int new = -1;
 
+if (debugging)
+  printf("db_change_field: %s.%u -> \"%.*s\"\n",
+    de->name, type, size, (char *) data);
 	if (!de->defer) {
 		new = get_erased_block(db);
 		if (new < 0)
@@ -379,6 +382,7 @@ struct db_entry *db_dummy_entry(struct db *db, const char *name,
 	de = new_entry(db, name, NULL);
 	de->name = stralloc(name);
 	de->block = -1;
+	de->defer = 1;
 	if (prev)
 		add_field(de, ft_prev, prev, strlen(prev));
 	return de;
@@ -470,6 +474,119 @@ unsigned db_tsort(struct db *db)
 	free(tmp);
 
 	return n;
+}
+
+
+/* --- Database entries: reordering ---------------------------------------- */
+
+
+/*
+ * is_prev determines if "prev" is the immediate predecessor of "e". If "prev"
+ * is NULL, we return "1" if "e" has no predecessor.
+ */
+
+static bool is_prev(const struct db_entry *prev, const struct db_entry *e)
+{
+	const struct db_field *f = db_field_find(e, ft_prev);
+
+	if (!prev && !f)
+		return 1;
+	if (!prev || !f)
+		return 0;
+	if (strlen(prev->name) != f->len)
+		return 0;
+	return !memcmp(prev->name, f->data, f->len);
+}
+
+
+void db_move_after(struct db_entry *e, const struct db_entry *after)
+{
+	struct db *db = e->db;
+	struct db_entry *e2;
+	struct db_field *f = db_field_find(e, ft_prev);
+
+	if (after) {
+if (debugging)
+  printf("move_after: %s -> %s\n", e->name, after->name);
+	} else {
+if (debugging)
+  printf("move_after: %s -> TOP\n", e->name);
+	}
+
+	/* @@@ is this the right place to handle moving after itself ? */
+	if (e == after) {
+if (debugging)
+  printf("to self\n");
+		return;
+	}
+
+if (debugging)
+  printf("followers:\n");
+	/*
+	 * db_change_field and db_delete_entry sort the database, so we just
+	 * restart to be safe.
+	 */
+again:
+	f = db_field_find(e, ft_prev);
+	for (e2 = db->entries; e2; e2 = e2->next)
+		if (e2 != e && is_prev(e, e2)) {
+			if (f) {
+				db_change_field(e2, ft_prev, f->data, f->len);
+			} else {
+				struct db_field *f2 =
+				    db_field_find(e2, ft_prev);
+
+				assert(f2);
+				db_delete_field(e2, f2);
+			}
+			goto again;
+		}
+
+if (debugging)
+  printf("followers2:\n");
+again2:
+	for (e2 = db->entries; e2; e2 = e2->next)
+{
+if (debugging)
+  printf("\t%s: %p =? %p, (%s) %u\n", e2->name, e2, e, e->name, is_prev(e, e2));
+		if (e2 != e && is_prev(after, e2)) {
+			db_change_field(e2, ft_prev, e->name, strlen(e->name));
+			goto again2;
+		}
+}
+
+	if (after) {
+		db_change_field(e, ft_prev, after->name,
+		    strlen(after->name));
+	} else {
+		if (f)
+			db_delete_field(e, f);
+	}
+
+	db_tsort(db);
+}
+
+
+void db_move_before(struct db_entry *e, const struct db_entry *before)
+{
+	struct db *db = e->db;
+	const struct db_entry *prev;
+
+	if (before == db->entries) {
+		prev = NULL;
+	} else if (before) {
+if (debugging)
+  printf("move_before: %s -> %s\n", e->name, before->name);
+		for (prev = db->entries; prev; prev = prev->next)
+			if (prev->next == before)
+				break;
+		assert(prev);
+	} else {
+if (debugging)
+  printf("move_before: %s -> END\n", e->name);
+		for (prev = db->entries; prev && prev->next; prev = prev->next);
+	}
+	db_move_after(e, prev);
 }
 
 

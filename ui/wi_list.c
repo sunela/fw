@@ -24,7 +24,15 @@
 #define	DEFAULT_OPAD	1
 #define	DEFAULT_IPAD	1
 
-#define	OVER_SCROLL	50	/* to get bottom item out of corner area */
+/*
+ * OVER_SCROLL determines how far we scroll past the end of the list. The main
+ * purpose is to let us move the bottom item out of the area where the screen
+ * corners may cut off part of the content.
+ *
+ * Another use is to have an "at the end" position from which to invoke an
+ * overlay, e.g., when moving entries.
+ */
+#define	OVER_SCROLL	50
 
 
 struct wi_list_entry {

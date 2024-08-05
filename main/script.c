@@ -173,12 +173,42 @@ static void ticks(unsigned n)
 }
 
 
+static struct db_entry *find_entry(const char *name)
+{
+	struct db_entry *e;
+
+	for (e = main_db.entries; e; e = e->next)
+		if (!strcmp(e->name, name))
+			return e;
+	fprintf(stderr, "entry \"%s\" not found\n", name);
+	exit(1);
+}
+
+
+static void dump_db_short(const struct db *db)
+{
+	const struct db_entry *de;
+	const struct db_field *f;
+
+	for (de = db->entries; de; de = de->next) {
+		for (f = de->fields; f; f = f->next)
+			if (f->type == ft_prev)
+				break;
+		printf("%s %.*s\n", de->name,
+		    f ? f->len : 1,
+		    f ? (char *) f->data : "-");
+	}
+}
+
+
 static void show_help(void)
 {
 	printf("Commands:\n\n"
-"db dummy\t\tuse a dummy database. This must be the first command in the\n"
+"db dummy\tuse a dummy database. This must be the first command in the\n"
 "\t\tscript.\n"
 "db add NAME [PREV]\n\t\tadd an entry to the dummy database\n"
+"db move NAME [BEFORE]\n\t\tmove an entry before another (to the bottom, if\n"
+"\t\tBEFORE is omitted)\n"
 "db dump\tprint the content of the database\n"
 "db sort\tsort the database\n"
 "echo MESSAGE\tdisplay a message, can contain spaces\n"
@@ -387,17 +417,7 @@ static bool process_cmd(const char *cmd)
 			return 1;
 		}
 		if (!strcmp(op, "dump") && args == 1) {
-			const struct db_entry *de;
-			const struct db_field *f;
-
-			for (de = main_db.entries; de; de = de->next) {
-				for (f = de->fields; f; f = f->next)
-					if (f->type == ft_prev)
-						break;
-				printf("%s %.*s\n", de->name,
-				    f ? f->len : 1,
-				    f ? (char *) f->data : "-");
-			}
+			dump_db_short(&main_db);
 			return 1;
 		}
 		if (!strcmp(op, "add"))
@@ -411,6 +431,23 @@ static bool process_cmd(const char *cmd)
 			default:
 				goto fail;
 			}
+		if (!strcmp(op, "move")) {
+			struct db_entry *a, *b;
+
+			switch (args) {
+			case 2:
+				a = find_entry(name);
+				db_move_before(a, NULL);
+				return 1;
+			case 3:
+				a = find_entry(name);
+				b = find_entry(prev);
+				db_move_before(a, b);
+				return 1;
+			default:
+				goto fail;
+			}
+		}
 		return 1;
 	}
 

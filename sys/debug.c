@@ -11,6 +11,9 @@
 #include "debug.h"
 
 
+bool debugging = 0;
+
+
 /* vdebug() is provided by the HAL */
 
 

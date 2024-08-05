@@ -9,6 +9,17 @@
 #ifndef DEBUG_H
 #define	DEBUG_H
 
+#include <stdbool.h>
+
+
+/*
+ * "debugging" can be used by any code currently under development to activate
+ * additional debugging operations. It has no direct effect on debug().
+ */
+
+extern bool debugging;
+
+
 void debug(const char *fmt, ...)
     __attribute__((format(printf, 1, 2)));
 

@@ -333,6 +333,7 @@ static void usage(const char *name)
 "\n"
 "-2  double the pixel size\n"
 "-C  receive user interaction from a script\n"
+"-D  set the global debugging flag (use changes during development)\n"
 "-d database\n"
 "    set the database file (default: %s)\n"
 "-q  quiet. Disable debugging output.\n"
@@ -350,13 +351,16 @@ int main(int argc, char **argv)
 	bool scripting = 0;
 	int c, i;
 
-	while ((c = getopt(argc, argv, "+2Cd:qs:")) != EOF)
+	while ((c = getopt(argc, argv, "+2CDd:qs:")) != EOF)
 		switch (c) {
 		case '2':
 			zoom = 2;
 			break;
 		case 'C':
 			scripting = 1;
+			break;
+		case 'D':
+			debugging = 1;
 			break;
 		case 'd':
 			storage_file = optarg;

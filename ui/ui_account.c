@@ -26,6 +26,7 @@
 #include "ui_confirm.h"
 #include "ui_entry.h"
 #include "ui_field.h"
+#include "ui_accounts.h"
 #include "style.h"
 #include "ui.h"
 
@@ -290,6 +291,7 @@ static void confirm_entry_deletion(void *user, bool confirm)
 	if (confirm) {
 		db_delete_entry(c->selected_account);
 		c->selected_account = NULL;
+		ui_accounts_cancel_move();
 	}
 }
 

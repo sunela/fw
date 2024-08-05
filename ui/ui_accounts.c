@@ -7,6 +7,7 @@
 
 #include <stddef.h>
 #include <string.h>
+#include <assert.h>
 
 #include "hal.h"
 #include "gfx.h"
@@ -17,6 +18,7 @@
 #include "db.h"
 #include "style.h"
 #include "ui.h"
+#include "ui_accounts.h"
 
 
 struct ui_accounts_ctx {
@@ -108,6 +110,51 @@ static void ui_accounts_tap(void *ctx, unsigned x, unsigned y)
 }
 
 
+/* --- Moving accounts ----------------------------------------------------- */
+
+
+/*
+ * Note: move_from and move_to receive a pointer to the db_entry on which the
+ * overlay was invoked in "user", not the ui_accounts_ctx the other callbacks
+ * get.
+ */
+
+static struct db_entry *moving = NULL;
+
+
+static void move_from(void *user)
+{
+	assert(!moving);
+	moving = user;
+	ui_return();
+}
+
+
+static void move_to(void *user)
+{
+	struct db_entry *e = user;
+
+	assert(moving);
+	db_move_before(moving, e);
+	moving = NULL;
+	ui_return();
+}
+
+
+static void move_cancel(void *user)
+{
+	assert(moving);
+	moving = NULL;
+	ui_return();
+}
+
+
+void ui_accounts_cancel_move(void)
+{
+	moving = NULL;
+}
+
+
 /* --- Long press event ---------------------------------------------------- */
 
 
@@ -144,6 +191,8 @@ static void long_top(void *ctx, unsigned x, unsigned y)
 
 static void ui_accounts_long(void *ctx, unsigned x, unsigned y)
 {
+	struct ui_accounts_ctx *c = ctx;
+
 	if (y < LIST_Y0) {
 		long_top(ctx, x, y);
 		return;
@@ -152,17 +201,40 @@ static void ui_accounts_long(void *ctx, unsigned x, unsigned y)
 	static struct ui_overlay_button buttons[] = {
 		{ ui_overlay_sym_power,	power_off, NULL },
 		{ ui_overlay_sym_add,	new_account, NULL },
-		{ NULL, },
+		{ ui_overlay_sym_move_from, move_from, NULL, },
 		{ ui_overlay_sym_setup,	enter_setup, NULL },
 	};
 	static struct ui_overlay_params prm = {
 		.buttons	= buttons,
 		.n_buttons	= 4,
         };
+	const struct wi_list_entry *entry = wi_list_pick(&c->list, x, y);
 	unsigned i;
 
 	for (i = 0; i != prm.n_buttons; i++)
 		buttons[i].user = ctx;
+	if (moving) {
+		if (entry) {
+			buttons[1].draw = ui_overlay_sym_move_to;
+			buttons[1].fn = move_to;
+			buttons[1].user = wi_list_user(entry);
+		} else {
+			buttons[1].draw = NULL;
+		}
+		buttons[2].draw = ui_overlay_sym_move_cancel;
+		buttons[2].fn = move_cancel;
+	} else {
+		buttons[1].draw = ui_overlay_sym_add;
+		buttons[1].fn = new_account;
+		if (entry) {
+			buttons[2].draw = ui_overlay_sym_move_from;
+			buttons[2].fn = move_from;
+			buttons[2].user = wi_list_user(entry);
+		} else {
+			buttons[2].draw = NULL;
+		}
+	}
+
 	ui_call(&ui_overlay, &prm);
 }
 

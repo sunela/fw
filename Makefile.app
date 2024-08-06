@@ -8,9 +8,9 @@
 CFLAGS += -g -Wall -Wextra -Wshadow -Wno-unused-parameter \
 	 -Wmissing-prototypes -Wmissing-declarations \
 	 -Wno-address-of-packed-member \
-	 -I$(shell pwd) -Isys -Ilib -Igfx -Iui -Ifont -Icrypto -Idb
+	 -I$(shell pwd) -Isys -Ilib -Igfx -Iui -Ifont -Icrypto -Idb -Imain
 OBJS = ui.o demo.o timer.o debug.o mbox.o rnd.o hmac.o hotp.o base32.o \
-    fmt.o imath.o \
+    fmt.o imath.o version.o \
     basic.o poly.o shape.o long_text.o font.o text.o \
     dbcrypt.o block.o span.o db.o settings.o \
     ui_off.o ui_pin.o ui_fail.o ui_accounts.o ui_account.o ui_field.o \
@@ -66,6 +66,7 @@ vpath demo.c ui
 vpath citrine.jpg logo
 vpath mksintab.pl lib
 
+# --- Generated files ---------------------------------------------------------
 
 ui.o:		citrine.inc
 lib/imath.c:	sin.inc
@@ -76,6 +77,23 @@ citrine.inc:    citrine.jpg scripts/pnmtorgb.pl
 
 sin.inc:	mksintab.pl
 		$(BUILD) perl $< >$@ || { rm -f $@; exit 1; }
+
+# --- Build version -----------------------------------------------------------
+
+.PHONY:		main/version.c
+
+BUILD_DATE = $(shell date +'%Y%m%d-%H:%M')
+BUILD_HASH = $(shell git rev-parse HEAD | cut -c 1-7)
+BUILD_DIRTY = $(shell [ -z "`git status -s -uno`" ]; echo $$?)
+
+$(OBJDIR)version$(OBJ_SUFFIX): main/version.c | generated_headers
+		$(CC) $(CFLAGS) $(CFLAGS_CC) \
+		    -DBUILD_DATE="\"$(BUILD_DATE)\"" \
+		    -DBUILD_HASH=0x$(BUILD_HASH) \
+		    -DBUILD_DIRTY=$(BUILD_DIRTY) \
+		    -o $@ -c $<
+
+# --- Cleanup -----------------------------------------------------------------
 
 clean::
 		rm -f citrine.inc

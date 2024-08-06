@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <math.h>
+#include <string.h>
 #include <time.h>
 #include <assert.h>
 
@@ -278,6 +279,18 @@ static void event_loop(void)
 
 void display_on(bool on)
 {
+}
+
+
+/* --- CPU ID -------------------------------------------------------------- */
+
+
+void read_cpu_id(char *buf)
+{
+	static const char *id = "Simulator";
+
+	assert(strlen(id) <= CPU_ID_LENGTH);
+	strcpy(buf, id);
 }
 
 

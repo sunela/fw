@@ -1,14 +1,19 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <string.h>
 #include <assert.h>
 
 #include "usbd_core.h"
 #include "bflb_mtimer.h"
 #include "bflb_rtc.h"
 #include "bflb_uart.h"
+#include "bflb_efuse.h"
 #include "board.h"
 
+#define	SDK_MAIN
+#include "../lib/fmt.h"
+#include "../hal.h"
 #include "../sdk-hal.h"
 
 
@@ -37,6 +42,20 @@ uint64_t time_us(void)
 		bflb_rtc_set_time(rtc, 0);
 	}
 	return bflb_rtc_get_time(rtc) / 32768.8 * 1000000;
+}
+
+
+void read_cpu_id(char *buf)
+{
+	bflb_efuse_device_info_type info;
+
+	bflb_efuse_get_device_info(&info);
+	assert(strlen(info.package_name) <= CPU_ID_LENGTH - 4);
+	format(add_char, &buf, "%s %u", info.package_name, info.version);
+//	printf("pkg %s flash %s psram %s version %u\n",
+//	    info.package_name, info.flash_info_name, info.psram_info_name,
+//	    info.version);
+//	bflb_efuse_get_chipid(chipid);
 }
 
 

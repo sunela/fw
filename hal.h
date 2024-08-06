@@ -12,7 +12,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#ifndef SDK_MAIN
 #include "gfx.h"
+#endif
 
 
 #define GFX_WIDTH	240
@@ -23,6 +25,8 @@
 #else
 #define	PSRAM
 #endif
+
+#define	CPU_ID_LENGTH	20
 
 
 extern bool quiet;
@@ -48,9 +52,13 @@ void msleep(unsigned ms);
 
 uint64_t time_us(void);
 
+#ifndef SDK_MAIN
 void update_display_partial(struct gfx_drawable *da, unsigned x, unsigned y);
 void update_display(struct gfx_drawable *da);
 void display_on(bool on);
+#endif /* !SDK_MAIN */
+
+void read_cpu_id(char *buf);	/* CPU_ID_LENGTH */
 
 bool app_init(char **args, unsigned n_args);
 

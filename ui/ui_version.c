@@ -93,6 +93,7 @@ static void ui_version_open(void *ctx, void *params)
 {
 	struct ui_version_ctx *c = ctx;
 	char tmp[20];
+	char cpu_id[CPU_ID_LENGTH + 1];
 	char *p;
 
 	lists[0] = &c->list;
@@ -109,6 +110,9 @@ static void ui_version_open(void *ctx, void *params)
 	wi_list_add(&c->list, "Firmware", tmp, NULL);
 
 	wi_list_add(&c->list, "Build date", build_date, NULL);
+
+	read_cpu_id(cpu_id);
+	wi_list_add(&c->list, "CPU", cpu_id, NULL);
 
 	wi_list_end(&c->list);
 }

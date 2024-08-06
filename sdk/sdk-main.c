@@ -41,7 +41,7 @@ uint64_t time_us(void)
 		/* enable RTC and set time */
 		bflb_rtc_set_time(rtc, 0);
 	}
-	return bflb_rtc_get_time(rtc) / 32768.8 * 1000000;
+	return bflb_rtc_get_time(rtc) / 32768.0 * 1000000;
 }
 
 

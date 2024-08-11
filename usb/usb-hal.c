@@ -22,10 +22,15 @@ bool usb_query(uint8_t req, uint8_t **data, uint32_t *len)
 {
 	static char hello[] = "hello";
 
-	debug("query\r\n");
-	*data = (uint8_t *) hello;
-	*len = strlen(hello);
-	return 1;
+	debug("query %u\r\n", req);
+	switch (req) {
+	case SUNELA_QUERY:
+		*data = (uint8_t *) hello;
+		*len = strlen(hello);
+		return 1;
+	default:
+		return 0;
+	}
 }
 
 

@@ -5,6 +5,7 @@
  * A copy of the license can be found in the file LICENSE.MIT
  */
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -34,15 +35,15 @@ static void set_time(usb_dev_handle *dev)
 }
 
 
-static void query(usb_dev_handle *dev)
+static void query(usb_dev_handle *dev, uint8_t req, const char *name)
 {
 	char buf[1024];
 	int res, i;
 
-	res = usb_control_msg(dev, FROM_DEV, SUNELA_QUERY, 0, 0,
-	    buf, sizeof(buf), TIMEOUT_MS);
+	res = usb_control_msg(dev, FROM_DEV, req, 0, 0, buf, sizeof(buf),
+	    TIMEOUT_MS);
 	if (res < 0) {
-		fprintf(stderr, "SUNELA_TIME: %d\n", res);
+		fprintf(stderr, "%s: %d\n", name, res);
 		exit(1);
 	}
 	printf("%d:", res);
@@ -80,6 +81,7 @@ static void usage(const char *name)
 "Commands:\n"
 "  time\n"
 "  query\n"
+"  bad-query\n"
 "  demo name [args ...]\n"
     , name);
 	exit(1);
@@ -112,7 +114,9 @@ int main(int argc, char *const *argv)
 	if (n_args == 1 && !strcmp(argv[optind], "time"))
 		set_time(dev);
 	else if (n_args == 1 && !strcmp(argv[optind], "query"))
-		query(dev);
+		query(dev, SUNELA_QUERY, "SUNELA_QUERY");
+	else if (n_args == 1 && !strcmp(argv[optind], "bad-query"))
+		query(dev, SUNELA_DEMO, "SUNELA_DEMO");
 	else if (n_args > 1 && !strcmp(argv[optind], "demo"))
 		demo(dev, argv + optind + 1, n_args - 1);
 	else

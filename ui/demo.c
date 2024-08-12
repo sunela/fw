@@ -797,14 +797,18 @@ void demo(char **args, unsigned n_args)
 void poll_demo_mbox(void)
 {
 	char buf[256];
-	size_t got;
+	ssize_t got;
 	char *args[10];
 	unsigned n_args = 0;
 	char *p = buf;
 
 	got = mbox_retrieve(&demo_mbox, buf, sizeof(buf));
-	if (!got)
+	if (got < 0)
 		return;
+	if (!got) {
+		debug("poll_demo_mbox: empty message\n");
+		return;
+	}
 	if (buf[got - 1]) {
 		debug("poll_demo_mbox: no NUL\n");
 		return;

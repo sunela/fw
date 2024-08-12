@@ -11,7 +11,7 @@
 /*
  * Mailboxes are intended for communication between the single-threaded
  * application and interrupt handlers. They do NOT work for:
- * - multiple interrupts handlers accessing the same mailbox, if these
+ * - multiple interrupt handlers accessing the same mailbox, if these
  *   interrupts can preempt each other,
  * - multithreading,
  * - multiple readers or multiple writers (e.g., if an interrupt handler can
@@ -27,20 +27,21 @@ struct mbox {
 	bool enabled;
 	void *buf;
 	size_t size;		/* buffer size */
-	uint32_t length;	/* receive only if length > 0 */
+	int32_t length;		/* receive only if length >= 0 */
 		/* Note: read/write of "length" must be atomic. */
 };
 
 
-#define	MBOX_INIT	{ .enabled = 0, .buf = NULL, .size = 0, .length = 0 }
+#define	MBOX_INIT	{ .enabled = 0, .buf = NULL, .size = 0, .length = -1 }
 #define	MBOX_INIT_BUF(buf, size) \
 	{ .enabled = 0, .buf = (buf), .size = (size), .length = 0 }
 
 
 /*
- * mbox_deposit and mbox_retrieve both return 0 if no operation was performed.
- * None of the functions block or loop. Messages must not exceed the maximum
- * buffer size. They may be shorter, but cannot be empty.
+ * If no operation was performed, mbox_deposit returns 0, and mbox_retrieve
+ * returns a negative number. None of the functions block or loop. Messages
+ * must not exceed the maximum buffer size. They may be shorter, and can be
+ * empty.
  *
  * The buffer given to mbox_retrieve must be at least large enough to store the
  * message. There is no partial retrieval. To avoid spurious errors, it is
@@ -53,11 +54,16 @@ struct mbox {
  */
 
 bool mbox_deposit(volatile struct mbox *mbox, const void *data, size_t length);
-size_t mbox_retrieve(volatile struct mbox *mbox, void *data, size_t size);
+ssize_t mbox_retrieve(volatile struct mbox *mbox, void *data, size_t size);
 
 void mbox_enable(volatile struct mbox *mbox);
 void mbox_enable_buf(volatile struct mbox *mbox, void *buf, size_t size);
 void mbox_disable(volatile struct mbox *mbox);
+
+/*
+ * After initialization, mailboxes are disabled. If the buffer is to be set
+ * with mbox_enable_buf, it can be initialized to NULL with size 0.
+ */
 
 void mbox_init(struct mbox *mbox, void *buf, size_t size);
 

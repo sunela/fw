@@ -19,8 +19,10 @@
 
 #include <stddef.h>
 #include <time.h>
+#include <sys/types.h>
 
 #include "hal.h"
+#include "debug.h"
 #include "fmt.h"
 #include "gfx.h"
 #include "text.h"
@@ -191,10 +193,17 @@ static void ui_time_tick(void *ctx)
 	struct ui_time_ctx *c = ctx;
 	static int64_t last_tick = -1;
 	int64_t this_tick = time_us() / 1000000;
+	ssize_t got;
 	uint64_t new_time;
 
+	got = mbox_retrieve(&time_mbox, &new_time, sizeof(new_time));
+	if (got >= 0) {
+		if (got == sizeof(new_time))
+			set_time(c, new_time);
+		else
+			debug("ui_time_tick: time size %u\n", (unsigned) got);
+	}
 	if (mbox_retrieve(&time_mbox, &new_time, sizeof(new_time)))
-		set_time(c, new_time);
 	if (last_tick == this_tick)
 		return;
 	last_tick = this_tick;

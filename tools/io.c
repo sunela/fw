@@ -79,10 +79,10 @@ static void usage(const char *name)
 	fprintf(stderr,
 "usage: %s [-d vid:pid] [command [args ...]]\n\n"
 "Commands:\n"
-"  time\n"
-"  query\n"
 "  bad-query\n"
 "  demo name [args ...]\n"
+"  query\n"
+"  time\n"
     , name);
 	exit(1);
 }

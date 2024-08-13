@@ -119,6 +119,7 @@ static void add_field(struct db_entry *de, enum field_type type,
 	memcpy(f->data, data, len);
 	f->next = *anchor;
 	*anchor = f;
+	de->db->generation++;
 }
 
 
@@ -167,6 +168,7 @@ if (debugging)
 		db_tsort(db);
 		break;
 	default:
+		db->generation++;
 		break;
 	}
 
@@ -191,7 +193,8 @@ bool db_delete_field(struct db_entry *de, struct db_field *f)
 	free_field(f);
 
 	/* just in case we deleted ft_prev */
-	db_tsort(db);
+	if (!db_tsort(db))
+		db->generation++;
 
 	return de->defer || update_entry(de, new);
 }
@@ -357,6 +360,7 @@ struct db_entry *db_new_entry(struct db *db, const char *name)
 	new = get_erased_block(db);
 	if (new < 0)
 		return NULL;
+	db->generation++;
 	de = new_entry(db, name, NULL);
 	de->name = stralloc(name);
 	de->block = new;
@@ -379,6 +383,7 @@ struct db_entry *db_dummy_entry(struct db *db, const char *name,
 {
 	struct db_entry *de;
 
+	db->generation++;
 	de = new_entry(db, name, NULL);
 	de->name = stralloc(name);
 	de->block = -1;
@@ -407,6 +412,8 @@ unsigned db_tsort(struct db *db)
 		n++;
 	if (!n)
 		return 0;
+
+	db->generation++;
 
 	/* allocate temporary variables */
 	tmp = t = alloc_type_n(struct tmp, n);
@@ -728,6 +735,7 @@ void db_open_empty(struct db *db, const struct dbcrypt *c)
 {
 	memset(db, 0, sizeof(*db));
 	db->c = c;
+	db->generation = 0;
 	db->stats.total = storage_blocks();
 	db->entries = NULL;
 }

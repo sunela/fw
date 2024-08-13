@@ -87,6 +87,7 @@ struct db_span;
 
 struct db {
 	const struct dbcrypt *c;
+	unsigned generation; /* generation number, to detect changes */
 	struct db_stats stats;
 	struct db_span *erased;
 	struct db_span *deleted;

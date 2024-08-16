@@ -118,9 +118,10 @@ static int ep0_handler(struct usb_setup_packet *setup, uint8_t **data,
 	debug("EP0 bReq 0x%02x wInd %u\r\n", setup->bRequest, setup->wIndex);
 	switch (setup->bmRequestType) {
 	case FROM_DEV:
-		if (usb_query(setup->bRequest, data, len))
-			return 0;
-		return -1;
+		if (!usb_query(setup->bRequest, data, len))
+			return -1;
+		asm volatile ("fence.i" ::: "memory");
+		return 0;
 	case TO_DEV:
 		if (usb_arrival(setup->bRequest, *data, *len))
 			return 0;

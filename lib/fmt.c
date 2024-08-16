@@ -74,6 +74,17 @@ static void string(void (*out)(void *user, char c), void *user, const char *s)
 }
 
 
+static unsigned string_n(void (*out)(void *user, char c), void *user,
+    const char *s, unsigned n)
+{
+	const char *start = s;
+
+	while (*s && n--)
+		out(user, *s++);
+	return s - start;
+}
+
+
 #define	GET_xINT(signed)						\
 	({								\
 		signed long long int _tmp;				\
@@ -107,6 +118,8 @@ bool vformat(void (*out)(void *user, char c), void *user,
 	bool percent = 0;
 	uint8_t pad = 0;	/* pacify gcc */
 	uint8_t pad_int = 0;	/* pacify gcc */
+	bool dot = 0;
+	bool star = 0;
 	unsigned longer;
 	const char *s;
 	char ch;
@@ -124,11 +137,23 @@ bool vformat(void (*out)(void *user, char c), void *user,
 				nl = ch == '\n';
 				break;
 			case 's':
+				if (dot && star)
+					pad = va_arg(ap, int);
 				s = va_arg(ap, const char *);
 				if (s) {
-					string(out, user, s);
-					if (*s)
-						nl = strchr(s, 0)[-1] == '\n';
+					if (dot && star) {
+						unsigned len;
+
+						len = string_n(out, user, s,
+						    pad);
+						if (len)
+							nl = s[len - 1] == '\n';
+					} else {
+						string(out, user, s);
+						if (*s)
+							nl = strchr(s, 0)[-1]
+							    == '\n';
+					}
 				} else {
 					string(out, user, "(null)");
 					nl = 0;
@@ -202,6 +227,14 @@ decimal:
 			case '.':
 				pad_int = pad;
 				pad = 0;
+				dot = 1;
+				fmt++;
+				// @@@ we support %.*s but not %*.s
+				if (star)
+					dot = 0;
+				continue;
+			case '*':
+				star = 1;
 				fmt++;
 				continue;
 			case '%':
@@ -219,6 +252,8 @@ decimal:
 			case '%':
 				percent = 1;
 				pad = 0;
+				dot = 0;
+				star = 0;
 				longer = 0;
 				nl = 0;
 				break;

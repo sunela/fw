@@ -9,10 +9,13 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <string.h>
 #include <time.h>
 #include <usb.h>
+#include <errno.h>
 
+#include "../rmt/rmt-db.h"
 #include "../sdk/sdk-usb.h"
 
 #include "usbopen.h"
@@ -74,6 +77,52 @@ static void demo(usb_dev_handle *dev, char *const *argv, int args)
 }
 
 
+static void rmt(usb_dev_handle *dev, uint8_t op, const char *arg)
+{
+	size_t len = strlen(arg);
+	int res;
+	char buf[256] = { op, };
+
+	memcpy(buf + 1, arg, len);
+//fprintf(stderr, "TO_DEV SUNELA_RMT %u\n", (unsigned) len + 1);
+	res = usb_control_msg(dev, TO_DEV, SUNELA_RMT, 0, 0, buf, len + 1,
+	    TIMEOUT_MS);
+	if (res < 0) {
+		fprintf(stderr, "SUNELA_RMT (req): %d\n", res);
+		exit(1);
+	}
+	while (1) {
+		usleep(10 * 1000);
+//fprintf(stderr, "TO_DEV SUNELA_RMT %u\n", 0);
+		res = usb_control_msg(dev, TO_DEV, SUNELA_RMT, 0, 0, NULL, 0,
+		    TIMEOUT_MS);
+		if (res == -EPIPE)
+			continue;
+		if (res < 0) {
+			fprintf(stderr, "SUNELA_RMT (req-end): %d\n", res);
+			exit(1);
+		}
+		break;
+	}
+	while (1) {
+		usleep(10 * 1000);
+//fprintf(stderr, "FROM_DEV SUNELA_RMT %u\n", (unsigned) sizeof(buf));
+		res = usb_control_msg(dev, FROM_DEV, SUNELA_RMT, 0, 0, buf,
+		    sizeof(buf), TIMEOUT_MS);
+//fprintf(stderr, "got %d\n", res);
+		if (res == -EPIPE)
+			continue;
+		if (res < 0) {
+			fprintf(stderr, "SUNELA_RMT (res): %d\n", res);
+			exit(1);
+		}
+		if (!res)
+			return;
+		printf("%.*s\n", res, buf);
+	}
+}
+
+
 static void usage(const char *name)
 {
 	fprintf(stderr,
@@ -81,6 +130,7 @@ static void usage(const char *name)
 "Commands:\n"
 "  bad-query\n"
 "  demo name [args ...]\n"
+"  ls\n"
 "  query\n"
 "  time\n"
     , name);
@@ -119,6 +169,8 @@ int main(int argc, char *const *argv)
 		query(dev, SUNELA_DEMO, "SUNELA_DEMO");
 	else if (n_args > 1 && !strcmp(argv[optind], "demo"))
 		demo(dev, argv + optind + 1, n_args - 1);
+	else if (n_args == 1 && !strcmp(argv[optind], "ls"))
+		rmt(dev, RDOP_LS, "");
 	else
 		usage(*argv);
 	return 0;

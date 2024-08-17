@@ -8,10 +8,9 @@
 /*
  * assert(3) of the SDK crashes in fprintf before printing anything. This hack
  * is more useful.
- *
- * @@@ TO DO: don't use this in the simulator, where we have a perfectly good
- * assert(3).
  */
+
+#ifdef SDK
 
 #ifndef ASSERT_H
 #define	ASSERT_H
@@ -31,3 +30,9 @@
 	} while (0)
 
 #endif /* !ASSERT_H */
+
+#else /* SDK */
+
+#include_next <assert.h>
+
+#endif /* !SDK */

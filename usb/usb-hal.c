@@ -13,6 +13,7 @@
 #include "demo.h"
 #include "ui.h"
 #include "mbox.h"
+#include "rmt.h"
 #include "sdk-hal.h"
 
 #include "../sdk/sdk-usb.h"
@@ -28,6 +29,8 @@ bool usb_query(uint8_t req, uint8_t **data, uint32_t *len)
 		*data = (uint8_t *) hello;
 		*len = strlen(hello);
 		return 1;
+	case SUNELA_RMT:
+		return rmt_query(&rmt_usb, data, len);
 	default:
 		return 0;
 	}
@@ -53,6 +56,8 @@ bool usb_arrival(uint8_t req, const void *data, uint32_t len)
 	case SUNELA_DEMO:
 		mbox_deposit(&demo_mbox, data, len);
 		break;
+	case SUNELA_RMT:
+		return rmt_arrival(&rmt_usb, data, len);
 	default:
 		break;
 	}

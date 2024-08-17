@@ -16,6 +16,13 @@
 #include "rmt.h"
 
 
+#if 0
+#define	DEBUG(...) debug(__VA_ARGS__)
+#else
+#define	DEBUG(...) do {} while (0)
+#endif
+
+
 enum rmt_state {
 	RS_IDLE,	/* no request */
 	RS_REQ,		/* receiving request blocks */
@@ -60,8 +67,8 @@ int rmt_request(struct rmt *rmt, void *buf, unsigned size)
 
 	assert(rmt->state == RS_IDLE || rmt->state == RS_REQ);
 	got = mbox_retrieve(&rmt->in, buf, size);
-if (got >= 0)
-debug("rmt_request(%u): got %d\n", rmt->state, (int) got);
+	if (got >= 0)
+		DEBUG("rmt_request(%u): got %d\n", rmt->state, (int) got);
 	if (got < 0)
 		return rmt->state == RS_IDLE ? -1 : 0;
 	if (got > 0) {
@@ -79,10 +86,10 @@ bool rmt_response(struct rmt *rmt, const void *buf, unsigned len)
 {
 	bool ok;
 
-debug("rmt_response(%u/%u) len %u\n", rmt->state, RS_RES, len);
+	DEBUG("rmt_response(%u/%u) len %u\n", rmt->state, RS_RES, len);
 	assert(rmt->state == RS_RES);
 	ok = mbox_deposit(&rmt->out, buf, len);
-debug("rmt_response(%u): success %u\n", rmt->state, ok);
+	DEBUG("rmt_response(%u): success %u\n", rmt->state, ok);
 	return ok;
 }
 
@@ -93,7 +100,7 @@ bool rmt_end(struct rmt *rmt)
 
 	assert(rmt->state == RS_RES);
 	ok = mbox_deposit(&rmt->out, NULL, 0);
-debug("rmt_end(%u): success %u\n", rmt->state, ok);
+	DEBUG("rmt_end(%u): success %u\n", rmt->state, ok);
 	if (!ok)
 		return 0;
 	rmt->state = RS_IDLE;
@@ -117,8 +124,6 @@ bool rmt_query(struct rmt *rmt, uint8_t **data, uint32_t *len)
 	ssize_t got;
 
 	got = mbox_retrieve(&rmt->out, rmt->usb_buf, RMT_MAX_LEN);
-debug("rmt_query: got %d \"%.*s\"\n",
-    (int) got, (int) got, got ? rmt->usb_buf : NULL);
 	if (got < 0)
 		return 0;
 	*data = rmt->usb_buf;
@@ -133,7 +138,7 @@ bool rmt_arrival(struct rmt *rmt, const void *data, uint32_t len)
 
 	assert(rmt->state == RS_IDLE || rmt->state == RS_REQ);
 	ok = mbox_deposit(&rmt->in, data, len);
-debug("rmt_arrival: success %u\n", ok);
+	DEBUG("rmt_arrival: success %u\n", ok);
 	return ok;
 }
 

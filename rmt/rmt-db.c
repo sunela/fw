@@ -18,6 +18,13 @@
 #include "rmt-db.h"
 
 
+#if 0
+#define DEBUG(...) debug(__VA_ARGS__)
+#else
+#define DEBUG(...) do {} while (0)
+#endif
+
+
 #define	MAX_REQ_LEN	1
 
 
@@ -43,7 +50,8 @@ void rmt_db_poll(void)
 
 	if (!rmt_poll(&rmt_usb))
 		return;
-//debug("rmt_db_poll state %u op %u\n", state, op);
+	if (state)
+		DEBUG("rmt_db_poll state %u op %u\n", state, op);
 	switch (state) {
 	case RDS_IDLE:
 		got = rmt_request(&rmt_usb, buf, MAX_REQ_LEN);
@@ -55,7 +63,7 @@ void rmt_db_poll(void)
 			return;
 		}
 		op = *buf;
-debug("\tRDS_IDLE: %u\n", op);
+		DEBUG("\tRDS_IDLE: %u\n", op);
 		switch (*buf) {
 		case RDOP_LS:
 			break;
@@ -65,7 +73,7 @@ debug("\tRDS_IDLE: %u\n", op);
 		}
 		return;
 	case RDS_REQ:
-debug("\tRDS_REQ: %u\n", op);
+		DEBUG("\tRDS_REQ: %u\n", op);
 		got = rmt_request(&rmt_usb, buf, MAX_REQ_LEN);
 		if (!got)
 			return;
@@ -84,7 +92,7 @@ debug("\tRDS_REQ: %u\n", op);
 		}
 		/* fall through */
 	case RDS_RES:
-debug("\tRDS_RES: %u\n", op);
+		DEBUG("\tRDS_RES: %u\n", op);
 		switch (op) {
 		case RDOP_LS:
 			if (generation != main_db.generation) {
@@ -93,8 +101,7 @@ debug("\tRDS_RES: %u\n", op);
 					return;
 				state = RDS_END;
 			}
-debug("de %p de->name %p\n", de, de->name);
-debug("\"%s\"\n", de->name);
+			DEBUG("\"%s\"\n", de->name);
 			if (!rmt_response(&rmt_usb, de->name, strlen(de->name)))
 				return;
 			de = de->next;

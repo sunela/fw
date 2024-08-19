@@ -9,9 +9,11 @@
 #define	RMT_DB__H
 
 enum rdb_op {
-	RDOP_NULL,	/* null request, returns an empty reponse */
-	RDOP_INVALID,	/* invalid request, returns an error */
-	RDOP_LS,	/* list all the accounts */
+	RDOP_NULL	= 0,	/* null request, returns an empty reponse */
+	RDOP_INVALID	= 1,	/* invalid request, returns an error */
+	RDOP_LS		= 2,	/* list all the accounts */
+	RDOP_NOT_FOUND	= 3,	/* entry not found, returns an error */
+	RDOP_SHOW	= 4,	/* list all fields */
 };
 
 

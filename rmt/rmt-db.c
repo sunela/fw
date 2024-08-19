@@ -25,7 +25,7 @@
 #endif
 
 
-#define	MAX_REQ_LEN	1
+#define	MAX_REQ_LEN	256
 
 
 enum rdb_state {
@@ -36,12 +36,12 @@ enum rdb_state {
 };
 
 
-
 static enum rdb_state state = RDS_IDLE;
 static enum rdb_op op;
 static PSRAM uint8_t buf[MAX_REQ_LEN];
 static uint64_t generation;
 static const struct db_entry *de;
+static const struct db_field *f;
 
 
 void rmt_db_poll(void)
@@ -63,9 +63,24 @@ void rmt_db_poll(void)
 			return;
 		}
 		op = *buf;
+		generation = main_db.generation;
 		DEBUG("\tRDS_IDLE: %u\n", op);
 		switch (*buf) {
 		case RDOP_LS:
+			de = main_db.entries;
+			break;
+		case RDOP_SHOW:
+			f = NULL;
+			for (de = main_db.entries; de; de = de->next)
+				if (strlen(de->name) == (size_t) got - 1 &&
+				    !strncmp(de->name, (const char *) buf + 1,
+				    got -1))
+					break;
+			if (!de) {
+				op = RDOP_NOT_FOUND;
+				break;
+			}
+			f = de->fields;
 			break;
 		default:
 			op = RDOP_INVALID;
@@ -77,12 +92,20 @@ void rmt_db_poll(void)
 		got = rmt_request(&rmt_usb, buf, MAX_REQ_LEN);
 		if (!got)
 			return;
+		if (got > 0) {
+			op = RDOP_INVALID;
+			return;
+		}
 		state = RDS_RES;
 		switch (op) {
 		case RDOP_LS:
-			generation = main_db.generation;
-			de = main_db.entries;
 			if (!de) {
+				state = RDS_END;
+				return;
+			}
+			break;
+		case RDOP_SHOW:
+			if (!f) {
 				state = RDS_END;
 				return;
 			}
@@ -108,8 +131,50 @@ void rmt_db_poll(void)
 			if (!de)
 				state = RDS_END;
 			break;
+		case RDOP_SHOW:
+			if (generation != main_db.generation) {
+				if (!rmt_response(&rmt_usb,
+				    "\000DB changed", 10))
+					return;
+				state = RDS_END;
+			}
+			while (f) {
+				switch (f->type) {
+				case ft_end:
+				case ft_id:
+				case ft_prev:
+					break;
+				case ft_user:
+				case ft_email:
+				case ft_hotp_counter:
+				case ft_comment:
+					if (!rmt_responsev(&rmt_usb,
+					    &f->type, 1, f->data, f->len, NULL))
+						return;
+					break;
+				case ft_pw:
+				case ft_pw2:
+				case ft_hotp_secret:
+				case ft_totp_secret:
+					if (!rmt_response(&rmt_usb,
+					    &f->type, 1))
+						return;
+					break;
+				default:
+					abort();
+				}
+				f = f->next;
+			}
+			if (!f)
+				state = RDS_END;
+			break;
 		case RDOP_INVALID:
 			if (!rmt_response(&rmt_usb, "\000Bad request", 12))
+				return;
+			state = RDS_END;
+			break;
+		case RDOP_NOT_FOUND:
+			if (!rmt_response(&rmt_usb, "\000Not found", 12))
 				return;
 			state = RDS_END;
 			break;

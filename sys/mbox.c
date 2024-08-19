@@ -5,6 +5,7 @@
  * A copy of the license can be found in the file LICENSE.MIT
  */
 
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
@@ -14,18 +15,59 @@
 #include "mbox.h"
 
 
-bool mbox_deposit(volatile struct mbox *mbox, const void *data, size_t length)
+bool mbox_vdepositv(volatile struct mbox *mbox, va_list ap)
 {
+	va_list aq;
+	size_t total = 0;
+	void *p;
+
+	va_copy(aq, ap);
 	if (!mbox->enabled)
 		return 0;
 	if (mbox->length >= 0)
 		return 0;
 	assert(mbox->buf);
-	assert(length <= mbox->size);
-	memcpy(mbox->buf, data, length);
+
+	while (va_arg(ap, const void *))
+		total += va_arg(ap, size_t);
+
+	assert(total <= mbox->size);
+
+	p = mbox->buf;
+	while (1) {
+		const void *data;
+		size_t length;
+
+		data = va_arg(aq, const void *);
+		if (!data)
+			break;
+		length = va_arg(aq, size_t);
+		memcpy(p, data, length);
+		p += length;
+	}
+
 	assert(mbox->length < 0);
-	mbox->length = length;
+	mbox->length = total;
+
 	return 1;
+}
+
+
+bool mbox_depositv(volatile struct mbox *mbox, ...)
+{
+	va_list ap;
+	bool ret;
+
+	va_start(ap, mbox);
+	ret = mbox_vdepositv(mbox, ap);
+	va_end(ap);
+	return ret;
+}
+
+
+bool mbox_deposit(volatile struct mbox *mbox, const void *data, size_t length)
+{
+	return mbox_depositv(mbox, data, length, NULL);
 }
 
 

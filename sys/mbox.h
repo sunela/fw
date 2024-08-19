@@ -18,6 +18,7 @@
  *   deposit and then retrieve/discard a message).
  */
 
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <sys/types.h>
@@ -51,8 +52,15 @@ struct mbox {
  * may be in the mailbox. There is no way to probe for the presence of a
  * message without retrieving it. Note that mbox_enable and mbox_disable also
  * discard any pending messages.
+ *
+ * mbox_depositv is like mbox_deposit, but its arguments are a list of
+ * (pointer, length) pairs. The last pointer must be NULL, and does not have to
+ * be followed by a length. mbox_vdepositv is like mbox_depositv, but operates
+ * on the argument pointer, similar to vprintf and printf.
  */
 
+bool mbox_vdepositv(volatile struct mbox *mbox, va_list ap);
+bool mbox_depositv(volatile struct mbox *mbox, ...);
 bool mbox_deposit(volatile struct mbox *mbox, const void *data, size_t length);
 ssize_t mbox_retrieve(volatile struct mbox *mbox, void *data, size_t size);
 

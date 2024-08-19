@@ -49,8 +49,13 @@ int rmt_request(struct rmt *rmt, void *buf, unsigned size);
  * or require additional asyncronous operations. If rmt_response returns zero,
  * the response could not be accepted (e.g., because a previous response is
  * being sent) and the operation has to be retried.
+ *
+ * rmt_responsev is like rmt_response, but its arguments are a list of
+ * (pointer, length) pairs. The last pointer must be NULL, and does not have to
+ * be followed by a length.
  */
 
+bool rmt_responsev(struct rmt *rmt, ...);
 bool rmt_response(struct rmt *rmt, const void *buf, unsigned len);
 
 /*

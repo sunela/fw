@@ -6,6 +6,7 @@
  */
 
 #include <stddef.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <assert.h>
 #include <sys/types.h>
@@ -82,15 +83,24 @@ int rmt_request(struct rmt *rmt, void *buf, unsigned size)
 }
 
 
-bool rmt_response(struct rmt *rmt, const void *buf, unsigned len)
+bool rmt_responsev(struct rmt *rmt, ...)
 {
+	va_list ap;
 	bool ok;
 
-	DEBUG("rmt_response(%u/%u) len %u\n", rmt->state, RS_RES, len);
+	va_start(ap, rmt);
 	assert(rmt->state == RS_RES);
-	ok = mbox_deposit(&rmt->out, buf, len);
-	DEBUG("rmt_response(%u): success %u\n", rmt->state, ok);
+	ok = mbox_vdepositv(&rmt->out, ap);
+	DEBUG("rmt_responsev(%u): success %u\n", rmt->state, ok);
+	va_end(ap);
 	return ok;
+}
+
+
+bool rmt_response(struct rmt *rmt, const void *buf, unsigned len)
+{
+	DEBUG("rmt_response(%u/%u) len %u\n", rmt->state, RS_RES, len);
+	return rmt_responsev(rmt, buf, len, NULL);
 }
 
 

@@ -32,6 +32,8 @@ enum rmt_state {
 
 struct rmt {
 	enum rmt_state state;
+	void (*reset)(void);	/* called on protocol reset (from interrupt
+				   handler !) if not NULL */
 	struct mbox in;
 	struct mbox out;
 	uint8_t mbox_buf[RMT_MAX_LEN];
@@ -88,8 +90,8 @@ bool rmt_responsev(struct rmt *rmt, ...)
 	va_list ap;
 	bool ok;
 
-	va_start(ap, rmt);
 	assert(rmt->state == RS_RES);
+	va_start(ap, rmt);
 	ok = mbox_vdepositv(&rmt->out, ap);
 	DEBUG("rmt_responsev(%u): success %u\n", rmt->state, ok);
 	va_end(ap);
@@ -146,6 +148,18 @@ bool rmt_arrival(struct rmt *rmt, const void *data, uint32_t len)
 {
 	bool ok;
 
+	/*
+	 * @@@ this protocol reset logic lets us proceed if we've received a
+	 * complete header, and then the host abandoned the transfer and tried
+	 * sending a new request.
+	 * However, we don't synchronize if the host did not finish sending the
+	 * header. (Eventually, the protocol on top of rmt should figure out
+	 * that something is amiss, and the states should converge. FSS.)
+	 */
+	if (rmt->state == RS_RES && rmt->reset) {
+		rmt->reset();
+		rmt->state = RS_IDLE;
+	}
 	assert(rmt->state == RS_IDLE || rmt->state == RS_REQ);
 	ok = mbox_deposit(&rmt->in, data, len);
 	DEBUG("rmt_arrival: success %u\n", ok);
@@ -159,11 +173,18 @@ bool rmt_arrival(struct rmt *rmt, const void *data, uint32_t len)
 void rmt_open(struct rmt *rmt)
 {
 	rmt->state = RS_IDLE;
+	rmt->reset = NULL;
 	mbox_init(&rmt->in, rmt->mbox_buf, RMT_MAX_LEN);
 	mbox_init(&rmt->out, rmt->mbox_buf, RMT_MAX_LEN);
 	mbox_enable(&rmt->in);
 	// @@@ we shouldn't enable both mailboxes at the same time
 	mbox_enable(&rmt->out);
+}
+
+
+void rmt_set_reset(struct rmt *rmt, void (*reset)(void))
+{
+	rmt->reset = reset;
 }
 
 

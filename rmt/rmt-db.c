@@ -8,7 +8,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 
 #include "hal.h"
 #include "debug.h"
@@ -42,6 +41,14 @@ static PSRAM uint8_t buf[MAX_REQ_LEN];
 static uint64_t generation;
 static const struct db_entry *de;
 static const struct db_field *f;
+static volatile bool async_reset = 0;
+
+
+static void rmt_db_reset(void)
+{
+	debug("rmt_db_reset: from state %u\n", state);
+	async_reset = 1;
+}
 
 
 void rmt_db_poll(void)
@@ -50,6 +57,10 @@ void rmt_db_poll(void)
 
 	if (!rmt_poll(&rmt_usb))
 		return;
+	if (async_reset) {
+		async_reset = 0;
+		state = RDS_IDLE;
+	}
 	if (state)
 		DEBUG("rmt_db_poll state %u op %u\n", state, op);
 	switch (state) {
@@ -197,4 +208,6 @@ void rmt_db_poll(void)
 void rmt_db_init(void)
 {
 	rmt_open(&rmt_usb);
+	async_reset = 0;
+	rmt_set_reset(&rmt_usb, rmt_db_reset);
 }

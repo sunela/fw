@@ -94,6 +94,14 @@ bool rmt_arrival(struct rmt *rmt, const void *data, uint32_t len);
 void rmt_open(struct rmt *rmt);
 
 /*
+ * Set a handler to reset the application state if RMT returns to RS_IDLE after
+ * losing protocol synchronization with the host.
+ * Note that the reset function is called from an interrupt handler !
+ */
+
+void rmt_set_reset(struct rmt *rmt, void (*reset)(void));
+
+/*
  * Close a remote control connection. If the endpoint is busy sending data at
  * the time rmt_close is called, the data transmission is aborted.
  */

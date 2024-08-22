@@ -11,6 +11,7 @@
 
 struct settings settings = {
 	.crosshair	= 0,
+	.strict_rmt	= 0,
 };
 
 

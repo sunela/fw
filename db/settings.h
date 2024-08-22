@@ -13,6 +13,7 @@
 
 struct settings {
 	bool	crosshair;	/* show a crosshair at the tap position */
+	bool	strict_rmt;	/* strict RMT protocol (panic on error) */
 };
 
 

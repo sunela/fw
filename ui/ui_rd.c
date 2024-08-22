@@ -164,6 +164,8 @@ static void ui_rd_open(void *ctx, void *params)
 	static const struct rd_item items[] = {
 		{ "Crosshair",	rit_bool,
 		    { .bool_var = &settings.crosshair }},
+		{ "Strict RMT",	rit_bool,
+		    { .bool_var = &settings.strict_rmt}},
 	};
 	struct ui_rd_ctx *c = ctx;
 	const struct rd_item *item;

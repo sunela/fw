@@ -97,9 +97,11 @@ void rmt_open(struct rmt *rmt);
  * Set a handler to reset the application state if RMT returns to RS_IDLE after
  * losing protocol synchronization with the host.
  * Note that the reset function is called from an interrupt handler !
+ * The reset function returns 1 if the reset was performed, 0 if not (in which
+ * case we'll have an assertion failure.)
  */
 
-void rmt_set_reset(struct rmt *rmt, void (*reset)(void));
+void rmt_set_reset(struct rmt *rmt, bool (*reset)(void));
 
 /*
  * Close a remote control connection. If the endpoint is busy sending data at

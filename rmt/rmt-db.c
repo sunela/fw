@@ -12,6 +12,7 @@
 #include "hal.h"
 #include "debug.h"
 #include "db.h"
+#include "settings.h"
 #include "ui.h"	/* for main_db */
 #include "rmt.h"
 #include "rmt-db.h"
@@ -44,10 +45,14 @@ static const struct db_field *f;
 static volatile bool async_reset = 0;
 
 
-static void rmt_db_reset(void)
+static bool rmt_db_reset(void)
 {
-	debug("rmt_db_reset: from state %u\n", state);
+	debug("rmt_db_reset: from state %u (%s)\n",
+	    state, settings.strict_rmt ? "disabled" : "enabled");
+	if (settings.strict_rmt)
+		return 0;
 	async_reset = 1;
+	return 1;
 }
 
 

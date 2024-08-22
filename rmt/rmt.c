@@ -32,7 +32,7 @@ enum rmt_state {
 
 struct rmt {
 	enum rmt_state state;
-	void (*reset)(void);	/* called on protocol reset (from interrupt
+	bool (*reset)(void);	/* called on protocol reset (from interrupt
 				   handler !) if not NULL */
 	struct mbox in;
 	struct mbox out;
@@ -156,10 +156,8 @@ bool rmt_arrival(struct rmt *rmt, const void *data, uint32_t len)
 	 * header. (Eventually, the protocol on top of rmt should figure out
 	 * that something is amiss, and the states should converge. FSS.)
 	 */
-	if (rmt->state == RS_RES && rmt->reset) {
-		rmt->reset();
+	if (rmt->state == RS_RES && rmt->reset && rmt->reset())
 		rmt->state = RS_IDLE;
-	}
 	assert(rmt->state == RS_IDLE || rmt->state == RS_REQ);
 	ok = mbox_deposit(&rmt->in, data, len);
 	DEBUG("rmt_arrival: success %u\n", ok);
@@ -182,7 +180,7 @@ void rmt_open(struct rmt *rmt)
 }
 
 
-void rmt_set_reset(struct rmt *rmt, void (*reset)(void))
+void rmt_set_reset(struct rmt *rmt, bool (*reset)(void))
 {
 	rmt->reset = reset;
 }

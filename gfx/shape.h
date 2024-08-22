@@ -105,6 +105,9 @@ void gfx_move_sym(struct gfx_drawable *da, unsigned x, unsigned y,
     unsigned box_size, unsigned box_ro, unsigned lw,
     bool from, int to, gfx_color color, gfx_color bg);
 
+void gfx_pc_comm_sym(struct gfx_drawable *da, unsigned x, unsigned y,
+    unsigned side, gfx_color color, gfx_color bg);
+
 
 /* --- Other UI items ------------------------------------------------------ */
 

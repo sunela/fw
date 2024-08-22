@@ -398,3 +398,48 @@ void gfx_checkbox(struct gfx_drawable *da, unsigned x, unsigned y,
 			    y - iw / 2 + i, cw, 1, color);
 		}
 }
+
+
+/* --- PC communication ---------------------------------------------------- */
+
+
+static void rrect_centered(struct gfx_drawable *da, unsigned cx, unsigned cy,
+    unsigned w, unsigned h, unsigned r, gfx_color color)
+{
+	gfx_rrect_xy(da, cx - w  / 2, cy - h / 2, w, h, r, color);
+}
+
+
+/*
+ * @@@ The coefficients here have been chosen to produce a good-looking icon
+ * with the default size, but may produce much less pleasing results at
+ * different sizes. For rectangles inside others, we should calculate the
+ * border width, and size the rectangle such that all borders uses that width,
+ * instead of hoping that multiplying the size (with rounding) will yield the
+ * symmetry.
+ */
+
+void gfx_pc_comm_sym(struct gfx_drawable *da, unsigned x, unsigned y,
+    unsigned side, gfx_color color, gfx_color bg)
+{
+	unsigned ro = side * 0.07;
+	unsigned cx = x - side * 0.30;
+	unsigned cy = y + side * 0.22;
+
+	/* monitor */
+	rrect_centered(da, x, y, side * 0.8, side * 0.7, ro, color);
+	gfx_rect_xy(da,
+	    x - side * 0.3, y - side * 0.25, side * 0.6, side * 0.45, bg);
+#if 0
+	gfx_rect_xy(da,
+	    x - side * 0.2, y + side * 0.35, side * 0.4, side * 0.1, color);
+#endif
+
+	/* sunela */
+
+	ro = side * 0.08;
+
+	rrect_centered(da, cx, cy, side * 0.3 + 2, side * 0.4 + 2, ro, bg);
+	rrect_centered(da, cx, cy, side * 0.3, side * 0.4, ro, color);
+	rrect_centered(da, cx, cy, side * 0.2, side * 0.3, side * 0.07, bg);
+}

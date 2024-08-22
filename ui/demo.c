@@ -603,12 +603,12 @@ static bool demo_overlay(char *const *args, unsigned n_args)
 		{ ui_overlay_sym_next,		NULL, NULL },
 		{ ui_overlay_sym_edit,		NULL, NULL },
 		{ ui_overlay_sym_setup,		NULL, NULL },
-		{ NULL, },
+		{ ui_overlay_sym_pc_comm,	NULL, NULL, },
 		{ NULL }
 	};
 	struct ui_overlay_params prm = {
 		.buttons	= buttons,
-		.n_buttons	= 7,
+		.n_buttons	= 8,
 	};
 
 	switch (n_args) {
@@ -693,7 +693,7 @@ static bool demo_movesym(char *const *args, unsigned n_args)
 }
 
 
-/* Draw a movement symbol */
+/* Draw a checkbox */
 
 static bool demo_checkbox(char *const *args, unsigned n_args)
 {
@@ -717,6 +717,28 @@ static bool demo_checkbox(char *const *args, unsigned n_args)
 
 	gfx_checkbox(&main_da, GFX_WIDTH / 2, GFX_HEIGHT / 2,
 	    w, lw, on,
+	    GFX_WHITE, GFX_BLACK);
+	return 1;
+}
+
+
+/* Draw a PC communication symbol */
+
+static bool demo_pccomm(char *const *args, unsigned n_args)
+{
+	unsigned side = 50;
+
+	switch (n_args) {
+	case 0:
+		break;
+	case 1:
+		side = atoi(args[0]);
+		break;
+	default:
+		return 0;
+	}
+
+	gfx_pc_comm_sym(&main_da, GFX_WIDTH / 2, GFX_HEIGHT / 2, side,
 	    GFX_WHITE, GFX_BLACK);
 	return 1;
 }
@@ -757,6 +779,7 @@ static const struct demo {
 	{ "movesym",	demo_movesym,	"[from to [bs br lw]]" },
 	{ "overlay2",	demo_overlay2,	"[n]" },
 	{ "checkbox",	demo_checkbox,	"[w [lw]] 0|1" },
+	{ "pccomm",	demo_pccomm,	"[side]" },
 };
 
 

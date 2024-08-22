@@ -248,6 +248,17 @@ void ui_overlay_sym_move_cancel(struct gfx_drawable *da,
 }
 
 
+void ui_overlay_sym_pc_comm(struct gfx_drawable *da,
+    const struct ui_overlay_params *params, unsigned x, unsigned y, void *user)
+{
+	const struct ui_overlay_style *style =
+	    params->style ? params->style : &default_style;
+
+	gfx_pc_comm_sym(da, x, y, style->size * 0.8,
+	    style->button_fg, style->button_bg);
+}
+
+
 /* --- Event handling ------------------------------------------------------ */
 
 

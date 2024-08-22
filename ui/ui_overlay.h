@@ -60,5 +60,7 @@ void ui_overlay_sym_move_to(struct gfx_drawable *da,
     const struct ui_overlay_params *params, unsigned x, unsigned y, void *user);
 void ui_overlay_sym_move_cancel(struct gfx_drawable *da,
     const struct ui_overlay_params *params, unsigned x, unsigned y, void *user);
+void ui_overlay_sym_pc_comm(struct gfx_drawable *da,
+    const struct ui_overlay_params *params, unsigned x, unsigned y, void *user);
 
 #endif /* !UI_ENTRY_H */

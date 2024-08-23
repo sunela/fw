@@ -77,6 +77,11 @@ static void render(void)
 #define	CORNER_R	40
 
 
+/*
+ * hline is only for use by cut_corners. Unlike pixel(), it doesn't use a grid
+ * pattern, and would therefore be unsuitable for lines drawn in the UI.
+ */
+
 static void hline(unsigned x0, unsigned x1, unsigned y)
 {
 	SDL_Rect rect = {
@@ -110,8 +115,8 @@ static void pixel(unsigned x, unsigned y, gfx_color c)
 	SDL_Rect rect = {
 		.x = x * zoom,
 		.y = y * zoom,
-		.w = zoom,
-		.h = zoom
+		.w = zoom > 3 ? zoom - 1 : zoom,
+		.h = zoom > 3 ? zoom -1 : zoom
 	};
 
 	SDL_FillRect(surf, &rect, SDL_MapRGB(surf->format,
@@ -345,6 +350,7 @@ static void usage(const char *name)
 "%6s %s [options] demo-name [demo-arg ...]] [-C command ...]\n"
 "\n"
 "-2  double the pixel size\n"
+"-4  cuadruple the pixel size and leave a gap between pixels\n"
 "-C  receive user interaction from a script\n"
 "-D  set the global debugging flag (use changes during development)\n"
 "-d database\n"
@@ -364,10 +370,13 @@ int main(int argc, char **argv)
 	bool scripting = 0;
 	int c, i;
 
-	while ((c = getopt(argc, argv, "+2CDd:qs:")) != EOF)
+	while ((c = getopt(argc, argv, "+24CDd:qs:")) != EOF)
 		switch (c) {
 		case '2':
 			zoom = 2;
+			break;
+		case '4':
+			zoom = 4;
 			break;
 		case 'C':
 			scripting = 1;

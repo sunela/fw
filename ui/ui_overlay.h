@@ -25,9 +25,7 @@ struct ui_overlay_style {
 	unsigned size;		/* button size (square) */
 	unsigned button_r;	/* corner radius */
 	unsigned gap;		/* horizontal/vertical gap between buttons */
-	unsigned halo;		/* "halo" around the button array */
 	gfx_color button_fg, button_bg;
-	gfx_color halo_bg;
 };
 
 struct ui_overlay_params {

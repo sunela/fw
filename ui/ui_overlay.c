@@ -65,9 +65,6 @@ struct button_ref {
 };
 
 
-static struct gfx_drawable old_da;
-static PSRAM gfx_color old_fb[GFX_WIDTH * GFX_HEIGHT];
-static PSRAM gfx_color tmp_fb[GFX_WIDTH * GFX_HEIGHT];
 static struct button_ref refs[MAX_BUTTONS];
 
 
@@ -75,10 +72,8 @@ static const struct ui_overlay_style default_style = {
 	.size		= 50,
 	.button_r	= 12,
 	.gap		= 12,
-	.halo		= 8,
 	.button_fg	= GFX_BLACK,
 	.button_bg	= GFX_WHITE,
-	.halo_bg	= GFX_BLACK,
 };
 
 static struct timer t_overlay_idle;
@@ -305,15 +300,10 @@ static void ui_overlay_open(void *ctx, void *params)
 	const struct ui_overlay_style *style =
 	    p->style ? p->style : &default_style;
 	struct button_ref *ref = refs;
-	struct gfx_drawable tmp_da;
 	unsigned nx, ny;
-	unsigned w, h, ix, iy;
-	unsigned r = DEFAULT_BUTTON_R;
+	unsigned ix, iy;
 
-	gfx_da_init(&old_da, main_da.w, main_da.h, old_fb);
-	gfx_da_init(&tmp_da, main_da.w, main_da.h, tmp_fb);
-	gfx_copy(&old_da, 0, 0, &main_da, 0, 0, main_da.w, main_da.h, -1);
-	gfx_clear(&tmp_da, GFX_TRANSPARENT);
+	gfx_clear(&main_da, GFX_BLACK);
 
 	switch (p->n_buttons) {
 	case 1:
@@ -346,10 +336,6 @@ static void ui_overlay_open(void *ctx, void *params)
 	default:
 		abort();
 	}
-	w = nx * style->size + (nx - 1) * style->gap + 2 * style->halo;
-	h = ny * style->size + (ny - 1) * style->gap + 2 * style->halo;
-	gfx_rrect_xy(&tmp_da, (GFX_WIDTH - w) / 2, (GFX_HEIGHT - h) / 2, w, h,
-	    r + style->halo, style->halo_bg);
 	for (iy = 0; iy != ny; iy++)
 		for (ix = 0; ix != nx; ix++) {
 			unsigned x = GFX_WIDTH / 2 -
@@ -360,7 +346,7 @@ static void ui_overlay_open(void *ctx, void *params)
 			if (b == p->buttons + p->n_buttons)
 				break;
 			if (b->draw) {
-				draw_button(&tmp_da, p, b, x, y);
+				draw_button(&main_da, p, b, x, y);
 				ref->fn = b->fn;
 				ref->user = b->user;
 				ref->bb.x =
@@ -373,8 +359,6 @@ static void ui_overlay_open(void *ctx, void *params)
 			}
 			b++;
 		}
-	gfx_copy(&main_da, 0, 0, &tmp_da, 0, 0, main_da.w, main_da.h,
-	    GFX_TRANSPARENT);
 
 	while (ref != refs + MAX_BUTTONS) {
 		ref->fn = NULL;
@@ -391,7 +375,6 @@ static void ui_overlay_open(void *ctx, void *params)
 
 static void ui_overlay_close(void *ctx)
 {
-	gfx_copy(&main_da, 0, 0, &old_da, 0, 0, main_da.w, main_da.h, -1);
 	timer_cancel(&t_overlay_idle);
 	progress();
 }

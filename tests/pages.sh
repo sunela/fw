@@ -492,6 +492,10 @@ accounts $mode setup-version "long 201 23" "tap 152 141" static "tap 81 218"
 
 accounts $mode setup-rd "long 201 23" "tap 152 141" "tap 81 269"
 
+# --- Move from ---------------------------------------------------------------
+
+accounts $mode move-from "long 200 72" "tap 98 165"
+
 # --- Moving -----------------------------------------------------------------
 
 accounts $mode moving "long 200 72" "tap 98 165" "long 114 166"

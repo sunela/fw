@@ -16,6 +16,7 @@
 #include "gfx.h"
 #include "text.h"
 #include "db.h"
+#include "ui_accounts.h"
 #include "pin.h"
 #include "shape.h"
 #include "ui.h"
@@ -188,6 +189,7 @@ static bool accept_pin(void)
 
 	if (pin != DUMMY_PIN)
 		return 0;
+	ui_accounts_cancel_move();
 	gfx_clear(&main_da, GFX_BLACK);
 	gfx_rect_xy(&main_da, PROGRESS_X0, PROGRESS_Y0, PROGRESS_W, PROGRESS_H,
 	    PROGRESS_TOTAL_COLOR);

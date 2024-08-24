@@ -12,6 +12,7 @@
 #include "version.h"
 
 
+bool build_override = 0;
 const char *build_date = BUILD_DATE;
 uint32_t build_hash = BUILD_HASH;
 bool build_dirty = BUILD_DIRTY;

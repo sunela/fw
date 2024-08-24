@@ -105,11 +105,13 @@ static void ui_version_open(void *ctx, void *params)
 	wi_list_begin(&c->list, &style);
 
 	p = tmp;
-	format(add_char, &p, "%08lx%s", (unsigned long) build_hash,
-	    build_dirty ? "+" : "");
+	format(add_char, &p, "%08lx%s",
+	    (unsigned long) (build_override ? STATIC_BUILD_HASH : build_hash),
+	    (build_override ? STATIC_BUILD_DIRTY : build_dirty) ? "+" : "");
 	wi_list_add(&c->list, "Firmware", tmp, NULL);
 
-	wi_list_add(&c->list, "Build date", build_date, NULL);
+	wi_list_add(&c->list, "Build date",
+	    build_override ? STATIC_BUILD_DATE : build_date, NULL);
 
 	read_cpu_id(cpu_id);
 	wi_list_add(&c->list, "CPU", cpu_id, NULL);

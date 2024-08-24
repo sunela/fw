@@ -17,6 +17,7 @@
 #include "rnd.h"
 #include "timer.h"
 #include "db.h"
+#include "version.h"
 #include "ui.h"
 #include "sim.h"
 #include "script.h"
@@ -218,6 +219,7 @@ static void show_help(void)
 "random BYTE\tset random number generator to fixed value\n"
 "screen\t\ttake a screenshot (PPM)\n"
 "screen PPMFILE\ttake a screenshot in a specific file, remember the name\n"
+"static\t\tuse static dummy data where information may change\n"
 "press\t\tpress the side button\n"
 "release\t\trelease the side button\n"
 "button\t\tpress the button long enough to debounce, then release it\n"
@@ -393,6 +395,13 @@ static bool process_cmd(const char *cmd)
 		if (sscanf(arg, "%llu", &t) != 1)
 			goto fail;
 		time_override = t;
+		return 1;
+	}
+
+	/* static build */
+
+	if (!strcmp("static", cmd)) {
+		build_override = 1;
 		return 1;
 	}
 

@@ -133,8 +133,16 @@ static void pin_button(unsigned col, unsigned row, gfx_color bg)
 	if (row > 0) {
 		pin_digit(x, y, 1 + col + (3 - row) * 3);
 	} else if (col == 0) {	// X
+		if (pin_len)
+			gfx_equilateral(&main_da, x, y, BUTTON_R * 1.4, -1,
+			    GFX_BLACK);
+		else
+			gfx_power_sym(&main_da, x, y, BUTTON_R * 0.6, 5,
+			    GFX_BLACK, bg);
+#if 0
 		gfx_diagonal_cross(&main_da, x, y, BUTTON_R * 0.8, 4,
 		    GFX_BLACK);
+#endif
 	} else if (col == 1) {	// "0"
 		pin_digit(x, y, 0);
 	} else {	// >
@@ -226,18 +234,22 @@ static void ui_pin_tap(void *ctx, unsigned x, unsigned y)
 
 	debug("pin_tap X %u Y %u -> col %u row %u\n", x, y, col, row);
 	if (col == 0 && row == 0) { // cancel
-		if (pin_len == 0)
+		if (pin_len == 0) {
+			pin = 0;
+			turn_off();
 			return;
+		}
 		progress();
 		timer_flush(&t_button);
-		clear_indicators(pin_len);
-		clear_button(0, 0);
 		if (pin_len >= MIN_PIN_LEN)
 			clear_button(2, 0);
 		if (pin_len == MAX_PIN_LEN)
 			draw_digits(UP_BG);
-		pin_len = 0;
-		pin = 0xffffffff;
+		pin = (pin >> 4) | 0xf0000000;
+		pin_len--;
+		pin_button(0, 0, SPECIAL_BG);
+		clear_indicators(pin_len + 1);
+		draw_indicators(pin_len);
 		ui_update_display();
 		return;
 	}
@@ -265,8 +277,7 @@ debug("%08lx\n", (unsigned long) pin);
 	n = row ? (3 - row) * 3 + col + 1 : 0;
 	pin = pin << 4 | shuffle[n];
 	pin_len++;
-	if (pin_len == 1)
-		pin_button(0, 0, SPECIAL_BG);
+	pin_button(0, 0, SPECIAL_BG);
 	if (pin_len == MIN_PIN_LEN)
 		pin_button(2, 0, SPECIAL_BG);
 	if (pin_len == MAX_PIN_LEN)
@@ -306,14 +317,10 @@ void pin_shuffle_pad(void)
 
 static void ui_pin_open(void *ctx, void *params)
 {
-	unsigned row, col;
-
 	pin = 0xffffffff;
 	pin_len = 0;
-	for (col = 0; col != 3; col++)
-		for (row = 0; row != 4; row++)
-			if (row > 0 || col == 1)
-				draw_digits(UP_BG);
+	pin_button(0, 0, SPECIAL_BG);
+	draw_digits(UP_BG);
 	timer_init(&t_button);
 	set_idle(IDLE_PIN_S);
 }

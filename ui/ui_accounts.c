@@ -21,6 +21,8 @@
 #include "ui_accounts.h"
 
 
+#define	NULL_TARGET_COLOR	GFX_HEX(0x808080)
+
 struct ui_accounts_ctx {
 	void (*resume_action)(struct ui_accounts_ctx *c);
 	struct wi_list list;
@@ -38,6 +40,7 @@ static const struct wi_list_style style = {
 	}
 };
 
+static struct wi_list_entry_style style_null_target;
 static struct wi_list *lists[1];
 
 
@@ -247,8 +250,11 @@ static void ui_accounts_long(void *ctx, unsigned x, unsigned y)
 static bool add_account(void *user, struct db_entry *de)
 {
 	struct ui_accounts_ctx *c = user;
+	struct wi_list_entry *e;
 
-	wi_list_add(&c->list, de->name, NULL, de);
+	e = wi_list_add(&c->list, de->name, NULL, de);
+	if (moving && (de == moving || moving->next == de))
+		wi_list_entry_style(&c->list, e, &style_null_target);
 	return 1;
 }
 
@@ -256,6 +262,9 @@ static bool add_account(void *user, struct db_entry *de)
 static void ui_accounts_open(void *ctx, void *params)
 {
 	struct ui_accounts_ctx *c = ctx;
+
+	style_null_target = style.entry;
+	style_null_target.fg[0] = style_null_target.fg[1] = NULL_TARGET_COLOR;
 
 	lists[0] = &c->list;
 	c->resume_action = NULL;

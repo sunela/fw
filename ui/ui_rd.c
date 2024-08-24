@@ -53,10 +53,12 @@ static void render_rd(const struct wi_list *l,
 static const struct wi_list_style style = {
 	.y0	= LIST_Y0,
 	.y1	= GFX_HEIGHT - 1,
-	.fg	= { ENTRY_FG, ENTRY_FG },
-	.bg	= { EVEN_BG, ODD_BG },
-	.min_h	= 50,
-	.render	= render_rd,
+	.entry = {
+		.fg	= { ENTRY_FG, ENTRY_FG },
+		.bg	= { EVEN_BG, ODD_BG },
+		.min_h	= 50,
+		.render	= render_rd,
+	}
 };
 
 static struct wi_list *lists[1];

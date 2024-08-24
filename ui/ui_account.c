@@ -55,10 +55,12 @@ static void render_account(const struct wi_list *l,
 static const struct wi_list_style style = {
 	.y0	= LIST_Y0,
 	.y1	= GFX_HEIGHT - 1,
-	.fg	= { ENTRY_FG, ENTRY_FG },
-	.bg	= { EVEN_BG, ODD_BG },
-	.min_h	= 50,
-	.render	= render_account,
+	.entry = {
+		.fg	= { ENTRY_FG, ENTRY_FG },
+		.bg	= { EVEN_BG, ODD_BG },
+		.min_h	= 50,
+		.render	= render_account,
+	}
 };
 
 static struct wi_list *lists[1];
@@ -78,7 +80,7 @@ static void render_account(const struct wi_list *l,
 		return;
 	gfx_arc(d, bb->x + bb->w - 1 - bb->h / 2, bb->y + bb->h / 2,
 	    bb->h / 4, 12 * passed_s, 0,
-	    passed_s ? TIMER_FG : style.bg[odd], style.bg[odd]);
+	    passed_s ? TIMER_FG : style.entry.bg[odd], style.entry.bg[odd]);
 }
 
 

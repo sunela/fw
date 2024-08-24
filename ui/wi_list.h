@@ -18,17 +18,21 @@
 struct wi_list_entry;
 struct wi_list;
 
-struct wi_list_style {
-	unsigned		y0, y1;	/* display area for the list */
+struct wi_list_entry_style {
 	gfx_color		fg[2];	/* even and odd entries */
 	gfx_color		bg[2];	/* even and odd entries */
-	unsigned		opad;	/* padding at top and bottom (0 -> 1) */
-	unsigned		ipad;	/* padding between lines (0 -> 1)*/
 	unsigned		min_h;	/* including padding */
-	const struct font *font;/* NULL for default */
 	void (*render)(const struct wi_list *list,
 	    const struct wi_list_entry *entry, struct gfx_drawable *da,
 	    const struct gfx_rect *bb, bool odd);
+};
+
+struct wi_list_style {
+	unsigned		y0, y1;	/* display area for the list */
+	unsigned		opad;	/* padding at top and bottom (0 -> 1) */
+	unsigned		ipad;	/* padding between lines (0 -> 1)*/
+	const struct font *font;/* NULL for default */
+	struct wi_list_entry_style entry;
 };
 
 struct wi_list {

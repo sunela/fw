@@ -21,11 +21,11 @@ struct ui_setup_ctx {
 
 
 static const struct wi_list_style style = {
-	y0:	LIST_Y0,
-	y1:	GFX_HEIGHT - 1,
-	fg:	{ GFX_WHITE, GFX_WHITE },
-	bg:	{ GFX_BLACK, GFX_HEX(0x202020) },
-	min_h:	50,
+	.y0	= LIST_Y0,
+	.y1	= GFX_HEIGHT - 1,
+	.fg	= { GFX_WHITE, GFX_WHITE },
+	.bg	= { GFX_BLACK, GFX_HEX(0x202020) },
+	.min_h	= 50,
 };
 
 static struct wi_list *lists[1];

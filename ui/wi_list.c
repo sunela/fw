@@ -39,6 +39,7 @@ struct wi_list_entry {
 	const char *first;
 	const char *second;
 	void *user;
+	const struct wi_list_entry_style *style;
 	struct wi_list_entry *next;
 };
 
@@ -83,13 +84,13 @@ struct wi_list_entry *wi_list_pick(const struct wi_list *list,
     unsigned x, unsigned y)
 {
 	const struct wi_list_style *style = list->style;
-	const struct wi_list_entry_style *entry_style = &style->entry;
 	struct wi_list_entry *e;
 	int pos = style->y0 - list->up;
 
 	if ((int) y < pos)
 		return NULL;
 	for (e = list->list; e; e = e->next) {
+		const struct wi_list_entry_style *entry_style = e->style;
 		unsigned h = entry_height(list, e);
 
 		pos += entry_style->min_h < h ? h : entry_style->min_h;
@@ -136,7 +137,7 @@ void wi_list_render_entry(struct wi_list *list, struct wi_list_entry *entry)
 		.h = entry_height(list, entry),
 	};
 	const struct wi_list_style *style = list->style;
-	const struct wi_list_entry_style *entry_style = &style->entry;
+	const struct wi_list_entry_style *entry_style = entry->style;
 	const struct wi_list_entry *e;
 	bool odd = 0;
 
@@ -145,9 +146,10 @@ void wi_list_render_entry(struct wi_list *list, struct wi_list_entry *entry)
 	if (bb.h < (int) entry_style->min_h)
 		bb.h = entry_style->min_h;
 	for (e = list->list; e != entry; e = e->next) {
+		const struct wi_list_entry_style *es = e->style;
 		unsigned h = entry_height(list, e);
 
-		bb.y += entry_style->min_h < h ? h : entry_style->min_h;
+		bb.y += es->min_h < h ? h : es->min_h;
 		odd = !odd;
 	}
 	clip_bb(&main_da, style, &bb);
@@ -187,7 +189,7 @@ static void do_draw_entry(const struct wi_list *list,
     const struct gfx_rect *bb, unsigned y, bool odd)
 {
 	const struct wi_list_style *style = list->style;
-	const struct wi_list_entry_style *entry_style = &style->entry;
+	const struct wi_list_entry_style *entry_style = e->style;
 
 	clip_bb(da, style, bb);
 	gfx_rect(da, bb, entry_style->bg[odd]);
@@ -208,7 +210,7 @@ static unsigned draw_entry(const struct wi_list *list,
     const struct wi_list_entry *e, struct gfx_drawable *da, int y, bool odd)
 {
 	const struct wi_list_style *style = list->style;
-	const struct wi_list_entry_style *entry_style = &style->entry;
+	const struct wi_list_entry_style *entry_style = e->style;
 	unsigned h = entry_height(list, e);
 	struct gfx_rect bb = { .x = 0, .y = y, .w = GFX_WIDTH, .h = h };
 	int top = y; /* avoid going through "unsigned" */
@@ -370,6 +372,7 @@ struct wi_list_entry *wi_list_add(struct wi_list *list,
 	e->first = first ? stralloc(first) : first;
 	e->second = second ? stralloc(second) : second;
 	e->user = user;
+	e->style = &list->style->entry;
 	e->next = NULL;
 	*list->anchor = e;
 	list->anchor = &e->next;
@@ -381,13 +384,12 @@ void wi_list_update_entry(struct wi_list *list, struct wi_list_entry *entry,
     const char *first, const char *second, void *user)
 {
 	const struct wi_list_style *style = list->style;
-	const struct wi_list_entry_style *entry_style = &style->entry;
 	bool changed = (first ? !entry->first || strcmp(first, entry->first) :
 	    !!entry->first) ||
 	    (second ? !entry->second || strcmp(second, entry->second) :
 	    !!entry->second);
 	const struct wi_list_entry *e;
-	unsigned y = list->style->y0 - list->up;
+	unsigned y = style->y0 - list->up;
 	int odd = 0;
 
 	entry->user = user;
@@ -400,12 +402,20 @@ void wi_list_update_entry(struct wi_list *list, struct wi_list_entry *entry,
 	entry->second = second ? stralloc(second) : second;
 
 	for (e = list->list; e != entry; e = e->next) {
+		const struct wi_list_entry_style *es = e->style;
 		unsigned h = entry_height(list, e);
 
-		y += h < entry_style->min_h ? entry_style->min_h : h;
+		y += h < es->min_h ? es->min_h : h;
 		odd = !odd;
 	}
 	draw_entry(list, entry, &main_da, y, odd);
+}
+
+
+void wi_list_entry_style(struct wi_list *list, struct wi_list_entry *entry,
+    const struct wi_list_entry_style *style)
+{
+	entry->style = style ? style : &list->style->entry;
 }
 
 

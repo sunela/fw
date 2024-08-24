@@ -79,6 +79,8 @@ struct wi_list_entry *wi_list_add(struct wi_list *ctx,
     const char *first, const char *second, void *user);
 void wi_list_update_entry(struct wi_list *list, struct wi_list_entry *entry,
     const char *first, const char *second, void *user);
+void wi_list_entry_style(struct wi_list *list, struct wi_list_entry *entry,
+    const struct wi_list_entry_style *style);
 void wi_list_end(struct wi_list *ctx);
 
 void wi_list_destroy(struct wi_list *ctx);

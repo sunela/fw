@@ -19,17 +19,9 @@
 #include "text.h"
 #include "shape.h"
 #include "ui.h"
+#include "wi_general_entry.h"
 #include "ui_entry.h"
 
-
-/* --- Input --------------------------------------------------------------- */
-
-#define	INPUT_PAD_TOP		5
-#define	INPUT_PAD_BOTTOM	2
-#define INPUT_MAX_X		210
-
-#define	DEFAULT_INPUT_FONT	mono34
-#define	DEFAULT_TITLE_FONT	mono24
 
 /* --- Keypad -------------------------------------------------------------- */
 
@@ -77,10 +69,12 @@ struct ui_entry_ctx {
 	/* from ui_entry_params */
 	struct ui_entry_input input;
 	const struct ui_entry_style *style;
+	const struct ui_entry_ops *entry_ops;
+	void *entry_user;
+	struct wi_general_entry_ctx default_entry_ctx;
 	const struct ui_entry_maps *maps;
 
 	/* run-time variables */
-	unsigned input_max_height;
 	const char *second;
 	struct timer t_button;
 	unsigned n;
@@ -161,7 +155,7 @@ const struct ui_entry_maps ui_entry_decimal_maps = {
 /* --- Input validation ---------------------------------------------------- */
 
 
-static bool valid(struct ui_entry_input *in)
+bool ui_entry_valid(struct ui_entry_input *in)
 {
 	return !*in->buf || !in->validate ||
 	    in->validate(in->user, in->buf) > 0;
@@ -171,69 +165,9 @@ static bool valid(struct ui_entry_input *in)
 /* --- Input field --------------------------------------------------------- */
 
 
-/* @@@ we should just clear the bounding box */
-
-static void clear_input(struct ui_entry_ctx *c)
+static void show_input(struct ui_entry_ctx *c)
 {
-	struct ui_entry_input *in = &c->input;
-	const struct ui_entry_style *style = c->style;
-
-	gfx_rect_xy(&main_da, 0, 0, GFX_WIDTH,
-	    INPUT_PAD_TOP + c->input_max_height + INPUT_PAD_BOTTOM,
-	    !*in->buf && in->title ? style->title_bg :
-	    valid(in) ? style->input_valid_bg : style->input_invalid_bg);
-}
-
-
-static void draw_top(struct ui_entry_ctx *c, const char *s,
-    const struct font *font, gfx_color color, gfx_color bg)
-{
-	struct ui_entry_input *in = &c->input;
-	struct text_query q;
-
-	if (!*s)
-		return;
-	/*
-	 * For the text width, we use the position of the next character
-	 * (q.next) instread of the bounding box width (q.w), so that there is
-	 * visual feedback when entering a space. (A trailing space doesn't
-	 * grow the bounding box. Multiple spaces would, though, which is
-	 * somewhat inconsistent.)
-	 */
-	text_query(0, 0, s, font, GFX_LEFT, GFX_TOP | GFX_MAX, &q);
-	assert(q.next <= (int) (in->max_len * c->input_max_height));
-
-	gfx_rect_xy(&main_da, 0, INPUT_PAD_TOP, GFX_WIDTH, q.h, bg);
-	gfx_clip_xy(&main_da, 0, INPUT_PAD_TOP, GFX_WIDTH, q.h);
-	if ((GFX_WIDTH + q.next) / 2 < INPUT_MAX_X)
-		text_text(&main_da, (GFX_WIDTH - q.next) / 2, INPUT_PAD_TOP,
-		    s, font, GFX_LEFT, GFX_TOP | GFX_MAX, color);
-	else
-		text_text(&main_da, INPUT_MAX_X - q.next, INPUT_PAD_TOP,
-		    s, font, GFX_LEFT, GFX_TOP | GFX_MAX, color);
-	gfx_clip(&main_da, NULL);
-}
-
-
-static void draw_input(struct ui_entry_ctx *c)
-{
-	struct ui_entry_input *in = &c->input;
-	const struct ui_entry_style *style = c->style;
-
-	if (!*in->buf && in->title)
-		text_text(&main_da, GFX_WIDTH / 2,
-		    (INPUT_PAD_TOP + c->input_max_height +
-		    INPUT_PAD_BOTTOM) / 2,
-		    in->title,
-		    style->title_font ? style->title_font :
-		    &DEFAULT_TITLE_FONT,
-		    GFX_CENTER, GFX_CENTER, style->title_fg);
-	else
-		draw_top(c, in->buf,
-		    style->input_font ? style->input_font : &DEFAULT_INPUT_FONT,
-		    style->input_fg,
-		    valid(in) ? style->input_valid_bg :
-		    style->input_invalid_bg);
+	c->entry_ops->input(c->entry_user);
 }
 
 
@@ -289,7 +223,8 @@ static void first_button(struct ui_entry_ctx *c, unsigned col, unsigned row,
 		first_label(x, y, c->maps->first[0]);
 	} else {	// >
 		if (*in->buf) {
-			base(x, y, valid(in) ? bg : SPECIAL_DISABLED_BG);
+			base(x, y,
+			    ui_entry_valid(in) ? bg : SPECIAL_DISABLED_BG);
 			gfx_equilateral(&main_da, x, y, BUTTON_H * 0.7, 1,
 			    GFX_BLACK);
 		} else {
@@ -422,8 +357,7 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 		progress();
 
 		end[-1] = 0;
-		clear_input(c);
-		draw_input(c);
+		show_input(c);
 		if (!*in->buf)
 			first_button(c, 2, 0, SPECIAL_UP_BG);
 		if (end - in->buf == (int) in->max_len)
@@ -434,7 +368,7 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 	if (col == 2 && row == 0) { // enter
 		if (c->second || !*in->buf)
 			return;
-		if (valid(in))
+		if (ui_entry_valid(in))
 			ui_return();
 		return;
 	}
@@ -459,8 +393,7 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 		if (in->validate && in->validate(in->user, in->buf) < 0) {
 			*end = 0;
 		} else {
-			clear_input(c);
-			draw_input(c);
+			show_input(c);
 			first_button(c, 0, 0, SPECIAL_UP_BG);
 			first_button(c, 2, 0, SPECIAL_UP_BG);
 		}
@@ -493,7 +426,6 @@ static void ui_entry_open(void *ctx, void *params)
 {
 	struct ui_entry_ctx *c = ctx;
 	const struct ui_entry_params *prm = params;
-	struct text_query q;
 
 	assert(strlen(prm->input.buf) <= prm->input.max_len);
 	c->input = prm->input;
@@ -501,13 +433,17 @@ static void ui_entry_open(void *ctx, void *params)
 	c->maps = prm->maps ? prm->maps : &ui_entry_text_maps;
 	c->second = NULL;
 
-	text_query(0, 0, "",
-	    c->style->input_font ? c->style->input_font : &DEFAULT_INPUT_FONT,
-	    GFX_TOP | GFX_MAX, GFX_TOP | GFX_MAX, &q);
-	c->input_max_height = q.h;
+	if (prm->entry_ops) {
+		c->entry_ops = prm->entry_ops;
+		c->entry_user = prm->entry_user;
+	} else {
+		c->entry_ops = &wi_general_entry_ops;
+		c->entry_user = &c->default_entry_ctx;
+	}
+	if (c->entry_ops->init)
+		c->entry_ops->init(c->entry_user, &c->input, c->style);
 
-	clear_input(c);
-	draw_input(c);
+	show_input(c);
 	first_button(c, 0, 0, SPECIAL_UP_BG);
 	draw_first_text(c, strlen(prm->input.buf) != prm->input.max_len);
 	first_button(c, 2, 0, SPECIAL_UP_BG);

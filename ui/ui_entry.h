@@ -53,14 +53,24 @@ struct ui_entry_input {
 	void		*user;
 };
 
+struct ui_entry_ops {
+	void (*init)(void *user, struct ui_entry_input *input,
+	    const struct ui_entry_style *style);
+	void (*input)(void *user);
+};
+
 struct ui_entry_params {
 	struct ui_entry_input input;
 	const struct ui_entry_style *style;
 	const struct ui_entry_maps *maps;
+	const struct ui_entry_ops *entry_ops;
+	void *entry_user;
 };
 
 
 extern const struct ui_entry_maps ui_entry_text_maps;
 extern const struct ui_entry_maps ui_entry_decimal_maps;
+
+bool ui_entry_valid(struct ui_entry_input *in);
 
 #endif /* !UI_ENTRY_H */

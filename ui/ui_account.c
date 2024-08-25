@@ -264,11 +264,13 @@ static void edit_account_name(void *user)
 	struct ui_account_ctx *c = user;
 
 	struct ui_entry_params params = {
-		.buf		= c->buf,
-		.max_len	= sizeof(c->buf) - 1,
-		.validate	= validate_name_change,
-		.user		= c,
-		.title		= "Account name",
+		.input = {
+			.buf		= c->buf,
+			.max_len	= sizeof(c->buf) - 1,
+			.validate	= validate_name_change,
+			.user		= c,
+			.title		= "Account name",
+		},
 	};
 
 	strcpy(c->buf, c->selected_account->name);

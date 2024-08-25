@@ -94,11 +94,11 @@ bool ui_field_more(const struct db_entry *de)
  * - the entry page should only accept digits
  */
 
-#define	PARAMS(text, max, fn)			\
-	do {					\
-		entry_params.title = (text);	\
-		entry_params.max_len = (max);	\
-		entry_params.validate = (fn);	\
+#define	PARAMS(text, max, fn)				\
+	do {						\
+		entry_params.input.title = (text);	\
+		entry_params.input.max_len = (max);	\
+		entry_params.input.validate = (fn);	\
 	} while (0)
 
 
@@ -205,7 +205,9 @@ static void ui_field_edit_open(void *ctx, void *params)
 			break;
 
 	struct ui_entry_params entry_params = {
-		.buf		= c->buf,
+		.input = {
+			.buf		= c->buf,
+		},
 		/* we set the remaining fields below */
 	};
 

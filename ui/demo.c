@@ -256,9 +256,11 @@ static bool demo_entry(char *const *args, unsigned n_args)
 {
 	static char buf[MAX_INPUT_LEN + 1] = "";
 	struct ui_entry_params params = {
-		.buf		= buf,
-		.max_len	= sizeof(buf) - 1,
-		.validate	= demo_entry_validate,
+		.input = {
+			.buf		= buf,
+			.max_len	= sizeof(buf) - 1,
+			.validate	= demo_entry_validate,
+		},
 	};
 
 	if (n_args)

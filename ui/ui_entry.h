@@ -40,7 +40,7 @@ struct ui_entry_maps {
 	const char *second[10];
 };
 
-struct ui_entry_params {
+struct ui_entry_input {
 	const char	*title;
 	char		*buf;
 	unsigned	max_len;
@@ -51,6 +51,10 @@ struct ui_entry_params {
 	 */
 	int		(*validate)(void *user, const char *s);
 	void		*user;
+};
+
+struct ui_entry_params {
+	struct ui_entry_input input;
 	const struct ui_entry_style *style;
 	const struct ui_entry_maps *maps;
 };

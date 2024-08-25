@@ -74,10 +74,12 @@ static void make_new_account(struct ui_accounts_ctx *c,
     void (*call)(const struct ui *ui, void *user))
 {
 	struct ui_entry_params params = {
-		.buf		= c->buf,
-		.max_len	= sizeof(c->buf) - 1,
-		.validate	= validate_new_account,
-		.title		= "New account",
+		.input = {
+			.buf		= c->buf,
+			.max_len	= sizeof(c->buf) - 1,
+			.validate	= validate_new_account,
+			.title		= "New account",
+		},
 	};
 
 	*c->buf = 0;

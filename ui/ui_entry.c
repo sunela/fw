@@ -75,13 +75,9 @@
 
 struct ui_entry_ctx {
 	/* from ui_entry_params */
-	const char *title;
+	struct ui_entry_input input;
 	const struct ui_entry_style *style;
 	const struct ui_entry_maps *maps;
-	char *buf;
-	unsigned max_len;
-	int (*validate)(void *user, const char *s);
-	void *user;
 
 	/* run-time variables */
 	unsigned input_max_height;
@@ -165,9 +161,10 @@ const struct ui_entry_maps ui_entry_decimal_maps = {
 /* --- Input validation ---------------------------------------------------- */
 
 
-static bool valid(struct ui_entry_ctx *c)
+static bool valid(struct ui_entry_input *in)
 {
-	return !*c->buf || !c->validate || c->validate(c->user, c->buf) > 0;
+	return !*in->buf || !in->validate ||
+	    in->validate(in->user, in->buf) > 0;
 }
 
 
@@ -178,16 +175,20 @@ static bool valid(struct ui_entry_ctx *c)
 
 static void clear_input(struct ui_entry_ctx *c)
 {
+	struct ui_entry_input *in = &c->input;
+	const struct ui_entry_style *style = c->style;
+
 	gfx_rect_xy(&main_da, 0, 0, GFX_WIDTH,
 	    INPUT_PAD_TOP + c->input_max_height + INPUT_PAD_BOTTOM,
-	    !*c->buf && c->title ? c->style->title_bg :
-	    valid(c) ? c->style->input_valid_bg : c->style->input_invalid_bg);
+	    !*in->buf && in->title ? style->title_bg :
+	    valid(in) ? style->input_valid_bg : style->input_invalid_bg);
 }
 
 
 static void draw_top(struct ui_entry_ctx *c, const char *s,
     const struct font *font, gfx_color color, gfx_color bg)
 {
+	struct ui_entry_input *in = &c->input;
 	struct text_query q;
 
 	if (!*s)
@@ -200,7 +201,7 @@ static void draw_top(struct ui_entry_ctx *c, const char *s,
 	 * somewhat inconsistent.)
 	 */
 	text_query(0, 0, s, font, GFX_LEFT, GFX_TOP | GFX_MAX, &q);
-	assert(q.next <= (int) (c->max_len * c->input_max_height));
+	assert(q.next <= (int) (in->max_len * c->input_max_height));
 
 	gfx_rect_xy(&main_da, 0, INPUT_PAD_TOP, GFX_WIDTH, q.h, bg);
 	gfx_clip_xy(&main_da, 0, INPUT_PAD_TOP, GFX_WIDTH, q.h);
@@ -216,21 +217,23 @@ static void draw_top(struct ui_entry_ctx *c, const char *s,
 
 static void draw_input(struct ui_entry_ctx *c)
 {
-	if (!*c->buf && c->title)
+	struct ui_entry_input *in = &c->input;
+	const struct ui_entry_style *style = c->style;
+
+	if (!*in->buf && in->title)
 		text_text(&main_da, GFX_WIDTH / 2,
 		    (INPUT_PAD_TOP + c->input_max_height +
 		    INPUT_PAD_BOTTOM) / 2,
-		    c->title,
-		    c->style->title_font ? c->style->title_font :
+		    in->title,
+		    style->title_font ? style->title_font :
 		    &DEFAULT_TITLE_FONT,
-		    GFX_CENTER, GFX_CENTER, c->style->title_fg);
+		    GFX_CENTER, GFX_CENTER, style->title_fg);
 	else
-		draw_top(c, c->buf,
-		    c->style->input_font ? c->style->input_font :
-		    &DEFAULT_INPUT_FONT,
-		    c->style->input_fg,
-		    valid(c) ? c->style->input_valid_bg :
-		    c->style->input_invalid_bg);
+		draw_top(c, in->buf,
+		    style->input_font ? style->input_font : &DEFAULT_INPUT_FONT,
+		    style->input_fg,
+		    valid(in) ? style->input_valid_bg :
+		    style->input_invalid_bg);
 }
 
 
@@ -266,6 +269,7 @@ static void first_label(unsigned x, unsigned y, const char *s)
 static void first_button(struct ui_entry_ctx *c, unsigned col, unsigned row,
     gfx_color bg)
 {
+	struct ui_entry_input *in= &c->input;
 	unsigned x = BUTTON_X0 + BUTTON_X_SPACING * col;
 	unsigned y = BUTTON_Y1 - BUTTON_Y_SPACING * row;
 
@@ -274,7 +278,7 @@ static void first_button(struct ui_entry_ctx *c, unsigned col, unsigned row,
 		first_label(x, y, c->maps->first[1 + col + (3 - row) * 3]);
 	} else if (col == 0) {	// X
 		base(x, y, bg);
-		if (*c->buf)
+		if (*in->buf)
 			gfx_equilateral(&main_da, x, y, BUTTON_H * 0.7, -1,
 			    GFX_BLACK);
 		else
@@ -284,8 +288,8 @@ static void first_button(struct ui_entry_ctx *c, unsigned col, unsigned row,
 		base(x, y, bg);
 		first_label(x, y, c->maps->first[0]);
 	} else {	// >
-		if (*c->buf) {
-			base(x, y, valid(c) ? bg : SPECIAL_DISABLED_BG);
+		if (*in->buf) {
+			base(x, y, valid(in) ? bg : SPECIAL_DISABLED_BG);
 			gfx_equilateral(&main_da, x, y, BUTTON_H * 0.7, 1,
 			    GFX_BLACK);
 		} else {
@@ -380,11 +384,12 @@ static void release_button(void *user)
 static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 {
 	struct ui_entry_ctx *c = ctx;
+	struct ui_entry_input *in = &c->input;
 	unsigned col = x < BUTTON_X0 + BUTTON_X_SPACING / 2 ? 0 :
 	    x < BUTTON_X0 + 1.5 * BUTTON_X_SPACING ? 1 : 2;
 	unsigned row = 0;
 	unsigned n;
-	char *end = strchr(c->buf, 0);
+	char *end = strchr(in->buf, 0);
 
 	if (y < BUTTON_Y0 - BUTTON_Y_SPACING + BUTTON_R)
 		return;
@@ -406,7 +411,7 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 			ui_update_display();
 			return;
 		}
-		if (!*c->buf) {
+		if (!*in->buf) {
 			ui_return();
 			return;
 		}
@@ -419,21 +424,21 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 		end[-1] = 0;
 		clear_input(c);
 		draw_input(c);
-		if (!*c->buf)
+		if (!*in->buf)
 			first_button(c, 2, 0, SPECIAL_UP_BG);
-		if (end - c->buf == (int) c->max_len)
+		if (end - in->buf == (int) in->max_len)
 			draw_first_text(c, 1);
 		ui_update_display();
 		return;
 	}
 	if (col == 2 && row == 0) { // enter
-		if (c->second || !*c->buf)
+		if (c->second || !*in->buf)
 			return;
-		if (valid(c))
+		if (valid(in))
 			ui_return();
 		return;
 	}
-	if (end - c->buf == (int) c->max_len)
+	if (end - in->buf == (int) in->max_len)
 		return;
 	progress();
 	timer_flush(&c->t_button);
@@ -451,7 +456,7 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 		end[0] = ch;
 		end[1] = 0;
 		c->second = NULL;
-		if (c->validate && c->validate(c->user, c->buf) < 0) {
+		if (in->validate && in->validate(in->user, in->buf) < 0) {
 			*end = 0;
 		} else {
 			clear_input(c);
@@ -459,7 +464,7 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 			first_button(c, 0, 0, SPECIAL_UP_BG);
 			first_button(c, 2, 0, SPECIAL_UP_BG);
 		}
-		draw_first_text(c, strlen(c->buf) != c->max_len);
+		draw_first_text(c, strlen(in->buf) != in->max_len);
 	} else {
 		c->second = c->maps->second[n];
 		draw_second(c->second);
@@ -472,9 +477,10 @@ static void ui_entry_to(void *ctx, unsigned from_x, unsigned from_y,
     unsigned to_x, unsigned to_y, enum ui_swipe swipe)
 {
 	struct ui_entry_ctx *c = ctx;
+	struct ui_entry_input *in = &c->input;
 
 	if (swipe == us_left) {
-		*c->buf = 0;
+		*in->buf = 0;
 		ui_return();
 	}
 }
@@ -489,14 +495,10 @@ static void ui_entry_open(void *ctx, void *params)
 	const struct ui_entry_params *prm = params;
 	struct text_query q;
 
-	assert(strlen(prm->buf) <= prm->max_len);
-	c->title = prm->title;
+	assert(strlen(prm->input.buf) <= prm->input.max_len);
+	c->input = prm->input;
 	c->style = prm->style ? prm->style : &default_style;
 	c->maps = prm->maps ? prm->maps : &ui_entry_text_maps;
-	c->buf = prm->buf;
-	c->max_len = prm->max_len;
-	c->validate = prm->validate;
-	c->user = prm->user;
 	c->second = NULL;
 
 	text_query(0, 0, "",
@@ -507,7 +509,7 @@ static void ui_entry_open(void *ctx, void *params)
 	clear_input(c);
 	draw_input(c);
 	first_button(c, 0, 0, SPECIAL_UP_BG);
-	draw_first_text(c, strlen(prm->buf) != prm->max_len);
+	draw_first_text(c, strlen(prm->input.buf) != prm->input.max_len);
 	first_button(c, 2, 0, SPECIAL_UP_BG);
 	timer_init(&c->t_button);
 }

@@ -14,6 +14,7 @@
 #include "shape.h"
 #include "text.h"
 #include "ui.h"
+#include "colors.h"
 #include "ui_entry.h"
 #include "wi_general_entry.h"
 
@@ -29,13 +30,6 @@
 
 
 /* --- Keypad -------------------------------------------------------------- */
-
-#define	UP_BG			GFX_WHITE
-#define	DOWN_BG			gfx_hex(0x808080)
-#define	DISABLED_BG		gfx_hex(0x606060)
-#define	SPECIAL_UP_BG		GFX_YELLOW
-#define	SPECIAL_DOWN_BG		gfx_hex(0x808000)
-#define	SPECIAL_DISABLED_BG	gfx_hex(0x404030)
 
 /*
  * Generally approximate the golden ratio: 1:1.618 or 0.384:0.615, but increase

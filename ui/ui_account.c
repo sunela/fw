@@ -28,14 +28,12 @@
 #include "ui_field.h"
 #include "ui_accounts.h"
 #include "style.h"
+#include "colors.h"
 #include "ui.h"
 
 
 #define	TITLE_FG		GFX_YELLOW
 #define	TIMER_FG		GFX_HEX(0x8080ff)
-#define	ENTRY_FG		GFX_WHITE
-#define	EVEN_BG			GFX_BLACK
-#define	ODD_BG			GFX_HEX(0x202020)
 
 
 struct ui_account_ctx {
@@ -56,7 +54,7 @@ static const struct wi_list_style style = {
 	.y0	= LIST_Y0,
 	.y1	= GFX_HEIGHT - 1,
 	.entry = {
-		.fg	= { ENTRY_FG, ENTRY_FG },
+		.fg	= { LIST_FG, LIST_FG },
 		.bg	= { EVEN_BG, ODD_BG },
 		.min_h	= 50,
 		.render	= render_account,

@@ -19,15 +19,11 @@
 #include "ui_accounts.h"
 #include "pin.h"
 #include "shape.h"
+#include "colors.h"
 #include "ui.h"
 
 
 /* --- Keypad -------------------------------------------------------------- */
-
-#define UP_BG			GFX_WHITE
-#define DOWN_BG			gfx_hex(0x808080)
-#define	SPECIAL_BG		GFX_YELLOW
-#define	DISABLED_BG		gfx_hex(0x606060)
 
 #define	BUTTON_LINGER_MS	150
 #define	FONT			mono36
@@ -247,7 +243,7 @@ static void ui_pin_tap(void *ctx, unsigned x, unsigned y)
 			draw_digits(UP_BG);
 		pin = (pin >> 4) | 0xf0000000;
 		pin_len--;
-		pin_button(0, 0, SPECIAL_BG);
+		pin_button(0, 0, SPECIAL_UP_BG);
 		clear_indicators(pin_len + 1);
 		draw_indicators(pin_len);
 		ui_update_display();
@@ -277,9 +273,9 @@ debug("%08lx\n", (unsigned long) pin);
 	n = row ? (3 - row) * 3 + col + 1 : 0;
 	pin = pin << 4 | shuffle[n];
 	pin_len++;
-	pin_button(0, 0, SPECIAL_BG);
+	pin_button(0, 0, SPECIAL_UP_BG);
 	if (pin_len == MIN_PIN_LEN)
-		pin_button(2, 0, SPECIAL_BG);
+		pin_button(2, 0, SPECIAL_UP_BG);
 	if (pin_len == MAX_PIN_LEN)
 		draw_digits(DISABLED_BG);
 	clear_indicators(pin_len - 1);
@@ -319,7 +315,7 @@ static void ui_pin_open(void *ctx, void *params)
 {
 	pin = 0xffffffff;
 	pin_len = 0;
-	pin_button(0, 0, SPECIAL_BG);
+	pin_button(0, 0, SPECIAL_UP_BG);
 	draw_digits(UP_BG);
 	timer_init(&t_button);
 	set_idle(IDLE_PIN_S);

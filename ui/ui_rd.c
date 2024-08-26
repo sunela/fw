@@ -20,13 +20,8 @@
 #include "wi_list.h"
 #include "ui_overlay.h"
 #include "style.h"
+#include "colors.h"
 #include "ui.h"
-
-
-#define	TITLE_FG		GFX_YELLOW
-#define	ENTRY_FG		GFX_WHITE
-#define	EVEN_BG			GFX_BLACK
-#define	ODD_BG			GFX_HEX(0x202020)
 
 
 enum rd_item_type {
@@ -54,7 +49,7 @@ static const struct wi_list_style style = {
 	.y0	= LIST_Y0,
 	.y1	= GFX_HEIGHT - 1,
 	.entry = {
-		.fg	= { ENTRY_FG, ENTRY_FG },
+		.fg	= { LIST_FG, LIST_FG },
 		.bg	= { EVEN_BG, ODD_BG },
 		.min_h	= 50,
 		.render	= render_rd,
@@ -77,7 +72,7 @@ static void render_rd(const struct wi_list *l,
 	case rit_bool:
 		gfx_checkbox(d, bb->x + bb->w - 1 - bb->h / 2,
 		    bb->y + bb->h / 2, bb->h / 2, 2, *item->u.bool_var,
-		    ENTRY_FG, odd ? ODD_BG : EVEN_BG);
+		    LIST_FG, odd ? ODD_BG : EVEN_BG);
 		break;
 	default:
 		abort();

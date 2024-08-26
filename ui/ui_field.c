@@ -19,15 +19,11 @@
 #include "gfx.h"
 #include "style.h"
 #include "ui.h"
+#include "colors.h"
 #include "wi_list.h"
 #include "ui_overlay.h"
 #include "ui_entry.h"
 #include "ui_field.h"
-
-
-#define	FIELD_FG		GFX_WHITE
-#define	EVEN_BG			GFX_BLACK
-#define	ODD_BG			GFX_HEX(0x202020)
 
 
 struct ui_field_edit_ctx {
@@ -45,7 +41,7 @@ static const struct wi_list_style style = {
 	.y0	= LIST_Y0,
 	.y1	= GFX_HEIGHT - 1,
 	.entry = {
-		.fg	= { FIELD_FG, FIELD_FG },
+		.fg	= { LIST_FG, LIST_FG },
 		.bg	= { EVEN_BG, ODD_BG },
 		.min_h	= 50,
 	}

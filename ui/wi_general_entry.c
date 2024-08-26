@@ -6,10 +6,12 @@
  */
 
 #include <stddef.h>
+#include <string.h>
 #include <assert.h>
 
 #include "hal.h"
 #include "gfx.h"
+#include "shape.h"
 #include "text.h"
 #include "ui.h"
 #include "ui_entry.h"
@@ -18,7 +20,6 @@
 
 /* --- Input --------------------------------------------------------------- */
 
-
 #define	INPUT_PAD_TOP		5
 #define	INPUT_PAD_BOTTOM	2
 #define	INPUT_MAX_X		210
@@ -26,6 +27,46 @@
 #define	DEFAULT_INPUT_FONT	mono34
 #define	DEFAULT_TITLE_FONT	mono24
 
+
+/* --- Keypad -------------------------------------------------------------- */
+
+#define	UP_BG			GFX_WHITE
+#define	DOWN_BG			gfx_hex(0x808080)
+#define	DISABLED_BG		gfx_hex(0x606060)
+#define	SPECIAL_UP_BG		GFX_YELLOW
+#define	SPECIAL_DOWN_BG		gfx_hex(0x808000)
+#define	SPECIAL_DISABLED_BG	gfx_hex(0x404030)
+
+/*
+ * Generally approximate the golden ratio: 1:1.618 or 0.384:0.615, but increase
+ * the font size since since we have only one small descender (for Q).
+ */
+
+#define	FONT_1_TOP		mono24
+#define	FONT_1_BOTTOM		mono18
+
+#define	FONT_2			mono34
+
+#define	LABEL_TOP_OFFSET	-12
+#define	LABEL_CENTER_OFFSET	0
+#define	LABEL_BOTTOM_OFFSET	13
+
+#define	BUTTON_BOTTOM_OFFSET	8
+
+#define	BUTTON_R		12
+#define	BUTTON_W		70
+#define	BUTTON_H		50
+#define	BUTTON_X_GAP		8
+#define	BUTTON_Y_GAP		5
+#define	BUTTON_X_SPACING	(BUTTON_W + BUTTON_X_GAP)
+#define	BUTTON_Y_SPACING	(BUTTON_H + BUTTON_Y_GAP)
+#define	BUTTON_X0		(GFX_WIDTH / 2 - BUTTON_X_SPACING)
+#define	BUTTON_Y1		(GFX_HEIGHT - BUTTON_H / 2 - \
+				    BUTTON_BOTTOM_OFFSET)
+#define	BUTTON_Y0		(BUTTON_Y1 - 3 * BUTTON_Y_SPACING)
+
+
+/* --- Input --------------------------------------------------------------- */
 
 /* @@@ we should just clear the bounding box */
 
@@ -103,6 +144,129 @@ static void wi_general_entry_input(void *user)
 }
 
 
+/* --- Pad layout ---------------------------------------------------------- */
+
+
+static void base(unsigned x, unsigned y, gfx_color bg)
+{
+        gfx_rrect_xy(&main_da, x - BUTTON_W / 2, y - BUTTON_H / 2,
+            BUTTON_W, BUTTON_H, BUTTON_R, bg);
+}
+
+
+static int wi_general_entry_n(void *user, unsigned col, unsigned row)
+{
+	int n = 1 + col + (3 - row) * 3;
+
+	if (row == 0) {
+		if (col == 1)
+			return 0;
+		return -1;
+	}
+	return n  < 0 || n > 9 ? -1 : n;
+}
+
+
+static void draw_label(unsigned x, unsigned y, const char *s, bool second)
+{
+	char top[] = { *s, 0 };
+
+	if (s[1]) {
+		text_text(&main_da, x, y + LABEL_TOP_OFFSET, top,
+		    &FONT_1_TOP, GFX_CENTER, GFX_CENTER, GFX_BLACK);
+		text_text(&main_da, x, y + LABEL_BOTTOM_OFFSET, s + 1,
+		    &FONT_1_BOTTOM, GFX_CENTER, GFX_CENTER, GFX_BLACK);
+	} else {
+		if (second) {
+			/*
+		         * Characters that are hard to recognize if vertically
+			 * centered, e.g., minus and underscore would look the
+			 * same. Some lower-case letters also look a little odd
+			 * when centered, but they still are easily
+			 * recognizable, so we probably don't need to do
+			 * anything about them.
+			 */
+		        bool tricky = strchr("'\"`_,.", *s);
+
+		        text_text(&main_da, x, y, s, &FONT_2, GFX_CENTER,
+		            tricky ? GFX_CENTER | GFX_MAX : GFX_CENTER,
+			    GFX_BLACK);
+		} else {
+			text_text(&main_da, x, y + LABEL_CENTER_OFFSET, top,
+			    &FONT_1_TOP, GFX_CENTER, GFX_CENTER, GFX_BLACK);
+		}
+	}
+}
+
+
+static void wi_general_entry_button(void *user, unsigned col, unsigned row,
+    const char *label, bool second, bool enabled, bool up)
+{
+	struct wi_general_entry_ctx *c = user;
+	struct ui_entry_input *in = c->input;
+	unsigned x = BUTTON_X0 + BUTTON_X_SPACING * col;
+	unsigned y = BUTTON_Y1 - BUTTON_Y_SPACING * row;
+	gfx_color bg;
+
+	if (row > 0 || col == 1) {
+		bg = enabled ? up ? UP_BG : DOWN_BG : DISABLED_BG;
+		base(x, y, bg);
+		draw_label(x, y, label, second);
+		return;
+	}
+	bg = enabled ? up ? SPECIAL_UP_BG : SPECIAL_DOWN_BG :
+	    SPECIAL_DISABLED_BG;
+	if (col == 0) {	// X
+		base(x, y, bg);
+		if (*in->buf || second)
+			gfx_equilateral(&main_da, x, y, BUTTON_H * 0.7, -1,
+			    GFX_BLACK);
+		else
+			gfx_diagonal_cross(&main_da, x, y, BUTTON_H * 0.4, 4,
+			    GFX_BLACK);
+	} else {	// >
+		if (*in->buf && !second) {
+			base(x, y, bg);
+			gfx_equilateral(&main_da, x, y, BUTTON_H * 0.7, 1,
+			    GFX_BLACK);
+		} else {
+			base(x, y, GFX_BLACK);
+		}
+	}
+}
+
+
+static void wi_general_entry_clear_pad(void *user)
+{
+	const unsigned h = 4 * BUTTON_H + 2 * BUTTON_X_GAP;
+
+	gfx_rect_xy(&main_da, 0, GFX_HEIGHT - h - BUTTON_BOTTOM_OFFSET,
+            GFX_WIDTH, h, GFX_BLACK);
+}
+
+
+static bool wi_general_entry_pos(void *user, unsigned x, unsigned y,
+    unsigned *col, unsigned *row)
+{
+	*col = x < BUTTON_X0 + BUTTON_X_SPACING / 2 ? 0 :
+	    x < BUTTON_X0 + 1.5 * BUTTON_X_SPACING ? 1 : 2;
+	*row = 0;
+	if (y < BUTTON_Y0 - BUTTON_Y_SPACING + BUTTON_R)
+		return 0;
+	if (y < BUTTON_Y0)
+		*row = 3;
+	else if (y > BUTTON_Y1)
+		*row = 0;
+	else
+		*row = 3 - (y - BUTTON_Y0 + BUTTON_Y_SPACING / 2) /
+		    BUTTON_Y_SPACING;
+	return 1;
+}
+
+
+/* --- API ----------------------------------------------------------------- */
+
+
 static void wi_general_entry_init(void *ctx, struct ui_entry_input *input,
     const struct ui_entry_style *style)
 {
@@ -119,6 +283,10 @@ static void wi_general_entry_init(void *ctx, struct ui_entry_input *input,
 
 
 struct ui_entry_ops wi_general_entry_ops = {
-	.init	= wi_general_entry_init,
-	.input	= wi_general_entry_input,
+	.init		= wi_general_entry_init,
+	.input		= wi_general_entry_input,
+	.pos		= wi_general_entry_pos,
+	.n		= wi_general_entry_n,
+	.button		= wi_general_entry_button,
+	.clear_pad	= wi_general_entry_clear_pad,
 };

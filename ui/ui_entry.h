@@ -8,6 +8,8 @@
 #ifndef UI_ENTRY_H
 #define	UI_ENTRY_H
 
+#include <stdbool.h>
+
 #include "gfx.h"
 
 
@@ -57,6 +59,12 @@ struct ui_entry_ops {
 	void (*init)(void *user, struct ui_entry_input *input,
 	    const struct ui_entry_style *style);
 	void (*input)(void *user);
+	bool (*pos)(void *user, unsigned x, unsigned y,
+	    unsigned *col, unsigned *row);
+	int (*n)(void *user, unsigned col, unsigned row);
+	void (*button)(void *user, unsigned col, unsigned row,
+	    const char *label, bool second, bool enabled, bool up);
+	void (*clear_pad)(void *user);
 };
 
 struct ui_entry_params {

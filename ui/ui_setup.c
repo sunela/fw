@@ -74,7 +74,7 @@ static void ui_setup_open(void *ctx, void *params)
 	    &FONT_TOP, GFX_CENTER, GFX_CENTER, GFX_WHITE);
 
 	wi_list_begin(&c->list, &style);
-	wi_list_add(&c->list, "Change PIN", NULL, NULL);
+	wi_list_add(&c->list, "Change PIN", NULL, (void *) &ui_pin_change);
 	wi_list_add(&c->list, "Time & date", NULL, (void *) &ui_time);
 	wi_list_add(&c->list, "Storage", NULL, (void *) &ui_storage);
 	wi_list_add(&c->list, "Version", NULL, (void *) &ui_version);

@@ -509,6 +509,75 @@ accounts $mode moved "long 200 72" "tap 98 165" "long 114 166" "tap 154 110"
 accounts $mode move-cancel "long 200 72" "tap 98 165" "long 114 166" \
     "tap 91 173"
 
+# --- Edit entry name (demo) --------------------------------------------------
+
+accounts $mode entry-edit "tap 86 67" "long 201 23" "tap 116 141"
+
+# --- Edit entry name (remove "emo") -------------------------------------------
+
+accounts $mode entry-edit-d "tap 86 67" "long 201 23" "tap 116 141" \
+    "$ENTRY_L" "$ENTRY_L" "$ENTRY_L"
+
+# --- Edit entry name ("dummy1", duplicate) -----------------------------------
+
+accounts $mode entry-edit-dummy1 "tap 86 67" "long 201 23" "tap 116 141" \
+    "$ENTRY_L" "$ENTRY_L" "$ENTRY_L" \
+    "$ENTRY_8" "$ENTRY_5" \
+    "$ENTRY_6" "$ENTRY_4" "$ENTRY_6" "$ENTRY_4" \
+    "$ENTRY_9" "$ENTRY_6" \
+    "$ENTRY_1" "$ENTRY_0"
+
+# --- Edit entry name ("dummy1xxx" ) ------------------------------------------
+
+accounts $mode entry-edit-dummy1xxx "tap 86 67" "long 201 23" "tap 116 141" \
+    "$ENTRY_L" "$ENTRY_L" "$ENTRY_L" \
+    "$ENTRY_8" "$ENTRY_5" \
+    "$ENTRY_6" "$ENTRY_4" "$ENTRY_6" "$ENTRY_4" \
+    "$ENTRY_9" "$ENTRY_6" \
+    "$ENTRY_1" "$ENTRY_0" \
+    "$ENTRY_9" "$ENTRY_5" "$ENTRY_9" "$ENTRY_5" "$ENTRY_9" "$ENTRY_5"
+
+# --- Edit entry name ("dummy1xxx123456" ) ------------------------------------
+
+accounts $mode entry-edit-6 \
+    "tap 86 67" "long 201 23" "tap 116 141" \
+    "$ENTRY_L" "$ENTRY_L" "$ENTRY_L" \
+    "$ENTRY_8" "$ENTRY_5" \
+    "$ENTRY_6" "$ENTRY_4" "$ENTRY_6" "$ENTRY_4" \
+    "$ENTRY_9" "$ENTRY_6" \
+    "$ENTRY_1" "$ENTRY_0" \
+    "$ENTRY_9" "$ENTRY_5" "$ENTRY_9" "$ENTRY_5" "$ENTRY_9" "$ENTRY_5" \
+    "$ENTRY_1" "$ENTRY_0" "$ENTRY_2" "$ENTRY_0" "$ENTRY_3" "$ENTRY_0" \
+    "$ENTRY_4" "$ENTRY_0" "$ENTRY_5" "$ENTRY_0" "$ENTRY_6" "$ENTRY_0"
+
+# --- Edit entry name ("dummy1xxx1234567", maximum length) --------------------
+
+accounts $mode entry-edit-7 \
+    "tap 86 67" "long 201 23" "tap 116 141" \
+    "$ENTRY_L" "$ENTRY_L" "$ENTRY_L" \
+    "$ENTRY_8" "$ENTRY_5" \
+    "$ENTRY_6" "$ENTRY_4" "$ENTRY_6" "$ENTRY_4" \
+    "$ENTRY_9" "$ENTRY_6" \
+    "$ENTRY_1" "$ENTRY_0" \
+    "$ENTRY_9" "$ENTRY_5" "$ENTRY_9" "$ENTRY_5" "$ENTRY_9" "$ENTRY_5" \
+    "$ENTRY_1" "$ENTRY_0" "$ENTRY_2" "$ENTRY_0" "$ENTRY_3" "$ENTRY_0" \
+    "$ENTRY_4" "$ENTRY_0" "$ENTRY_5" "$ENTRY_0" "$ENTRY_6" "$ENTRY_0" \
+    "$ENTRY_7" "$ENTRY_0"
+
+# --- Edit entry name ("dummy1xxx1234567", no more) ---------------------------
+
+accounts $mode entry-edit-8 \
+    "tap 86 67" "long 201 23" "tap 116 141" \
+    "$ENTRY_L" "$ENTRY_L" "$ENTRY_L" \
+    "$ENTRY_8" "$ENTRY_5" \
+    "$ENTRY_6" "$ENTRY_4" "$ENTRY_6" "$ENTRY_4" \
+    "$ENTRY_9" "$ENTRY_6" \
+    "$ENTRY_1" "$ENTRY_0" \
+    "$ENTRY_9" "$ENTRY_5" "$ENTRY_9" "$ENTRY_5" "$ENTRY_9" "$ENTRY_5" \
+    "$ENTRY_1" "$ENTRY_0" "$ENTRY_2" "$ENTRY_0" "$ENTRY_3" "$ENTRY_0" \
+    "$ENTRY_4" "$ENTRY_0" "$ENTRY_5" "$ENTRY_0" "$ENTRY_6" "$ENTRY_0" \
+    "$ENTRY_7" "$ENTRY_0" "$ENTRY_8" "$ENTRY_0"
+
 # -----------------------------------------------------------------------------
 
 [ "$1" = last ] && display "$dir/_tmp.ppm"

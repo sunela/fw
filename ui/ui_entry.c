@@ -40,7 +40,10 @@ struct ui_entry_ctx {
 	/* run-time variables */
 	const char *second;
 	struct timer t_button;
-	unsigned n;
+	struct {
+		unsigned col;
+		unsigned row;
+	} down;
 };
 
 
@@ -191,8 +194,8 @@ static void draw_second(struct ui_entry_ctx *c, const char *map)
 static void release_button(void *user)
 {
 	struct ui_entry_ctx *c = user;
-	unsigned col = c->n >> 4;
-	unsigned row = c->n & 15;
+	unsigned col = c->down.col;
+	unsigned row = c->down.row;
 	int n = c->entry_ops->n(c->entry_user, col, row);
 
 	draw_button(c, col, row, n < 0 ? NULL : c->maps->first[n], 0, 1, 1);
@@ -227,7 +230,8 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 		}
 		timer_flush(&c->t_button);
 		draw_button(c, 0, 0, NULL, 0, 1, 0);
-		c->n = col << 4 | row;
+		c->down.col = col;
+		c->down.row = row;
 		timer_set(&c->t_button, BUTTON_LINGER_MS, release_button, c);
 		progress();
 
@@ -251,7 +255,7 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 		return;
 	progress();
 	timer_flush(&c->t_button);
-	n = row ? (3 - row) * 3 + col + 1 : 0;
+	n = c->entry_ops->n(c->entry_user, col, row);
 	if (c->second || !c->maps->second[n]) {
 		char ch;
 		int valid;

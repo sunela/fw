@@ -527,6 +527,17 @@ accounts $mode entry-edit-dummy1 "tap 86 67" "long 201 23" "tap 116 141" \
     "$ENTRY_9" "$ENTRY_6" \
     "$ENTRY_1" "$ENTRY_0"
 
+# --- Edit entry name ("dummy12", then back, duplicate) -----------------------
+
+accounts $mode entry-edit-dummy12 "tap 86 67" "long 201 23" "tap 116 141" \
+    "$ENTRY_L" "$ENTRY_L" "$ENTRY_L" \
+    "$ENTRY_8" "$ENTRY_5" \
+    "$ENTRY_6" "$ENTRY_4" "$ENTRY_6" "$ENTRY_4" \
+    "$ENTRY_9" "$ENTRY_6" \
+    "$ENTRY_1" "$ENTRY_0" \
+    "$ENTRY_2" "$ENTRY_0" \
+    "$ENTRY_L"
+
 # --- Edit entry name ("dummy1xxx" ) ------------------------------------------
 
 accounts $mode entry-edit-dummy1xxx "tap 86 67" "long 201 23" "tap 116 141" \

@@ -13,6 +13,7 @@
 #include "pin.h"
 #include "ui.h"
 #include "wi_general_entry.h"
+#include "ui_notice.h"
 #include "ui_entry.h"
 
 
@@ -103,8 +104,10 @@ static void ui_pin_change_open(void *ctx, void *params)
 
 static void fail(struct ui_pin_change_ctx *c, const char *s)
 {
-	debug("PIN change: %s\n", s);
-	ui_return();
+	struct ui_notice_params params = {
+		.s = s,
+	};
+	ui_switch(&ui_notice, &params);
 }
 
 

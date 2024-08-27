@@ -16,14 +16,16 @@
 #include "ui_notice.h"
 
 
-#define	FG		GFX_BLACK
-#define	BG		GFX_WHITE
+#define	DEFAULT_BOX_R	10
+#define	DEFAULT_FONT	mono18
 
-#define	FONT		mono18
 
-#define	BOX_R		10
-#define	BOX_MARGIN	BOX_R
-
+static const struct ui_notice_style default_style = {
+	.fg		= GFX_BLACK,
+	.bg		= GFX_WHITE,
+	.x_align	= GFX_CENTER,
+	.font		= &mono18,
+};
 
 
 /* --- Event handling ------------------------------------------------------ */
@@ -49,18 +51,23 @@ static void ui_notice_to(void *ctx, unsigned from_x, unsigned from_y,
 static void ui_notice_open(void *ctx, void *params)
 {
 	const struct ui_notice_params *p = params;
+	const struct ui_notice_style *style =
+	    p->style ? p->style : &default_style;
 	unsigned w = p->w ? p->w : GFX_WIDTH;
+	unsigned r = p->r ? p->r : DEFAULT_BOX_R;
+	unsigned margin = p->margin ? p->margin : r;
+	const struct font *font = style->font ? style->font : &DEFAULT_FONT;
 	unsigned h;
 
-	assert(w > 2 * BOX_MARGIN);
-	h = text_format(NULL, 0, 0, w - 2 * BOX_MARGIN, 0, 0, p->s,
-	    &FONT, GFX_CENTER, FG);
+	assert(w > 2 * margin);
+	h = text_format(NULL, 0, 0, w - 2 * margin, 0, 0, p->s,
+	    font, style->x_align, style->fg);
 	gfx_rrect_xy(&main_da, (GFX_WIDTH - w) / 2,
-	    (GFX_HEIGHT - h) / 2 - BOX_MARGIN,
-	    w, h + 2 * BOX_MARGIN, BOX_R, BG);
-	text_format(&main_da, (GFX_WIDTH - w) / 2 + BOX_MARGIN,
-	    (GFX_HEIGHT - h) / 2, w - 2 * BOX_MARGIN, h, 0, p->s,
-	    &FONT, GFX_CENTER, FG);
+	    (GFX_HEIGHT - h) / 2 - margin,
+	    w, h + 2 * margin, r, style->bg);
+	text_format(&main_da, (GFX_WIDTH - w) / 2 + margin,
+	    (GFX_HEIGHT - h) / 2, w - 2 * margin, h, 0, p->s,
+	    font, style->x_align, style->fg);
 	set_idle(IDLE_NOTICE_S);
 }
 

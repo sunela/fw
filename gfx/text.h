@@ -55,4 +55,19 @@ unsigned text_text(struct gfx_drawable *da, int x, int y,
     const char *s, const struct font *font, int8_t align_x, int8_t align_y,
     gfx_color color);
 
+/*
+ * text_format renders a text such that it fits in a rectangle of width w and
+ * height h. It inserts line breaks as needed. Rendering starts at "offset"
+ * (vertical) pixels. If the text does not fit in the rectangle, text_format
+ * draws as much as it can. It returns for how many pixels the text would
+ * extend at the bottom. If the text does not need all the vertical space in
+ * rectangle, a negative number is returned.
+ *
+ * If h is zero, only the size calculations are done, without attempting to
+ * render any text.
+ */
+
+int text_format(struct gfx_drawable *da, int x, int y, unsigned w, unsigned h,
+    unsigned offset, const char *s, const struct font *font, gfx_color color);
+
 #endif /* !TEXT_H */

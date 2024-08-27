@@ -5,11 +5,14 @@
  * A copy of the license can be found in the file LICENSE.MIT
  */
 
+#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <assert.h>
 
 #include "debug.h"
+#include "alloc.h"
 #include "gfx.h"
 #include "font.h"
 #include "text.h"
@@ -288,4 +291,85 @@ unsigned text_text(struct gfx_drawable *da, int x, int y,
 	while (*s)
 		q.ox += text_char(da, q.ox, q.oy, font, *s++, color);
 	return q.ox;
+}
+
+
+/* --- Format text with line breaks ---------------------------------------- */
+
+
+static int any_char(int ch)
+{
+	return 1;
+}
+
+
+static char *find_break(char *s, unsigned w, const struct font *font,
+    int (*may_break)(int ch))
+{
+	char *last = NULL;
+	char *end = s;
+
+	while (1) {
+		struct text_query q;
+		char ch;
+
+		if (!*end)
+			return last;
+		// break before or after breakable
+		if (last == end && may_break(*end)) {
+			end++;
+		} else {
+			do end++;
+			while (*end && !may_break(*end));
+		}
+		ch = *end;
+		*end = 0;
+		text_query(0, 0, s, font, GFX_LEFT, GFX_TOP, &q);
+		*end = ch;
+		if (q.w > (int) w)
+			return last == s ? NULL : last;
+		last = end;
+	}
+}
+
+
+int text_format(struct gfx_drawable *da, int x, int y, unsigned w, unsigned h,
+    unsigned offset, const char *s, const struct font *font, gfx_color color)
+{
+	char *tmp = stralloc(s);
+	char *p = tmp;
+	int pos = -offset;
+
+	while (1) {
+		char *end, ch;
+		struct text_query q;
+
+		while (*p && isspace(*p))
+			p++;
+		if (!*p)
+			break;
+		end = find_break(p, w, font, isspace);
+		if (!end)
+			end = find_break(p, w, font, ispunct);
+		if (!end) {
+			end = find_break(p, w, font, any_char);
+			assert(end);
+		}
+		ch = *end;
+		*end = 0;
+		text_query(0, 0, p, font, GFX_LEFT, GFX_TOP | GFX_MAX, &q);
+		if (pos + q.h >= 0 && pos < (int) h) {
+			gfx_clip_xy(da, x, y, w, h);
+			text_text(da, x, y + pos + q.oy, p, font,
+			    GFX_LEFT, GFX_ORIGIN, color);
+			gfx_clip(da, NULL);
+		}
+		pos += q.h;
+		*end = ch;
+		if (!ch)
+			break;
+		p = end;
+	}
+	free(tmp);
+	return pos - h;
 }

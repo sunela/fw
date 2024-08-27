@@ -54,13 +54,13 @@ static void ui_notice_open(void *ctx, void *params)
 
 	assert(w > 2 * BOX_MARGIN);
 	h = text_format(NULL, 0, 0, w - 2 * BOX_MARGIN, 0, 0, p->s,
-	    &FONT, FG);
+	    &FONT, GFX_CENTER, FG);
 	gfx_rrect_xy(&main_da, (GFX_WIDTH - w) / 2,
 	    (GFX_HEIGHT - h) / 2 - BOX_MARGIN,
 	    w, h + 2 * BOX_MARGIN, BOX_R, BG);
 	text_format(&main_da, (GFX_WIDTH - w) / 2 + BOX_MARGIN,
 	    (GFX_HEIGHT - h) / 2, w - 2 * BOX_MARGIN, h, 0, p->s,
-	    &FONT, FG);
+	    &FONT, GFX_CENTER, FG);
 	set_idle(IDLE_NOTICE_S);
 }
 

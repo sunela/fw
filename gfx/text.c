@@ -334,7 +334,8 @@ static char *find_break(char *s, unsigned w, const struct font *font,
 
 
 int text_format(struct gfx_drawable *da, int x, int y, unsigned w, unsigned h,
-    unsigned offset, const char *s, const struct font *font, gfx_color color)
+    unsigned offset, const char *s, const struct font *font,
+    int8_t align_x, gfx_color color)
 {
 	char *tmp = stralloc(s);
 	char *p = tmp;
@@ -359,8 +360,23 @@ int text_format(struct gfx_drawable *da, int x, int y, unsigned w, unsigned h,
 		*end = 0;
 		text_query(0, 0, p, font, GFX_LEFT, GFX_TOP | GFX_MAX, &q);
 		if (pos + q.h >= 0 && pos < (int) h) {
+			unsigned x0;
+
+			switch (align_x) {
+			case GFX_LEFT:
+				x0 = x;
+				break;
+			case GFX_RIGHT:
+				x0 = x + (w - q.w);
+				break;
+			case GFX_CENTER:
+				x0 = x + (w - q.w) / 2;
+				break;
+			default:
+				abort();
+			}
 			gfx_clip_xy(da, x, y, w, h);
-			text_text(da, x, y + pos + q.oy, p, font,
+			text_text(da, x0, y + pos + q.oy, p, font,
 			    GFX_LEFT, GFX_ORIGIN, color);
 			gfx_clip(da, NULL);
 		}

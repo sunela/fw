@@ -754,10 +754,26 @@ static bool demo_format(char *const *args, unsigned n_args)
 	unsigned h = GFX_HEIGHT;
 	unsigned offset = 0;
 	unsigned x, y;
+	int8_t align = GFX_LEFT;
 
 	switch (n_args) {
 	case 1:
 		break;
+	case 5:
+		switch (*args[4]) {
+		case 'l':
+			align = GFX_LEFT;
+			break;
+		case 'c':
+			align = GFX_CENTER;
+			break;
+		case 'r':
+			align = GFX_RIGHT;
+			break;
+		default:
+			return 0;
+		}
+		/* fall through */
 	case 4:
 		offset = atoi(args[3]);
 		/* fall through */
@@ -774,7 +790,8 @@ static bool demo_format(char *const *args, unsigned n_args)
 	x = (GFX_WIDTH - w) / 2;
 	y = (GFX_HEIGHT - h) / 2;
 	gfx_rect_xy(&main_da, x, y, w, h, GFX_RED);
-	text_format(&main_da, x, y, w, h, offset, args[0], &mono18, GFX_WHITE);
+	text_format(&main_da, x, y, w, h, offset, args[0], &mono18, align,
+	    GFX_WHITE);
 	return 1;
 }
 
@@ -815,7 +832,7 @@ static const struct demo {
 	{ "overlay2",	demo_overlay2,	"[n]" },
 	{ "checkbox",	demo_checkbox,	"[w [lw]] 0|1" },
 	{ "pccomm",	demo_pccomm,	"[side]" },
-	{ "format",	demo_format,	"string [w [h [offset]]]" },
+	{ "format",	demo_format,	"string [w [h [offset [l|r|c]]]]" },
 };
 
 

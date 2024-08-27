@@ -68,6 +68,7 @@ unsigned text_text(struct gfx_drawable *da, int x, int y,
  */
 
 int text_format(struct gfx_drawable *da, int x, int y, unsigned w, unsigned h,
-    unsigned offset, const char *s, const struct font *font, gfx_color color);
+    unsigned offset, const char *s, const struct font *font, int8_t align_x,
+    gfx_color color);
 
 #endif /* !TEXT_H */

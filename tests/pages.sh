@@ -589,6 +589,78 @@ accounts $mode entry-edit-8 \
     "$ENTRY_4" "$ENTRY_0" "$ENTRY_5" "$ENTRY_0" "$ENTRY_6" "$ENTRY_0" \
     "$ENTRY_7" "$ENTRY_0" "$ENTRY_8" "$ENTRY_0"
 
+# --- Pin change, old PIN, empty ----------------------------------------------
+
+accounts $mode change-old \
+    "long 201 23" "tap 152 141" "tap 86 70"
+
+# --- Pin change, old PIN, first digit ----------------------------------------
+
+accounts $mode change-old-1 \
+    "long 201 23" "tap 152 141" "tap 86 70" \
+    "$ENTRY_1"
+
+# --- Pin change, invalid PIN  ------------------------------------------------
+
+accounts $mode change-invalid \
+    "long 201 23" "tap 152 141" "tap 86 70" \
+    "$ENTRY_1" "$ENTRY_1" "$ENTRY_1" "$ENTRY_1" "$ENTRY_R"
+
+# --- Pin change, new PIN  ----------------------------------------------------
+
+accounts $mode change-new \
+    "long 201 23" "tap 152 141" "tap 86 70" \
+    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R"
+
+# --- Pin change, new PIN, first digit  ---------------------------------------
+
+accounts $mode change-new-first \
+    "long 201 23" "tap 152 141" "tap 86 70" \
+    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
+    "$ENTRY_1"
+
+# --- Pin change, same PIN  ---------------------------------------------------
+
+accounts $mode change-same \
+    "long 201 23" "tap 152 141" "tap 86 70" \
+    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
+    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R"
+
+# --- Pin change, new PIN, all six digits  ------------------------------------
+
+accounts $mode change-new-all \
+    "long 201 23" "tap 152 141" "tap 86 70" \
+    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
+    "$ENTRY_1" "$ENTRY_2" "$ENTRY_9" "$ENTRY_5" "$ENTRY_8" "$ENTRY_0"
+
+# --- Pin change, confirm PIN -------------------------------------------------
+
+accounts $mode change-confirm \
+    "long 201 23" "tap 152 141" "tap 86 70" \
+    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
+    "$ENTRY_1" "$ENTRY_2" "$ENTRY_9" "$ENTRY_5" "$ENTRY_8" "$ENTRY_0" \
+    "$ENTRY_R"
+
+# --- Pin change, match -------------------------------------------------------
+
+accounts $mode change-match \
+    "long 201 23" "tap 152 141" "tap 86 70" \
+    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
+    "$ENTRY_1" "$ENTRY_2" "$ENTRY_9" "$ENTRY_5" "$ENTRY_8" "$ENTRY_0" \
+    "$ENTRY_R" \
+    "$ENTRY_1" "$ENTRY_2" "$ENTRY_9" "$ENTRY_5" "$ENTRY_8" "$ENTRY_0" \
+    "$ENTRY_R"
+
+# --- Pin change, match -------------------------------------------------------
+
+accounts $mode change-mismatch \
+    "long 201 23" "tap 152 141" "tap 86 70" \
+    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
+    "$ENTRY_1" "$ENTRY_2" "$ENTRY_9" "$ENTRY_5" "$ENTRY_8" "$ENTRY_0" \
+    "$ENTRY_R" \
+    "$ENTRY_1" "$ENTRY_2" "$ENTRY_9" "$ENTRY_6" "$ENTRY_8" "$ENTRY_0" \
+    "$ENTRY_R"
+
 # -----------------------------------------------------------------------------
 
 [ "$1" = last ] && display "$dir/_tmp.ppm"

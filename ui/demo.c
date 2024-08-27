@@ -272,7 +272,7 @@ static bool demo_entry(char *const *args, unsigned n_args)
 }
 
 
-/* SHA1,  hardware accelerator or gcrypt */
+/* SHA1, hardware accelerator or gcrypt */
 
 static bool demo_sha1(char *const *args, unsigned n_args)
 {
@@ -746,6 +746,39 @@ static bool demo_pccomm(char *const *args, unsigned n_args)
 }
 
 
+/* Show a formatted text */
+
+static bool demo_format(char *const *args, unsigned n_args)
+{
+	unsigned w = GFX_WIDTH;
+	unsigned h = GFX_HEIGHT;
+	unsigned offset = 0;
+	unsigned x, y;
+
+	switch (n_args) {
+	case 1:
+		break;
+	case 4:
+		offset = atoi(args[3]);
+		/* fall through */
+	case 3:
+		h = atoi(args[2]);
+		/* fall through */
+	case 2:
+		w = atoi(args[1]);
+		break;
+	default:
+		return 0;
+	}
+
+	x = (GFX_WIDTH - w) / 2;
+	y = (GFX_HEIGHT - h) / 2;
+	gfx_rect_xy(&main_da, x, y, w, h, GFX_RED);
+	text_format(&main_da, x, y, w, h, offset, args[0], &mono18, GFX_WHITE);
+	return 1;
+}
+
+
 /* --- Initialization ------------------------------------------------------ */
 
 
@@ -782,6 +815,7 @@ static const struct demo {
 	{ "overlay2",	demo_overlay2,	"[n]" },
 	{ "checkbox",	demo_checkbox,	"[w [lw]] 0|1" },
 	{ "pccomm",	demo_pccomm,	"[side]" },
+	{ "format",	demo_format,	"string [w [h [offset]]]" },
 };
 
 

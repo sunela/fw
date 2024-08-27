@@ -11,10 +11,16 @@
 
 #include "debug.h"
 #include "pin.h"
+#include "gfx.h"
 #include "ui.h"
 #include "wi_general_entry.h"
 #include "ui_notice.h"
 #include "ui_entry.h"
+
+
+#define	FG	GFX_WHITE
+#define	FAIL_BG	GFX_HEX(0x800000)
+#define	OK_BG	GFX_HEX(0x008000)
 
 
 enum stage {
@@ -70,7 +76,6 @@ static void entry(struct ui_pin_change_ctx *c)
 		.entry_user = &c->entry_ctx,
 	};
 
-debug("entry %u\n", c->stage);
 	memset(c->buf, 0, MAX_PIN_LEN + 1);
 	switch (c->stage) {
 	case S_OLD:
@@ -102,10 +107,16 @@ static void ui_pin_change_open(void *ctx, void *params)
 }
 
 
-static void notice(struct ui_pin_change_ctx *c, const char *s)
+static void notice(struct ui_pin_change_ctx *c, const char *s, bool ok)
 {
+	struct ui_notice_style style = {
+		.fg		= FG,
+		.bg		= ok ? OK_BG : FAIL_BG,
+		.x_align	= GFX_CENTER,
+	};
 	struct ui_notice_params params = {
-		.s = s,
+		.style		= &style,
+		.s		= s,
 	};
 	ui_switch(&ui_notice, &params);
 }
@@ -116,28 +127,27 @@ static void ui_pin_change_resume(void *ctx)
 	struct ui_pin_change_ctx *c = ctx;
 	uint32_t pin;
 
-debug("ui_pin_change_resume %u\n", c->stage);
 	switch (c->stage) {
 	case S_OLD:
 		pin = encode(c->buf);
 		if (pin == DUMMY_PIN)
 			break;
-		notice(c, "Incorrect PIN");
+		notice(c, "Incorrect PIN", 0);
 		return;
 	case S_NEW:
 		c->new_pin = encode(c->buf);
 		if (c->new_pin != DUMMY_PIN)
 			break;
-		notice(c, "Same PIN");
+		notice(c, "Same PIN", 0);
 		return;
 	case S_CONFIRM:
 		pin = encode(c->buf);
 		if (pin == c->new_pin) {
 			debug("NEW PIN 0x%08x\n", pin);
 			/* store new PIN */
-			notice(c, "PIN changed");
+			notice(c, "PIN changed", 1);
 		} else {
-			notice(c, "PIN mismatch");
+			notice(c, "PIN mismatch", 0);
 		}
 		return;
 	default:

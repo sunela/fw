@@ -26,6 +26,7 @@
 				   accident */
 #define	IDLE_SET_TIME_S	30	/* long - the page is complex */
 #define	IDLE_CONFIRM_S	10	/* keep it short, but not rushing */
+#define	IDLE_NOTICE_S	60	/* no rush */
 
 #define	MAX_INPUT_LEN	32	/* for ui_entry */
 
@@ -106,6 +107,7 @@ extern const struct ui ui_time;
 extern const struct ui ui_storage;
 extern const struct ui ui_version;
 extern const struct ui ui_rd;
+extern const struct ui ui_notice;
 extern const struct ui ui_pin_change;
 
 void progress(void);

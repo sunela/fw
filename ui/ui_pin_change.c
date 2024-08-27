@@ -102,7 +102,7 @@ static void ui_pin_change_open(void *ctx, void *params)
 }
 
 
-static void fail(struct ui_pin_change_ctx *c, const char *s)
+static void notice(struct ui_pin_change_ctx *c, const char *s)
 {
 	struct ui_notice_params params = {
 		.s = s,
@@ -122,19 +122,22 @@ debug("ui_pin_change_resume %u\n", c->stage);
 		pin = encode(c->buf);
 		if (pin == DUMMY_PIN)
 			break;
-		fail(c, "Incorrect PIN");
+		notice(c, "Incorrect PIN");
 		return;
 	case S_NEW:
 		c->new_pin = encode(c->buf);
-		break;
+		if (c->new_pin != DUMMY_PIN)
+			break;
+		notice(c, "Same PIN");
+		return;
 	case S_CONFIRM:
 		pin = encode(c->buf);
 		if (pin == c->new_pin) {
 			debug("NEW PIN 0x%08x\n", pin);
 			/* store new PIN */
-			ui_return();
+			notice(c, "PIN changed");
 		} else {
-			fail(c, "PIN mismatch");
+			notice(c, "PIN mismatch");
 		}
 		return;
 	default:

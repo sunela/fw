@@ -19,9 +19,10 @@
 #include "ui_entry.h"
 
 
-#define	FG	GFX_WHITE
-#define	FAIL_BG	GFX_HEX(0x800000)
-#define	OK_BG	GFX_HEX(0x008000)
+#define	FG		GFX_WHITE
+#define	FAIL_BG		GFX_HEX(0x800000)
+#define	SUCCESS_BG	GFX_HEX(0x008000)
+#define	NEUTRAL_BG	GFX_HEX(0x202020)
 
 
 enum stage {
@@ -111,17 +112,39 @@ static void ui_pin_change_open(void *ctx, void *params)
 }
 
 
-static void notice(struct ui_pin_change_ctx *c, const char *s, bool ok)
+enum notice_type {
+	nt_success,
+	nt_fail,
+	nt_neutral,
+};
+
+
+static void notice(struct ui_pin_change_ctx *c, const char *s,
+    enum notice_type type)
 {
 	struct ui_notice_style style = {
 		.fg		= FG,
-		.bg		= ok ? OK_BG : FAIL_BG,
+		/* .bg is set below */
 		.x_align	= GFX_CENTER,
 	};
 	struct ui_notice_params params = {
 		.style		= &style,
 		.s		= s,
 	};
+
+	switch (type) {
+	case nt_success:
+		style.bg = SUCCESS_BG;
+		break;
+	case nt_fail:
+		style.bg = FAIL_BG;
+		break;
+	case nt_neutral:
+		style.bg = NEUTRAL_BG;
+		break;
+	default:
+		abort();
+	}
 	ui_switch(&ui_notice, &params);
 }
 
@@ -131,27 +154,31 @@ static void ui_pin_change_resume(void *ctx)
 	struct ui_pin_change_ctx *c = ctx;
 	uint32_t pin;
 
+	if (!*c->buf) {
+		notice(c, "PIN not changed", nt_neutral);
+		return;
+	}
 	switch (c->stage) {
 	case S_OLD:
 		pin = encode(c->buf);
 		if (pin == DUMMY_PIN)
 			break;
-		notice(c, "Incorrect PIN", 0);
+		notice(c, "Incorrect PIN", nt_fail);
 		return;
 	case S_NEW:
 		c->new_pin = encode(c->buf);
 		if (c->new_pin != DUMMY_PIN)
 			break;
-		notice(c, "Same PIN", 0);
+		notice(c, "Same PIN", nt_fail);
 		return;
 	case S_CONFIRM:
 		pin = encode(c->buf);
 		if (pin == c->new_pin) {
 			debug("NEW PIN 0x%08x\n", pin);
 			/* store new PIN */
-			notice(c, "PIN changed", 1);
+			notice(c, "PIN changed", nt_success);
 		} else {
-			notice(c, "PIN mismatch", 0);
+			notice(c, "PIN mismatch", nt_fail);
 		}
 		return;
 	default:

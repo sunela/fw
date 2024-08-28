@@ -13,6 +13,7 @@
 #include "pin.h"
 #include "gfx.h"
 #include "ui.h"
+#include "wi_pin_entry.h"
 #include "wi_general_entry.h"
 #include "ui_notice.h"
 #include "ui_entry.h"
@@ -32,7 +33,8 @@ enum stage {
 struct ui_pin_change_ctx {
 	enum stage stage;
 	char buf[MAX_PIN_LEN + 1];
-	struct wi_general_entry_ctx entry_ctx;
+	struct wi_pin_entry_ctx pin_entry_ctx;
+	struct wi_general_entry_ctx general_entry_ctx;
 	uint32_t new_pin;
 };
 
@@ -73,13 +75,15 @@ static void entry(struct ui_pin_change_ctx *c)
 		},
 		.maps = &ui_entry_decimal_maps,
 		.entry_ops = &wi_general_entry_ops,
-		.entry_user = &c->entry_ctx,
+		.entry_user = &c->general_entry_ctx,
 	};
 
 	memset(c->buf, 0, MAX_PIN_LEN + 1);
 	switch (c->stage) {
 	case S_OLD:
 		params.input.title = "Current PIN";
+		params.entry_ops = &wi_pin_entry_ops;
+		params.entry_user = &c->pin_entry_ctx;
 		break;
 	case S_NEW:
 		params.input.title = "New PIN";

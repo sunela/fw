@@ -594,6 +594,11 @@ accounts $mode entry-edit-8 \
 accounts $mode change-old \
     "long 201 23" "tap 152 141" "tap 86 70"
 
+# --- Pin change, old PIN, cancel ---------------------------------------------
+
+accounts $mode change-old-cancel \
+    "long 201 23" "tap 152 141" "tap 86 70" "$ENTRY_L"
+
 # --- Pin change, old PIN, first digit ----------------------------------------
 
 accounts $mode change-old-1 \
@@ -611,6 +616,12 @@ accounts $mode change-invalid \
 accounts $mode change-new \
     "long 201 23" "tap 152 141" "tap 86 70" \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R"
+
+# --- Pin change, new PIN, cancel  --------------------------------------------
+
+accounts $mode change-new-cancel \
+    "long 201 23" "tap 152 141" "tap 86 70" \
+    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" "$ENTRY_L"
 
 # --- Pin change, new PIN, first digit  ---------------------------------------
 
@@ -640,6 +651,14 @@ accounts $mode change-confirm \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_9" "$ENTRY_5" "$ENTRY_8" "$ENTRY_0" \
     "$ENTRY_R"
+
+# --- Pin change, confirm PIN, cancel -----------------------------------------
+
+accounts $mode change-confirm-cancel \
+    "long 201 23" "tap 152 141" "tap 86 70" \
+    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
+    "$ENTRY_1" "$ENTRY_2" "$ENTRY_9" "$ENTRY_5" "$ENTRY_8" "$ENTRY_0" \
+    "$ENTRY_R" "$ENTRY_L"
 
 # --- Pin change, match -------------------------------------------------------
 

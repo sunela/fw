@@ -55,6 +55,7 @@ page_inner()
 	[ "$mode" = last ] || [ -z "$select" -o "$name" = "$select" ] || return
 
 	echo === $name ===
+	found=true
 
 	if [ ! -r "$dir/_db" ]; then
 		if [ "$json" ]; then
@@ -159,6 +160,7 @@ inter|interact)
 esac
 
 select=$2
+found=false
 
 rm -f "$dir/_db"
 
@@ -682,6 +684,10 @@ accounts $mode change-mismatch \
 
 # -----------------------------------------------------------------------------
 
+if [ "$select" ] && ! $found; then
+	echo "$select: not found" 1>&2
+	exit 1
+fi
 [ "$1" = last ] && display "$dir/_tmp.ppm"
 
 #

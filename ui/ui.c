@@ -492,6 +492,7 @@ void ui_empty_stack(void)
 		ui = current_ui();
 		if (ui->close)
 			ui->close(current_ctx());
+		memset(current_ctx(), 0, current_ui()->ctx_size);
 		free(current_ctx());
 		sp--;
 	}

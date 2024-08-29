@@ -85,6 +85,7 @@ static void entry(struct ui_pin_change_ctx *c)
 		params.input.title = "Current PIN";
 		params.entry_ops = &wi_pin_entry_ops;
 		params.entry_user = &c->pin_entry_ctx;
+		wi_pin_entry_setup(&c->pin_entry_ctx, 0, NULL);
 		break;
 	case S_NEW:
 		params.input.title = "New PIN";

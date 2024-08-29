@@ -105,16 +105,15 @@ static void base(unsigned x, unsigned y, gfx_color bg)
 
 static int wi_pin_entry_n(void *user, unsigned col, unsigned row)
 {
-//	struct wi_pin_entry_ctx *c = user;
+	struct wi_pin_entry_ctx *c = user;
 	int n = 1 + col + (3 - row) * 3;
 
 	if (row == 0) {
 		if (col == 1)
-			return 0;
+			return c->shuffle[0];
 		return -1;
 	}
-/* @@@ shuffle */
-	return n  < 0 || n > 9 ? -1 : n;
+	return n  < 0 || n > 9 ? -1 : c->shuffle[n];
 }
 
 
@@ -154,13 +153,12 @@ static void wi_pin_entry_button(void *user, unsigned col, unsigned row,
 			gfx_equilateral(&main_da, x, y, BUTTON_R * 1.4, -1,
 			    GFX_BLACK);
 		else
-#if 0
-			gfx_power_sym(&main_da, x, y, BUTTON_R * 0.6, 5,
-			    GFX_BLACK, bg);
-#else
-	                gfx_diagonal_cross(&main_da, x, y, BUTTON_R * 0.8, 4,
-			    GFX_BLACK);
-#endif
+			if (c->login)
+				gfx_power_sym(&main_da, x, y, BUTTON_R * 0.6,
+				    5, GFX_BLACK, bg);
+			else
+		                gfx_diagonal_cross(&main_da, x, y,
+				    BUTTON_R * 0.8, 4, GFX_BLACK);
 	} else {        // >
 		if (*in->buf) {
 			base(x, y, bg);
@@ -213,6 +211,16 @@ static void wi_pin_entry_init(void *ctx, struct ui_entry_input *input,
 	c->style = style;
 }
 
+
+void wi_pin_entry_setup(struct wi_pin_entry_ctx *c, bool login,
+    const uint8_t *shuffle)
+{
+	int i;
+
+	c->login = login;
+	for (i = 0; i != 10; i++)
+		c->shuffle[i] = shuffle ? shuffle[i] : i;
+}
 
 struct ui_entry_ops wi_pin_entry_ops = {
 	.init		= wi_pin_entry_init,

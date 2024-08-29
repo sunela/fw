@@ -9,7 +9,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "debug.h"
 #include "pin.h"
 #include "gfx.h"
 #include "ui.h"
@@ -172,7 +171,6 @@ static void ui_pin_change_resume(void *ctx)
 			notice(c, "PIN mismatch", nt_error);
 			return;
 		}
-		debug("NEW PIN 0x%08x\n", pin);
 		switch (pin_change(c->old_pin, pin)) {
 		case 1:
 			notice(c, "PIN changed", nt_success);

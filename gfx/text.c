@@ -345,7 +345,8 @@ int text_format(struct gfx_drawable *da, int x, int y, unsigned w, unsigned h,
 		char *end, ch;
 		struct text_query q;
 
-		while (*p && isspace(*p))
+		/* @@@ work around bug in SDK gcc/libc */
+		while (*p && isspace((int) *p))
 			p++;
 		if (!*p)
 			break;

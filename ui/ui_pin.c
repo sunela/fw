@@ -11,7 +11,6 @@
 
 #include "hal.h"
 #include "debug.h"
-#include "rnd.h"
 #include "gfx.h"
 #include "db.h"
 #include "ui_accounts.h"
@@ -38,10 +37,6 @@ struct ui_pin_ctx {
 };
 
 
-static uint32_t pin = 0xffffffff;
-static uint8_t shuffle[10] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-
-
 /* --- Event handling ------------------------------------------------------ */
 
 
@@ -59,12 +54,12 @@ static void open_progress(void *user, unsigned i, unsigned n)
 }
 
 
-static bool accept_pin(void)
+static bool accept_pin(uint32_t pin)
 {
 	struct db_stats s;
 	unsigned progress = 0;
 
-	if (pin != DUMMY_PIN)
+	if (!pin_validate(pin))
 		return 0;
 	ui_accounts_cancel_move();
 	gfx_clear(&main_da, GFX_BLACK);
@@ -81,30 +76,6 @@ static bool accept_pin(void)
 	 * and writing some record (configuration ?), to "pin" the PIN.
 	 */
 	return s.data || s.empty || (s.erased == s.total);
-}
-
-
-/* --- Shuffle the digit buttons ------------------------------------------- */
-
-
-static inline void swap(uint8_t *a, uint8_t *b)
-{
-	uint8_t tmp = *a;
-
-	*a = *b;
-	*b = tmp;
-}
-
-
-void pin_shuffle_pad(void)
-{
-	uint8_t i;
-
-	/*
-	 * @@@ use better algorithm
-	 */
-	for (i = 0; i != 10; i++)
-		swap(shuffle + i, shuffle + rnd(10));
 }
 
 
@@ -133,28 +104,17 @@ static void ui_pin_open(void *ctx, void *params)
 		.entry_user = &c->pin_entry_ctx,
         };
 
-	wi_pin_entry_setup(&c->pin_entry_ctx, 1, shuffle);
+	wi_pin_entry_setup(&c->pin_entry_ctx, 1, pin_shuffle);
 	memset(c->buf, 0, MAX_PIN_LEN + 1);
 	set_idle(IDLE_PIN_S);
 	ui_call(&ui_entry, &entry_params);
 }
 
 
-static uint32_t encode(const char *s)
-{
-	uint32_t _pin = 0xffffffff;
-
-	while (*s) {
-		_pin = _pin << 4 | (*s - '0');
-		s++;
-	}
-	return _pin;
-}
-
-
 static void ui_pin_resume(void *ctx)
 {
 	struct ui_pin_ctx *c = ctx;
+	uint32_t pin;
 
 	if (!*c->buf) {
 		memset(c, 0, sizeof(*c));
@@ -162,9 +122,9 @@ static void ui_pin_resume(void *ctx)
 		return;
 	}
 
-	pin = encode(c->buf);
+	pin = pin_encode(c->buf);
 	progress();
-	if (accept_pin()) {
+	if (accept_pin(pin)) {
 		pin_attempts = 0;
 		pin_cooldown = 0;
 		ui_switch(&ui_accounts, NULL);

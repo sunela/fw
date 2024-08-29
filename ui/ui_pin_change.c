@@ -20,9 +20,10 @@
 
 
 #define	FG		GFX_WHITE
-#define	FAIL_BG		GFX_HEX(0x800000)
+#define	ERROR_BG	GFX_HEX(0x800000)
 #define	SUCCESS_BG	GFX_HEX(0x008000)
 #define	NEUTRAL_BG	GFX_HEX(0x202020)
+#define	FAULT_BG	GFX_HEX(0x606000)
 
 
 enum stage {
@@ -36,23 +37,12 @@ struct ui_pin_change_ctx {
 	char buf[MAX_PIN_LEN + 1];
 	struct wi_pin_entry_ctx pin_entry_ctx;
 	struct wi_general_entry_ctx general_entry_ctx;
+	uint32_t old_pin;
 	uint32_t new_pin;
 };
 
 
 /* --- Helper functions ---------------------------------------------------- */
-
-
-static uint32_t encode(const char *s)
-{
-	uint32_t pin = 0xffffffff;
-
-	while (*s) {
-		pin = pin << 4 | (*s - '0');
-		s++;
-	}
-	return pin;
-}
 
 
 static int validate(void *user, const char *s)
@@ -115,8 +105,9 @@ static void ui_pin_change_open(void *ctx, void *params)
 
 enum notice_type {
 	nt_success,
-	nt_fail,
+	nt_error,
 	nt_neutral,
+	nt_fault,
 };
 
 
@@ -137,8 +128,11 @@ static void notice(struct ui_pin_change_ctx *c, const char *s,
 	case nt_success:
 		style.bg = SUCCESS_BG;
 		break;
-	case nt_fail:
-		style.bg = FAIL_BG;
+	case nt_error:
+		style.bg = ERROR_BG;
+		break;
+	case nt_fault:
+		style.bg = FAULT_BG;
 		break;
 	case nt_neutral:
 		style.bg = NEUTRAL_BG;
@@ -161,25 +155,36 @@ static void ui_pin_change_resume(void *ctx)
 	}
 	switch (c->stage) {
 	case S_OLD:
-		pin = encode(c->buf);
-		if (pin == DUMMY_PIN)
+		c->old_pin = pin_encode(c->buf);
+		if (pin_revalidate(c->old_pin))
 			break;
-		notice(c, "Incorrect PIN", nt_fail);
+		notice(c, "Incorrect PIN", nt_error);
 		return;
 	case S_NEW:
-		c->new_pin = encode(c->buf);
-		if (c->new_pin != DUMMY_PIN)
+		c->new_pin = pin_encode(c->buf);
+		if (!pin_revalidate(c->new_pin))
 			break;
-		notice(c, "Same PIN", nt_fail);
+		notice(c, "Same PIN", nt_error);
 		return;
 	case S_CONFIRM:
-		pin = encode(c->buf);
-		if (pin == c->new_pin) {
-			debug("NEW PIN 0x%08x\n", pin);
-			/* store new PIN */
+		pin = pin_encode(c->buf);
+		if (pin != c->new_pin) {
+			notice(c, "PIN mismatch", nt_error);
+			return;
+		}
+		debug("NEW PIN 0x%08x\n", pin);
+		switch (pin_change(c->old_pin, pin)) {
+		case 1:
 			notice(c, "PIN changed", nt_success);
-		} else {
-			notice(c, "PIN mismatch", nt_fail);
+			break;
+		case 0:
+			notice(c, "Change refused", nt_error);
+			break;
+		case -1:
+			notice(c, "Change failed", nt_fault);
+			break;
+		default:
+			abort();
 		}
 		return;
 	default:

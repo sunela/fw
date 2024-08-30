@@ -150,14 +150,22 @@ static void base(unsigned x, unsigned y, gfx_color bg)
 
 static int wi_general_entry_n(void *user, unsigned col, unsigned row)
 {
-	int n = 1 + col + (3 - row) * 3;
+	if (row) {
+		int n = 1 + col + (3 - row) * 3;
 
-	if (row == 0) {
-		if (col == 1)
+		return n  < 1 || n > 9 ? UI_ENTRY_INVALID : n;
+	} else {
+		switch (col) {
+		case 0:
+			return UI_ENTRY_LEFT;
+		case 1:
 			return 0;
-		return -1;
+		case 2:
+			return UI_ENTRY_RIGHT;
+		default:
+			return UI_ENTRY_INVALID;
+		}
 	}
-	return n  < 0 || n > 9 ? -1 : n;
 }
 
 

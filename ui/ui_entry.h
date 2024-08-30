@@ -13,6 +13,23 @@
 #include "gfx.h"
 
 
+#define	UI_ENTRY_LEFT		(-1)
+#define	UI_ENTRY_RIGHT		(-2)
+#define	UI_ENTRY_INVALID	(-3)
+
+
+/*
+ * Button layout for the "pos" and "n" operations:
+ *
+ * row  col
+ * |    0   1   3
+ * |    |   |   |
+ * 3   [1] [2] [3]
+ * 2   [4] [5] [6]
+ * 1   [7] [8] [9]
+ * 0   [L] [0] [R]
+ */
+
 struct ui_entry_style {
 	gfx_color	input_fg;
 	gfx_color	input_valid_bg;
@@ -47,8 +64,9 @@ struct ui_entry_input {
 	char		*buf;
 	unsigned	max_len;
 	/*
+	 * "validate" results:
 	 * 1: accept input. String in buffer is valid for "accept".
-	 * 0: accept input, but string in buffer is NOT valid.
+	 * 0: accept input, but string in buffer is NOT (yet) valid.
 	 * -1: ignore input
 	 */
 	int		(*validate)(void *user, const char *s);
@@ -59,8 +77,19 @@ struct ui_entry_ops {
 	void (*init)(void *user, struct ui_entry_input *input,
 	    const struct ui_entry_style *style);
 	void (*input)(void *user);
+	/*
+	 * "pos" returns 1 if the (x, y) position corresponds to a button, 0
+	 * otherwise. "col" and "row" contain the button position.
+	 */
 	bool (*pos)(void *user, unsigned x, unsigned y,
 	    unsigned *col, unsigned *row);
+	/*
+	 * If the (col, row) position corresponds to an existing button, "n"
+	 * returns the button number (0-9), UI_ENTRY_LEFT for the left special
+	 * button (cancel, etc.), or UI_ENTRY_RIGHT for the right special
+	 * button (accept). If (col, row) is outside the keypad, returns
+	 * UI_ENTRY_INVALID.
+	 */
 	int (*n)(void *user, unsigned col, unsigned row);
 	void (*button)(void *user, unsigned col, unsigned row,
 	    const char *label, bool second, bool enabled, bool up);

@@ -141,9 +141,9 @@ static void show_input(struct ui_entry_ctx *c)
 
 
 static void draw_button(struct ui_entry_ctx *c, unsigned col, unsigned row,
-    const char *label, bool second, bool enabled, bool up)
+    const char *label, bool enabled, bool up)
 {
-	c->entry_ops->button(c->entry_user, col, row, label, second, enabled,
+	c->entry_ops->button(c->entry_user, col, row, label, c->second, enabled,
 	    up);
 }
 
@@ -157,7 +157,7 @@ static void draw_first(struct ui_entry_ctx *c, bool enabled)
 			int n = c->entry_ops->n(c->entry_user, col, row);
 
 			if (n >= 0)
-				draw_button(c, col, row, c->maps->first[n], 0,
+				draw_button(c, col, row, c->maps->first[n],
 				    enabled, 1);
 		}
 }
@@ -172,7 +172,7 @@ static void draw_second(struct ui_entry_ctx *c, const char *map)
 	size_t len = strlen(map);
 
 	c->entry_ops->clear_pad(c->entry_user);
-		draw_button(c, 0, 0, NULL, 1, 1, 1);
+		draw_button(c, 0, 0, NULL, 1, 1);
 	for (col = 0; col != 3; col++)
 		for (row = 0; row != 4; row++) {
 			int n = c->entry_ops->n(c->entry_user, col, row);
@@ -182,7 +182,7 @@ static void draw_second(struct ui_entry_ctx *c, const char *map)
 
 			char s[] = { map[n], 0 };
 
-			draw_button(c, col, row, s, 1, 1, 1);
+			draw_button(c, col, row, s, 1, 1);
 		}
 }
 
@@ -197,7 +197,7 @@ static void release_button(void *user)
 	unsigned row = c->down.row;
 	int n = c->entry_ops->n(c->entry_user, col, row);
 
-	draw_button(c, col, row, n < 0 ? NULL : c->maps->first[n], 0, 1, 1);
+	draw_button(c, col, row, n < 0 ? NULL : c->maps->first[n], 1, 1);
 	ui_update_display();
 }
 
@@ -219,8 +219,8 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 		if (c->second) {
 			c->second = NULL;
 			draw_first(c, 1);
-			draw_button(c, 0, 0, NULL, 0, 1, 1);
-			draw_button(c, 2, 0, NULL, 0, 1, 1);
+			draw_button(c, 0, 0, NULL, 1, 1);
+			draw_button(c, 2, 0, NULL, 1, 1);
 			ui_update_display();
 			return;
 		}
@@ -229,7 +229,7 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 			return;
 		}
 		timer_flush(&c->t_button);
-		draw_button(c, 0, 0, NULL, 0, 1, 0);
+		draw_button(c, 0, 0, NULL, 1, 0);
 		c->down.col = col;
 		c->down.row = row;
 		timer_set(&c->t_button, BUTTON_LINGER_MS, release_button, c);
@@ -238,7 +238,7 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 		end[-1] = 0;
 		show_input(c);
 		if (!*in->buf || !ui_entry_valid(&c->input))
-			draw_button(c, 2, 0, NULL, 0, 0, 0);
+			draw_button(c, 2, 0, NULL, 0, 0);
 		if (end - in->buf == (int) in->max_len)
 			draw_first(c, 1);
 		ui_update_display();
@@ -274,8 +274,8 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 			*end = 0;
 		} else {
 			show_input(c);
-			draw_button(c, 0, 0, NULL, 0, 1, 1);
-			draw_button(c, 2, 0, NULL, 0, valid > 0, 1);
+			draw_button(c, 0, 0, NULL, 1, 1);
+			draw_button(c, 2, 0, NULL, valid > 0, 1);
 		}
 		draw_first(c, strlen(in->buf) != in->max_len);
 	} else {
@@ -324,9 +324,9 @@ static void ui_entry_open(void *ctx, void *params)
 		c->entry_ops->init(c->entry_user, &c->input, c->style);
 
 	show_input(c);
-	draw_button(c, 0, 0, NULL, 0, 1, 1);
+	draw_button(c, 0, 0, NULL, 1, 1);
 	draw_first(c, strlen(prm->input.buf) != prm->input.max_len);
-	draw_button(c, 2, 0, NULL, 0, 1, 1);
+	draw_button(c, 2, 0, NULL, 1, 1);
 	timer_init(&c->t_button);
 }
 

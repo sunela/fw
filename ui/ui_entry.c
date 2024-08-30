@@ -153,14 +153,13 @@ static void draw_first(struct ui_entry_ctx *c, bool enabled)
 	unsigned row, col;
 
 	for (col = 0; col != 3; col++)
-		for (row = 0; row != 4; row++)
-			if (row > 0 || col == 1) {
-				unsigned n =
-				    c->entry_ops->n(c->entry_user, col, row);
+		for (row = 0; row != 4; row++) {
+			int n = c->entry_ops->n(c->entry_user, col, row);
 
+			if (n >= 0)
 				draw_button(c, col, row, c->maps->first[n], 0,
 				    enabled, 1);
-			}
+		}
 }
 
 
@@ -208,14 +207,15 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 	struct ui_entry_ctx *c = ctx;
 	struct ui_entry_input *in = &c->input;
 	unsigned col, row;
-	unsigned n;
+	int n;
 	char *end = strchr(in->buf, 0);
 
 	if (!c->entry_ops->pos(c->entry_user, x, y, &col, &row))
 		return;
+	n = c->entry_ops->n(c->entry_user, col, row);
 
-	debug("entry_tap X %u Y %u -> col %u row %u\n", x, y, col, row);
-	if (col == 0 && row == 0) { // cancel or delete
+	debug("entry_tap X %u Y %u -> col %u row %u (%d)\n", x, y, col, row, n);
+	if (n == UI_ENTRY_LEFT) { // cancel or delete
 		if (c->second) {
 			c->second = NULL;
 			draw_first(c, 1);
@@ -244,7 +244,7 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 		ui_update_display();
 		return;
 	}
-	if (col == 2 && row == 0) { // enter
+	if (n == UI_ENTRY_RIGHT) { // accept
 		if (c->second || !*in->buf)
 			return;
 		if (ui_entry_valid(in))
@@ -255,13 +255,12 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 		return;
 	progress();
 	timer_flush(&c->t_button);
-	n = c->entry_ops->n(c->entry_user, col, row);
 	if (c->second || !c->maps->second[n]) {
 		char ch;
 		int valid;
 
 		if (c->second) {
-			if (n >= strlen(c->second))
+			if (n >= (int) strlen(c->second))
 				return;
 			ch = c->second[n];
 		} else {

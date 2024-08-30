@@ -18,13 +18,6 @@
 #include "ui_entry.h"
 
 
-#define	FG		GFX_WHITE
-#define	ERROR_BG	GFX_HEX(0x800000)
-#define	SUCCESS_BG	GFX_HEX(0x008000)
-#define	NEUTRAL_BG	GFX_HEX(0x202020)
-#define	FAULT_BG	GFX_HEX(0x606000)
-
-
 enum stage {
 	S_OLD		= 0,
 	S_NEW		= 1,
@@ -102,54 +95,13 @@ static void ui_pin_change_open(void *ctx, void *params)
 }
 
 
-enum notice_type {
-	nt_success,
-	nt_error,
-	nt_neutral,
-	nt_fault,
-};
-
-
-static void notice(struct ui_pin_change_ctx *c, const char *s,
-    enum notice_type type)
-{
-	struct ui_notice_style style = {
-		.fg		= FG,
-		/* .bg is set below */
-		.x_align	= GFX_CENTER,
-	};
-	struct ui_notice_params params = {
-		.style		= &style,
-		.s		= s,
-	};
-
-	switch (type) {
-	case nt_success:
-		style.bg = SUCCESS_BG;
-		break;
-	case nt_error:
-		style.bg = ERROR_BG;
-		break;
-	case nt_fault:
-		style.bg = FAULT_BG;
-		break;
-	case nt_neutral:
-		style.bg = NEUTRAL_BG;
-		break;
-	default:
-		abort();
-	}
-	ui_switch(&ui_notice, &params);
-}
-
-
 static void ui_pin_change_resume(void *ctx)
 {
 	struct ui_pin_change_ctx *c = ctx;
 	uint32_t pin;
 
 	if (!*c->buf) {
-		notice(c, "PIN not changed", nt_neutral);
+		notice(nt_info, "PIN not changed");
 		return;
 	}
 	switch (c->stage) {
@@ -157,7 +109,7 @@ static void ui_pin_change_resume(void *ctx)
 		c->old_pin = pin_encode(c->buf);
 		if (pin_revalidate(c->old_pin))
 			break;
-		notice(c, "Incorrect PIN", nt_error);
+		notice(nt_error, "Incorrect PIN");
 		if (pin_cooldown_ms())
 			ui_switch(&ui_fail, NULL);
 		return;
@@ -165,23 +117,23 @@ static void ui_pin_change_resume(void *ctx)
 		c->new_pin = pin_encode(c->buf);
 		if (c->old_pin != c->new_pin)
 			break;
-		notice(c, "Same PIN", nt_error);
+		notice(nt_error, "Same PIN");
 		return;
 	case S_CONFIRM:
 		pin = pin_encode(c->buf);
 		if (pin != c->new_pin) {
-			notice(c, "PIN mismatch", nt_error);
+			notice(nt_error, "PIN mismatch");
 			return;
 		}
 		switch (pin_change(c->old_pin, pin)) {
 		case 1:
-			notice(c, "PIN changed", nt_success);
+			notice(nt_success, "PIN changed");
 			break;
 		case 0:
-			notice(c, "Change refused", nt_error);
+			notice(nt_error, "Change refused");
 			break;
 		case -1:
-			notice(c, "Change failed", nt_fault);
+			notice(nt_fault, "Change failed");
 			break;
 		default:
 			abort();

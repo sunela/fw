@@ -6,10 +6,14 @@
  */
 
 #include <stddef.h>
+#include <stdarg.h>
+#include <stdlib.h>
 #include <assert.h>
 
 #include "hal.h"
 #include "debug.h"
+#include "fmt.h"
+#include "colors.h"
 #include "shape.h"
 #include "text.h"
 #include "ui.h"
@@ -85,3 +89,75 @@ const struct ui ui_notice = {
 	.open		= ui_notice_open,
 	.events		= &ui_notice_events,
 };
+
+
+/* --- Wrappers ------------------------------------------------------------ */
+
+
+static void vnotice_common(enum notice_type type, const char *fmt, va_list ap,
+    void (*chain)(const struct ui *ui, void *params))
+{
+	struct ui_notice_style style = {
+		/* .fg and .bg are set below */
+		.x_align	= GFX_CENTER,
+	};
+	struct ui_notice_params params = {
+		.style		= &style,
+        };
+
+	params.s = vformat_alloc(fmt, ap);
+	switch (type) {
+	case nt_success:
+		style.fg = SUCCESS_FG;
+		style.bg = SUCCESS_BG;
+		break;
+	case nt_error:
+		style.fg = ERROR_FG;
+		style.bg = ERROR_BG;
+		break;
+	case nt_fault:
+		style.fg = FAULT_FG;
+		style.bg = FAULT_BG;
+		break;
+	case nt_info:
+		style.fg = INFO_FG;
+		style.bg = INFO_BG;
+		break;
+	default:
+		abort();
+	}
+	chain(&ui_notice, &params);
+	free((char *) params.s);
+}
+
+
+void vnotice(enum notice_type type, const char *fmt, va_list ap)
+{
+	vnotice_common(type, fmt, ap, ui_switch);
+}
+
+
+void notice(enum notice_type type, const char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	vnotice(type, fmt, ap);
+	va_end(ap);
+}
+
+
+void vnotice_call(enum notice_type type, const char *fmt, va_list ap)
+{
+	vnotice_common(type, fmt, ap, ui_call);
+}
+
+
+void notice_call(enum notice_type type, const char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	vnotice_call(type, fmt, ap);
+	va_end(ap);
+}

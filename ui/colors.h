@@ -26,4 +26,18 @@
 #define	EVEN_BG			GFX_BLACK
 #define	ODD_BG			GFX_HEX(0x202020)
 
+/* --- Notifications ------------------------------------------------------- */
+
+#define	ERROR_FG	GFX_WHITE
+#define	ERROR_BG	GFX_HEX(0x800000)
+
+#define	SUCCESS_FG	GFX_WHITE
+#define	SUCCESS_BG	GFX_HEX(0x008000)
+
+#define	INFO_FG		GFX_WHITE
+#define	INFO_BG		GFX_HEX(0x202020)
+
+#define	FAULT_FG	GFX_BLACK
+#define	FAULT_BG	GFX_YELLOW
+
 #endif /* !COLORS_H */

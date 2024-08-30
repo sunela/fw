@@ -46,9 +46,9 @@ static void show_cooldown(void *user)
 		gfx_rect(&main_da, &bb, GFX_BLACK);
 
 	text_text(&main_da, GFX_WIDTH / 2, GFX_HEIGHT / 2, t, &FONT,
-	    GFX_CENTER, GFX_CENTER, GFX_RED);
+	    GFX_CENTER | GFX_MAX, GFX_CENTER | GFX_MAX, GFX_RED);
 	text_bbox(GFX_WIDTH / 2, GFX_HEIGHT / 2, t, &FONT,
-	    GFX_CENTER, GFX_CENTER, &bb);
+	    GFX_CENTER | GFX_MAX, GFX_CENTER | GFX_MAX, &bb);
 	ui_update_display();
 
 	timer_set(&t_tick, 1000, show_cooldown, show_cooldown);

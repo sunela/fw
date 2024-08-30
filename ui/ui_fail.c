@@ -28,11 +28,11 @@ static struct timer t_tick;
 static void show_cooldown(void *user)
 {
 	static struct gfx_rect bb = { 0, 0, 0, 0 };
-	unsigned s = pin_cooldown < now ? 0 : (pin_cooldown - now) / 1000;
+	unsigned s = (pin_cooldown_ms() + 999) / 1000;
 	char buf[5];
 	char *t = buf + sizeof(buf);
 
-	if (pin_cooldown < now) {
+	if (!s) {
 		ui_switch(&ui_pin, NULL);
 		return;
 	}
@@ -61,13 +61,11 @@ static void show_cooldown(void *user)
 static void ui_fail_open(void *ctx, void *params)
 {
 	timer_init(&t_tick);
-	pin_attempts++;
-	if (pin_attempts < PIN_FREE_ATTEMPTS) {
+	if (!pin_cooldown_ms()) {
 		ui_switch(&ui_pin, NULL);
 		return;
 	}
 	set_idle(IDLE_HOLD_S);
-	pin_cooldown = now + PIN_WAIT_S(pin_attempts) * 1000;
 	show_cooldown(NULL);
 }
 

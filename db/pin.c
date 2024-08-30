@@ -9,6 +9,7 @@
 #include <stdint.h>
 
 #include "rnd.h"
+#include "timer.h"
 #include "pin.h"
 
 
@@ -18,9 +19,11 @@
 uint8_t pin_shuffle[10] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
 static uint32_t secret_pin = DUMMY_PIN;
+static unsigned pin_cooldown; /* time when the PIN cooldown ends */
+static unsigned pin_attempts; /* number of failed PIN entries */
 
 
-#include <stdio.h>
+
 uint32_t pin_encode(const char *s)
 {
 	uint32_t pin = 0xffffffff;
@@ -36,7 +39,16 @@ uint32_t pin_encode(const char *s)
 bool pin_revalidate(uint32_t pin)
 {
 	/* @@@ */
-	return pin == secret_pin;
+	if (pin == secret_pin) {
+		pin_attempts = 0;
+		pin_cooldown = 0;
+		return 1;
+	} else {
+		pin_attempts++;
+		if (pin_attempts >= PIN_FREE_ATTEMPTS)
+			pin_cooldown = now + PIN_WAIT_S(pin_attempts) * 1000;
+		return 0;
+	}
 }
 
 
@@ -44,6 +56,14 @@ bool pin_validate(uint32_t pin)
 {
 	/* @@@ */
 	return pin_revalidate(pin);
+}
+
+
+unsigned pin_cooldown_ms(void)
+{
+	if (pin_cooldown <= now)
+		return 0;
+	return pin_cooldown - now;
 }
 
 

@@ -33,9 +33,6 @@
 struct gfx_drawable main_da;
 struct db main_db;
 
-unsigned pin_cooldown = 0;
-unsigned pin_attempts = 0;
-
 static PSRAM gfx_color fb[GFX_WIDTH * GFX_HEIGHT];
 
 
@@ -164,7 +161,7 @@ static void turn_on(void)
 	// @@@ hal_...
 	pin_shuffle_pad();
 	progress();
-	if (now < pin_cooldown)
+	if (pin_cooldown_ms())
 		ui_switch(&ui_cooldown, NULL);
 	else
 		ui_switch(&ui_pin, NULL);

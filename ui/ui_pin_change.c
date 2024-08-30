@@ -158,10 +158,12 @@ static void ui_pin_change_resume(void *ctx)
 		if (pin_revalidate(c->old_pin))
 			break;
 		notice(c, "Incorrect PIN", nt_error);
+		if (pin_cooldown_ms())
+			ui_switch(&ui_fail, NULL);
 		return;
 	case S_NEW:
 		c->new_pin = pin_encode(c->buf);
-		if (!pin_revalidate(c->new_pin))
+		if (c->old_pin != c->new_pin)
 			break;
 		notice(c, "Same PIN", nt_error);
 		return;

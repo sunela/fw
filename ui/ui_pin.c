@@ -124,13 +124,10 @@ static void ui_pin_resume(void *ctx)
 
 	pin = pin_encode(c->buf);
 	progress();
-	if (accept_pin(pin)) {
-		pin_attempts = 0;
-		pin_cooldown = 0;
+	if (accept_pin(pin))
 		ui_switch(&ui_accounts, NULL);
-	} else {
+	else
 		ui_switch(&ui_fail, NULL);
-	}
 }
 
 

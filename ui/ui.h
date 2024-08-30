@@ -84,9 +84,6 @@ struct ui {
 extern struct gfx_drawable main_da;
 extern struct db main_db;
 
-extern unsigned pin_cooldown; /* time when the PIN cooldown ends */
-extern unsigned pin_attempts; /* number of failed PIN entries */
-
 extern struct mbox time_mbox;
 
 /* User interface pages */

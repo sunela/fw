@@ -34,6 +34,7 @@ extern uint8_t pin_shuffle[10];
 uint32_t pin_encode(const char *s);
 bool pin_revalidate(uint32_t pin);
 bool pin_validate(uint32_t pin);
+unsigned pin_cooldown_ms(void);
 
 /*
  * pin_change returns the following results:

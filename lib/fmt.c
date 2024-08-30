@@ -20,6 +20,7 @@
 #include <string.h>
 #include <assert.h>
 
+#include "alloc.h"
 #include "fmt.h"
 
 
@@ -29,6 +30,14 @@ void add_char(void *user, char c)
 
 	*(*p)++ = c;
 	**p = 0;
+}
+
+
+void count_char(void *user, char c)
+{
+	unsigned *p = user;
+
+	(*p)++;
 }
 
 
@@ -275,6 +284,32 @@ bool format(void (*out)(void *user, char c), void *user, const char *fmt, ...)
 
 	va_start(ap, fmt);
 	res = vformat(out, user, fmt, ap);
+	va_end(ap);
+	return res;
+}
+
+
+char *vformat_alloc(const char *fmt, va_list ap)
+{
+	va_list aq;
+	unsigned len = 0;
+	char *buf, *tmp;
+
+	vformat(count_char, &len, fmt, ap);
+	va_copy(aq, ap);
+	buf = tmp = alloc_size(len + 1);
+	vformat(add_char, &tmp, fmt, aq);
+	return buf;
+}
+
+
+char *format_alloc(const char *fmt, ...)
+{
+	va_list ap;
+	char *res;
+
+	va_start(ap, fmt);
+	res = vformat_alloc(fmt, ap);
 	va_end(ap);
 	return res;
 }

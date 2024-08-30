@@ -190,15 +190,88 @@ static void draw_second(struct ui_entry_ctx *c, const char *map)
 /* --- Event handling ------------------------------------------------------ */
 
 
+static bool button_is_visible(struct ui_entry_ctx *c, int n)
+{
+	switch (n) {
+	case UI_ENTRY_INVALID:
+		return 0;
+	case UI_ENTRY_LEFT:
+		return 1;
+	case UI_ENTRY_RIGHT:
+		return !c->second;
+	default:
+		if (c->second)
+			return (int) strlen(c->second) > n;
+		return c->maps->first[n];
+	}
+}
+
+
+static bool button_is_enabled(struct ui_entry_ctx *c, int n)
+{
+	struct ui_entry_input *in = &c->input;
+
+	switch (n) {
+	case UI_ENTRY_INVALID:
+		return 0;
+	case UI_ENTRY_LEFT:
+		return 1;
+	case UI_ENTRY_RIGHT:
+		return *in->buf && ui_entry_valid(&c->input);
+	default:
+		return strlen(in->buf) < in->max_len;
+	}
+}
+
+
+static void draw_button_by_pos(struct ui_entry_ctx *c, unsigned col,
+    unsigned row, bool up)
+{
+	int n = c->entry_ops->n(c->entry_user, col, row);
+	bool enabled = button_is_enabled(c, n);
+
+	if (n < 0) {
+		draw_button(c, col, row, NULL, enabled, up);
+	} else if (c->second) {
+		char tmp[] = { c->second[n], 0 };
+
+		draw_button(c, col, row, tmp, enabled, up);
+	} else {
+		draw_button(c, col, row, c->maps->first[n], enabled, up);
+	}
+}
+
+
 static void release_button(void *user)
 {
 	struct ui_entry_ctx *c = user;
-	unsigned col = c->down.col;
-	unsigned row = c->down.row;
-	int n = c->entry_ops->n(c->entry_user, col, row);
 
-	draw_button(c, col, row, n < 0 ? NULL : c->maps->first[n], 1, 1);
+//debug("release_button: col %u row %u\n", c->down.col, c->down.row);
+	draw_button_by_pos(c, c->down.col, c->down.row, 1);
 	ui_update_display();
+}
+
+
+static void ui_entry_down(void *ctx, unsigned x, unsigned y)
+{
+	struct ui_entry_ctx *c = ctx;
+	unsigned col, row;
+	int n;
+
+//debug("ui_entry_down: %u %u\n", x, y);
+	if (!c->entry_ops->pos(c->entry_user, x, y, &col, &row))
+		return;
+	n = c->entry_ops->n(c->entry_user, col, row);
+	timer_flush(&c->t_button);
+	if (!button_is_visible(c, n))
+		return;
+	if (!button_is_enabled(c, n))
+		return;
+	draw_button_by_pos(c, col, row, 0);
+	ui_update_display();
+	c->down.col = col;
+	c->down.row = row;
+	timer_set(&c->t_button, BUTTON_LINGER_MS, release_button, c);
 }
 
 
@@ -213,10 +286,15 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 	if (!c->entry_ops->pos(c->entry_user, x, y, &col, &row))
 		return;
 	n = c->entry_ops->n(c->entry_user, col, row);
-
 	debug("entry_tap X %u Y %u -> col %u row %u (%d)\n", x, y, col, row, n);
+	if (!button_is_visible(c, n))
+		return;
+	if (!button_is_enabled(c, n))
+		return;
+
 	if (n == UI_ENTRY_LEFT) { // cancel or delete
 		if (c->second) {
+			timer_cancel(&c->t_button);
 			c->second = NULL;
 			draw_first(c, 1);
 			draw_button(c, 0, 0, NULL, 1, 1);
@@ -228,11 +306,6 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 			ui_return();
 			return;
 		}
-		timer_flush(&c->t_button);
-		draw_button(c, 0, 0, NULL, 1, 0);
-		c->down.col = col;
-		c->down.row = row;
-		timer_set(&c->t_button, BUTTON_LINGER_MS, release_button, c);
 		progress();
 
 		end[-1] = 0;
@@ -245,23 +318,16 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 		return;
 	}
 	if (n == UI_ENTRY_RIGHT) { // accept
-		if (c->second || !*in->buf)
-			return;
-		if (ui_entry_valid(in))
-			ui_return();
+		ui_return();
 		return;
 	}
-	if (end - in->buf == (int) in->max_len)
-		return;
 	progress();
-	timer_flush(&c->t_button);
 	if (c->second || !c->maps->second[n]) {
 		char ch;
 		int valid;
 
 		if (c->second) {
-			if (n >= (int) strlen(c->second))
-				return;
+			timer_cancel(&c->t_button);
 			ch = c->second[n];
 		} else {
 			ch = *c->maps->first[n];
@@ -279,6 +345,7 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 		}
 		draw_first(c, strlen(in->buf) != in->max_len);
 	} else {
+		timer_cancel(&c->t_button);
 		c->second = c->maps->second[n];
 		draw_second(c, c->second);
 	}
@@ -296,6 +363,15 @@ static void ui_entry_to(void *ctx, unsigned from_x, unsigned from_y,
 		*in->buf = 0;
 		ui_return();
 	}
+}
+
+
+static void ui_entry_cancel(void *ctx)
+{
+	struct ui_entry_ctx *c = ctx;
+
+//debug("ui_entry_cancel\n");
+	timer_flush(&c->t_button);
 }
 
 
@@ -343,8 +419,10 @@ static void ui_entry_close(void *ctx)
 
 
 static const struct ui_events ui_entry_events = {
+	.touch_down	= ui_entry_down,
 	.touch_tap	= ui_entry_tap,
 	.touch_to	= ui_entry_to,
+	.touch_cancel	= ui_entry_cancel,
 };
 
 

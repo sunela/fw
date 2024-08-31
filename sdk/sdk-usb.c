@@ -115,7 +115,8 @@ void usbd_event_handler(uint8_t event)
 static int ep0_handler(struct usb_setup_packet *setup, uint8_t **data,
     uint32_t *len)
 {
-	debug("EP0 bReq 0x%02x wInd %u\r\n", setup->bRequest, setup->wIndex);
+	debug("EP0 bmReqT 0x%2x bReq 0x%02x wInd %u\r\n",
+	    setup->bmRequestType, setup->bRequest, setup->wIndex);
 	switch (setup->bmRequestType) {
 	case FROM_DEV:
 		if (!usb_query(setup->bRequest, data, len))

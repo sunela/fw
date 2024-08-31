@@ -177,6 +177,12 @@ static void enter_setup(void *user)
 }
 
 
+static void remote_control(void *user)
+{
+	ui_switch(&ui_rmt, NULL);
+}
+
+
 static void long_top(void *ctx, unsigned x, unsigned y)
 {
 	/* @@@ future: if in sub-folder, edit folder name */
@@ -210,10 +216,11 @@ static void ui_accounts_long(void *ctx, unsigned x, unsigned y)
 		{ ui_overlay_sym_add,	new_account, NULL },
 		{ ui_overlay_sym_move_from, move_from, NULL, },
 		{ ui_overlay_sym_setup,	enter_setup, NULL },
+		{ ui_overlay_sym_pc_comm, remote_control, NULL },
 	};
 	static struct ui_overlay_params prm = {
 		.buttons	= buttons,
-		.n_buttons	= 4,
+		.n_buttons	= 5,
         };
 	const struct wi_list_entry *entry = wi_list_pick(&c->list, x, y);
 	unsigned i;

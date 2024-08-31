@@ -106,6 +106,7 @@ extern const struct ui ui_version;
 extern const struct ui ui_rd;
 extern const struct ui ui_notice;
 extern const struct ui ui_pin_change;
+extern const struct ui ui_rmt;
 
 void progress(void);
 void set_idle(unsigned seconds);

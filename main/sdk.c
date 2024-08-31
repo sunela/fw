@@ -26,7 +26,6 @@
 #include "debug.h"
 #include "timer.h"
 #include "db.h"
-#include "rmt-db.h"
 #include "gfx.h"
 
 
@@ -93,8 +92,6 @@ static void event_loop(void)
 		timer_tick(uptime);
 		if (!(uptime & 7))
 			tick_event();
-
-		rmt_db_poll();
 
 		msleep(1);
 		uptime++;
@@ -163,7 +160,6 @@ void sdk_main(void)
 	cst816_init(TOUCH_I2C, TOUCH_I2C_ADDR, TOUCH_INT);
 
 	db_init();
-	rmt_db_init();
 	app_init(NULL, 0);
 	event_loop();
 }

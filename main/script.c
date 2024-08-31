@@ -12,11 +12,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "hal.h"
 #include "rnd.h"
 #include "timer.h"
 #include "db.h"
+#include "rmt.h"
+#include "rmt-db.h"
 #include "version.h"
 #include "ui.h"
 #include "sim.h"
@@ -202,6 +205,77 @@ static void dump_db_short(const struct db *db)
 }
 
 
+static void rmt(const char *s)
+{
+	uint8_t buf[100]; /* @@@ */
+	uint8_t *p = buf;
+	char *end;
+
+	while (*s) {
+		end = strchr(s, ' ');
+		if (!end)
+			end = strchr(s, 0);
+		if (end - s == 2 && isxdigit(s[0]) && isxdigit(s[1])) {
+			*p++ = strtoul(s, NULL, 16);
+		} else {
+			memcpy(p, s, end - s);
+			p += end - s;
+		}
+		if (!*end)
+			break;
+		s = end + 1;
+	}
+
+	/* send request */
+//fprintf(stderr, "S %u\n", (unsigned) (p - buf));
+	if (!rmt_arrival(&rmt_usb, buf, p - buf)) {
+		fprintf(stderr, "rmt_arrival failed\n");
+		exit(1);
+	}
+
+	/* send end-of-request */
+	do rmt_db_poll();
+	while (!rmt_arrival(&rmt_usb, NULL, 0));
+
+//fprintf(stderr, "S 0\n");
+
+	/* retrieve response */
+	while (1) {
+		uint32_t got;
+		uint8_t *res;
+
+		rmt_db_poll();
+		if (!rmt_query(&rmt_usb, &res, &got))
+			continue;
+//fprintf(stderr, "R %u\n", (unsigned) got);
+		if (!got)
+			break;
+		if (!*res) {
+			printf("Error: ");
+			res++;
+			got--;
+		}
+
+		bool hex = 0;
+
+		for (p = res; p != res + got; p++) {
+			if (*p < ' ' || *p > '~') {
+				if (p != res)
+					putchar(' ');
+				printf("%02X", *p);
+				hex = 1;
+			} else {
+				if (hex)
+					putchar(' ');
+				putchar(*p);
+				hex = 0;
+			}
+		}
+		putchar('\n');
+	}
+}
+
+
 static void show_help(void)
 {
 	printf("Commands:\n\n"
@@ -225,6 +299,8 @@ static void show_help(void)
 "random\t\tenable random number generation\n"
 "random BYTE\tset random number generator to fixed value\n"
 "release\t\trelease the side button\n"
+"rmt hex|string ...\n"
+"\t\tsend a remote request and show the response (if any)\n"
 "screen\t\ttake a screenshot (PPM)\n"
 "screen PPMFILE\ttake a screenshot in a specific file, remember the name\n"
 "static\t\tuse static dummy data where information may change\n"
@@ -403,6 +479,14 @@ static bool process_cmd(const char *cmd)
 
 	if (!strcmp("static", cmd)) {
 		build_override = 1;
+		return 1;
+	}
+
+	/* rmt */
+
+	arg = cmd_arg("rmt", cmd);
+	if (arg) {
+		rmt(arg);
 		return 1;
 	}
 

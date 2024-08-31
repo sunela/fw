@@ -38,7 +38,7 @@ enum rdb_state {
 
 static enum rdb_state state = RDS_IDLE;
 static enum rdb_op op;
-static PSRAM uint8_t buf[MAX_REQ_LEN];
+static PSRAM_NOINIT uint8_t buf[MAX_REQ_LEN];
 static uint64_t generation;
 static const struct db_entry *de;
 static const struct db_field *f;

@@ -17,6 +17,7 @@
 
 #include "../rmt/rmt-db.h"
 #include "../sdk/sdk-usb.h"
+#include "../db/db.h" /* for enum field_type */
 
 #include "usbopen.h"
 
@@ -77,9 +78,9 @@ static void demo(usb_dev_handle *dev, char *const *argv, int args)
 }
 
 
-static void rmt(usb_dev_handle *dev, uint8_t op, const char *arg)
+static void rmt_bin(usb_dev_handle *dev, uint8_t op, const void *arg,
+    size_t len)
 {
-	size_t len = strlen(arg);
 	int res;
 	char buf[256] = { op, };
 
@@ -118,6 +119,10 @@ static void rmt(usb_dev_handle *dev, uint8_t op, const char *arg)
 		}
 		if (!res)
 			return;
+		if (!*buf) {
+			fprintf(stderr, "%.*s\n", res - 1, buf + 1);
+			continue;
+		}
 		switch (op) {
 		case RDOP_LS:
 			printf("%.*s\n", res, buf);
@@ -132,6 +137,30 @@ static void rmt(usb_dev_handle *dev, uint8_t op, const char *arg)
 }
 
 
+static void rmt(usb_dev_handle *dev, uint8_t op, const char *arg)
+{
+	rmt_bin(dev, op, arg, strlen(arg));
+}
+
+
+static void reveal(usb_dev_handle *dev, const char *entry, const char *field)
+{
+	unsigned len = strlen(entry);
+	uint8_t buf[len + 1];
+	enum field_type type;
+
+	if (!strcmp(field, "password") || !strcmp(field, "pw"))
+		type = ft_pw;
+	else {
+		fprintf(stderr, "unrecognized field \"%s\"\n", field);
+		exit(1);
+	}
+	memcpy(buf, entry, len);
+	buf[len] = type;
+	rmt_bin(dev, RDOP_REVEAL, buf, len + 1);
+}
+
+
 static void usage(const char *name)
 {
 	fprintf(stderr,
@@ -141,6 +170,8 @@ static void usage(const char *name)
 "  demo name [args ...]\n"
 "  ls\n"
 "  query\n"
+"  reveal entry-name field-name\n"
+"  show entry-name\n"
 "  time\n"
     , name);
 	exit(1);
@@ -182,6 +213,8 @@ int main(int argc, char *const *argv)
 		rmt(dev, RDOP_LS, "");
 	else if (n_args == 2 && !strcmp(argv[optind], "show"))
 		rmt(dev, RDOP_SHOW, argv[optind + 1]);
+	else if (n_args == 3 && !strcmp(argv[optind], "reveal"))
+		reveal(dev, argv[optind + 1], argv[optind + 2]);
 	else
 		usage(*argv);
 	return 0;

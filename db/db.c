@@ -32,7 +32,7 @@ const enum field_type order2ft[] = {
 uint8_t ft2order[ARRAY_ENTRIES(order2ft)];
 const unsigned field_types = sizeof(ft2order);
 
-static PSRAM uint8_t payload_buf[BLOCK_PAYLOAD_SIZE];
+static PSRAM_NOINIT uint8_t payload_buf[BLOCK_PAYLOAD_SIZE];
 
 
 /* --- Get an erased block, erasing if needed ------------------------------ */

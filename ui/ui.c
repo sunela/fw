@@ -33,7 +33,7 @@
 struct gfx_drawable main_da;
 struct db main_db;
 
-static PSRAM gfx_color fb[GFX_WIDTH * GFX_HEIGHT];
+static PSRAM_NOINIT gfx_color fb[GFX_WIDTH * GFX_HEIGHT];
 
 
 struct stack {

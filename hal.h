@@ -21,9 +21,9 @@
 #define GFX_HEIGHT	280
 
 #ifdef SDK
-#define	PSRAM	__attribute__((__section__(".psram_noinit")))
+#define	PSRAM_NOINIT	__attribute__((__section__(".psram_noinit")))
 #else
-#define	PSRAM
+#define	PSRAM_NOINIT
 #endif
 
 #define	CPU_ID_LENGTH	20

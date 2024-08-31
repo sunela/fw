@@ -20,8 +20,8 @@
 #include "debug.h"
 
 
-static PSRAM uint8_t io_buf[STORAGE_BLOCK_SIZE];
-static PSRAM struct block_content bc;
+static PSRAM_NOINIT uint8_t io_buf[STORAGE_BLOCK_SIZE];
+static PSRAM_NOINIT struct block_content bc;
 
 
 static enum block_type classify_block(const uint8_t *b)

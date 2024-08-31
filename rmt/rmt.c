@@ -42,14 +42,14 @@ struct rmt {
 
 
 /*
- * @@@ Do NOT use PSRAM here !
+ * @@@ Do NOT use PSRAM_NOINIT here !
  *
  * We need rmt_use.state to be RS_IDLE (zero) and the mailboxes in rmt_usb to
  * be initialized (disabled) when the system starts.
  *
- * With PSRAM, no such initialization would happen: First, PSRAM uses the
- * psram_noinit segment, which is not initialized at all. Second, even if we
- * used psram_data, which sounds as if it would be initialized, this still
+ * With PSRAM_INIT, no such initialization would happen: First, PSRAM_INIT uses
+ * the psram_noinit segment, which is not initialized at all. Second, even if
+ * we used psram_data, which sounds as if it would be initialized, this still
  * wouldn't work, since the code for it in
  * bouffalo_sdk/bsp/board/bl808dk/board.c:board_init is
  * commented out.

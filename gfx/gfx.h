@@ -122,6 +122,12 @@ static inline gfx_color gfx_not_transparent(gfx_color color)
 }
 
 
+static inline bool gfx_in_rect(const struct gfx_rect *r, int x, int y)
+{
+	return x >= r->x && x < r->x + r->w && y >= r->y && y < r->y + r->h;
+}
+
+
 /* gfx_clip(da, NULL) disables clipping */
 
 void gfx_clip(struct gfx_drawable *da, const struct gfx_rect *clip);

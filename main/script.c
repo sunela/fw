@@ -301,6 +301,7 @@ static void show_help(void)
 "release\t\trelease the side button\n"
 "rmt hex|string ...\n"
 "\t\tsend a remote request and show the response (if any)\n"
+"rmt open\tinitialize the remote control protocol\n"
 "screen\t\ttake a screenshot (PPM)\n"
 "screen PPMFILE\ttake a screenshot in a specific file, remember the name\n"
 "static\t\tuse static dummy data where information may change\n"
@@ -486,7 +487,12 @@ static bool process_cmd(const char *cmd)
 
 	arg = cmd_arg("rmt", cmd);
 	if (arg) {
-		rmt(arg);
+		if (!strcmp(arg, "open")) {
+			rmt_db_init();
+			return 1;
+		} else {
+			rmt(arg);
+		}
 		return 1;
 	}
 

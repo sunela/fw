@@ -79,7 +79,7 @@ void vdebug(const char *fmt, va_list ap)
 	if (quiet)
 		return;
 	if (nl)
-		format(console_cb, NULL, "[%3llu.%03llu] ",
+		format(console_cb, NULL, "[%3llu.%06llu] ",
 		    (unsigned long long) t / 1000000,
 		    (unsigned long long) t % 1000000);
 	nl = vformat(console_cb, NULL, fmt, ap);

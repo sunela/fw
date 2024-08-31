@@ -79,9 +79,9 @@ void vdebug(const char *fmt, va_list ap)
 	if (quiet)
 		return;
 	if (nl)
-		format(console_cb, NULL, "[%3llu.%06llu] ",
-		    (unsigned long long) t / 1000000,
-		    (unsigned long long) t % 1000000);
+		format(console_cb, NULL, "[%3lu.%06lu] ",
+		    (unsigned long) t / 1000000,
+		    (unsigned long) t % 1000000);
 	nl = vformat(console_cb, NULL, fmt, ap);
 }
 
@@ -117,9 +117,9 @@ double t1(const char *fmt, ...)
 		va_start(ap, fmt);
 		vdebug(tmp, ap);
 		va_end(ap);
-		format(console_cb, NULL, ": %3llu.%06llu s%s",
-		    (unsigned long long) t_t1 / 1000000,
-		    (unsigned long long) t_t1 % 1000000,
+		format(console_cb, NULL, ": %3lu.%06lu s%s",
+		    (unsigned long) t_t1 / 1000000,
+		    (unsigned long) t_t1 % 1000000,
 		    nl ? "\n" : "");
 		t1_cached = 0;
 	} else {

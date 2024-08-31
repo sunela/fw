@@ -271,6 +271,7 @@ accounts $mode account-demo-top-over "tap 86 67" "long 201 23"
 ACCOUNTS_ADD="tap 60 169"
 ACCOUNTS_MOVE="tap 120 168"
 ACCOUNTS_CANCEL_MOVE="tap 193 177"
+ACCOUNTS_REMOTE="tap 181 109"
 
 accounts $mode accounts-demo-add "long 45 69" "$ACCOUNTS_ADD"
 
@@ -686,6 +687,10 @@ accounts $mode change-mismatch \
     "$ENTRY_R" \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_9" "$ENTRY_6" "$ENTRY_8" "$ENTRY_0" \
     "$ENTRY_R"
+
+# --- Remote ------------------------------------------------------------------
+
+accounts $mode remote "long 200 72" "$ACCOUNTS_REMOTE"
 
 # -----------------------------------------------------------------------------
 

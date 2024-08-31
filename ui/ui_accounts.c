@@ -213,14 +213,15 @@ static void ui_accounts_long(void *ctx, unsigned x, unsigned y)
 
 	static struct ui_overlay_button buttons[] = {
 		{ ui_overlay_sym_power,	power_off, NULL },
-		{ ui_overlay_sym_add,	new_account, NULL },
-		{ ui_overlay_sym_move_from, move_from, NULL, },
 		{ ui_overlay_sym_setup,	enter_setup, NULL },
 		{ ui_overlay_sym_pc_comm, remote_control, NULL },
+		{ ui_overlay_sym_add,	new_account, NULL },
+		{ ui_overlay_sym_move_from, move_from, NULL, },
+		{ NULL, move_cancel, NULL },
 	};
 	static struct ui_overlay_params prm = {
 		.buttons	= buttons,
-		.n_buttons	= 5,
+		.n_buttons	= 6,
         };
 	const struct wi_list_entry *entry = wi_list_pick(&c->list, x, y);
 	unsigned i;
@@ -229,24 +230,22 @@ static void ui_accounts_long(void *ctx, unsigned x, unsigned y)
 		buttons[i].user = ctx;
 	if (moving) {
 		if (entry) {
-			buttons[1].draw = ui_overlay_sym_move_to;
-			buttons[1].fn = move_to;
-			buttons[1].user = wi_list_user(entry);
+			buttons[4].draw = ui_overlay_sym_move_to;
+			buttons[4].fn = move_to;
+			buttons[4].user = wi_list_user(entry);
 		} else {
-			buttons[1].draw = NULL;
+			buttons[4].draw = NULL;
 		}
-		buttons[2].draw = ui_overlay_sym_move_cancel;
-		buttons[2].fn = move_cancel;
+		buttons[5].draw = ui_overlay_sym_move_cancel;
 	} else {
-		buttons[1].draw = ui_overlay_sym_add;
-		buttons[1].fn = new_account;
 		if (entry) {
-			buttons[2].draw = ui_overlay_sym_move_from;
-			buttons[2].fn = move_from;
-			buttons[2].user = wi_list_user(entry);
+			buttons[4].draw = ui_overlay_sym_move_from;
+			buttons[4].fn = move_from;
+			buttons[4].user = wi_list_user(entry);
 		} else {
-			buttons[2].draw = NULL;
+			buttons[4].draw = NULL;
 		}
+		buttons[5].draw = NULL;
 	}
 
 	ui_call(&ui_overlay, &prm);

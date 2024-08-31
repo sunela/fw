@@ -468,7 +468,7 @@ static bool process_cmd(const char *cmd)
 	}
 
 fail:
-	fprintf(stderr, "bad command \"%s\n", cmd);
+	fprintf(stderr, "bad command \"%s\"\n", cmd);
 	return 0;
 }
 

@@ -15,6 +15,7 @@
 #include "settings.h"
 #include "ui.h"	/* for main_db */
 #include "rmt.h"
+#include "ui_rmt.h"
 #include "rmt-db.h"
 
 
@@ -90,13 +91,39 @@ void rmt_db_poll(void)
 			for (de = main_db.entries; de; de = de->next)
 				if (strlen(de->name) == (size_t) got - 1 &&
 				    !strncmp(de->name, (const char *) buf + 1,
-				    got -1))
+				    got - 1))
 					break;
 			if (!de) {
 				op = RDOP_NOT_FOUND;
 				break;
 			}
 			f = de->fields;
+			break;
+		case RDOP_REVEAL:
+			if (got < 2) {
+				op = RDOP_INVALID;
+				return;
+			}
+			for (de = main_db.entries; de; de = de->next)
+				if (strlen(de->name) == (size_t) got - 2 &&
+				    !strncmp(de->name, (const char *) buf + 1,
+				    got - 2))
+					break;
+			if (!de) {
+				op = RDOP_NOT_FOUND;
+				break;
+			}
+
+			uint8_t type = buf[got - 1];
+
+			for (f = de->fields; f; f = f->next)
+				if (f->type == type)
+					break;
+
+			if (f)
+				ui_rmt_reveal(f);
+			else
+				op = RDOP_NOT_FOUND;
 			break;
 		default:
 			op = RDOP_INVALID;
@@ -190,11 +217,12 @@ void rmt_db_poll(void)
 			state = RDS_END;
 			break;
 		case RDOP_NOT_FOUND:
-			if (!rmt_response(&rmt_usb, "\000Not found", 12))
+			if (!rmt_response(&rmt_usb, "\000Not found", 10))
 				return;
 			state = RDS_END;
 			break;
 		case RDOP_NULL:
+		case RDOP_REVEAL:
 			state = RDS_END;
 			break;
 		default:

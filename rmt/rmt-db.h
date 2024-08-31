@@ -14,6 +14,7 @@ enum rdb_op {
 	RDOP_LS		= 2,	/* list all the accounts */
 	RDOP_NOT_FOUND	= 3,	/* entry not found, returns an error */
 	RDOP_SHOW	= 4,	/* list all fields */
+	RDOP_REVEAL	= 5,	/* display field content on device */
 };
 
 

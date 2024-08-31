@@ -692,6 +692,15 @@ accounts $mode change-mismatch \
 
 accounts $mode remote "long 200 72" "$ACCOUNTS_REMOTE"
 
+# --- Remote (reveal) ---------------------------------------------------------
+
+#accounts $mode rmt-ls "long 200 72" "$ACCOUNTS_REMOTE" "rmt 02"
+RDOP_REVEAL=05
+FIELD_PASSWORD=05
+
+accounts $mode rmt-reveal "long 200 72" "$ACCOUNTS_REMOTE" \
+    "rmt $RDOP_REVEAL demo $FIELD_PASSWORD"
+
 # -----------------------------------------------------------------------------
 
 if [ "$select" ] && ! $found; then

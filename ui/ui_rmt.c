@@ -23,8 +23,9 @@
 #define	FONT	mono24
 
 
-static bool revealing = 0;
-
+struct ui_rmt_ctx {
+	bool revealing;
+};
 
 static void show_remote(void)
 {
@@ -35,14 +36,19 @@ static void show_remote(void)
 }
 
 
+static struct ui_rmt_ctx *last_ctx;
+
+
 /* --- Events -------------------------------------------------------------- */
 
 
 static void ui_rmt_tap(void *ctx, unsigned x, unsigned y)
 {
-	if (revealing) {
+	struct ui_rmt_ctx *c = ctx;
+
+	if (c->revealing) {
 		show_remote();
-		revealing = 0;
+		c->revealing = 0;
 		ui_update_display();
 	} else {
 		ui_return();
@@ -69,6 +75,10 @@ static void ui_rmt_to(void *ctx, unsigned from_x, unsigned from_y,
 
 static void ui_rmt_open(void *ctx, void *params)
 {
+	struct ui_rmt_ctx *c = ctx;
+
+	last_ctx = c;
+	c->revealing = 0;
 	show_remote();
 	rmt_db_init();
 	set_idle(3600); /* @@@ */
@@ -78,6 +88,7 @@ static void ui_rmt_open(void *ctx, void *params)
 static void ui_rmt_close(void *ctx)
 {
 	rmt_close(&rmt_usb);
+	last_ctx = NULL;
 }
 
 
@@ -92,7 +103,7 @@ static const struct ui_events ui_rmt_events = {
 
 const struct ui ui_rmt = {
 	.name		= "rmt",
-//	.ctx_size	= sizeof(struct ui_rmt_ctx),
+	.ctx_size	= sizeof(struct ui_rmt_ctx),
 	.open		= ui_rmt_open,
 	.close		= ui_rmt_close,
 	.events		= &ui_rmt_events,
@@ -112,6 +123,6 @@ void ui_rmt_reveal(const struct db_field *f)
 	gfx_clear(&main_da, GFX_BLACK);
 	text_text(&main_da, GFX_WIDTH / 2, GFX_HEIGHT / 2, buf,
 	    &FONT, GFX_CENTER, GFX_CENTER, GFX_YELLOW);
-	revealing = 1;
+	last_ctx->revealing = 1;
 	ui_update_display();
 }

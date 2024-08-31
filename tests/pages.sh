@@ -268,42 +268,46 @@ accounts $mode account-demo-top-over "tap 86 67" "long 201 23"
 
 # ---  accounts overlay add (demo) ---------------------------------------------
 
-accounts $mode accounts-demo-add "long 45 69" "tap 153 110"
+ACCOUNTS_ADD="tap 60 169"
+ACCOUNTS_MOVE="tap 120 168"
+ACCOUNTS_CANCEL_MOVE="tap 193 177"
+
+accounts $mode accounts-demo-add "long 45 69" "$ACCOUNTS_ADD"
 
 # ---  accounts overlay add M, level 1 (demo) ---------------------------------
 
-accounts $mode accounts-demo-add-m1 "long 45 69" "tap 153 110" "tap 200 136"
+accounts $mode accounts-demo-add-m1 "long 45 69" "$ACCOUNTS_ADD" "tap 200 136"
 
 # ---  accounts overlay add M, level 2 (demo) ---------------------------------
 
-accounts $mode accounts-demo-add-m2 "long 45 69" "tap 153 110" \
+accounts $mode accounts-demo-add-m2 "long 45 69" "$ACCOUNTS_ADD" \
     "tap 200 136" "tap 42 81"
 
 # ---  accounts overlay add Me ------------------------------------------------
 
-accounts $mode accounts-demo-add-me "long 45 69" "tap 153 110" \
+accounts $mode accounts-demo-add-me "long 45 69" "$ACCOUNTS_ADD" \
     "tap 200 136" "tap 42 81" "tap 194 83" "tap 119 137"
 
 # ---  accounts added Me ------------------------------------------------------
 
-accounts $mode accounts-demo-added-me "long 45 69" "tap 153 110" \
+accounts $mode accounts-demo-added-me "long 45 69" "$ACCOUNTS_ADD" \
     "tap 200 136" "tap 42 81" "tap 194 83" "tap 119 137" "tap 201 247"
 
 # ---  account Me -------------------------------------------------------------
 
-accounts $mode account-me "long 45 69" "tap 153 110" \
+accounts $mode account-me "long 45 69" "$ACCOUNTS_ADD" \
     "tap 200 136" "tap 42 81" "tap 194 83" "tap 119 137" "tap 201 247" \
     "tap 23 68"
 
 # ---  account Me: fields list ------------------------------------------------
 
-accounts $mode account-me-fields "long 45 69" "tap 153 110" \
+accounts $mode account-me-fields "long 45 69" "$ACCOUNTS_ADD" \
     "tap 200 136" "tap 42 81" "tap 194 83" "tap 119 137" "tap 201 247" \
     "tap 23 68" "tap 119 165"
 
 # ---  account Me: enter Password ---------------------------------------------
 
-accounts $mode account-me-pw "long 45 69" "tap 153 110" \
+accounts $mode account-me-pw "long 45 69" "$ACCOUNTS_ADD" \
     "tap 200 136" "tap 42 81" "tap 194 83" "tap 119 137" "tap 201 247" \
     "tap 23 68" "tap 119 165" "tap 71 167"
 
@@ -322,7 +326,7 @@ ENTRY_L="tap 43 245"
 ENTRY_0="tap 119 245"
 ENTRY_R="tap 200 245"
 
-accounts $mode account-me-pw-secret "long 45 69" "tap 153 110" \
+accounts $mode account-me-pw-secret "long 45 69" "$ACCOUNTS_ADD" \
     "tap 200 136" "tap 42 81" "tap 194 83" "tap 119 137" "tap 201 247" \
     "tap 23 68" "tap 119 165" "tap 71 167" \
     "$ENTRY_7" "$ENTRY_7" "$ENTRY_3" "$ENTRY_5" "$ENTRY_2" "$ENTRY_6" \
@@ -330,7 +334,7 @@ accounts $mode account-me-pw-secret "long 45 69" "tap 153 110" \
 
 # ---  account Me: password added ---------------------------------------------
 
-accounts $mode account-me-pw-added "long 45 69" "tap 153 110" \
+accounts $mode account-me-pw-added "long 45 69" "$ACCOUNTS_ADD" \
     "tap 200 136" "tap 42 81" "tap 194 83" "tap 119 137" "tap 201 247" \
     "tap 23 68" "tap 119 165" "tap 71 167" \
     "$ENTRY_7" "$ENTRY_7" "$ENTRY_3" "$ENTRY_5" "$ENTRY_2" "$ENTRY_6" \
@@ -500,16 +504,17 @@ accounts $mode move-from "long 200 72" "tap 98 165"
 
 # --- Moving -----------------------------------------------------------------
 
-accounts $mode moving "long 200 72" "tap 98 165" "long 114 166"
+accounts $mode moving "long 200 72" "$ACCOUNTS_MOVE" "long 114 166"
 
 # --- Moved -------------------------------------------------------------------
 
-accounts $mode moved "long 200 72" "tap 98 165" "long 114 166" "tap 154 110"
+accounts $mode moved "long 200 72" "$ACCOUNTS_MOVE" \
+    "long 114 166" "$ACCOUNTS_MOVE"
 
 # --- Move cancel -------------------------------------------------------------
 
-accounts $mode move-cancel "long 200 72" "tap 98 165" "long 114 166" \
-    "tap 91 173"
+accounts $mode move-cancel "long 200 72" "$ACCOUNTS_MOVE" "long 114 166" \
+    "$ACCOUNTS_CANCEL_MOVE"
 
 # --- Edit entry name (demo) --------------------------------------------------
 

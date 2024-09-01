@@ -25,6 +25,8 @@
 #include "sim.h"
 #include "script.h"
 
+#include "debug.h"
+
 
 /* --- Debugging dump ------------------------------------------------------ */
 
@@ -205,6 +207,15 @@ static void dump_db_short(const struct db *db)
 }
 
 
+static void dump_rmt(const char *s, void *data, unsigned len)
+{
+	printf("%s %u:", s, len);
+	while (len--)
+		printf(" %02x", *(uint8_t *) data++);
+	putchar('\n');
+}
+
+
 static void rmt(const char *s)
 {
 	uint8_t buf[100]; /* @@@ */
@@ -227,7 +238,9 @@ static void rmt(const char *s)
 	}
 
 	/* send request */
-//fprintf(stderr, "S %u\n", (unsigned) (p - buf));
+
+	if (debugging)
+		dump_rmt("S", buf, p - buf);
 	if (!rmt_arrival(&rmt_usb, buf, p - buf)) {
 		fprintf(stderr, "rmt_arrival failed\n");
 		exit(1);
@@ -237,6 +250,8 @@ static void rmt(const char *s)
 	do rmt_db_poll();
 	while (!rmt_arrival(&rmt_usb, NULL, 0));
 
+	if (debugging)
+		dump_rmt("S", NULL, 0);
 //fprintf(stderr, "S 0\n");
 
 	/* retrieve response */
@@ -247,7 +262,8 @@ static void rmt(const char *s)
 		rmt_db_poll();
 		if (!rmt_query(&rmt_usb, &res, &got))
 			continue;
-//fprintf(stderr, "R %u\n", (unsigned) got);
+		if (debugging)
+			dump_rmt("R", res, got);
 		if (!got)
 			break;
 		if (!*res) {

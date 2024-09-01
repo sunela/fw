@@ -1,3 +1,4 @@
+
 #!/bin/sh
 #
 # rmt.sh - Test the remote protocol
@@ -13,10 +14,13 @@ PIN_3="tap 130 252"
 PIN_4="tap 125 135"
 PIN_NEXT="tap 191 252"
 
+
+RDOP_UNKNOWN=ff
 RDOP_LS=02
 RDOP_SHOW=04
 RDOP_REVEAL=05
 
+FIELD_END=00
 FIELD_USER=03
 FIELD_EMAIL=04
 FIELD_PW=05
@@ -104,4 +108,40 @@ EOF
 run show-demo "rmt $RDOP_SHOW demo" <<EOF
 $FIELD_USER user@mail.com
 $FIELD_PW
+EOF
+
+# --- Show unknown entry ------------------------------------------------------
+
+run show-unknown "rmt $RDOP_SHOW demox" <<EOF
+Error: Not found
+EOF
+
+# --- Reveal known entry and field --------------------------------------------
+
+gdb="gdb --args </dev/tty" \
+run reveal-demo-pw "rmt $RDOP_REVEAL demo $FIELD_PW" <<EOF
+EOF
+
+# --- Reveal unknown entry, known field ---------------------------------------
+
+run reveal-unknown-pw "rmt $RDOP_REVEAL demox $FIELD_PW" <<EOF
+Error: Not found
+EOF
+
+# --- Reveal known entry, already visible field -------------------------------
+
+run reveal-demo-user "rmt $RDOP_REVEAL demo $FIELD_END" <<EOF
+Error: Not found
+EOF
+
+# --- Reveal unknown entry, already visible field -----------------------------
+
+run reveal-unknown-user "rmt $RDOP_REVEAL demox $FIELD_END" <<EOF
+Error: Not found
+EOF
+
+# --- Unknown operation -------------------------------------------------------
+
+run unknown "rmt $RDOP_UNKNOWN" <<EOF
+Error: Bad request
 EOF

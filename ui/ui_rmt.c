@@ -194,6 +194,10 @@ void ui_rmt_reveal(const struct db_field *f)
 {
 	char buf[f->len + 1];
 
+	/* last_ctx is not set if we're running from a test script */
+	if (!last_ctx)
+		return;
+
 	memcpy(buf, f->data, f->len);
 	buf[f->len] = 0;
 

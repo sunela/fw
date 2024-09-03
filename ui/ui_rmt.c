@@ -28,18 +28,16 @@
 #define	TIMEOUT_S	1800
 
 #define	TEXT_FONT	mono24
-#define	TIME_FONT	mono18
-#define	SUBTEXT_FONT	mono18
-
 #define	TEXT_Y0		(GFX_HEIGHT / 2 - 10)
+
+#define	SUBTEXT_FONT	mono18
 #define	SUBTEXT_Y0	(GFX_HEIGHT / 2 + 60)
 
 #define	TIMEOUT_Y0	35
-
-#define	TIME_FG		GFX_BLACK
-#define	TIME_BG		GFX_HEX(0x808080)
-
-#define	TIME_BOX_R	4
+#define	TIMEOUT_FONT	mono18
+#define	TIMEOUT_FG	GFX_BLACK
+#define	TIMEOUT_BG	GFX_HEX(0x808080)
+#define	TIMEOUT_BOX_R	4
 
 #define	QUESTION_Y0	80
 #define	QUESTION_H	120
@@ -84,14 +82,15 @@ static void show_countdown(struct ui_rmt_ctx *c, unsigned s)
 	 * We run this over the set of characters we actually use to avoid the
 	 * addition of unused space we'd get with GFX_MAX.
 	 */
-	text_query(0, 0, "88h88", &TIME_FONT, GFX_LEFT, GFX_TOP, &q);
-	x = GFX_WIDTH - q.w - 2 * TIME_BOX_R;
+	text_query(0, 0, "88h88", &TIMEOUT_FONT, GFX_LEFT, GFX_TOP, &q);
+	x = GFX_WIDTH - q.w - 2 * TIMEOUT_BOX_R;
 	gfx_rrect_xy(&main_da, x, TIMEOUT_Y0,
-	    q.w + 2 * TIME_BOX_R, q.h + 2 * TIME_BOX_R, TIME_BOX_R, TIME_BG);
+	    q.w + 2 * TIMEOUT_BOX_R, q.h + 2 * TIMEOUT_BOX_R, TIMEOUT_BOX_R,
+	    TIMEOUT_BG);
 	c->cd_box.x = x;
 	c->cd_box.y = TIMEOUT_Y0;
-	c->cd_box.w = q.w + 2 * TIME_BOX_R;
-	c->cd_box.h = q.h + 2 * TIME_BOX_R;
+	c->cd_box.w = q.w + 2 * TIMEOUT_BOX_R;
+	c->cd_box.h = q.h + 2 * TIMEOUT_BOX_R;
 
 	if (s >= 3600 * 100)
 		return;
@@ -99,9 +98,9 @@ static void show_countdown(struct ui_rmt_ctx *c, unsigned s)
 		format(add_char, &p, "%2uh%02u", s / 3600, (s / 60) % 60);
 	else
 		format(add_char, &p, "%2u:%02u", s / 60, s % 60);
-	text_text(&main_da, x + TIME_BOX_R + q.ox,
-	    TIMEOUT_Y0 + TIME_BOX_R + q.oy,
-	    buf, &TIME_FONT, GFX_ORIGIN, GFX_ORIGIN, TIME_FG);
+	text_text(&main_da, x + TIMEOUT_BOX_R + q.ox,
+	    TIMEOUT_Y0 + TIMEOUT_BOX_R + q.oy,
+	    buf, &TIMEOUT_FONT, GFX_ORIGIN, GFX_ORIGIN, TIMEOUT_FG);
 	ui_update_display();
 }
 

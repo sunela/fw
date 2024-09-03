@@ -295,8 +295,8 @@ char *vformat_alloc(const char *fmt, va_list ap)
 	unsigned len = 0;
 	char *buf, *tmp;
 
-	vformat(count_char, &len, fmt, ap);
 	va_copy(aq, ap);
+	vformat(count_char, &len, fmt, ap);
 	buf = tmp = alloc_size(len + 1);
 	vformat(add_char, &tmp, fmt, aq);
 	return buf;

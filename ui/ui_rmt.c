@@ -42,12 +42,12 @@
 #define	TIME_BOX_R	4
 
 #define	QUESTION_Y0	80
-#define	QUESTION_H	140
+#define	QUESTION_H	120
 #define QUESTION_FONT	mono18
 
-#define	YESNO_Y0	240
-#define	YESNO_H		30
-#define	YESNO_W		80
+#define	YESNO_Y0	220
+#define	YESNO_H		50
+#define	YESNO_W		90
 #define	YESNO_R		5
 #define	YESNO_FONT	mono18
 #define	YESNO_NO_BG	GFX_RED

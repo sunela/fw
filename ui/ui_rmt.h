@@ -11,6 +11,12 @@
 #include "db.h"
 
 
-void ui_rmt_reveal(const struct db_field *f);
+struct ui_rmt_field {
+	const struct db_entry *de;
+	const struct db_field *f;
+};
+
+
+void ui_rmt_reveal(const struct ui_rmt_field *field);
 
 #endif /* !UI_RMT_H */

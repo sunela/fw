@@ -6,8 +6,10 @@
  */
 
 #include <stddef.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "hal.h"
@@ -23,21 +25,34 @@
 #include "ui_rmt.h"
 
 
-#define	TEXT_FONT		mono24
-#define	TIME_FONT		mono18
-#define	SUBTEXT_FONT		mono18
+#define	TIMEOUT_S	1800
 
-#define	TIMEOUT_S		1800
+#define	TEXT_FONT	mono24
+#define	TIME_FONT	mono18
+#define	SUBTEXT_FONT	mono18
 
-#define	TEXT_Y0			(GFX_HEIGHT / 2 - 10)
-#define	SUBTEXT_Y0		(GFX_HEIGHT / 2 + 60)
+#define	TEXT_Y0		(GFX_HEIGHT / 2 - 10)
+#define	SUBTEXT_Y0	(GFX_HEIGHT / 2 + 60)
 
-#define	TIMEOUT_Y0		35
+#define	TIMEOUT_Y0	35
 
-#define	TIME_FG			GFX_BLACK
-#define	TIME_BG			GFX_HEX(0x808080)
+#define	TIME_FG		GFX_BLACK
+#define	TIME_BG		GFX_HEX(0x808080)
 
-#define	TIME_BOX_R		4
+#define	TIME_BOX_R	4
+
+#define	QUESTION_Y0	80
+#define	QUESTION_H	140
+#define QUESTION_FONT	mono18
+
+#define	YESNO_Y0	240
+#define	YESNO_H		30
+#define	YESNO_W		80
+#define	YESNO_R		5
+#define	YESNO_FONT	mono18
+#define	YESNO_NO_BG	GFX_RED
+#define	YESNO_YES_BG	GFX_GREEN
+#define	YESNO_FG	GFX_BLACK
 
 
 struct ui_rmt_ctx {
@@ -45,6 +60,10 @@ struct ui_rmt_ctx {
 	uint64_t timeout_ms;
 	struct gfx_rect cd_box;
 	unsigned last_s;
+	/* action for which permission is being requested; NULL if none */
+	void (*action)(struct ui_rmt_ctx *c, void *user);
+	void *user;
+	unsigned generation; /* database generation */
 };
 
 
@@ -105,6 +124,77 @@ static void reset_timeout(struct ui_rmt_ctx *c)
 }
 
 
+/* --- Permission and actions ---------------------------------------------- */
+
+
+static void action_reveal(struct ui_rmt_ctx *c, void *user)
+{
+	const struct db_field *f = user;
+	char buf[f->len + 1];
+
+	if (main_db.generation != c->generation) {
+		/* @@@ should display some message */
+		show_remote();
+		ui_update_display();
+		return;
+	}
+
+	memcpy(buf, f->data, f->len);
+	buf[f->len] = 0;
+
+	gfx_clear(&main_da, GFX_BLACK);
+	text_text(&main_da, GFX_WIDTH / 2, GFX_HEIGHT / 2, buf,
+	    &TEXT_FONT, GFX_CENTER, GFX_CENTER, GFX_YELLOW);
+	last_ctx->revealing = 1;
+	ui_update_display();
+}
+
+
+static void yesno_rect(struct gfx_rect *r, bool right)
+{
+	unsigned gap = (GFX_WIDTH - 2 * YESNO_W) / 3;
+
+	r->x = gap + (YESNO_W + gap) * right;
+	r->y = YESNO_Y0;
+	r->h = YESNO_H;
+	r->w = YESNO_W;
+}
+
+
+static void yesno_button(struct ui_rmt_ctx *c, bool yes)
+{
+	struct gfx_rect r;
+
+	yesno_rect(&r, yes);
+	gfx_rrect(&main_da, &r, YESNO_R, yes ? YESNO_YES_BG : YESNO_NO_BG);
+	text_text(&main_da, r.x + r.w / 2, r.y + r.h / 2, yes ? "Yes" : "No",
+	    &YESNO_FONT, GFX_CENTER, GFX_CENTER, YESNO_FG);
+}
+
+
+static void ask_permission(struct ui_rmt_ctx *c,
+    void (*fn)(struct ui_rmt_ctx *c, void *user), void *user,
+    const char *fmt, ...)
+{
+	va_list ap;
+	char *s;
+
+	c->action = fn;
+	c->user = user;
+	va_start(ap, fmt);
+	s = vformat_alloc(fmt, ap);
+	va_end(ap);
+
+	gfx_clear(&main_da, GFX_BLACK);
+	text_format(&main_da, 0, QUESTION_Y0, GFX_WIDTH, QUESTION_H, 0,
+	    s, &QUESTION_FONT, GFX_CENTER, GFX_WHITE);
+	yesno_button(c, 0);
+	yesno_button(c, 1);
+	free(s);
+	ui_update_display();
+}
+
+
 /* --- Events -------------------------------------------------------------- */
 
 
@@ -112,9 +202,31 @@ static void ui_rmt_tap(void *ctx, unsigned x, unsigned y)
 {
 	struct ui_rmt_ctx *c = ctx;
 
-	if (c->revealing) {
+	if (c->action) {
+		struct gfx_rect r;
+
+		/* Yes */
+		yesno_rect(&r, 1);
+		if (gfx_in_rect(&r, x, y)) {
+			void (*action)(struct ui_rmt_ctx *c, void *user) =
+			    c->action;
+			void *user = c->user;
+
+			c->action = NULL;
+			c->user = NULL;
+			action(c, user);
+			return;
+		}
+
+		/* No */
+		yesno_rect(&r, 0);
+		if (!gfx_in_rect(&r, x, y))
+			return;
+	}
+	if (c->revealing || c->action) {
 		show_remote();
 		c->revealing = 0;
+		c->action = 0;
 		ui_update_display();
 	} else {
 		if (gfx_in_rect(&c->cd_box, x,y))
@@ -154,6 +266,7 @@ static void ui_rmt_open(void *ctx, void *params)
 	last_ctx = c;
 	c->revealing = 0;
 	c->last_s = 0;
+	c->action = NULL;
 	reset_timeout(c);
 
 	show_remote();
@@ -190,20 +303,14 @@ const struct ui ui_rmt = {
 /* --- Interface towards the protocol stack -------------------------------- */
 
 
-void ui_rmt_reveal(const struct db_field *f)
+void ui_rmt_reveal(const struct ui_rmt_field *field)
 {
-	char buf[f->len + 1];
+	const char *field_name = "password";
 
 	/* last_ctx is not set if we're running from a test script */
 	if (scripting && !last_ctx)
 		return;
-
-	memcpy(buf, f->data, f->len);
-	buf[f->len] = 0;
-
-	gfx_clear(&main_da, GFX_BLACK);
-	text_text(&main_da, GFX_WIDTH / 2, GFX_HEIGHT / 2, buf,
-	    &TEXT_FONT, GFX_CENTER, GFX_CENTER, GFX_YELLOW);
-	last_ctx->revealing = 1;
-	ui_update_display();
+	last_ctx->generation = main_db.generation;
+	ask_permission(last_ctx, action_reveal, (void *) field->f,
+	    "Show %s of %s ?", field_name, field->de->name);
 }

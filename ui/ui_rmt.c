@@ -33,7 +33,8 @@
 #define	SUBTEXT_FONT	mono18
 #define	SUBTEXT_Y0	(GFX_HEIGHT / 2 + 60)
 
-#define	TIMEOUT_Y0	35
+#define	TIMEOUT_X1	(GFX_WIDTH - 15)
+#define	TIMEOUT_Y0	15
 #define	TIMEOUT_FONT	mono18
 #define	TIMEOUT_FG	GFX_BLACK
 #define	TIMEOUT_BG	GFX_HEX(0x808080)
@@ -46,7 +47,7 @@
 #define	YESNO_Y0	220
 #define	YESNO_H		50
 #define	YESNO_W		90
-#define	YESNO_R		5
+#define	YESNO_R		10
 #define	YESNO_FONT	mono18
 #define	YESNO_NO_BG	GFX_RED
 #define	YESNO_YES_BG	GFX_GREEN
@@ -83,7 +84,7 @@ static void show_countdown(struct ui_rmt_ctx *c, unsigned s)
 	 * addition of unused space we'd get with GFX_MAX.
 	 */
 	text_query(0, 0, "88h88", &TIMEOUT_FONT, GFX_LEFT, GFX_TOP, &q);
-	x = GFX_WIDTH - q.w - 2 * TIMEOUT_BOX_R;
+	x = TIMEOUT_X1 - q.w - 2 * TIMEOUT_BOX_R;
 	gfx_rrect_xy(&main_da, x, TIMEOUT_Y0,
 	    q.w + 2 * TIMEOUT_BOX_R, q.h + 2 * TIMEOUT_BOX_R, TIMEOUT_BOX_R,
 	    TIMEOUT_BG);

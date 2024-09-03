@@ -694,12 +694,30 @@ accounts $mode remote "long 200 72" "$ACCOUNTS_REMOTE"
 
 # --- Remote (reveal) ---------------------------------------------------------
 
-#accounts $mode rmt-ls "long 200 72" "$ACCOUNTS_REMOTE" "rmt 02"
 RDOP_REVEAL=05
 FIELD_PASSWORD=05
+NO="tap 69 256"
+YES="tap 175 256"
 
 accounts $mode rmt-reveal "long 200 72" "$ACCOUNTS_REMOTE" \
     "rmt $RDOP_REVEAL demo $FIELD_PASSWORD"
+
+# --- Remote (reveal, no) -----------------------------------------------------
+
+accounts $mode rmt-reveal-no "long 200 72" "$ACCOUNTS_REMOTE" \
+    "rmt $RDOP_REVEAL demo $FIELD_PASSWORD" "$NO"
+
+# --- Remote (reveal, yes) ----------------------------------------------------
+
+accounts $mode rmt-reveal-yes "long 200 72" "$ACCOUNTS_REMOTE" \
+    "rmt $RDOP_REVEAL demo $FIELD_PASSWORD" "$YES"
+
+# --- Remote (reveal, return) -------------------------------------------------
+
+# tap anywhere, we arbitrarily pick ENTRY_5
+
+accounts $mode rmt-reveal-return "long 200 72" "$ACCOUNTS_REMOTE" \
+    "rmt $RDOP_REVEAL demo $FIELD_PASSWORD" "$YES" "$ENTRY_5"
 
 # -----------------------------------------------------------------------------
 

@@ -29,6 +29,10 @@
 #include "gfx.h"
 
 
+/* scripting is only available in the simulator */
+bool sccripting = 0;
+
+
 /* --- Event loop ---------------------------------------------------------- */
 
 

@@ -30,6 +30,7 @@
 
 
 extern bool quiet;
+extern bool scripting;
 extern int64_t time_offset;
 extern int64_t time_override;
 

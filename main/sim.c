@@ -31,6 +31,7 @@
 
 
 bool headless = 0;
+bool scripting = 0;
 const char *screenshot_name = DEFAULT_SCREENSHOT_NAME;
 unsigned screenshot_number = 0;
 
@@ -367,7 +368,6 @@ static void usage(const char *name)
 
 int main(int argc, char **argv)
 {
-	bool scripting = 0;
 	int c, i;
 
 	while ((c = getopt(argc, argv, "+24CDd:qs:")) != EOF)

@@ -30,7 +30,7 @@
 
 
 /* scripting is only available in the simulator */
-bool sccripting = 0;
+bool scripting = 0;
 
 
 /* --- Event loop ---------------------------------------------------------- */

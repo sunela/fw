@@ -11,7 +11,7 @@ include Makefile.app
 
 CFLAGS += $(shell sdl2-config --cflags) -DSIM
 LDLIBS += $(shell sdl2-config --libs) -lm -lgcrypt
-OBJS += sim.o shared.o script.o sha.o storage-file.o
+OBJS += sim.o shared.o script.o sha.o storage-file.o fake-rmt.o usb-hal.o
 
 
 vpath sim.c main
@@ -19,6 +19,8 @@ vpath shared.c main
 vpath script.c main
 vpath sha.c crypto
 vpath storage-file.c db
+vpath fake-rmt.c rmt
+vpath usb-hal.c usb
 
 
 all::		| $(OBJDIR:%/=%)

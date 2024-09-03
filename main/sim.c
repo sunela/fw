@@ -23,6 +23,7 @@
 #include "gfx.h"
 #include "ui.h"
 #include "storage.h"
+#include "fake-rmt.h"
 #include "script.h"
 #include "sim.h"
 
@@ -42,6 +43,7 @@ static SDL_Renderer *rend;
 static SDL_Texture *tex;
 static unsigned zoom = 1;
 static bool quit = 0;
+static bool fake_rmt = 0;
 
 
 /* --- Delays and sleeping ------------------------------------------------- */
@@ -276,6 +278,9 @@ static void event_loop(void)
 			msleep(10);
 			uptime += 10;
 		}
+		if (fake_rmt)
+			fake_rmt_poll();
+			
 	}
 }
 
@@ -357,6 +362,8 @@ static void usage(const char *name)
 "-d database\n"
 "    set the database file (default: %s)\n"
 "-q  quiet. Disable debugging output.\n"
+"-R /path/to/socket\n"
+"    open Unix domain SEQPACKET socket for RMT communication\n"
 "-s screenshot\n"
 "    set the screenshot file name. if present, %%u is converted to the\n"
 "    screenshot number (starts at 0). The usual printf conversion\n"
@@ -370,7 +377,7 @@ int main(int argc, char **argv)
 {
 	int c, i;
 
-	while ((c = getopt(argc, argv, "+24CDd:qs:")) != EOF)
+	while ((c = getopt(argc, argv, "+24CDd:qR:s:")) != EOF)
 		switch (c) {
 		case '2':
 			zoom = 2;
@@ -389,6 +396,10 @@ int main(int argc, char **argv)
 			break;
 		case 'q':
 			quiet = 1;
+			break;
+		case 'R':
+			fake_rmt_init(optarg);
+			fake_rmt = 1;
 			break;
 		case 's':
 			screenshot_name = optarg;

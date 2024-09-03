@@ -7,7 +7,7 @@
 
 CFLAGS = -g -Wall -Wextra -Wshadow -Wno-unused-parameter \
 	 -Wmissing-prototypes -Wmissing-declarations
-OBJS = io.o usbopen.o
+OBJS = io.o usbopen.o fake-rmt.o
 LDLIBS = -lusb
 
 include ../Makefile.c-common

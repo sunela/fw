@@ -20,9 +20,13 @@
 #include "../db/db.h" /* for enum field_type */
 
 #include "usbopen.h"
+#include "fake-rmt.h"
 
 
 #define	TIMEOUT_MS	1000
+
+
+static bool fake_rmt = 0;
 
 
 static void set_time(usb_dev_handle *dev)
@@ -86,36 +90,49 @@ static void rmt_bin(usb_dev_handle *dev, uint8_t op, const void *arg,
 
 	memcpy(buf + 1, arg, len);
 //fprintf(stderr, "TO_DEV SUNELA_RMT %u\n", (unsigned) len + 1);
-	res = usb_control_msg(dev, TO_DEV, SUNELA_RMT, 0, 0, buf, len + 1,
-	    TIMEOUT_MS);
-	if (res < 0) {
-		fprintf(stderr, "SUNELA_RMT (req): %d\n", res);
-		exit(1);
+	if (fake_rmt) {
+		fake_rmt_send(buf, len + 1);
+	} else {
+		res = usb_control_msg(dev, TO_DEV, SUNELA_RMT, 0, 0,
+		    buf, len + 1, TIMEOUT_MS);
+		if (res < 0) {
+			fprintf(stderr, "SUNELA_RMT (req): %d\n", res);
+			exit(1);
+		}
 	}
 	while (1) {
 		usleep(10 * 1000);
 //fprintf(stderr, "TO_DEV SUNELA_RMT %u\n", 0);
-		res = usb_control_msg(dev, TO_DEV, SUNELA_RMT, 0, 0, NULL, 0,
-		    TIMEOUT_MS);
-		if (res == -EPIPE)
-			continue;
-		if (res < 0) {
-			fprintf(stderr, "SUNELA_RMT (req-end): %d\n", res);
-			exit(1);
+		if (fake_rmt) {
+			fake_rmt_send(NULL, 0);
+		} else {
+			res = usb_control_msg(dev, TO_DEV, SUNELA_RMT, 0, 0,
+			    NULL, 0, TIMEOUT_MS);
+			if (res == -EPIPE)
+				continue;
+			if (res < 0) {
+				fprintf(stderr, "SUNELA_RMT (req-end): %d\n",
+				    res);
+				exit(1);
+			}
 		}
 		break;
 	}
 	while (1) {
 		usleep(10 * 1000);
 //fprintf(stderr, "FROM_DEV SUNELA_RMT %u\n", (unsigned) sizeof(buf));
-		res = usb_control_msg(dev, FROM_DEV, SUNELA_RMT, 0, 0, buf,
-		    sizeof(buf), TIMEOUT_MS);
+		if (fake_rmt) {
+			res = fake_rmt_recv(buf, sizeof(buf));
+		} else {
+			res = usb_control_msg(dev, FROM_DEV, SUNELA_RMT, 0, 0,
+			    buf, sizeof(buf), TIMEOUT_MS);
 //fprintf(stderr, "got %d\n", res);
-		if (res == -EPIPE)
-			continue;
-		if (res < 0) {
-			fprintf(stderr, "SUNELA_RMT (res): %d\n", res);
-			exit(1);
+			if (res == -EPIPE)
+				continue;
+			if (res < 0) {
+				fprintf(stderr, "SUNELA_RMT (res): %d\n", res);
+				exit(1);
+			}
 		}
 		if (!res)
 			return;
@@ -164,7 +181,10 @@ static void reveal(usb_dev_handle *dev, const char *entry, const char *field)
 static void usage(const char *name)
 {
 	fprintf(stderr,
-"usage: %s [-d vid:pid] [command [args ...]]\n\n"
+"usage: %s [-d vid:pid] [-R path] [command [args ...]]\n\n"
+"Options:\n"
+"-R path\topen a Unix domain SEQPACKET socket for RMT communication\n"
+"\n"
 "Commands:\n"
 "  bad-query\n"
 "  demo name [args ...]\n"
@@ -183,8 +203,12 @@ int main(int argc, char *const *argv)
 	usb_dev_handle *dev;
 	int c, n_args;
 
-	while ((c = getopt(argc, argv, "")) != EOF)
+	while ((c = getopt(argc, argv, "R:")) != EOF)
 		switch (c) {
+		case 'R':
+			fake_rmt_open(optarg);
+			fake_rmt = 1;
+			break;
 		default:
 			usage(*argv);
 		}
@@ -194,10 +218,12 @@ int main(int argc, char *const *argv)
 	if (device)
 		restrict_usb_path(device);
 #endif
-	dev = open_usb(USB_VENDOR, USB_PRODUCT);
-	if (!dev) {
-		perror("usb");
-		exit(1);
+	if (!fake_rmt) {
+		dev = open_usb(USB_VENDOR, USB_PRODUCT);
+		if (!dev) {
+			perror("usb");
+			exit(1);
+		}
 	}
 
 	n_args = argc - optind;

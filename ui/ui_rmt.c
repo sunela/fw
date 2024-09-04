@@ -455,7 +455,7 @@ bool ui_rmt_set_time(time_t new_time)
 	format_time(t, old, sizeof(old));
 	format_time(new_time, new, sizeof(new));
 	dt = new_time - t;
-	format_delta(dt >= 0 ? -dt : -dt, delta, sizeof(delta));
+	format_delta(dt >= 0 ? dt : -dt, delta, sizeof(delta));
 
 	p = alloc_size(sizeof(*p));
 	*p = dt;

@@ -44,8 +44,8 @@
 #define	TIMEOUT_BG	GFX_HEX(0x808080)
 #define	TIMEOUT_BOX_R	4
 
-#define	QUESTION_Y0	80
-#define	QUESTION_H	120
+#define	QUESTION_Y0	50
+#define	QUESTION_H	160
 #define QUESTION_FONT	mono18
 
 #define	YESNO_Y0	220
@@ -213,6 +213,7 @@ static void ask_permission(struct ui_rmt_ctx *c,
 {
 	va_list ap;
 	char *s;
+	unsigned h, y;
 
 	c->action = fn;
 	c->user = user;
@@ -221,7 +222,12 @@ static void ask_permission(struct ui_rmt_ctx *c,
 	va_end(ap);
 
 	gfx_clear(&main_da, GFX_BLACK);
-	text_format(&main_da, 0, QUESTION_Y0, GFX_WIDTH, QUESTION_H, 0,
+	h = text_format(&main_da, 0, QUESTION_Y0, GFX_WIDTH, 0, 0,
+	    s, &QUESTION_FONT, GFX_CENTER, GFX_WHITE);
+	if (h > QUESTION_H)
+		h = QUESTION_H;
+	y = QUESTION_Y0 + (QUESTION_H - h) / 2;
+	text_format(&main_da, 0, y, GFX_WIDTH, h, 0,
 	    s, &QUESTION_FONT, GFX_CENTER, GFX_WHITE);
 	yesno_button(c, 0);
 	yesno_button(c, 1);

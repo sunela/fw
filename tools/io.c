@@ -243,11 +243,16 @@ static void set_time(usb_dev_handle *dev, const char *s)
 		char *next;
 
 		next = strptime(s, "%Y-%m-%dT%H:%M:%S", &tm);
-		if (!next)
-			next = strptime(s, "%H:%M:%S", &tm);
-		if (!next)
-			next = strptime(s, "%Y-%m-%dT%H:%M", &tm);
 		if (!next) {
+			tm = *gmtime(&t);
+			next = strptime(s, "%Y-%m-%dT%H:%M", &tm);
+		}
+		if (!next) {
+			tm = *gmtime(&t);
+			next = strptime(s, "%H:%M:%S", &tm);
+		}
+		if (!next) {
+			tm = *gmtime(&t);
 			tm.tm_sec = 0;
 			next = strptime(s, "%H:%M", &tm);
 		}

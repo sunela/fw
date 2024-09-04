@@ -8,12 +8,15 @@
 #ifndef UI_RMT_H
 #define	UI_RMT_H
 
+#include <stdbool.h>
+
 #include "db.h"
 
 
 struct ui_rmt_field {
 	const struct db_entry *de;
 	const struct db_field *f;
+	bool binary;
 };
 
 

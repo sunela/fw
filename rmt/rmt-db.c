@@ -120,16 +120,28 @@ void rmt_db_poll(void)
 				if (f->type == type)
 					break;
 
-			if (f) {
-				struct ui_rmt_field field = {
-					.de	= de,
-					.f	= f,
-				};
+			struct ui_rmt_field field = {
+				.de	= de,
+				.f	= f,
+				.binary	= 0,
+			};
 
-				ui_rmt_reveal(&field);
-			} else {
-				op = RDOP_NOT_FOUND;
+			switch (type) {
+			case ft_pw:
+			case ft_pw2:
+				break;
+			case ft_hotp_secret:
+			case ft_totp_secret:
+				field.binary = 1;
+				break;
+			default:
+				f = NULL;
 			}
+
+			if (f)
+				ui_rmt_reveal(&field);
+			else
+				op = RDOP_NOT_FOUND;
 			break;
 		default:
 			op = RDOP_INVALID;

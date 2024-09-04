@@ -13,8 +13,11 @@
 #include <string.h>
 
 #include "hal.h"
+#include "alloc.h"
+#include "debug.h"
 #include "timer.h"
 #include "fmt.h"
+#include "base32.h"
 #include "db.h"
 #include "gfx.h"
 #include "shape.h"
@@ -59,7 +62,12 @@ struct ui_rmt_ctx {
 	uint64_t timeout_ms;
 	struct gfx_rect cd_box;
 	unsigned last_s;
-	/* action for which permission is being requested; NULL if none */
+	/*
+	 * action for which permission is being requested; NULL if none.
+	 * "action" is invoked if the permission is granted, with "c" set to
+	 * the context, and also if the permission is denied, with "c" set to
+	 * NULL, in order to deallocate "user", if necessary.
+	 */
 	void (*action)(struct ui_rmt_ctx *c, void *user);
 	void *user;
 	unsigned generation; /* database generation */
@@ -129,9 +137,13 @@ static void reset_timeout(struct ui_rmt_ctx *c)
 
 static void action_reveal(struct ui_rmt_ctx *c, void *user)
 {
-	const struct db_field *f = user;
-	char buf[f->len + 1];
+	const char *s = user;
+	unsigned h, y;
 
+	if (!c) {
+		free(user);
+		return;
+	}
 	if (main_db.generation != c->generation) {
 		/* @@@ should display some message */
 		show_remote();
@@ -139,12 +151,15 @@ static void action_reveal(struct ui_rmt_ctx *c, void *user)
 		return;
 	}
 
-	memcpy(buf, f->data, f->len);
-	buf[f->len] = 0;
-
 	gfx_clear(&main_da, GFX_BLACK);
-	text_text(&main_da, GFX_WIDTH / 2, GFX_HEIGHT / 2, buf,
-	    &TEXT_FONT, GFX_CENTER, GFX_CENTER, GFX_YELLOW);
+	h = text_format(&main_da, 0, 0, GFX_WIDTH, 0, 0, s, 
+	    &TEXT_FONT, GFX_CENTER, GFX_YELLOW);
+	if (h > GFX_HEIGHT)
+		h = GFX_HEIGHT;
+	y = (GFX_HEIGHT - h) / 2;
+	text_format(&main_da, 0, y, GFX_WIDTH, GFX_HEIGHT - y, 0, s, 
+	    &TEXT_FONT, GFX_CENTER, GFX_YELLOW);
+	free(user);
 	last_ctx->revealing = 1;
 	ui_update_display();
 }
@@ -204,29 +219,38 @@ static void ui_rmt_tap(void *ctx, unsigned x, unsigned y)
 
 	if (c->action) {
 		struct gfx_rect r;
+		bool yes, no;
+
+		yesno_rect(&r, 1);
+		yes = gfx_in_rect(&r, x, y);
+		yesno_rect(&r, 0);
+		no = gfx_in_rect(&r, x, y);
+
+		if (!yes && !no)
+			return;
+
+		void (*action)(struct ui_rmt_ctx *c, void *user) = c->action;
+		void *user = c->user;
+
+		c->action = NULL;
+		c->user = NULL;
+		c->action = NULL;
 
 		/* Yes */
-		yesno_rect(&r, 1);
-		if (gfx_in_rect(&r, x, y)) {
-			void (*action)(struct ui_rmt_ctx *c, void *user) =
-			    c->action;
-			void *user = c->user;
-
-			c->action = NULL;
-			c->user = NULL;
+		if (yes) {
 			action(c, user);
 			return;
 		}
 
 		/* No */
-		yesno_rect(&r, 0);
-		if (!gfx_in_rect(&r, x, y))
-			return;
+		show_remote();
+		action(NULL, user);
+		return;
 	}
 	if (c->revealing || c->action) {
 		show_remote();
 		c->revealing = 0;
-		c->action = 0;
+		c->action = NULL;
 		ui_update_display();
 	} else {
 		if (gfx_in_rect(&c->cd_box, x,y))
@@ -305,12 +329,41 @@ const struct ui ui_rmt = {
 
 void ui_rmt_reveal(const struct ui_rmt_field *field)
 {
-	const char *field_name = "password";
+	const char *field_name;
+	const struct db_field *f = field->f;
+	char *buf;
 
 	/* last_ctx is not set if we're running from a test script */
 	if (scripting && !last_ctx)
 		return;
 	last_ctx->generation = main_db.generation;
-	ask_permission(last_ctx, action_reveal, (void *) field->f,
+	switch (f->type) {
+	case ft_pw:
+		field_name = "password";
+		break;
+	case ft_pw2:
+		field_name = "2nd password";
+		break;
+	case ft_hotp_secret:
+		field_name = "HOTP secret";
+		break;
+	case ft_totp_secret:
+		field_name = "TOTP secret";
+		break;
+	default:
+		debug("ui_rmt_reveal: unrecognized field %u\n", f->type);
+		return;
+	}
+	if (field->binary) {
+		size_t size = base32_encode_size(f->len);
+
+		buf = alloc_size(size);
+		base32_encode(buf, size, f->data, f->len);
+	} else {
+		buf = alloc_size(f->len + 1);
+		memcpy(buf, f->data, f->len);
+		buf[f->len] = 0;
+	}
+	ask_permission(last_ctx, action_reveal, buf,
 	    "Show %s of %s ?", field_name, field->de->name);
 }

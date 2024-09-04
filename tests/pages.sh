@@ -712,12 +712,35 @@ accounts $mode rmt-reveal-no "long 200 72" "$ACCOUNTS_REMOTE" \
 accounts $mode rmt-reveal-yes "long 200 72" "$ACCOUNTS_REMOTE" \
     "rmt $RDOP_REVEAL demo $FIELD_PASSWORD" "$YES"
 
-# --- Remote (reveal, return) -------------------------------------------------
+# --- Remote (set time, advance by 30 seconds) --------------------------------
 
-# tap anywhere, we arbitrarily pick ENTRY_5
+RDOP_SET_TIME=07
+T_150000=1725462000
+T_150030=`expr $T_150000 + 30`
+T_120000=`expr $T_150000 - 3 \* 3600`
 
-accounts $mode rmt-reveal-return "long 200 72" "$ACCOUNTS_REMOTE" \
-    "rmt $RDOP_REVEAL demo $FIELD_PASSWORD" "$YES" "$ENTRY_5"
+t_bytes()
+{
+	local tmp=$1
+	local i=0
+
+	while [ $i -lt 8 ]; do
+		[ "$i" -gt 0 ] && printf " "
+		printf "%02x" `expr $tmp % 256`
+		tmp=`expr $tmp / 256`
+		i=`expr $i + 1`
+	done
+}
+
+accounts $mode rmt-set-time-30s "time $T_150000" \
+    "long 200 72" "$ACCOUNTS_REMOTE" \
+    "rmt $RDOP_SET_TIME `t_bytes $T_150030`"
+
+# --- Remote (set time, back 3h) ----------------------------------------------
+
+accounts $mode rmt-set-time-3h "time $T_150000" \
+    "long 200 72" "$ACCOUNTS_REMOTE" \
+    "rmt $RDOP_SET_TIME `t_bytes $T_120000`"
 
 # -----------------------------------------------------------------------------
 

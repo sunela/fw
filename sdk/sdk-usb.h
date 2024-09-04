@@ -40,7 +40,7 @@
 
 
 enum sunela_requests {
-	SUNELA_TIME	= 1,
+	/* 1 was SUNELA_TIME */
 	SUNELA_QUERY	= 2,
 	SUNELA_DEMO	= 3,
 	SUNELA_RMT	= 4,

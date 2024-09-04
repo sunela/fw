@@ -50,9 +50,6 @@ bool usb_arrival(uint8_t req, const void *data, uint32_t len)
 		debug("%02x%s", ((const uint8_t *) data)[i],
 			i < len - 1 ? " ": "\r\n");
 	switch (req) {
-	case SUNELA_TIME:
-		mbox_deposit(&time_mbox, data, len);
-		break;
 	case SUNELA_DEMO:
 		mbox_deposit(&demo_mbox, data, len);
 		break;

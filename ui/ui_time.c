@@ -31,16 +31,9 @@
 #include "ui.h"
 
 
-enum sync_mode {
-	sm_manual,
-	sm_usb,
-	sm_end		/* must be last */
-};
-
 struct ui_time_ctx {
 	struct wi_list list;
 	struct wi_list_entry *entry_time, *entry_date, *entry_sync;
-	enum sync_mode sync_mode;
 };
 
 
@@ -55,14 +48,7 @@ static const struct wi_list_style style = {
 	}
 };
 
-struct mbox time_mbox = MBOX_INIT;
-
 static struct wi_list *lists[1];
-
-static const char *sync_mode_name[] = {
-	"Manual",
-	"USB"
-};
 
 
 /* --- Show time ----------------------------------------------------------- */
@@ -85,44 +71,6 @@ static void show_time(struct ui_time_ctx *c)
 	    tm.tm_year + 1900, tm.tm_mon, tm.tm_mday);
 	wi_list_update_entry(&c->list, c->entry_time, "Time", s_time, NULL);
 	wi_list_update_entry(&c->list, c->entry_date, "Date", s_date, NULL);
-	wi_list_update_entry(&c->list, c->entry_sync,
-	    sync_mode_name[c->sync_mode], NULL, NULL);
-}
-
-
-/* --- Set time ----------------------------------------------------------- */
-
-
-static void set_time(struct ui_time_ctx *c, uint64_t t)
-{
-	time_offset = t - time_us() / 1000000;
-	show_time(c);
-	ui_update_display();
-}
-
-
-/* --- Sync mode ----------------------------------------------------------- */
-
-
-static void show_sync_mode(struct ui_time_ctx *c)
-{
-	wi_list_update_entry(&c->list, c->entry_sync,
-	    sync_mode_name[c->sync_mode], NULL, NULL);
-}
-
-
-static void change_sync_mode(struct ui_time_ctx *c)
-{
-	static uint64_t time_buf;
-
-	c->sync_mode = (c->sync_mode + 1) % sm_end;
-	show_sync_mode(c);
-	ui_update_display();
-
-	if (c->sync_mode == sm_usb)
-		mbox_enable_buf(&time_mbox, &time_buf, sizeof(time_buf));
-	else
-		mbox_disable(&time_mbox);
 }
 
 
@@ -131,14 +79,14 @@ static void change_sync_mode(struct ui_time_ctx *c)
 
 static void ui_time_tap(void *ctx, unsigned x, unsigned y)
 {
+#if 0
 	struct ui_time_ctx *c = ctx;
 	const struct wi_list_entry *entry;
 
 	entry = wi_list_pick(&c->list, x, y);
 	if (!entry)
 		return;
-	if (entry == c->entry_sync)
-		change_sync_mode(c);
+#endif
 }
 
 
@@ -158,7 +106,6 @@ static void ui_time_open(void *ctx, void *params)
 	struct ui_time_ctx *c = ctx;
 
 	lists[0] = &c->list;
-	c->sync_mode = sm_manual;
 
 	gfx_rect_xy(&main_da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH, GFX_WHITE);
 	text_text(&main_da, GFX_WIDTH / 2, TOP_H / 2, "Set Time",
@@ -168,10 +115,8 @@ static void ui_time_open(void *ctx, void *params)
 	c->entry_time = wi_list_add(&c->list, "Time", "--:--:--", NULL);
 	c->entry_date = wi_list_add(&c->list, "Date", "****-**-**", NULL);
 	wi_list_add(&c->list, "Time zone", "UTC", NULL);
-	c->entry_sync = wi_list_add(&c->list, "", NULL, NULL);
 	wi_list_end(&c->list);
 	show_time(c);
-	show_sync_mode(c);
 
 	set_idle(IDLE_SET_TIME_S);
 }
@@ -182,8 +127,6 @@ static void ui_time_close(void *ctx)
 	struct ui_time_ctx *c = ctx;
 
 	wi_list_destroy(&c->list);
-	if (c->sync_mode == sm_usb)
-		mbox_disable(&time_mbox);
 }
 
 
@@ -195,17 +138,7 @@ static void ui_time_tick(void *ctx)
 	struct ui_time_ctx *c = ctx;
 	static int64_t last_tick = -1;
 	int64_t this_tick = time_us() / 1000000;
-	ssize_t got;
-	uint64_t new_time;
 
-	got = mbox_retrieve(&time_mbox, &new_time, sizeof(new_time));
-	if (got >= 0) {
-		if (got == sizeof(new_time))
-			set_time(c, new_time);
-		else
-			debug("ui_time_tick: time size %u\n", (unsigned) got);
-	}
-	if (mbox_retrieve(&time_mbox, &new_time, sizeof(new_time)))
 	if (last_tick == this_tick)
 		return;
 	last_tick = this_tick;

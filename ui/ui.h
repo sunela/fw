@@ -84,8 +84,6 @@ struct ui {
 extern struct gfx_drawable main_da;
 extern struct db main_db;
 
-extern struct mbox time_mbox;
-
 /* User interface pages */
 
 extern const struct ui ui_off;

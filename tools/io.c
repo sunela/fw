@@ -31,20 +31,6 @@
 static bool fake_rmt = 0;
 
 
-static void old_set_time(usb_dev_handle *dev)
-{
-	uint64_t t = time(NULL);
-	int res;
-
-	res = usb_control_msg(dev, TO_DEV, SUNELA_TIME, 0, 0,
-	    (char *)  &t, sizeof(t), TIMEOUT_MS);
-	if (res < 0) {
-		fprintf(stderr, "SUNELA_TIME: %d\n", res);
-		exit(1);
-	}
-}
-
-
 static void query(usb_dev_handle *dev, uint8_t req, const char *name)
 {
 	char buf[1024];
@@ -283,7 +269,6 @@ static void usage(const char *name)
 "  reveal entry-name field-name\n"
 "  set-time [[YYYY-MM-DDT]HH:MM[:SS]]\n"
 "  show entry-name\n"
-"  time\n"
     , name);
 	exit(1);
 }
@@ -318,9 +303,7 @@ int main(int argc, char *const *argv)
 	}
 
 	n_args = argc - optind;
-	if (n_args == 1 && !strcmp(argv[optind], "time"))
-		old_set_time(dev);
-	else if (n_args == 1 && !strcmp(argv[optind], "query"))
+	if (n_args == 1 && !strcmp(argv[optind], "query"))
 		query(dev, SUNELA_QUERY, "SUNELA_QUERY");
 	else if (n_args == 1 && !strcmp(argv[optind], "bad-query"))
 		query(dev, SUNELA_DEMO, "SUNELA_DEMO");

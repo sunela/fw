@@ -13,6 +13,7 @@ enum rdb_op {
 	RDOP_LS		= 2,	/* list all the accounts */
 	RDOP_SHOW	= 4,	/* list all fields */
 	RDOP_REVEAL	= 5,	/* display field content on device */
+	RDOP_GET_TIME	= 6,	/* get the time (64-bit LE Unix time) */
 	RDOP_INVALID	= 100,	/* invalid request, returns an error */
 	RDOP_NOT_FOUND	= 101,	/* entry not found, returns an error */
 	RDOP_BUSY	= 102,	/* previous action is still on-going, returns

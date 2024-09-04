@@ -145,6 +145,8 @@ void rmt_db_poll(void)
 				op = RDOP_NOT_FOUND;
 			}
 			break;
+		case RDOP_GET_TIME:
+			break;
 		default:
 			op = RDOP_INVALID;
 			return;
@@ -230,6 +232,15 @@ void rmt_db_poll(void)
 			}
 			if (!f)
 				state = RDS_END;
+			break;
+		case RDOP_GET_TIME:
+			uint64_t t = t = time_us() / 1000000 + time_offset;
+
+			buf[0] = 1;
+			memcpy(buf + 1, &t, sizeof(t));
+			if (!rmt_response(&rmt_usb, buf, sizeof(t) + 1))
+				return;
+			state = RDS_END;
 			break;
 		case RDOP_INVALID:
 			if (!rmt_response(&rmt_usb, "\000Bad request", 12))

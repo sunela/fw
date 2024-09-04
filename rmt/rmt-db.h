@@ -10,12 +10,12 @@
 
 enum rdb_op {
 	RDOP_NULL	= 0,	/* null request, returns an empty reponse */
-	RDOP_INVALID	= 1,	/* invalid request, returns an error */
 	RDOP_LS		= 2,	/* list all the accounts */
-	RDOP_NOT_FOUND	= 3,	/* entry not found, returns an error */
 	RDOP_SHOW	= 4,	/* list all fields */
 	RDOP_REVEAL	= 5,	/* display field content on device */
-	RDOP_BUSY	= 6,	/* previous action is still on-going, returns
+	RDOP_INVALID	= 100,	/* invalid request, returns an error */
+	RDOP_NOT_FOUND	= 101,	/* entry not found, returns an error */
+	RDOP_BUSY	= 102,	/* previous action is still on-going, returns
 				   an error */
 };
 

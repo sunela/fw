@@ -5,6 +5,7 @@
  * A copy of the license can be found in the file LICENSE.MIT
  */
 
+#define	_XOPEN_SOURCE 500	/* for strptime; 500 needed for usleep */
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -30,7 +31,7 @@
 static bool fake_rmt = 0;
 
 
-static void set_time(usb_dev_handle *dev)
+static void old_set_time(usb_dev_handle *dev)
 {
 	uint64_t t = time(NULL);
 	int res;
@@ -231,6 +232,36 @@ static void get_time(usb_dev_handle *dev)
 }
 
 
+static void set_time(usb_dev_handle *dev, const char *s)
+{
+	time_t t;
+	uint64_t t_buf;
+
+	time(&t);
+	if (s) {
+		struct tm tm = *gmtime(&t);
+		char *next;
+
+		next = strptime(s, "%Y-%m-%dT%H:%M:%S", &tm);
+		if (!next)
+			next = strptime(s, "%H:%M:%S", &tm);
+		if (!next)
+			next = strptime(s, "%Y-%m-%dT%H:%M", &tm);
+		if (!next) {
+			tm.tm_sec = 0;
+			next = strptime(s, "%H:%M", &tm);
+		}
+		if (!next || *next) {
+			fprintf(stderr, "invalid date\n");
+			exit(1);
+		}
+		t = mktime(&tm);
+	}
+	t_buf = t;
+	rmt_io(dev, RDOP_SET_TIME, &t_buf, sizeof(t_buf), NULL);
+}
+
+
 static void usage(const char *name)
 {
 	fprintf(stderr,
@@ -245,6 +276,7 @@ static void usage(const char *name)
 "  ls\n"
 "  query\n"
 "  reveal entry-name field-name\n"
+"  set-time [[YYYY-MM-DDT]HH:MM[:SS]]\n"
 "  show entry-name\n"
 "  time\n"
     , name);
@@ -282,7 +314,7 @@ int main(int argc, char *const *argv)
 
 	n_args = argc - optind;
 	if (n_args == 1 && !strcmp(argv[optind], "time"))
-		set_time(dev);
+		old_set_time(dev);
 	else if (n_args == 1 && !strcmp(argv[optind], "query"))
 		query(dev, SUNELA_QUERY, "SUNELA_QUERY");
 	else if (n_args == 1 && !strcmp(argv[optind], "bad-query"))
@@ -297,6 +329,10 @@ int main(int argc, char *const *argv)
 		reveal(dev, argv[optind + 1], argv[optind + 2]);
 	else if (n_args == 1 && !strcmp(argv[optind], "get-time"))
 		get_time(dev);
+	else if (n_args == 1 && !strcmp(argv[optind], "set-time"))
+		set_time(dev, NULL);
+	else if (n_args == 2 && !strcmp(argv[optind], "set-time"))
+		set_time(dev, argv[optind + 1]);
 	else
 		usage(*argv);
 	return 0;

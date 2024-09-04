@@ -168,6 +168,12 @@ static void reveal(usb_dev_handle *dev, const char *entry, const char *field)
 
 	if (!strcmp(field, "password") || !strcmp(field, "pw"))
 		type = ft_pw;
+	else if (!strcmp(field, "password2") || !strcmp(field, "pw2"))
+		type = ft_pw2;
+	else if (!strcmp(field, "hotp_secret"))
+		type = ft_hotp_secret;
+	else if (!strcmp(field, "totp_secret"))
+		type = ft_totp_secret;
 	else {
 		fprintf(stderr, "unrecognized field \"%s\"\n", field);
 		exit(1);

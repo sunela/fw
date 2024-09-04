@@ -329,7 +329,7 @@ const struct ui ui_rmt = {
 /* --- Interface towards the protocol stack -------------------------------- */
 
 
-void ui_rmt_reveal(const struct ui_rmt_field *field)
+bool ui_rmt_reveal(const struct ui_rmt_field *field)
 {
 	const char *field_name;
 	const struct db_field *f = field->f;
@@ -337,7 +337,9 @@ void ui_rmt_reveal(const struct ui_rmt_field *field)
 
 	/* last_ctx is not set if we're running from a test script */
 	if (scripting && !last_ctx)
-		return;
+		return 1;
+	if (last_ctx->action)
+		return 0;
 	last_ctx->generation = main_db.generation;
 	switch (f->type) {
 	case ft_pw:
@@ -354,7 +356,7 @@ void ui_rmt_reveal(const struct ui_rmt_field *field)
 		break;
 	default:
 		debug("ui_rmt_reveal: unrecognized field %u\n", f->type);
-		return;
+		return 1;
 	}
 	if (field->binary) {
 		size_t size = base32_encode_size(f->len);
@@ -368,4 +370,5 @@ void ui_rmt_reveal(const struct ui_rmt_field *field)
 	}
 	ask_permission(last_ctx, action_reveal, buf,
 	    "Show %s of %s ?", field_name, field->de->name);
+	return 1;
 }

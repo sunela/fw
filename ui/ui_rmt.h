@@ -20,6 +20,6 @@ struct ui_rmt_field {
 };
 
 
-void ui_rmt_reveal(const struct ui_rmt_field *field);
+bool ui_rmt_reveal(const struct ui_rmt_field *field);
 
 #endif /* !UI_RMT_H */

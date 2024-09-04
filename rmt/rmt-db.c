@@ -138,10 +138,12 @@ void rmt_db_poll(void)
 				f = NULL;
 			}
 
-			if (f)
-				ui_rmt_reveal(&field);
-			else
+			if (f) {
+				if (!ui_rmt_reveal(&field))
+					op = RDOP_BUSY;
+			} else {
 				op = RDOP_NOT_FOUND;
+			}
 			break;
 		default:
 			op = RDOP_INVALID;
@@ -236,6 +238,11 @@ void rmt_db_poll(void)
 			break;
 		case RDOP_NOT_FOUND:
 			if (!rmt_response(&rmt_usb, "\000Not found", 10))
+				return;
+			state = RDS_END;
+			break;
+		case RDOP_BUSY:
+			if (!rmt_response(&rmt_usb, "\000Busy", 10))
 				return;
 			state = RDS_END;
 			break;

@@ -15,6 +15,8 @@ enum rdb_op {
 	RDOP_NOT_FOUND	= 3,	/* entry not found, returns an error */
 	RDOP_SHOW	= 4,	/* list all fields */
 	RDOP_REVEAL	= 5,	/* display field content on device */
+	RDOP_BUSY	= 6,	/* previous action is still on-going, returns
+				   an error */
 };
 
 

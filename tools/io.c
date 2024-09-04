@@ -14,6 +14,7 @@
 #include <time.h>
 #include <usb.h>
 #include <errno.h>
+#include <assert.h>
 
 #include "../rmt/rmt-db.h"
 #include "../sdk/sdk-usb.h"
@@ -206,6 +207,30 @@ static void reveal(usb_dev_handle *dev, const char *entry, const char *field)
 }
 
 
+
+static void print_time(const char *buf, unsigned len)
+{
+	uint64_t t_raw;
+	time_t t;
+	struct tm tm;
+	char buf2[100];
+
+	assert(len == sizeof(t_raw) + 1);
+	memcpy(&t_raw, buf + 1, len - 1);
+	t = t_raw;
+	gmtime_r(&t, &tm);
+	strftime(buf2, sizeof(buf2), "%Y-%m-%d %H:%M:%S", &tm);
+
+	printf("%s\n", buf2);
+}
+
+
+static void get_time(usb_dev_handle *dev)
+{
+	rmt_io(dev, RDOP_GET_TIME, NULL, 0, print_time);
+}
+
+
 static void usage(const char *name)
 {
 	fprintf(stderr,
@@ -216,6 +241,7 @@ static void usage(const char *name)
 "Commands:\n"
 "  bad-query\n"
 "  demo name [args ...]\n"
+"  get-time\n"
 "  ls\n"
 "  query\n"
 "  reveal entry-name field-name\n"
@@ -269,6 +295,8 @@ int main(int argc, char *const *argv)
 		rmt(dev, RDOP_SHOW, argv[optind + 1]);
 	else if (n_args == 3 && !strcmp(argv[optind], "reveal"))
 		reveal(dev, argv[optind + 1], argv[optind + 2]);
+	else if (n_args == 1 && !strcmp(argv[optind], "get-time"))
+		get_time(dev);
 	else
 		usage(*argv);
 	return 0;

@@ -57,6 +57,7 @@ static bool rmt_db_reset(void)
 }
 
 
+#include <stdio.h>
 void rmt_db_poll(void)
 {
 	int got;
@@ -147,6 +148,18 @@ void rmt_db_poll(void)
 			break;
 		case RDOP_GET_TIME:
 			break;
+		case RDOP_SET_TIME:
+			;
+			uint64_t t;
+
+			if (got != sizeof(t) + 1) {
+				op = RDOP_INVALID;
+				return;
+			}
+			memcpy(&t, buf + 1, sizeof(t));
+			if (!ui_rmt_set_time(t))
+				op = RDOP_BUSY;
+			break;
 		default:
 			op = RDOP_INVALID;
 			return;
@@ -175,6 +188,9 @@ void rmt_db_poll(void)
 				return;
 			}
 			break;
+		case RDOP_SET_TIME:
+			state = RDS_END;
+			return;
 		default:
 			break;
 		}
@@ -234,6 +250,7 @@ void rmt_db_poll(void)
 				state = RDS_END;
 			break;
 		case RDOP_GET_TIME:
+			;
 			uint64_t t = t = time_us() / 1000000 + time_offset;
 
 			buf[0] = 1;

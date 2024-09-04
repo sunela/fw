@@ -11,6 +11,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "hal.h"
 #include "alloc.h"
@@ -163,6 +164,23 @@ static void action_reveal(struct ui_rmt_ctx *c, void *user)
 {
 	if (c)
 		do_action_reveal(c, user);
+	free(user);
+}
+
+
+
+static void do_action_set_time(struct ui_rmt_ctx *c, const int64_t *delta_s)
+{
+	time_offset += *delta_s;
+	show_remote();
+	ui_update_display();
+}
+
+
+static void action_set_time(struct ui_rmt_ctx *c, void *user)
+{
+	if (c)
+		do_action_set_time(c, user);
 	free(user);
 }
 
@@ -326,7 +344,7 @@ const struct ui ui_rmt = {
 };
 
 
-/* --- Interface towards the protocol stack -------------------------------- */
+/* --- Interface: "reveal" ------------------------------------------------- */
 
 
 bool ui_rmt_reveal(const struct ui_rmt_field *field)
@@ -370,5 +388,73 @@ bool ui_rmt_reveal(const struct ui_rmt_field *field)
 	}
 	ask_permission(last_ctx, action_reveal, buf,
 	    "Show %s of %s ?", field_name, field->de->name);
+	return 1;
+}
+
+
+/* --- Interface: "set time" ----------------------------------------------- */
+
+
+static void format_time(time_t t, char *buf, unsigned size)
+{
+	struct tm tm;
+	char *p = buf;
+
+	assert(size >= 10 + 1 + 8 + 1);
+
+	gmtime_r(&t, &tm);
+        format(add_char, &p, "%04d-%02d-%02d",
+            tm.tm_year + 1900, tm.tm_mon, tm.tm_mday);
+	*p++ = ' ';
+	format(add_char, &p, "%02d:%02d:%02d",
+            tm.tm_hour, tm.tm_min, tm.tm_sec);
+	assert(p - buf == 10 + 1 + 8);
+}
+
+
+static void format_delta(uint64_t dt, char *buf, unsigned size)
+{
+	char *p = buf;
+
+	if (dt > 10 * 365.25 * 24 * 3600)
+		format(add_char, &p, "%u years",
+		    (unsigned) (dt / 3600 / 24 / 365.25));
+	else if (dt > 10 * 7 * 24 * 3600)
+		format(add_char, &p, "%u weeks",
+		    (unsigned) (dt / 3600 / 24 / 7));
+	else if (dt > 10 * 24 * 3600)
+		format(add_char, &p, "%u days", (unsigned) (dt / 3600 / 24));
+	else if (dt > 3600)
+		format(add_char, &p, "%uh%02u",
+		    (unsigned) (dt / 3600), (unsigned) ((dt / 60) % 60));
+	else
+		format(add_char, &p, "%u s", (unsigned) dt);
+	assert((unsigned) (p - buf) < size);
+}
+
+
+bool ui_rmt_set_time(time_t new_time)
+{
+	char old[20], new[20], delta[30];
+	time_t t = time_us() / 1000000 + time_offset;
+	int64_t dt, *p;
+
+	if (scripting && !last_ctx)
+		return 1;
+	if (last_ctx->action)
+		return 0;
+	if (new_time >= t - 1 && new_time <= t + 1)
+		return 1;
+
+	format_time(t, old, sizeof(old));
+	format_time(new_time, new, sizeof(new));
+	dt = new_time - t;
+	format_delta(dt >= 0 ? -dt : -dt, delta, sizeof(delta));
+
+	p = alloc_size(sizeof(*p));
+	*p = dt;
+	ask_permission(last_ctx, action_set_time, p,
+	    "Change time from %s to %s (%s %s)", old, new, delta,
+	    dt < 0 ? "earlier" : "later");
 	return 1;
 }

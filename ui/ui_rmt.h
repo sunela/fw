@@ -9,6 +9,8 @@
 #define	UI_RMT_H
 
 #include <stdbool.h>
+#include <stdint.h>
+#include <time.h>
 
 #include "db.h"
 
@@ -21,5 +23,6 @@ struct ui_rmt_field {
 
 
 bool ui_rmt_reveal(const struct ui_rmt_field *field);
+bool ui_rmt_set_time(time_t new_time);
 
 #endif /* !UI_RMT_H */

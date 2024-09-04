@@ -135,15 +135,10 @@ static void reset_timeout(struct ui_rmt_ctx *c)
 /* --- Permission and actions ---------------------------------------------- */
 
 
-static void action_reveal(struct ui_rmt_ctx *c, void *user)
+static void do_action_reveal(struct ui_rmt_ctx *c, const char *s)
 {
-	const char *s = user;
 	unsigned h, y;
 
-	if (!c) {
-		free(user);
-		return;
-	}
 	if (main_db.generation != c->generation) {
 		/* @@@ should display some message */
 		show_remote();
@@ -159,9 +154,16 @@ static void action_reveal(struct ui_rmt_ctx *c, void *user)
 	y = (GFX_HEIGHT - h) / 2;
 	text_format(&main_da, 0, y, GFX_WIDTH, GFX_HEIGHT - y, 0, s, 
 	    &TEXT_FONT, GFX_CENTER, GFX_YELLOW);
-	free(user);
 	last_ctx->revealing = 1;
 	ui_update_display();
+}
+
+
+static void action_reveal(struct ui_rmt_ctx *c, void *user)
+{
+	if (c)
+		do_action_reveal(c, user);
+	free(user);
 }
 
 

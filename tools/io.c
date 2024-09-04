@@ -82,8 +82,8 @@ static void demo(usb_dev_handle *dev, char *const *argv, int args)
 }
 
 
-static void rmt_bin(usb_dev_handle *dev, uint8_t op, const void *arg,
-    size_t len)
+static void rmt_io(usb_dev_handle *dev, uint8_t op, const void *arg,
+    size_t len, void (*print)(const char *buf, unsigned len))
 {
 	int res;
 	char buf[256] = { op, };
@@ -140,17 +140,39 @@ static void rmt_bin(usb_dev_handle *dev, uint8_t op, const void *arg,
 			fprintf(stderr, "%.*s\n", res - 1, buf + 1);
 			continue;
 		}
-		switch (op) {
-		case RDOP_LS:
-			printf("%.*s\n", res, buf);
-			break;
-		case RDOP_SHOW:
-			printf("%u: %.*s\n", buf[0], res - 1, buf + 1);
-			break;
-		default:
-			abort();
-		}
+		print(buf, res);
 	}
+}
+
+
+static void print_ls(const char *buf, unsigned len)
+{
+	printf("%.*s\n", len , buf);
+}
+
+
+static void print_show(const char *buf, unsigned len)
+{
+	printf("%u: %.*s\n", buf[0], len - 1, buf + 1);
+}
+
+
+static void rmt_bin(usb_dev_handle *dev, uint8_t op, const void *arg,
+    size_t len)
+{
+	void (*print)(const char *buf, unsigned len);
+
+	switch (op) {
+	case RDOP_LS:
+		print = print_ls;
+		break;
+	case RDOP_SHOW:
+		print = print_show;
+		break;
+	default:
+		abort();
+	}
+	rmt_io(dev, op, arg, len, print);
 }
 
 

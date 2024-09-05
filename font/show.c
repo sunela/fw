@@ -19,6 +19,7 @@
 
 #include "font.h"
 
+#include "mono14.font"
 #include "mono18.font"
 #include "mono24.font"
 #include "mono34.font"
@@ -33,6 +34,7 @@ struct font_ref {
 
 
 static struct font_ref fonts[] = {
+	{ "mono14",	&mono14 },
 	{ "mono18",	&mono18 },
 	{ "mono24",	&mono24 },
 	{ "mono34",	&mono34 },
@@ -52,8 +54,6 @@ static void render(const struct font *font, const struct character *ch)
 	uint16_t buf = 0;
 
 	(void) font;
-	/* @@@ Support uncompressed fonts later */
-	assert(ch->bits > 1);
 
 	printf("%3s", "");
 	for (x = 0; x != ch->w; x++)
@@ -64,23 +64,35 @@ static void render(const struct font *font, const struct character *ch)
 		printf("%2u ", y);
 		for (x = 0; x != ch->w; x++) {
 			if (!more) {
-				while (1) {
-					uint8_t this;
-
-					if (got < ch->bits) {
-						buf |= *p++ << got;
-						got += 8;
+				/* uncompressed */
+				if (ch->bits == 1) {
+					if (!got) {
+						buf = *p++;
+						got = 8;
 					}
-					this =
-					    (buf & ((1 << ch->bits) - 1)) + 1;
-					more += this;
-					buf >>= ch->bits;
-					got -= ch->bits;
-					if (this != 1 << ch->bits)
-						break;
-					more--;
+					on = buf & 1;
+					buf >>= 1;
+					got--;
+					more = 1;
+				} else {
+					while (1) {
+						uint8_t this;
+
+						if (got < ch->bits) {
+							buf |= *p++ << got;
+							got += 8;
+						}
+						this = (buf &
+						    ((1 << ch->bits) - 1)) + 1;
+						more += this;
+						buf >>= ch->bits;
+						got -= ch->bits;
+						if (this != 1 << ch->bits)
+							break;
+						more--;
+					}
+					on = !on;
 				}
-				on = !on;
 			}
 			printf("%s", on ? "##" : "--");
 			more--;

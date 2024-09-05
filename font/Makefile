@@ -16,7 +16,7 @@ FONT_PATTERN = Liberation Mono:bold:slant=0
 FONT_FILE = $(shell fc-list '$(FONT_PATTERN)' file | grep /liberation2/ | \
     sed 's/:.*//')
 
-FONTS = mono18.font mono24.font mono34.font mono36.font mono58.font
+FONTS = mono14.font mono18.font mono24.font mono34.font mono36.font mono58.font
 
 CFLAGS = -Wall -Wextra -g
 OBJS = font.o
@@ -29,6 +29,10 @@ all::	show
 
 show:	show.c $(FONTS) $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $< $(OBJS)
+
+mono14.font: cvtfont.py Makefile PATCHES
+	$(BUILD) ./cvtfont.py $(FONT_FILE) 14 mono14 32-126 PATCHES >$@ || \
+	    { rm -f $@; exit 1; }
 
 mono18.font: cvtfont.py Makefile PATCHES
 	$(BUILD) ./cvtfont.py $(FONT_FILE) 18 mono18 32-126 PATCHES >$@ || \

@@ -22,6 +22,7 @@ struct text_query {
 };
 
 
+extern const struct font mono14;
 extern const struct font mono18;
 extern const struct font mono24;
 extern const struct font mono34;

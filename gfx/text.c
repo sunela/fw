@@ -19,6 +19,7 @@
 
 //#define DEBUG
 
+#include "mono14.font"
 #include "mono18.font"
 #include "mono24.font"
 #include "mono34.font"
@@ -50,8 +51,6 @@ unsigned text_char(struct gfx_drawable *da, int x1, int y1,
 	assert(c);
 	if (c->bits == 0)
 		return c->advance;
-	/* @@@ support bits = 1 later */
-	assert(c->bits >= 2);
 
 	x1 += c->ox;
 	y1 -= c->oy + c->h - 1;
@@ -60,21 +59,32 @@ unsigned text_char(struct gfx_drawable *da, int x1, int y1,
 	p = c->data;
 	on = c->start;
 	while (x != c->w && y != c->h) {
-		more = 0;
-		while (1) {
-			uint8_t this;
-
-			if (got < c->bits) {
-				buf |= *p++ << got;
-				got += 8;
+		if (c->bits == 1) {
+			if (!got) {
+				buf = *p++;
+				got = 8;
 			}
-			this = (buf & ((1 << c->bits) - 1)) + 1;
-			more += this;
-			buf >>= c->bits;
-			got -= c->bits;
-			if (this != 1 << c->bits)
-				break;
-			more--;
+			on = buf & 1;
+			buf >>= 1;
+			got--;
+			more = 1;
+		} else {
+			more = 0;
+			while (1) {
+				uint8_t this;
+
+				if (got < c->bits) {
+					buf |= *p++ << got;
+					got += 8;
+				}
+				this = (buf & ((1 << c->bits) - 1)) + 1;
+				more += this;
+				buf >>= c->bits;
+				got -= c->bits;
+				if (this != 1 << c->bits)
+					break;
+				more--;
+			}
 		}
 //debug("%u %u %u:%u (w %u)\n", x, y, on, more, c->w);
 		while (x + more >= c->w) {

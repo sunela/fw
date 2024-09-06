@@ -251,7 +251,7 @@ void rmt_db_poll(void)
 			break;
 		case RDOP_GET_TIME:
 			;
-			uint64_t t = t = time_us() / 1000000 + time_offset;
+			uint64_t t = time_us() / 1000000 + time_offset;
 
 			buf[0] = 1;
 			memcpy(buf + 1, &t, sizeof(t));

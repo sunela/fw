@@ -52,3 +52,12 @@ project. Furthermore, sdk-main.c is based on main.c and sdk-usb.c is based on hi
 
 The Bouffalo SDK is licensed under the Apache 2.0 license. See LICENSE.Apache
 for a copy of the license.
+
+
+TweetNaCl
+---------
+
+TweetNaCl is the 2014-04-27 version obtained from
+https://tweetnacl.cr.yp.to/
+
+It is in the public domain.

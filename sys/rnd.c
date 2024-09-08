@@ -87,3 +87,11 @@ uint32_t rnd(uint32_t range)
 	rnd_bytes(&tmp, sizeof(tmp));
         return tmp % range;
 }
+
+
+/* for TweetNaCl */
+
+void randombytes(uint8_t *bytes, uint64_t len)
+{
+	rnd_bytes(bytes, len);
+}

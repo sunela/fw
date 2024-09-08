@@ -11,17 +11,20 @@
 
 #include <stdbool.h>
 #include <string.h>
+#include <assert.h>
 
 #include "rnd.h"
 #include "block.h"
 #include "dbcrypt.h"
 
 
-bool db_encrypt(const struct dbcrypt *c, void *block, const void *content)
+bool db_encrypt(const struct dbcrypt *c, void *block, const void *content,
+    unsigned length)
 {
 	struct block *b = (void *) block;
 	struct block_content *bc = &b->content;
 
+	assert(length == sizeof(struct block_content));
 	rnd_bytes(b->nonce, sizeof(b->nonce));
 	memcpy(bc, content, sizeof(struct block_content));
 	memset(b->hash, 0, sizeof(b->hash));
@@ -29,11 +32,13 @@ bool db_encrypt(const struct dbcrypt *c, void *block, const void *content)
 }
 
 
-bool db_decrypt(const struct dbcrypt *c, void *content, const void *block)
+int db_decrypt(const struct dbcrypt *c, void *content, unsigned size,
+    const void *block)
 {
 	const struct block *b = (const void *) block;
 	const struct block_content *bc = &b->content;
 
+	assert(size == sizeof(*bc));
 	memcpy(content, bc, sizeof(*bc));
-	return 1;
+	return sizeof(*bc);
 }

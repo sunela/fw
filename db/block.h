@@ -20,7 +20,7 @@
  *
  * Offset
  * |	Size
- * 0	24	Nonce
+ * 0	24	Nonce (0 if ct_empty)
  * 24	8	Reserved
  * 32	992	Encrypted content
  *  0	1	  Content type (empty, data)

@@ -17,11 +17,18 @@ struct dbcrypt;
 
 
 /*
+ * 
  * "Content" is all the encrypted data, including status, payload, hash, and
  * reserved bytes.
+ *
+ * db_encrypt returns 1 if the encryption was successful, 0 otherwise.
+ * db_decrypt returns -1 if decrypting failed, the length of the decrypted
+ * content otherwise.
  */
 
-bool db_encrypt(const struct dbcrypt *c, void *block, const void *content);
-bool db_decrypt(const struct dbcrypt *c, void *content, const void *block);
+bool db_encrypt(const struct dbcrypt *c, void *block, const void *content,
+    unsigned length);
+int db_decrypt(const struct dbcrypt *c, void *content, unsigned size,
+    const void *block);
 
 #endif /* !DBCRYPT_H */

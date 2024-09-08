@@ -52,6 +52,7 @@ enum block_type block_read(const struct dbcrypt *c, uint16_t *seq,
     void *payload, unsigned n)
 {
 	enum block_type type;
+	int got;
 
 	if (!storage_read_block(io_buf, n))
 		return bt_error;
@@ -64,10 +65,12 @@ enum block_type block_read(const struct dbcrypt *c, uint16_t *seq,
 	default:
 		break;
 	}
-	if (!db_decrypt(c, &bc, io_buf)) {
+	got = db_decrypt(c, &bc, sizeof(bc), io_buf);
+	if (got < 0) {
 		memset(&bc, 0, sizeof(bc));
 		return bt_invalid;
 	}
+	assert(got == sizeof(bc));
 	type = bc.type;
 	switch (bc.type) {
 	case bt_data:
@@ -103,7 +106,7 @@ bool block_write(const struct dbcrypt *c, enum content_type type, uint16_t seq,
 	default:
 		abort();
 	}
-	if (!db_encrypt(c, io_buf, &bc))
+	if (!db_encrypt(c, io_buf, &bc, sizeof(bc)))
 		return 0;
 	memset(&bc, 0, sizeof(bc));
 	return storage_write_block(io_buf, n);

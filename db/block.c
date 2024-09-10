@@ -49,8 +49,9 @@ static enum block_type classify_block(const uint8_t *b)
 
 
 enum block_type block_read(const struct dbcrypt *c, uint16_t *seq,
-    void *payload, unsigned n)
+    void *payload, unsigned *payload_len, unsigned n)
 {
+	const struct block_header *hdr = &bc.hdr;
 	enum block_type type;
 	int got;
 
@@ -70,18 +71,21 @@ enum block_type block_read(const struct dbcrypt *c, uint16_t *seq,
 		memset(&bc, 0, sizeof(bc));
 		return bt_invalid;
 	}
-	assert(got == sizeof(bc));
-	type = bc.type;
-	switch (bc.type) {
+	assert((unsigned) got <= sizeof(*hdr) + *payload_len);
+	type = hdr->type;
+	switch (hdr->type) {
 	case bt_data:
 		if (seq)
-			*seq = bc.seq;
+			*seq = hdr->seq;
 		memcpy(payload, bc.payload, sizeof(bc.payload));
+		*payload_len = sizeof(bc.payload);
 		break;
 	case bt_empty:
+		*payload_len = 0;
 		break;
 	default:
 		type = bt_invalid;
+		*payload_len = 0;
 		break;
 	}
 	memset(&bc, 0, sizeof(bc));
@@ -90,23 +94,28 @@ enum block_type block_read(const struct dbcrypt *c, uint16_t *seq,
 
 
 bool block_write(const struct dbcrypt *c, enum content_type type, uint16_t seq,
-    const void *payload, unsigned n)
+    const void *payload, unsigned length, unsigned n)
 {
+	struct block_header *hdr = &bc.hdr;
+
+debug("block_write %u\n", n);
 	assert(sizeof(struct block) == STORAGE_BLOCK_SIZE);
+	assert(length <= BLOCK_PAYLOAD_SIZE);
 	memset(io_buf, 0, sizeof(io_buf));
-	bc.type = type;
-	bc.seq = seq;
+	memset(&bc.hdr, 0, sizeof(bc.hdr));
+	hdr->type = type;
+	hdr->seq = seq;
 	switch (type) {
 	case bt_empty:
 		memset(&bc, 0, sizeof(bc));
 		break;
 	case bt_data:
-		memcpy(bc.payload, payload, sizeof(bc.payload));
+		memcpy(bc.payload, payload, length);
 		break;
 	default:
 		abort();
 	}
-	if (!db_encrypt(c, io_buf, &bc, sizeof(bc)))
+	if (!db_encrypt(c, io_buf, &bc, sizeof(bc.hdr) + length))
 		return 0;
 	memset(&bc, 0, sizeof(bc));
 	return storage_write_block(io_buf, n);

@@ -11,6 +11,7 @@ CFLAGS += -g -Wall -Wextra -Wshadow -Wno-unused-parameter \
 	 -I$(shell pwd) -Isys -Ilib -Igfx -Iui -Ifont -Icrypto -Idb -Imain \
 	 -Irmt
 OBJS = ui.o demo.o timer.o debug.o mbox.o rnd.o hmac.o hotp.o base32.o \
+    tweetnacl.o \
     fmt.o imath.o version.o rmt.o rmt-db.o \
     basic.o poly.o shape.o long_text.o font.o text.o \
     dbcrypt.o block.o span.o db.o settings.o pin.o \
@@ -40,6 +41,7 @@ vpath rnd.c sys
 vpath hmac.c crypto
 vpath hotp.c crypto
 vpath base32.c crypto
+vpath tweetnacl.c crypto
 
 vpath rmt.c rmt
 vpath rmt-db.c rmt

@@ -24,9 +24,10 @@ bool db_encrypt(const struct dbcrypt *c, void *block, const void *content,
 	struct block *b = (void *) block;
 	struct block_content *bc = &b->content;
 
-	assert(length == sizeof(struct block_content));
+	assert(length <= sizeof(struct block_content));
 	rnd_bytes(b->nonce, sizeof(b->nonce));
-	memcpy(bc, content, sizeof(struct block_content));
+	memcpy(bc, content, length);
+	memset((void *) bc + length, 0, sizeof(struct block_content) - length);
 	memset(b->hash, 0, sizeof(b->hash));
 	return 1;
 }

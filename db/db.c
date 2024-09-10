@@ -232,7 +232,8 @@ static bool write_entry(const struct db_entry *de)
 		memcpy(p, f->data, f->len);
 		p += f->len;
 	}
-	return block_write(de->db->c, ct_data, de->seq, payload_buf, de->block);
+	return block_write(de->db->c, ct_data, de->seq, payload_buf,
+	    p - payload_buf, de->block);
 }
 
 
@@ -749,9 +750,11 @@ bool db_open_progress(struct db *db, const struct dbcrypt *c,
 
 	db_open_empty(db, c);
 	for (i = 0; i != db->stats.total; i++) {
+		unsigned payload_len = sizeof(payload_buf);
+
 		if (progress)
 			progress(user, i, db->stats.total);
-		switch (block_read(c, &seq, payload_buf, i)) {
+		switch (block_read(c, &seq, payload_buf, &payload_len, i)) {
 		case bt_error:
 			db->stats.error++;
 			break;
@@ -772,7 +775,7 @@ bool db_open_progress(struct db *db, const struct dbcrypt *c,
 			break;
 		case bt_data:
 			if (process_payload(db, i, seq, payload_buf,
-			    BLOCK_PAYLOAD_SIZE))
+			    payload_len))
 				db->stats.data++;
 			else
 				db->stats.invalid++;

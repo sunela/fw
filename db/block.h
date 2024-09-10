@@ -54,13 +54,17 @@ enum block_type {
 	bt_data		= ct_data,
 };
 
+struct block_header {
+	uint8_t type;
+	uint8_t	reserved;	/* set to zero */
+	uint16_t seq;		/* sequence number */
+};
+
 struct block {
 	uint8_t	nonce[DB_NONCE_SIZE];
 	uint8_t	reserved_1[8];		/* set to zero */
 	struct block_content {
-		uint8_t type;
-		uint8_t	reserved;	/* set to zero */
-		uint16_t seq;		/* sequence number */
+		struct block_header hdr;
 		uint8_t payload[BLOCK_PAYLOAD_SIZE];
 	} content;
 	uint8_t hash[SHA1_HASH_BYTES];
@@ -71,12 +75,16 @@ struct block {
 
 /*
  * block_read returns the decrypted payload in the buffer at "payload".
+ * When calling block_read, payload_len points to the size of the buffer. After
+ * a successful read, the length of the decrypted payload is stored in
+ * *payload_len.
+ *
  * If the block type is anything other than bt_data, neither sequence number
  * nor payload data are returned. If the sequence number is not needed, a NULL
  * pointer can be passed for "seq".
  */
 enum block_type block_read(const struct dbcrypt *c, uint16_t *seq,
-    void *payload, unsigned n);
+    void *payload, unsigned *payload_len, unsigned n);
 
 /*
  * block_write requires the block to be erased. Note that attempting to write
@@ -84,7 +92,7 @@ enum block_type block_read(const struct dbcrypt *c, uint16_t *seq,
  * block, losing any (valid) data that may have been stored there before.
  */
 bool block_write(const struct dbcrypt *c, enum content_type type, uint16_t seq,
-    const void *buf, unsigned n);
+    const void *payload, unsigned length, unsigned n);
 
 bool block_delete(unsigned n);
 

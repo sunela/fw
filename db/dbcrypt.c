@@ -327,7 +327,8 @@ struct dbcrypt *dbcrypt_init(const void *sk, unsigned bytes)
 
 	assert(bytes == crypto_box_SECRETKEYBYTES);
 	memcpy(c->sk, sk, crypto_box_SECRETKEYBYTES);
-	crypto_scalarmult_base(c->pk, sk);
+	if (crypto_scalarmult_base(c->pk, sk))
+		DIE("crypto_scalarmult_base failed");
 
 	p = alloc_type(struct peer);
 	c->readers = p;

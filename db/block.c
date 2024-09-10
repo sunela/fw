@@ -21,7 +21,8 @@
 
 
 static PSRAM_NOINIT uint8_t io_buf[STORAGE_BLOCK_SIZE];
-static PSRAM_NOINIT struct block_content bc;
+static PSRAM_NOINIT uint8_t bc[STORAGE_BLOCK_SIZE];
+	// @@@ beyond-worst-case size
 
 
 static enum block_type classify_block(const uint8_t *b)
@@ -51,7 +52,7 @@ static enum block_type classify_block(const uint8_t *b)
 enum block_type block_read(const struct dbcrypt *c, uint16_t *seq,
     void *payload, unsigned *payload_len, unsigned n)
 {
-	const struct block_header *hdr = &bc.hdr;
+	const struct block_header *hdr = (const void *) bc;
 	enum block_type type;
 	int got;
 
@@ -66,19 +67,20 @@ enum block_type block_read(const struct dbcrypt *c, uint16_t *seq,
 	default:
 		break;
 	}
-	got = db_decrypt(c, &bc, sizeof(bc), io_buf);
+	got = db_decrypt(c, bc, sizeof(bc), io_buf);
 	if (got < 0) {
-		memset(&bc, 0, sizeof(bc));
+		memset(bc, 0, sizeof(bc));
 		return bt_invalid;
 	}
+	assert((unsigned) got >= sizeof(*hdr));
 	assert((unsigned) got <= sizeof(*hdr) + *payload_len);
 	type = hdr->type;
 	switch (hdr->type) {
 	case bt_data:
 		if (seq)
 			*seq = hdr->seq;
-		memcpy(payload, bc.payload, sizeof(bc.payload));
-		*payload_len = sizeof(bc.payload);
+		memcpy(payload, bc + sizeof(*hdr), got - sizeof(*hdr));
+		*payload_len = got - sizeof(*hdr);
 		break;
 	case bt_empty:
 		*payload_len = 0;
@@ -88,7 +90,7 @@ enum block_type block_read(const struct dbcrypt *c, uint16_t *seq,
 		*payload_len = 0;
 		break;
 	}
-	memset(&bc, 0, sizeof(bc));
+	memset(bc, 0, sizeof(bc));
 	return type;
 }
 
@@ -96,26 +98,26 @@ enum block_type block_read(const struct dbcrypt *c, uint16_t *seq,
 bool block_write(const struct dbcrypt *c, enum content_type type, uint16_t seq,
     const void *payload, unsigned length, unsigned n)
 {
-	struct block_header *hdr = &bc.hdr;
+	struct block_header *hdr = (void *) bc;
 
-	assert(length <= BLOCK_PAYLOAD_SIZE);
+	assert(sizeof(*hdr) + length <= sizeof(bc));
 	memset(io_buf, 0, sizeof(io_buf));
-	memset(&bc.hdr, 0, sizeof(bc.hdr));
+	memset(hdr, 0, sizeof(*hdr));
 	hdr->type = type;
 	hdr->seq = seq;
 	switch (type) {
 	case bt_empty:
-		memset(&bc, 0, sizeof(bc));
+		memset(bc, 0, sizeof(bc));
 		break;
 	case bt_data:
-		memcpy(bc.payload, payload, length);
+		memcpy(bc + sizeof(*hdr), payload, length);
 		break;
 	default:
 		abort();
 	}
-	if (!db_encrypt(c, io_buf, &bc, sizeof(bc.hdr) + length))
+	if (!db_encrypt(c, io_buf, bc, sizeof(*hdr) + length))
 		return 0;
-	memset(&bc, 0, sizeof(bc));
+	memset(bc, 0, sizeof(bc));
 	return storage_write_block(io_buf, n);
 }
 

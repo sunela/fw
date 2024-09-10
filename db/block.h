@@ -18,21 +18,22 @@
 /*
  * Block structure:
  *
+ * 
  * Offset
  * |	Size
- * 0	24	Nonce (0 if ct_empty)
- * 24	8	Reserved
- * 32	992	Encrypted content
- *  0	1	  Content type (empty, data)
- *  1	1	  Reserved
- *  2	2	  Sequence (to version IDs)
- *  4	956	  Payload (begins with NUL-terminated ID string)
- *  960	20	  Hash (SHA-1)
- *  980	12	  Reserved
+ * 0	32	Writer's public key
+ * 32	24	Nonce
+ * 56	1	Number of readers
+ * 57	For each reader:
+ *	32	Reader's public key
+ *	32	Encrypted record key
+ * Encrypted data:
+ *	16	Hash
+ *	*	Payload (zero-padded to fill the block)
+ *	1	  Content type (empty, data)
+ *	1	  Reserved (set to zero)
+ *	2	  Sequence number (little-endian)
  */
-
-#define	BLOCK_PAYLOAD_SIZE	956
-
 
 enum content_type {
 	ct_empty		= 3,	/* the block is allocated but does not
@@ -59,12 +60,6 @@ struct block_header {
 	uint8_t	reserved;	/* set to zero */
 	uint16_t seq;		/* sequence number */
 };
-
-struct block_content {
-	struct block_header hdr;
-	uint8_t payload[BLOCK_PAYLOAD_SIZE];
-};
-
 
 
 /*

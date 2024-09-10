@@ -17,6 +17,7 @@
 #include "hal.h"
 #include "rnd.h"
 #include "timer.h"
+#include "dbcrypt.h"
 #include "db.h"
 #include "rmt.h"
 #include "rmt-db.h"
@@ -525,7 +526,10 @@ static bool process_cmd(const char *cmd)
 		if (args < 1)
 			goto fail;
 		if (!strcmp(op, "dummy") && args == 1) {
-			db_open_empty(&main_db, NULL);
+			const uint8_t key[32] = { 0, };
+			struct dbcrypt *c = dbcrypt_init(key, sizeof(key));
+
+			db_open_empty(&main_db, c);
 			return 1;
 		}
 		if (!strcmp(op, "sort") && args == 1) {
@@ -582,8 +586,12 @@ fail:
 
 bool run_script(char **args, int n_args)
 {
-	if (!n_args || strncmp(args[0], "db ", 3))
-		db_open(&main_db, NULL);
+	if (!n_args || strncmp(args[0], "db ", 3)) {
+		const uint8_t key[32] = { 0, };
+		struct dbcrypt *c = dbcrypt_init(key, sizeof(key));
+
+		db_open(&main_db, c);
+	}
 	while (n_args-- && headless)
 		if (!process_cmd(*args++))
 			return 0;

@@ -43,6 +43,8 @@ static struct wi_list *lists[1];
 
 static void initialize_storage(void)
 {
+	static const uint8_t key[32] = { 0, };
+	struct dbcrypt *c = dbcrypt_init(key, sizeof(key));
 	unsigned total = storage_blocks();
 
 	gfx_clear(&main_da, GFX_BLACK);
@@ -50,7 +52,7 @@ static void initialize_storage(void)
 	db_close(&main_db);
 	storage_erase_blocks(0, total);
 	// @@@ create at least one empty entry, so that we can verify the PIN
-	db_open(&main_db, NULL);
+	db_open(&main_db, c);
 }
 
 

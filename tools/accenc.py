@@ -21,9 +21,10 @@ HASH_PAD = 12
 
 STORAGE_BLOCKS = 2048
 
-
 keys = ( "id", "prev", "user", "email", "pw", "hotp_secret", "hotp_counter",
     "totp_secret", "comment", "pw2" )
+
+debug = False
 
 
 def encode(key, code, v):
@@ -51,15 +52,25 @@ def write_new(data, writer, readers):
 	rk = nacl.utils.random(SecretBox.KEY_SIZE)
 	nonce = nacl.utils.random(Box.NONCE_SIZE)
 
+	if debug:
+		print("Wpk", bytes(writer.public_key).hex(), file = sys.stderr)
+		print("Nonce", nonce.hex(), file = sys.stderr)
+		print("RK", rk.hex(), file = sys.stderr)
+		print("Readers", len(readers), file = sys.stderr)
 	blob = bytes(writer.public_key) + nonce
 	blob += struct.pack("B", len(readers))
 
 	for rd in readers:
 		shared = bytes(Box(writer, rd))
 		box = SecretBox(shared)
-		ek = box.encrypt(rk)[0:len(rk)]
-#crypto_stream_xor(rk, nonce, shared)
+		ek = box.encrypt(rk, nonce)[Box.NONCE_SIZE +
+		    SecretBox.MACBYTES:]
 		blob += bytes(rd) + ek
+		if debug:
+			print("\tShared", bytes(shared).hex(),
+			    file = sys.stderr)
+			print("\tRpk", bytes(rd).hex(), file = sys.stderr)
+			print("\tEK", ek.hex(), file = sys.stderr)
 
 	space = BLOCK_SIZE - len(blob) - SecretBox.MACBYTES
 	assert space >= len(data)
@@ -93,6 +104,7 @@ else:
 	else:
 		readers = map(lambda x: PublicKey(base64.b32decode(x)),
 		    sys.argv[3:])
+
 for e in db:
 	b = b''
 	i = 1
@@ -103,8 +115,7 @@ for e in db:
 	if writer is None:
 		write_old(b)
 	else:
-		w = PrivateKey.generate()
-		r = PrivateKey.generate()
-		write_new(b, w, [ r.public_key ])
+		write_new(struct.pack("<BBH", 4, 0, 0) + b,
+		    writer, [ writer.public_key ])
 	
 sys.stdout.buffer.write((b'\xff' * (STORAGE_BLOCKS - len(db)) * BLOCK_SIZE))

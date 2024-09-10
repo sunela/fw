@@ -37,11 +37,14 @@ json()
 page_inner()
 {
 	local json=
+	local title=true
 
 	while [ "$1" ]; do
 		case "$1" in
 		-j)	json=$2
 			shift 2;;
+		-n)	title=false
+			shift;;
 		*)	break;;
 		esac
 	done
@@ -51,13 +54,13 @@ page_inner()
 	shift 2
 
 	if [ "$mode" = names ]; then
-		echo $name
+		$title && echo $name
 		return
 	fi
 
 	[ "$mode" = last ] || [ -z "$select" -o "$name" = "$select" ] || return
 
-	echo === $name ===
+	$title && echo === $name ===
 	found=true
 
 	if [ ! -r "$dir/_db" ]; then
@@ -103,11 +106,17 @@ page_inner()
 }
 
 
+cleanup()
+{
+	rm -f "$dir/_tmp.ppm" "$dir/_db"
+}
+
+
 page()
 {
 	page_inner "$@"
 	local rc=$?
-	rm -f "$dir/_tmp.ppm" "$dir/_db"
+	cleanup
 	return $rc
 }
 
@@ -744,6 +753,17 @@ accounts $mode rmt-set-time-30s "time $T_150000" \
 accounts $mode rmt-set-time-3h "time $T_150000" \
     "long 200 72" "$ACCOUNTS_REMOTE" \
     "rmt $RDOP_SET_TIME `t_bytes $T_120000`"
+
+# --- account (HOTP revealed)--------------------------------------------------
+
+if ! page_inner -n run hotp-reveal-twice \
+    "random 1" button "$PIN_1" "$PIN_2" "$PIN_3" "$PIN_4" \
+     "$PIN_NEXT"; then
+	cleanup
+else
+	accounts $mode hotp-reveal-twice \
+	    "drag 158 243 159 196" "tap 50 221" "tap 38 80"
+fi
 
 # -----------------------------------------------------------------------------
 

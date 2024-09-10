@@ -24,9 +24,12 @@
 reproducible="-define png:exclude-chunks=date,time"
 
 
+PK=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA====
+
+
 json()
 {
-	"$top/tools/accenc.py" /dev/stdin >"$dir/_db" ||
+	"$top/tools/accenc.py" /dev/stdin $PK >"$dir/_db" ||
 	    { rm -f "$dir/_dn"; exit 1; }
 }
 
@@ -60,10 +63,10 @@ page_inner()
 	if [ ! -r "$dir/_db" ]; then
 		if [ "$json" ]; then
 			echo "$json" |
-			    "$top/tools/accenc.py" /dev/stdin >"$dir/_db" ||
+			    "$top/tools/accenc.py" /dev/stdin $PK >"$dir/_db" ||
 			    exit
 		else
-			"$top/tools/accenc.py" "$top/accounts.json" \
+			"$top/tools/accenc.py" "$top/accounts.json" $PK \
 			    >"$dir/_db" || exit
 		fi
 	fi

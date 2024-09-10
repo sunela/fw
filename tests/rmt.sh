@@ -14,7 +14,6 @@ PIN_3="tap 130 252"
 PIN_4="tap 125 135"
 PIN_NEXT="tap 191 252"
 
-
 RDOP_UNKNOWN=ff
 RDOP_LS=02
 RDOP_SHOW=04
@@ -29,6 +28,8 @@ FIELD_HOTP_COUNTER=07
 FIELD_TOTP_SECRET=08
 FIELD_COMMENT=09
 FIELD_PW2=0a
+
+PK=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA====
 
 
 run()
@@ -47,7 +48,7 @@ run()
 	shift
 	echo -n "$title: " 1>&2
 
-	"$top/tools/accenc.py" "$top/accounts.json" >"$dir/_db" || exit
+	"$top/tools/accenc.py" "$top/accounts.json" $PK >"$dir/_db" || exit
 
 	for n in "$@"; do
 		s="$s '$n'"

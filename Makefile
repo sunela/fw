@@ -28,8 +28,11 @@ fonts:	$(FONTS:%=font/%)
 $(FONTS:%=font/%): font/Makefile font/cvtfont.py
 	$(MAKE) -C font
 
+# dd if=/dev/zero bs=32 count=1 | base32
+PK = AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA====
+
 dummy.db: tools/accenc.py accounts.json
-	$(BUILD) $^ >$@ || { rm -f $@; exit 1; }
+	$(BUILD) $^ >$@ $(PK) || { rm -f $@; exit 1; }
 
 # --- Flashing ----------------------------------------------------------------
 

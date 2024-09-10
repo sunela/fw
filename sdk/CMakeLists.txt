@@ -9,5 +9,7 @@ sdk_add_include_directories(.)
 target_sources(app PRIVATE sdk-usb.c flash-storage.c)
 target_link_libraries(app libsunela.a -L$ENV{TOP}/obj-sdk/)
 sdk_set_main_file(sdk-main.c)
+#sdk_set_linker_script(bl808_flash_${CPU_ID}.ld)
+sdk_set_linker_script(sunela.ld)
 
 project(sunela)

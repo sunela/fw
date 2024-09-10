@@ -13,6 +13,8 @@ CROSS_COMPILE = riscv64-unknown-elf-
 # happens while something is still using ACM0 or ACM1.
 COMX = /dev/ttyACM1
 
+SDK_LD = $(BL_SDK_BASE)/bsp/board/bl808dk/bl808_flash_m0.ld
+
 # add custom cmake definition
 #cmake_definition+=-Dxxx=sss
 
@@ -26,4 +28,5 @@ include $(BL_SDK_BASE)/project.build
 
 redo:
 	rm -f build/build_out/sunela_bl808_m0.elf
+	sed '/^StackSize/s/0x0400/0x1000/' $(SDK_LD) >sunela.ld
 	$(MAKE)

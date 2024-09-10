@@ -53,7 +53,7 @@ upload:	$(shell pwd)/dummy.db
 # --config=sdk/flash_prog_cfg.ini \
 
 download:
-	$(FLASH) --read -$(REGION_DB) --file $(shell pwd)/flash.db
+	$(FLASH) --read $(REGION_DB) --file $(shell pwd)/flash.db
 
 download-all:
 	$(FLASH) --read $(REGION_ALL) --file $(shell pwd)/all.bin

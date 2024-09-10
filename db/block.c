@@ -98,8 +98,6 @@ bool block_write(const struct dbcrypt *c, enum content_type type, uint16_t seq,
 {
 	struct block_header *hdr = &bc.hdr;
 
-debug("block_write %u\n", n);
-	assert(sizeof(struct block) == STORAGE_BLOCK_SIZE);
 	assert(length <= BLOCK_PAYLOAD_SIZE);
 	memset(io_buf, 0, sizeof(io_buf));
 	memset(&bc.hdr, 0, sizeof(bc.hdr));

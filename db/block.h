@@ -60,16 +60,10 @@ struct block_header {
 	uint16_t seq;		/* sequence number */
 };
 
-struct block {
-	uint8_t	nonce[DB_NONCE_SIZE];
-	uint8_t	reserved_1[8];		/* set to zero */
-	struct block_content {
-		struct block_header hdr;
-		uint8_t payload[BLOCK_PAYLOAD_SIZE];
-	} content;
-	uint8_t hash[SHA1_HASH_BYTES];
-	uint8_t reserved_2[12];	/* set to zero */
-} __attribute__((__packed__));
+struct block_content {
+	struct block_header hdr;
+	uint8_t payload[BLOCK_PAYLOAD_SIZE];
+};
 
 
 

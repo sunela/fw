@@ -31,4 +31,8 @@ bool db_encrypt(const struct dbcrypt *c, void *block, const void *content,
 int db_decrypt(const struct dbcrypt *c, void *content, unsigned size,
     const void *block);
 
+struct dbcrypt *dbcrypt_init(const void *sk, unsigned size);
+void dbcrypt_add_reader(struct dbcrypt *c, const void *pk, unsigned size);
+void dbcrypt_free(struct dbcrypt *c);
+
 #endif /* !DBCRYPT_H */

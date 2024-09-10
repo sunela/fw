@@ -12,6 +12,7 @@
 #include "hal.h"
 #include "debug.h"
 #include "gfx.h"
+#include "dbcrypt.h"
 #include "db.h"
 #include "ui_accounts.h"
 #include "pin.h"
@@ -66,11 +67,17 @@ static bool accept_pin(uint32_t pin)
 	gfx_rect_xy(&main_da, PROGRESS_X0, PROGRESS_Y0, PROGRESS_W, PROGRESS_H,
 	    PROGRESS_TOTAL_COLOR);
 	ui_update_display();	/* give immediate visual feedback */
-	if (!db_open_progress(&main_db, NULL, open_progress, &progress))
+
+	static const uint8_t key[32] = { 0, };
+	struct dbcrypt *c;
+
+	c = dbcrypt_init(key, sizeof(key));
+	if (!db_open_progress(&main_db, c, open_progress, &progress))
 		return 0;
 	db_stats(&main_db, &s);
+
 	/*
-	 * @@@ also let us in if there Flash has been erased. This is for
+	 * @@@ also let us in if the Flash has been erased. This is for
 	 * development - in the end, an erased Flash should bypass the PIN
 	 * dialog and go through a setup procedure, e.g., asking for a new PIN,
 	 * and writing some record (configuration ?), to "pin" the PIN.

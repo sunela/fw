@@ -757,8 +757,8 @@ accounts $mode rmt-set-time-3h "time $T_150000" \
 # --- account (HOTP revealed)--------------------------------------------------
 
 if ! page_inner -n run hotp-reveal-twice \
-    "random 1" button "$PIN_1" "$PIN_2" "$PIN_3" "$PIN_4" \
-     "$PIN_NEXT"; then
+    "random 1" button "$PIN_1" "$PIN_2" "$PIN_3" "$PIN_4" "$PIN_NEXT" \
+    "drag 158 243 159 196" "tap 50 221" "tap 38 80"; then
 	cleanup
 else
 	accounts $mode hotp-reveal-twice \

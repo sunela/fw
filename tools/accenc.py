@@ -60,10 +60,14 @@ def write_new(data, writer, readers):
 	blob = bytes(writer.public_key) + nonce
 	blob += struct.pack("B", len(readers))
 
+	i = 0
 	for rd in readers:
+		nonce2 = bytearray(nonce)
+		i += 1
+		nonce2[0] ^= i
 		shared = bytes(Box(writer, rd))
 		box = SecretBox(shared)
-		ek = box.encrypt(rk, nonce)[Box.NONCE_SIZE +
+		ek = box.encrypt(rk, bytes(nonce2))[Box.NONCE_SIZE +
 		    SecretBox.MACBYTES:]
 		blob += bytes(rd) + ek
 		if debug:

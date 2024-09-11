@@ -184,6 +184,8 @@ bool db_encrypt(const struct dbcrypt *c, void *block, const void *content,
 	*reader_list = n_readers;
 
 	uint8_t *b = reader_list + 1;
+	uint8_t nonce2[crypto_secretbox_NONCEBYTES];
+	uint8_t i = 0;
 
 	for (reader = c->readers; reader; reader = reader->next) {
 		memcpy(b, reader->pk, crypto_box_PUBLICKEYBYTES);
@@ -192,9 +194,12 @@ bool db_encrypt(const struct dbcrypt *c, void *block, const void *content,
 		memset(in_buf, 0, crypto_secretbox_ZEROBYTES);
 		memcpy(in_buf + crypto_secretbox_ZEROBYTES, rk,
 		    crypto_secretbox_KEYBYTES);
+		memcpy(nonce2, nonce, crypto_secretbox_NONCEBYTES);
+		i++;
+		nonce2[0] ^= i;
 		if (crypto_stream_xor(out_buf, in_buf,
 		    crypto_secretbox_ZEROBYTES + crypto_secretbox_KEYBYTES,
-		    nonce, reader->k))
+		    nonce2, reader->k))
 			DIE("crypto_stream_xor failed");
 		memcpy(b, out_buf + crypto_secretbox_ZEROBYTES,
 		    crypto_secretbox_KEYBYTES);
@@ -263,6 +268,7 @@ int db_decrypt(const struct dbcrypt *c, void *content, unsigned size,
 
 	uint8_t shared[crypto_secretbox_KEYBYTES];
 	uint8_t rk[crypto_box_PUBLICKEYBYTES];
+	uint8_t nonce2[crypto_secretbox_NONCEBYTES];
 
 	/* @@@ should first search the reader list and the cache */
 	if (crypto_box_beforenm(shared, b, c->sk)) {
@@ -270,11 +276,13 @@ int db_decrypt(const struct dbcrypt *c, void *content, unsigned size,
 		return -1;
 	}
 
+	memcpy(nonce2, nonce, crypto_secretbox_NONCEBYTES);
+	nonce2[0] ^= i + 1;
 	memset(in_buf, 0, crypto_secretbox_ZEROBYTES);
 	memcpy(in_buf + crypto_secretbox_ZEROBYTES,
 	    b + crypto_box_PUBLICKEYBYTES, crypto_secretbox_KEYBYTES);
 	if (crypto_stream_xor(out_buf, in_buf,
-            crypto_secretbox_ZEROBYTES + crypto_secretbox_KEYBYTES, nonce,
+            crypto_secretbox_ZEROBYTES + crypto_secretbox_KEYBYTES, nonce2,
 	    shared)) {
 		debug("crypto_stream_xor failed\b");
 		memset(shared, 0, sizeof(shared));

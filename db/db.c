@@ -46,8 +46,10 @@ static int get_erased_block(struct db *db)
 
 	while (1) {
 		n = span_pull_one(&db->erased);
-		if (n >= 0)
+		if (n >= 0) {
+			db->stats.erased--;
 			break;
+		}
 		n = span_pull_erase_block(&db->empty, erase_size);
 		if (n >= 0) {
 			db->stats.empty -= erase_size;
@@ -220,6 +222,7 @@ static bool write_entry(const struct db_entry *de)
 	const void *end = payload_buf + sizeof(payload_buf);
 	uint8_t *p = payload_buf;
 	const struct db_field *f;
+	bool ok;
 
 	memset(payload_buf, 0, sizeof(payload_buf));
 	for (f = de->fields; f; f = f->next) {
@@ -233,8 +236,11 @@ static bool write_entry(const struct db_entry *de)
 		memcpy(p, f->data, f->len);
 		p += f->len;
 	}
-	return block_write(de->db->c, ct_data, de->seq, payload_buf,
+	ok = block_write(de->db->c, ct_data, de->seq, payload_buf,
 	    p - payload_buf, de->block);
+	if (ok)
+		de->db->stats.data++;
+	return ok;
 }
 
 
@@ -258,6 +264,7 @@ static bool update_entry(struct db_entry *de, unsigned new)
 	// @@@ complain if block_delete fails ?
 	if (block_delete(old)) {
 		span_add(&db->deleted, old, 1);
+		db->stats.data--;
 		db->stats.deleted++;
 	}
 	return 1;
@@ -617,6 +624,7 @@ bool db_delete_entry(struct db_entry *de)
 		return 0;
 	span_add(&db->deleted, de->block, 1);
 	free_entry(de);
+	db->stats.data--;
 	db->stats.deleted++;
 	return 1;
 }

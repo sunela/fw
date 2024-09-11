@@ -17,6 +17,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "hal.h"
+#include "storage.h"
+
 
 #define	MAX_NAME_LEN	16	/* maximum length of an entry name */
 #define	MAX_STRING_LEN	64	/* maximum length of user, email, pw */
@@ -81,6 +84,7 @@ struct db_stats {
 	unsigned	invalid;
 	unsigned	error;
 	unsigned	data;
+	unsigned	special;
 };
 
 struct db_span;
@@ -93,9 +97,12 @@ struct db {
 	struct db_span *deleted;
 	struct db_span *empty;
 	struct db_entry	*entries;
+	int settings_block;
 };
 
 
+extern PSRAM_NOINIT uint8_t payload_buf[STORAGE_BLOCK_SIZE];
+	// @@@ beyond-worst-case size
 extern const enum field_type order2ft[];
 extern uint8_t ft2order[];
 extern const unsigned field_types;
@@ -155,6 +162,9 @@ void db_move_before(struct db_entry *e, const struct db_entry *before);
 bool db_delete_entry(struct db_entry *de);
 bool db_iterate(struct db *db, bool (*fn)(void *user, struct db_entry *de),
     void *user);
+
+bool db_update_settings(struct db *db, uint16_t seq,
+    const void *payload, unsigned length);
 
 void db_stats(const struct db *db, struct db_stats *s);
 

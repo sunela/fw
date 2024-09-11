@@ -20,20 +20,20 @@
 #include "span.h"
 #include "storage.h"
 #include "block.h"
+#include "settings.h"
 #include "db.h"
 
 
 static bool update_entry(struct db_entry *de, unsigned new);
 
 
+PSRAM_NOINIT uint8_t payload_buf[STORAGE_BLOCK_SIZE];
+	// @@@ beyond-worst-case size
 const enum field_type order2ft[] = {
     ft_end, ft_id, ft_prev, ft_user, ft_email, ft_pw, ft_pw2,
     ft_hotp_secret, ft_hotp_counter, ft_totp_secret, ft_comment };
 uint8_t ft2order[ARRAY_ENTRIES(order2ft)];
 const unsigned field_types = sizeof(ft2order);
-
-static PSRAM_NOINIT uint8_t payload_buf[STORAGE_BLOCK_SIZE];
-	// @@@ beyond-worst-case size
 
 
 /* --- Get an erased block, erasing if needed ------------------------------ */
@@ -236,7 +236,7 @@ static bool write_entry(const struct db_entry *de)
 		memcpy(p, f->data, f->len);
 		p += f->len;
 	}
-	ok = block_write(de->db->c, ct_data, de->seq, payload_buf,
+	ok = block_write(de->db->c, bt_data, de->seq, payload_buf,
 	    p - payload_buf, de->block);
 	if (ok)
 		de->db->stats.data++;
@@ -647,6 +647,38 @@ bool db_iterate(struct db *db, bool (*fn)(void *user, struct db_entry *de),
 }
 
 
+/* --- Settings ------------------------------------------------------------ */
+
+
+bool db_update_settings(struct db *db, uint16_t seq,
+    const void *payload, unsigned length)
+{
+	int new;
+
+	new = get_erased_block(db);
+	if (new < 0)
+		return 0;
+	if (block_write(db->c, bt_settings, seq, payload, length, new)) {
+		db->stats.special++;
+		if (db->settings_block != -1) {
+			if (block_delete(db->settings_block)) {
+				span_add(&db->deleted, db->settings_block, 1);
+				db->stats.deleted++;
+				db->stats.special--;
+			}
+		}
+		db->settings_block = new;
+		return 1;
+	} else {
+		if (block_delete(new)) {
+			span_add(&db->deleted, new, 1);
+			db->stats.deleted++;
+		}
+		return 0;
+	}
+}
+
+
 /* --- Open/close the account database ------------------------------------- */
 
 
@@ -748,6 +780,7 @@ void db_open_empty(struct db *db, const struct dbcrypt *c)
 	db->generation = 0;
 	db->stats.total = storage_blocks();
 	db->entries = NULL;
+	db->settings_block = -1;
 }
 
 
@@ -788,6 +821,14 @@ bool db_open_progress(struct db *db, const struct dbcrypt *c,
 				db->stats.data++;
 			else
 				db->stats.invalid++;
+			break;
+		case bt_settings:
+			if (settings_process(seq, payload_buf, payload_len)) {
+				db->stats.special++;
+				db->settings_block = i;
+			} else {
+				db->stats.invalid++;
+			}
 			break;
 		default:
 			abort();

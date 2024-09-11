@@ -53,6 +53,7 @@ enum block_type {
 	bt_invalid	= 2,	/* invalid (at least with the current key) */
 	bt_empty	= ct_empty,
 	bt_data		= ct_data,
+	bt_settings	= 5,	/* block contains settings */
 };
 
 struct block_header {
@@ -84,7 +85,7 @@ enum block_type block_read(const struct dbcrypt *c, uint16_t *seq,
  * to a block that is not completelly erased is likely to produce an invalid
  * block, losing any (valid) data that may have been stored there before.
  */
-bool block_write(const struct dbcrypt *c, enum content_type type, uint16_t seq,
+bool block_write(const struct dbcrypt *c, enum block_type type, uint16_t seq,
     const void *payload, unsigned length, unsigned n);
 
 bool block_delete(unsigned n);

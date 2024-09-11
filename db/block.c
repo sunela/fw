@@ -79,6 +79,7 @@ enum block_type block_read(const struct dbcrypt *c, uint16_t *seq,
 	type = hdr->type;
 	switch (hdr->type) {
 	case bt_data:
+	case bt_settings:
 		if (seq)
 			*seq = hdr->seq;
 		memcpy(payload, bc + sizeof(*hdr), got - sizeof(*hdr));
@@ -97,7 +98,7 @@ enum block_type block_read(const struct dbcrypt *c, uint16_t *seq,
 }
 
 
-bool block_write(const struct dbcrypt *c, enum content_type type, uint16_t seq,
+bool block_write(const struct dbcrypt *c, enum block_type type, uint16_t seq,
     const void *payload, unsigned length, unsigned n)
 {
 	struct block_header *hdr = (void *) bc;
@@ -112,6 +113,7 @@ bool block_write(const struct dbcrypt *c, enum content_type type, uint16_t seq,
 		memset(bc, 0, sizeof(bc));
 		break;
 	case bt_data:
+	case bt_settings:
 		memcpy(bc + sizeof(*hdr), payload, length);
 		break;
 	default:

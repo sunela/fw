@@ -9,6 +9,7 @@
 #define	SETTINGS_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 
 struct settings {
@@ -20,7 +21,8 @@ struct settings {
 extern struct settings settings;
 
 
-void settings_update(void);
-void settings_load(void);
+bool settings_update(void);
+bool settings_process(uint16_t seq, const void *payload, unsigned size);
+void settings_reset(void);
 
 #endif /* !SETTINGS_H */

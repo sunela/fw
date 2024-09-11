@@ -71,6 +71,10 @@ struct block_header {
  * If the block type is anything other than bt_data, neither sequence number
  * nor payload data are returned. If the sequence number is not needed, a NULL
  * pointer can be passed for "seq".
+ *
+ * If "payload" is NULL, only the block type (without resolving whether what
+ * looks like bt_data is really valid) is returned, but no attempt is made to
+ * decrypt the block's content.
  */
 enum block_type block_read(const struct dbcrypt *c, uint16_t *seq,
     void *payload, unsigned *payload_len, unsigned n);

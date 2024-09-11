@@ -59,6 +59,8 @@ enum block_type block_read(const struct dbcrypt *c, uint16_t *seq,
 	if (!storage_read_block(io_buf, n))
 		return bt_error;
 	type = classify_block((const uint8_t *) io_buf);
+	if (!payload)
+		return type;
 	switch (type) {
 	case bt_deleted:
 	case bt_erased:

@@ -15,3 +15,4 @@ all:
 	./tsort.sh
 	./move.sh
 	./rmt.sh
+	./db.sh

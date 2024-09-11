@@ -98,6 +98,7 @@ static void ui_rd_tap(void *ctx, unsigned x, unsigned y)
 	case rit_bool:
 		*item->u.bool_var = !*item->u.bool_var;
 		wi_list_render_entry(&c->list, entry);
+		settings_update(); // @@@ check for errors
 		break;
 	default:
 		abort();

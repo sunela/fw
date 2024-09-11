@@ -17,6 +17,7 @@
 #include "hal.h"
 #include "rnd.h"
 #include "timer.h"
+#include "block.h"
 #include "secrets.h"
 #include "dbcrypt.h"
 #include "db.h"
@@ -305,6 +306,13 @@ static void show_help(void)
 "\t\tBEFORE is omitted)\n"
 "db dump\t\tprint the content of the database\n"
 "db sort\t\tsort the database\n"
+"db open\t\topen the database\n"
+"db stats\tshow block statistics\n"
+"db blocks\tdump block types\n"
+"db new NAME\tcreate a new block\n"
+"db delete NAME\tdelete a block\n"
+"db change NAME\tchange a field in a block\n"
+"db remove NAME\tremove a field from a block\n"
 "down X Y\ttouch the touch screen\n"
 "drag X0 Y0 X1 Y1\n"
 "\t\tdrag gesture\n"
@@ -570,7 +578,102 @@ static bool process_cmd(const char *cmd)
 				goto fail;
 			}
 		}
-		return 1;
+		
+		if (!strcmp(op, "open")) {
+			struct dbcrypt *c;
+
+			secrets_init();
+			c  = dbcrypt_init(master_secret, sizeof(master_secret));
+			if (!c) {
+				fprintf(stderr, "dbcrypt_init failed\n");
+				exit(1);
+			}
+			db_open(&main_db, c);
+			return 1;
+		}
+		if (!strcmp(op, "stats")) {
+			printf("total %u invalid %u data %u\n",
+			    main_db.stats.total, main_db.stats.invalid,
+			    main_db.stats.data);
+			printf("erased %u deleted %u empty %u\n",
+			    main_db.stats.erased, main_db.stats.deleted,
+			    main_db.stats.empty);
+			return 1;
+		}
+		if (!strcmp(arg, "blocks")) {
+			bool first = 1;
+			unsigned i;
+
+			for (i = 0; i != main_db.stats.total; i++)
+				switch (block_read(main_db.c,
+				    NULL, NULL, NULL, i)) {
+				case bt_data:
+					printf("%sD%u", first ? "" : " ", i);
+					first = 0;
+					break;
+				case bt_deleted:
+					printf("%sX%u", first ? "" : " ", i);
+					first = 0;
+					break;
+				case bt_erased:
+					continue;
+				case bt_invalid:
+					printf("%sI%u", first ? "" : " ", i);
+					first = 0;
+					break;
+				default:
+					abort();
+				}
+			if (!first)
+				printf("\n");
+			return 1;
+		}
+
+		const char *arg2;
+
+		arg2 = cmd_arg("new", arg);
+		if (arg2) {
+			struct db_entry *de;
+
+			de = db_new_entry(&main_db, arg2);
+			if (de)
+				printf("%u\n", de->block);
+			else
+				printf("failed\n");
+			return 1;
+		}
+		arg2 = cmd_arg("delete", arg);
+		if (arg2) {
+			struct db_entry *de = find_entry(arg2);
+
+			if (!db_delete_entry(de))
+				printf("failed");
+			return 1;
+		}
+		arg2 = cmd_arg("change", arg);
+		if (arg2) {
+			struct db_entry *de = find_entry(arg2);
+
+			if (db_change_field(de, ft_user, "foo", 3))
+				printf("%u\n", de->block);
+			else
+				printf("failed\n");
+			return 1;
+		}
+		arg2 = cmd_arg("remove", arg);
+		if (arg2) {
+			struct db_entry *de = find_entry(arg2);
+			struct db_field *f = db_field_find(de, ft_user);
+
+			if (!f)
+				printf("field no found\n");
+			else if (db_delete_field(de, f))
+				printf("%u\n", de->block);
+			else
+				printf("failed\n");
+			return 1;
+		}
+		goto fail;
 	}
 
 	/* help */

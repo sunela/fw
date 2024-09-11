@@ -116,6 +116,12 @@ static void ui_storage_open(void *ctx, void *params)
 		wi_list_add(&c->list, "Used", tmp, NULL);
 	}
 
+	if (s.special) {
+		p = tmp;
+		format(add_char, &p, "%u", s.special);
+		wi_list_add(&c->list, "Special", tmp, NULL);
+	}
+
 	if (s.error) {
 		p = tmp;
 		format(add_char, &p, "%u", s.error);

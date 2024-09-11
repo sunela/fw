@@ -772,6 +772,7 @@ if [ "$select" ] && ! $found; then
 	exit 1
 fi
 [ "$1" = last ] && display "$dir/_tmp.ppm"
+exit 0
 
 #
 # Tentative naming convention:

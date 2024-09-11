@@ -7,9 +7,13 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <string.h>
+#include <assert.h>
 
 #include "rnd.h"
+#include "sha.h"
 #include "timer.h"
+#include "secrets.h"
 #include "pin.h"
 
 
@@ -36,26 +40,31 @@ uint32_t pin_encode(const char *s)
 }
 
 
+void pin_success(void)
+{
+	pin_attempts = 0;
+	pin_cooldown = 0;
+}
+
+
+void pin_fail(void)
+{
+	pin_attempts++;
+	if (pin_attempts >= PIN_FREE_ATTEMPTS)
+		pin_cooldown = now + PIN_WAIT_S(pin_attempts) * 1000;
+}
+
+
 bool pin_revalidate(uint32_t pin)
 {
 	/* @@@ */
 	if (pin == secret_pin) {
-		pin_attempts = 0;
-		pin_cooldown = 0;
+		pin_success();
 		return 1;
 	} else {
-		pin_attempts++;
-		if (pin_attempts >= PIN_FREE_ATTEMPTS)
-			pin_cooldown = now + PIN_WAIT_S(pin_attempts) * 1000;
+		pin_fail();
 		return 0;
 	}
-}
-
-
-bool pin_validate(uint32_t pin)
-{
-	/* @@@ */
-	return pin_revalidate(pin);
 }
 
 
@@ -75,6 +84,27 @@ int pin_change(uint32_t old_pin, uint32_t new_pin)
 		return 0;
 	secret_pin = new_pin;
 	return 1;
+}
+
+
+void pin_xor(uint8_t secret[MASTER_SECRET_BYTES], uint32_t pin)
+{
+	/*
+	 * @@@ SHA1(device_secret + PIN) is a poor KDF. Pick something better.
+	 */
+	uint8_t hash[MASTER_SECRET_BYTES];
+	unsigned i;
+
+	assert(SHA1_HASH_BYTES <= MASTER_SECRET_BYTES);
+	memset(hash, 0, sizeof(hash));
+	sha1_begin();
+	sha1_hash(device_secret, sizeof(device_secret));
+	sha1_hash((const void *) &pin, sizeof(pin));
+	sha1_end(hash);
+
+	for (i = 0; i != MASTER_SECRET_BYTES; i++)
+		secret[i] ^= hash[i];
+	memset(hash, 0, sizeof(hash));
 }
 
 

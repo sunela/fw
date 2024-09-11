@@ -16,6 +16,8 @@
 #include "fmt.h"
 #include "storage.h"
 #include "block.h"
+#include "secrets.h"
+#include "dbcrypt.h"
 #include "db.h"
 #include "style.h"
 #include "ui.h"
@@ -43,8 +45,7 @@ static struct wi_list *lists[1];
 
 static void initialize_storage(void)
 {
-	static const uint8_t key[32] = { 0, };
-	struct dbcrypt *c = dbcrypt_init(key, sizeof(key));
+	struct dbcrypt *c;
 	unsigned total = storage_blocks();
 
 	gfx_clear(&main_da, GFX_BLACK);
@@ -52,6 +53,8 @@ static void initialize_storage(void)
 	db_close(&main_db);
 	storage_erase_blocks(0, total);
 	// @@@ create at least one empty entry, so that we can verify the PIN
+	secrets_init();
+	c = dbcrypt_init(master_secret, sizeof(master_secret));
 	db_open(&main_db, c);
 }
 

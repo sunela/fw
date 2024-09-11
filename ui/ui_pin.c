@@ -12,6 +12,7 @@
 #include "hal.h"
 #include "debug.h"
 #include "gfx.h"
+#include "secrets.h"
 #include "dbcrypt.h"
 #include "db.h"
 #include "ui_accounts.h"
@@ -60,20 +61,22 @@ static bool accept_pin(uint32_t pin)
 	struct db_stats s;
 	unsigned progress = 0;
 
-	if (!pin_validate(pin))
-		return 0;
 	ui_accounts_cancel_move();
 	gfx_clear(&main_da, GFX_BLACK);
 	gfx_rect_xy(&main_da, PROGRESS_X0, PROGRESS_Y0, PROGRESS_W, PROGRESS_H,
 	    PROGRESS_TOTAL_COLOR);
 	ui_update_display();	/* give immediate visual feedback */
 
-	static const uint8_t key[32] = { 0, };
 	struct dbcrypt *c;
 
-	c = dbcrypt_init(key, sizeof(key));
-	if (!db_open_progress(&main_db, c, open_progress, &progress))
+	secrets_init();
+	secrets_setup(pin);
+	c = dbcrypt_init(master_secret, sizeof(master_secret));
+	if (!db_open_progress(&main_db, c, open_progress, &progress)) {
+		dbcrypt_free(c);
 		return 0;
+	}
+	/* @@@ need to dbcrypt_free also when we turn off */
 	db_stats(&main_db, &s);
 
 	/*
@@ -82,7 +85,7 @@ static bool accept_pin(uint32_t pin)
 	 * dialog and go through a setup procedure, e.g., asking for a new PIN,
 	 * and writing some record (configuration ?), to "pin" the PIN.
 	 */
-	return s.data || s.empty || (s.erased == s.total);
+	return s.data || s.empty || s.erased == s.total;
 }
 
 
@@ -131,10 +134,13 @@ static void ui_pin_resume(void *ctx)
 
 	pin = pin_encode(c->buf);
 	progress();
-	if (accept_pin(pin))
+	if (accept_pin(pin)) {
+		pin_success();
 		ui_switch(&ui_accounts, NULL);
-	else
+	} else {
+		pin_fail();
 		ui_switch(&ui_fail, NULL);
+	}
 }
 
 

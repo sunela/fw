@@ -25,6 +25,7 @@
 #include "hmac.h"
 #include "hotp.h"
 #include "base32.h"
+#include "secrets.h"
 #include "dbcrypt.h"
 #include "db.h"
 #include "ui_overlay.h"
@@ -846,11 +847,12 @@ static void help(const struct demo *d)
 
 void demo(char **args, unsigned n_args)
 {
-	const uint8_t key[32] = { 0, };
-	struct dbcrypt *c = dbcrypt_init(key, sizeof(key));
+	struct dbcrypt *c;
 	unsigned n, i;
 	char *end;
 
+	secrets_init();
+ 	c = dbcrypt_init(master_secret, sizeof(master_secret));
 	db_open(&main_db, c);
 	display_on(1);
 	n = strtoul(args[0], &end, 0);

@@ -11,6 +11,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "secrets.h"
+
 
 #define DUMMY_PIN		0xffff1234
 #define MIN_PIN_LEN		4
@@ -32,9 +34,12 @@ extern uint8_t pin_shuffle[10];
 
 
 uint32_t pin_encode(const char *s);
+void pin_success(void);
+void pin_fail(void);
 bool pin_revalidate(uint32_t pin);
-bool pin_validate(uint32_t pin);
 unsigned pin_cooldown_ms(void);
+
+void pin_xor(uint8_t secret[MASTER_SECRET_BYTES], uint32_t pin);
 
 /*
  * pin_change returns the following results:

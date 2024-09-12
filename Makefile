@@ -9,7 +9,7 @@ TARGETS = sim sdk
 
 FONTS = mono14.font mono18.font mono24.font mono34.font mono36.font mono58.font
 
-.PHONY:	all sim sdk fonts gdb clean spotless test tests
+.PHONY:	all sim sdk fonts empty-db gdb clean spotless test tests
 .PHONY:	flash picocom upload download download-all erase
 
 all:	fonts $(TARGETS) dummy.db
@@ -33,6 +33,10 @@ PK = AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA====
 
 dummy.db: tools/accenc.py accounts.json
 	$(BUILD) $^ >$@ $(PK) || { rm -f $@; exit 1; }
+
+empty-db:
+	echo "[]" | tools/accenc.py /dev/stdin >dummy.db || \
+	    { rm -f dummy.db; exit 1; }
 
 # --- Flashing ----------------------------------------------------------------
 

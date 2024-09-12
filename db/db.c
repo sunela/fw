@@ -862,6 +862,21 @@ void db_close(struct db *db)
 }
 
 
+bool db_is_erased(void)
+{
+	unsigned n = storage_blocks();
+	unsigned i;
+
+	for (i = 0; i != n; i++) {
+		enum block_type type = block_read(NULL, NULL, NULL, NULL, i);
+
+		if (type != bt_error && type != bt_erased)
+		    return 0;
+	}
+	return 1;
+}
+
+
 void db_init(void)
 {
 	unsigned i;

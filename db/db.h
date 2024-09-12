@@ -173,6 +173,8 @@ bool db_open_progress(struct db *db, const struct dbcrypt *c,
 bool db_open(struct db *db, const struct dbcrypt *c);
 void db_close(struct db *db);
 
+bool db_is_erased(void);
+
 void db_init(void);
 
 #endif /* !DB_H */

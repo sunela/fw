@@ -15,6 +15,7 @@
 #include <string.h>
 #include <assert.h>
 
+#include "hal.h"
 #include "debug.h"
 #include "alloc.h"
 #include "rnd.h"
@@ -22,6 +23,11 @@
 #include "storage.h"
 #include "block.h"
 #include "dbcrypt.h"
+
+#if 1
+#define	t0()	do {} while (0)
+#define	t1(...)	do {} while (0)
+#endif
 
 
 struct peer {
@@ -172,8 +178,12 @@ bool db_encrypt(const struct dbcrypt *c, void *block, const void *content,
 	assert(mlen <= sizeof(out_buf));
 	memset(in_buf, 0, sizeof(in_buf));
 	memcpy(in_buf + crypto_secretbox_ZEROBYTES, content, length);
+
+	t0();
 	if (crypto_secretbox(out_buf, in_buf, mlen, nonce, rk))
 		DIE("crypto_secretbox failed");
+	t1("db_encrypt:crypto_secretbox\n");
+
 	memcpy(encrypted, out_buf + crypto_secretbox_BOXZEROBYTES,
 	    mlen - crypto_secretbox_BOXZEROBYTES);
 	assert(encrypted + mlen - crypto_secretbox_BOXZEROBYTES == block_end);
@@ -197,10 +207,14 @@ bool db_encrypt(const struct dbcrypt *c, void *block, const void *content,
 		memcpy(nonce2, nonce, crypto_secretbox_NONCEBYTES);
 		i++;
 		nonce2[0] ^= i;
+
+		t0();
 		if (crypto_stream_xor(out_buf, in_buf,
 		    crypto_secretbox_ZEROBYTES + crypto_secretbox_KEYBYTES,
 		    nonce2, reader->k))
 			DIE("crypto_stream_xor failed");
+		t1("db_encrypt:crypto_stream_xor\n");
+
 		memcpy(b, out_buf + crypto_secretbox_ZEROBYTES,
 		    crypto_secretbox_KEYBYTES);
 		b += crypto_secretbox_KEYBYTES;
@@ -271,16 +285,20 @@ int db_decrypt(const struct dbcrypt *c, void *content, unsigned size,
 	uint8_t nonce2[crypto_secretbox_NONCEBYTES];
 
 	/* @@@ should first search the reader list and the cache */
+	t0();
 	if (crypto_box_beforenm(shared, b, c->sk)) {
 		debug("crypto_box_beforenm failed\n");
 		return -1;
 	}
+	t1("db_decrypt:crypto_box_beforenm\n");
 
 	memcpy(nonce2, nonce, crypto_secretbox_NONCEBYTES);
 	nonce2[0] ^= i + 1;
 	memset(in_buf, 0, crypto_secretbox_ZEROBYTES);
 	memcpy(in_buf + crypto_secretbox_ZEROBYTES,
 	    b + crypto_box_PUBLICKEYBYTES, crypto_secretbox_KEYBYTES);
+
+	t0();
 	if (crypto_stream_xor(out_buf, in_buf,
             crypto_secretbox_ZEROBYTES + crypto_secretbox_KEYBYTES, nonce2,
 	    shared)) {
@@ -288,6 +306,8 @@ int db_decrypt(const struct dbcrypt *c, void *content, unsigned size,
 		memset(shared, 0, sizeof(shared));
 		goto cleanup;
 	}
+	t1("db_decrypt:crypto_stream_xor\n");
+
 	memcpy(rk, out_buf + crypto_secretbox_ZEROBYTES,
 	    crypto_secretbox_KEYBYTES);
 
@@ -302,10 +322,13 @@ int db_decrypt(const struct dbcrypt *c, void *content, unsigned size,
 	memset(in_buf, 0, crypto_secretbox_BOXZEROBYTES);
 	memcpy(in_buf + crypto_secretbox_BOXZEROBYTES, encrypted,
 	    encrypted_bytes);
+
+	t0();
 	if (crypto_secretbox_open(out_buf, in_buf, mlen, nonce, rk)) {
                 debug("crypto_secretbox failed\n");
 		goto cleanup;
 	}
+	t1("db_decrypt:crypto_secretbox_open\n");
 
 	/* --- extract the payload --- */
 
@@ -335,16 +358,26 @@ struct dbcrypt *dbcrypt_init(const void *sk, unsigned bytes)
 
 	assert(bytes == crypto_box_SECRETKEYBYTES);
 	memcpy(c->sk, sk, crypto_box_SECRETKEYBYTES);
+
+	t0();
 	if (crypto_scalarmult_base(c->pk, sk))
 		DIE("crypto_scalarmult_base failed");
+	t1("dbcrypt_init:crypto_scalarmult_base(1)\n");
 
 	p = alloc_type(struct peer);
 	c->readers = p;
 	p->next = NULL;
+
+	t0();
 	if (crypto_scalarmult_base(p->pk, sk))
 		DIE("crypto_scalarmult_base failed");
+	t1("dbcrypt_init:crypto_scalarmult_base(2)\n");
+
+	t0();
 	if (crypto_box_beforenm(p->k, p->pk, sk))
 		DIE("crypto_box_beforenm failed");
+	t1("dbcrypt_init:crypto_box_beforenm\n");
+
 	c->cache = NULL;
 	return c;
 }
@@ -362,8 +395,11 @@ void dbcrypt_add_reader(struct dbcrypt *c, const void *pk, unsigned bytes)
 	*anchor = p;
 	p->next = NULL;
 	memcpy(p->pk, pk, crypto_box_PUBLICKEYBYTES);
+
+	t0();
 	if (crypto_box_beforenm(p->k, p->pk, c->sk))
 		DIE("crypto_box_beforenm failed");
+	t1("dbcrypt_add_reader:crypto_box_beforenm\n");
 }
 
 

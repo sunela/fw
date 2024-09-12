@@ -773,37 +773,37 @@ page -j "[]" $mode new-cancel "random 1" button \
 # --- New device, PIN ---------------------------------------------------------
 
 page -j "[]" $mode new-pin "random 1" button \
-    "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_0"
+    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4"
 
 # --- New device, confirm -----------------------------------------------------
 
 page -j "[]" $mode new-confirm "random 1" button \
-    "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_R"
+    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R"
 
 # --- New device, confirmed ---------------------------------------------------
 
 page -j "[]" $mode new-confirmed "random 1" button \
-    "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_R" \
-    "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_R"
+    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
+    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R"
 
 # --- New device, enter -------------------------------------------------------
 
 page -j "[]" $mode new-enter "random 1" button \
-    "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_R" \
-    "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_R" \
+    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
+    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
     "$ENTRY_5"
 
 # --- New device, mismatch ---------------------------------------------------
 
 page -j "[]" $mode new-mismatch "random 1" button \
-    "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_R" \
-    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R"
+    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
+    "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_R"
 
 # --- New device, repeat ---------------------------------------------------
 
 page -j "[]" $mode new-repeat "random 1" button \
-    "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_R" \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
+    "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_R" \
     "$ENTRY_5"
 
 ## --- accounts (empty) --------------------------------------------------------

@@ -105,6 +105,7 @@ struct ui_entry_params {
 };
 
 
+extern const struct ui_entry_style ui_entry_default_style;
 extern const struct ui_entry_maps ui_entry_text_maps;
 extern const struct ui_entry_maps ui_entry_decimal_maps;
 

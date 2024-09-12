@@ -25,6 +25,7 @@
 
 /* --- Keypad -------------------------------------------------------------- */
 
+
 #define	BUTTON_LINGER_MS	150
 
 
@@ -50,7 +51,7 @@ struct ui_entry_ctx {
 /* --- Style --------------------------------------------------------------- */
 
 
-static const struct ui_entry_style default_style = {
+const struct ui_entry_style ui_entry_default_style = {
 	.input_fg		= GFX_WHITE,
 	.input_valid_bg		= GFX_HEX(0x002060),
 	.input_invalid_bg	= GFX_HEX(0x800000),
@@ -385,7 +386,7 @@ static void ui_entry_open(void *ctx, void *params)
 
 	assert(strlen(prm->input.buf) <= prm->input.max_len);
 	c->input = prm->input;
-	c->style = prm->style ? prm->style : &default_style;
+	c->style = prm->style ? prm->style : &ui_entry_default_style;
 	c->maps = prm->maps ? prm->maps : &ui_entry_text_maps;
 	c->second = NULL;
 

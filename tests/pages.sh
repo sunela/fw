@@ -240,10 +240,6 @@ accounts $mode accounts
 
 accounts $mode accounts-up "drag 158 243 159 180"
 
-# --- accounts (empty) --------------------------------------------------------
-
-accounts -j "[]" $mode accounts-empty
-
 # --- account (demo)-----------------------------------------------------------
 
 accounts $mode account-demo "tap 86 67"
@@ -764,6 +760,55 @@ else
 	accounts $mode hotp-reveal-twice \
 	    "drag 158 243 159 196" "tap 50 221" "tap 38 80"
 fi
+
+# --- New device --------------------------------------------------------------
+
+page -j "[]" $mode new-on "random 1" button
+
+# --- New device, cancel ------------------------------------------------------
+
+page -j "[]" $mode new-cancel "random 1" button \
+    "$ENTRY_L"
+
+# --- New device, PIN ---------------------------------------------------------
+
+page -j "[]" $mode new-pin "random 1" button \
+    "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_0"
+
+# --- New device, confirm -----------------------------------------------------
+
+page -j "[]" $mode new-confirm "random 1" button \
+    "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_R"
+
+# --- New device, confirmed ---------------------------------------------------
+
+page -j "[]" $mode new-confirmed "random 1" button \
+    "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_R" \
+    "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_R"
+
+# --- New device, enter -------------------------------------------------------
+
+page -j "[]" $mode new-enter "random 1" button \
+    "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_R" \
+    "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_R" \
+    "$ENTRY_5"
+
+# --- New device, mismatch ---------------------------------------------------
+
+page -j "[]" $mode new-mismatch "random 1" button \
+    "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_R" \
+    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R"
+
+# --- New device, repeat ---------------------------------------------------
+
+page -j "[]" $mode new-repeat "random 1" button \
+    "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_R" \
+    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
+    "$ENTRY_5"
+
+## --- accounts (empty) --------------------------------------------------------
+#
+#accounts -j "[]" $mode accounts-empty
 
 # -----------------------------------------------------------------------------
 

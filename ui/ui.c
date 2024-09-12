@@ -163,6 +163,8 @@ static void turn_on(void)
 	progress();
 	if (pin_cooldown_ms())
 		ui_switch(&ui_cooldown, NULL);
+	else if (db_is_erased())
+		ui_switch(&ui_new, NULL);
 	else
 		ui_switch(&ui_pin, NULL);
 }

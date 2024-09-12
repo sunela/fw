@@ -87,6 +87,16 @@ int pin_change(uint32_t old_pin, uint32_t new_pin)
 }
 
 
+bool pin_set(uint32_t new_pin)
+{
+	secrets_init();
+	if (!secrets_new(new_pin))
+		return 0;
+	secret_pin = new_pin;
+	return 1;
+}
+
+
 void pin_xor(uint8_t secret[MASTER_SECRET_BYTES], uint32_t pin)
 {
 	/*

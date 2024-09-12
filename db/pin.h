@@ -49,6 +49,7 @@ void pin_xor(uint8_t secret[MASTER_SECRET_BYTES], uint32_t pin);
  */
 
 int pin_change(uint32_t old_pin, uint32_t new_pin);
+bool pin_set(uint32_t new_pin);
 
 void pin_shuffle_pad(void);
 

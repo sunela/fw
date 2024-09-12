@@ -24,6 +24,12 @@
 #define	DEFAULT_FONT	mono18
 
 
+struct ui_notice_ctx {
+	const struct ui *next;
+	void *next_params;
+};
+
+
 static const struct ui_notice_style default_style = {
 	.fg		= GFX_BLACK,
 	.bg		= GFX_WHITE,
@@ -37,15 +43,26 @@ static const struct ui_notice_style default_style = {
 
 static void ui_notice_tap(void *ctx, unsigned x, unsigned y)
 {
-	ui_return();
+	const struct ui_notice_ctx *c = ctx;
+
+	if (c->next)
+		ui_switch(c->next, c->next_params);
+	else
+		ui_return();
 }
 
 
 static void ui_notice_to(void *ctx, unsigned from_x, unsigned from_y,
     unsigned to_x, unsigned to_y, enum ui_swipe swipe)
 {
-        if (swipe == us_left)
-                ui_return();
+	const struct ui_notice_ctx *c = ctx;
+
+        if (swipe == us_left) {
+		if (c->next)
+			ui_switch(c->next, c->next_params);
+		else
+                	ui_return();
+	}
 }
 
 
@@ -54,6 +71,7 @@ static void ui_notice_to(void *ctx, unsigned from_x, unsigned from_y,
 
 static void ui_notice_open(void *ctx, void *params)
 {
+	struct ui_notice_ctx *c = ctx;
 	const struct ui_notice_params *p = params;
 	const struct ui_notice_style *style =
 	    p->style ? p->style : &default_style;
@@ -63,6 +81,8 @@ static void ui_notice_open(void *ctx, void *params)
 	const struct font *font = style->font ? style->font : &DEFAULT_FONT;
 	unsigned h;
 
+	c->next = p->next;
+	c->next_params = p->next_params;
 	assert(w > 2 * margin);
 	h = text_format(NULL, 0, 0, w - 2 * margin, 0, 0, p->s,
 	    font, style->x_align, style->fg);
@@ -86,6 +106,7 @@ static const struct ui_events ui_notice_events = {
 
 const struct ui ui_notice = {
 	.name		= "notice",
+	.ctx_size	= sizeof(struct ui_notice_ctx),
 	.open		= ui_notice_open,
 	.events		= &ui_notice_events,
 };
@@ -95,7 +116,8 @@ const struct ui ui_notice = {
 
 
 static void vnotice_common(enum notice_type type, const char *fmt, va_list ap,
-    void (*chain)(const struct ui *ui, void *params))
+    void (*chain)(const struct ui *ui, void *params), const struct ui *next,
+    void *next_params)
 {
 	struct ui_notice_style style = {
 		/* .fg and .bg are set below */
@@ -103,6 +125,8 @@ static void vnotice_common(enum notice_type type, const char *fmt, va_list ap,
 	};
 	struct ui_notice_params params = {
 		.style		= &style,
+		.next		= next,
+		.next_params	= next_params,
         };
 
 	params.s = vformat_alloc(fmt, ap);
@@ -133,7 +157,7 @@ static void vnotice_common(enum notice_type type, const char *fmt, va_list ap,
 
 void vnotice(enum notice_type type, const char *fmt, va_list ap)
 {
-	vnotice_common(type, fmt, ap, ui_switch);
+	vnotice_common(type, fmt, ap, ui_switch, NULL, NULL);
 }
 
 
@@ -149,7 +173,7 @@ void notice(enum notice_type type, const char *fmt, ...)
 
 void vnotice_call(enum notice_type type, const char *fmt, va_list ap)
 {
-	vnotice_common(type, fmt, ap, ui_call);
+	vnotice_common(type, fmt, ap, ui_call, NULL, NULL);
 }
 
 
@@ -159,5 +183,23 @@ void notice_call(enum notice_type type, const char *fmt, ...)
 
 	va_start(ap, fmt);
 	vnotice_call(type, fmt, ap);
+	va_end(ap);
+}
+
+
+void vnotice_switch(const struct ui *next, void *params, enum notice_type type,
+    const char *fmt, va_list ap)
+{
+	vnotice_common(type, fmt, ap, ui_switch, next, params);
+}
+
+
+void notice_switch(const struct ui *next, void *params, enum notice_type type,
+    const char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	vnotice_switch(next, params, type, fmt, ap);
 	va_end(ap);
 }

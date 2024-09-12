@@ -25,6 +25,8 @@ struct ui_notice_params {
 	unsigned r;	/* 0 for default radius */
 	unsigned margin; /* 0 for radius */
 	const struct ui_notice_style *style;
+	const struct ui *next;	/* NULL for return */
+	void *next_params;
 };
 
 enum notice_type {
@@ -37,12 +39,18 @@ enum notice_type {
 
 /*
  * vnotice and notice end by calling ui_switch, while vnotice_call and
- * progress_call end * with ui_call. All invoke ui_notice.
+ * progress_call end * with ui_call. All invoke ui_notice. vnotice_switch and
+ * notice_switch call ui_switch first to reach ui_notice and then again for the
+ * destination "next".
  */
 
-void vnotice(enum notice_type type, const char *fmp, va_list ap);
+void vnotice(enum notice_type type, const char *fmt, va_list ap);
 void notice(enum notice_type type, const char *fmt, ...);
-void vnotice_call(enum notice_type type, const char *fmp, va_list ap);
+void vnotice_call(enum notice_type type, const char *fmt, va_list ap);
 void notice_call(enum notice_type type, const char *fmt, ...);
+void vnotice_switch(const struct ui *next, void *params, enum notice_type type,
+    const char *fmt, va_list ap);
+void notice_switch(const struct ui *next, void *params, enum notice_type type,
+    const char *fmt, ...);
 
 #endif /* !UI_NOTICE_H */

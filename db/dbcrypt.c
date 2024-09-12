@@ -132,9 +132,6 @@ static uint8_t in_buf[STORAGE_BLOCK_SIZE + crypto_secretbox_ZEROBYTES];
 static uint8_t out_buf[STORAGE_BLOCK_SIZE + crypto_secretbox_ZEROBYTES];
 
 
-#define	DIE(msg)	assert(((void) msg, 0))
-
-
 /* --- Encrypt ------------------------------------------------------------- */
 
 

@@ -28,6 +28,8 @@
 
 #define	CPU_ID_LENGTH	20
 
+#define	DIE(msg)	assert(((void) msg, 0))
+
 
 extern bool quiet;
 extern bool scripting;

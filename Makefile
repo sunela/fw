@@ -9,7 +9,7 @@ TARGETS = sim sdk
 
 FONTS = mono14.font mono18.font mono24.font mono34.font mono36.font mono58.font
 
-.PHONY:	all sim sdk fonts empty-db gdb clean spotless test tests
+.PHONY:	all sim sdk fonts empty-db gdb nm clean spotless test tests
 .PHONY:	flash picocom upload download download-all erase
 
 all:	fonts $(TARGETS) dummy.db
@@ -82,6 +82,11 @@ picocom:
 
 gdb:
 	riscv64-unknown-elf-gdb sdk/build/build_out/sunela_bl808_m0.elf
+
+# idem, for nm
+
+nm:
+	riscv64-unknown-elf-nm sdk/build/build_out/sunela_bl808_m0.elf
 
 # --- Testing -----------------------------------------------------------------
 

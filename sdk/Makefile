@@ -28,5 +28,5 @@ include $(BL_SDK_BASE)/project.build
 
 redo:
 	rm -f build/build_out/sunela_bl808_m0.elf
-	sed '/^StackSize/s/0x0400/0x1000/' $(SDK_LD) >sunela.ld
+	sed '/^StackSize/s/0x0400/0x2000/' $(SDK_LD) >sunela.ld
 	$(MAKE)

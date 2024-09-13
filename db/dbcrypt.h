@@ -14,6 +14,7 @@
 struct dbcrypt;
 
 #define	DB_NONCE_SIZE	24
+#define	DB_MAX_READERS	12
 
 
 /*

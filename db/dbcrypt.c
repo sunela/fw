@@ -55,52 +55,16 @@ struct dbcrypt {
  * Each block contains at least:
  * - the write's pubkey (Pw),
  * - a nonce,
- * - the number of readers (one bytes),
  * - one reader. We store for each reader r:
- *   - the reader's public key (Pr),
  *   - the record key, encrypted with Shared(Sw, Pr)
- * @@@ Note: we usually want to be include a record key the writer can decrypt.
- * For this, we need one reader entry, which in this case contains the writer's
- * public key. We already have this public key, at the beginning of the block.
- * We could:
- * - keep things as they are, and waste 32 precious block bytes,
- * - remove the writer's pubkey field, and just require the first reader entry
- *   to be for the writer.
- */
-
-/*
- * @@@ Thinking ahead, we store the public keys of readers purely as a
- * performance improvement.
  *
- * We could also store only the encrypted record keys, and let the reader try
- * each keys, to see if it fits. In this case, we would want to keep the field
- * for the writer's pubkey, but remove all pubkeys from the readers list.
- *
- * Cost/benefit of such a change:
- * + just by looking at an encrypted block, once can't tell who might be able
- *   to read it (but one can tell the maximum number of possible readers (*)),
- * + we save 32 bytes (3.1% of the block size) for each reader,
- * - the reader needs to try to decrypt and use each reader key until it finds
- *   a match, instead of just picking the right key from the list (or deciding,
- *   without decrypting anything, that there is no suitable key)
- *
- * (*) In order to hide the exact number of readers, a writer could add
- *     "garbage" entries that contain just random noise.
- *
- * Storing reader's public keys to improve performance comes from the original
- * Anelok design, which was based on a 48 MHz ARM Cortex-M0. Sunela has a 320
- * MHz RISC-V.
- *
- * Privacy could be further improved by removing the number of readers field.
- * Then a reader would have to consider block content after the start of the
- * reader list as potential reader keys, but could not tell whether an entry is
- * a key or already part of the encrypted payload. Furthermore, the beginning
- * of the payload would have to be determined by trial and error as well.
+ * There is no information about who can decrypt the record key, nor how many
+ * record keys the block contains. The reader therefor has to try all possible
+ * combinations until a key fits.
  */
 
 #define	BLOCK_OVERHEAD	(crypto_box_PUBLICKEYBYTES +		\
-			    crypto_secretbox_NONCEBYTES + 1 +	\
-			    crypto_box_PUBLICKEYBYTES +		\
+			    crypto_secretbox_NONCEBYTES +	\
 			    crypto_secretbox_KEYBYTES)
 
 /*
@@ -176,8 +140,7 @@ bool db_encrypt(const struct dbcrypt *c, void *block, const void *content,
 	uint8_t *wpk = block;	/* writer's pubkey */
 	uint8_t *nonce = wpk + crypto_box_PUBLICKEYBYTES;
 	uint8_t *reader_list = nonce + crypto_secretbox_NONCEBYTES;
-	unsigned reader_list_bytes = 1 + n_readers *
-	    (crypto_box_PUBLICKEYBYTES + crypto_secretbox_KEYBYTES);
+	unsigned reader_list_bytes = n_readers * crypto_secretbox_KEYBYTES;
 	uint8_t *encrypted = reader_list + reader_list_bytes;
 	unsigned encrypted_bytes = block_end - encrypted;
 
@@ -198,16 +161,12 @@ bool db_encrypt(const struct dbcrypt *c, void *block, const void *content,
 	/* --- populate the rest of the block --- */
 
 	memcpy(wpk, c->pk, crypto_box_PUBLICKEYBYTES);
-	*reader_list = n_readers;
 
-	uint8_t *b = reader_list + 1;
+	uint8_t *b = reader_list;
 	uint8_t nonce2[crypto_secretbox_NONCEBYTES];
 	uint8_t i = 0;
 
 	for (reader = c->readers; reader; reader = reader->next) {
-		memcpy(b, reader->pk, crypto_box_PUBLICKEYBYTES);
-		b += crypto_box_PUBLICKEYBYTES;
-
 		memset(in_buf, 0, crypto_secretbox_ZEROBYTES);
 		memcpy(in_buf + crypto_secretbox_ZEROBYTES, rk,
 		    crypto_secretbox_KEYBYTES);
@@ -328,50 +287,20 @@ cleanup:
 int db_decrypt(const struct dbcrypt *c, void *content, unsigned size,
     const void *block)
 {
+	int length = -1; /* means that we could not decrypt the block */
+
 	/* --- block layout --- */
 
 	const uint8_t *block_end = block + STORAGE_BLOCK_SIZE;
 	const uint8_t *wpk = block;	/* writer's pubkey */
 	const uint8_t *nonce = wpk + crypto_box_PUBLICKEYBYTES;
 	const uint8_t *reader_list = nonce + crypto_secretbox_NONCEBYTES;
-	unsigned n_readers = *reader_list;
-	unsigned reader_list_bytes = 1 + n_readers *
-	    (crypto_box_PUBLICKEYBYTES + crypto_secretbox_KEYBYTES);
-	const uint8_t *encrypted = reader_list + reader_list_bytes;
-	unsigned encrypted_bytes = block_end - encrypted;
+	unsigned n_readers;
 
-	if (encrypted > block_end) {
-		debug("reader list too long (%u)\n", n_readers);
-		return -1;
-	}
-	if (encrypted_bytes < BOX_OVERHEAD) {
-		debug("not enough room for box (%u < %u)\n",
-		    encrypted_bytes, BOX_OVERHEAD);
-		return -1;
-	}
-
-	/* --- find a suitable encrypted key --- */
-
-	const uint8_t *b = reader_list + 1;
-	unsigned i;
-
-	for (i = 0; i != n_readers; i++) {
-		if (!memcmp(b, c->pk, crypto_box_PUBLICKEYBYTES))
-			break;
-		b += crypto_box_PUBLICKEYBYTES + crypto_secretbox_KEYBYTES;
-	}
-	if (i == n_readers) {
-		debug("key not found\n");
-		return -1;
-	}
-	assert(b + crypto_box_PUBLICKEYBYTES + crypto_secretbox_KEYBYTES <=
-	    encrypted);
-
-	/* --- decrypt --- */
+	/* --- shared public-key encryption secret --- */
 
 	uint8_t shared[crypto_secretbox_KEYBYTES];
 
-	/* @@@ should first search the reader list and the cache */
 	t0();
 	if (crypto_box_beforenm(shared, wpk, c->sk)) {
 		debug("crypto_box_beforenm failed\n");
@@ -379,17 +308,55 @@ int db_decrypt(const struct dbcrypt *c, void *content, unsigned size,
 	}
 	t1("db_decrypt:crypto_box_beforenm\n");
 
-	/* --- decrypt the payload --- */
+	/* --- try all possible layouts and record keys --- */
 
-	int length;
+	for (n_readers = 1; n_readers <= DB_MAX_READERS; n_readers++) {
+		unsigned reader_list_bytes =
+		    n_readers * crypto_secretbox_KEYBYTES;
+		const uint8_t *encrypted = reader_list + reader_list_bytes;
+		unsigned encrypted_bytes = block_end - encrypted;
 
-	length = db_try_decrypt(content,size, block, encrypted,
-	    i, b + crypto_box_PUBLICKEYBYTES, shared);
+		if (encrypted > block_end) {
+			debug("reader list too long (%u)\n", n_readers);
+			return -1;
+		}
+		if (encrypted_bytes < BOX_OVERHEAD) {
+			debug("not enough room for box (%u < %u)\n",
+			    encrypted_bytes, BOX_OVERHEAD);
+			return -1;
+		}
 
+		/* --- find a suitable encrypted key --- */
+
+		const uint8_t *b = reader_list;
+		unsigned i;
+
+		for (i = 0; i != n_readers; i++) {
+			/* @@@ should first search the reader list and the
+			   cache of share public-key encryption secrets  */
+			/* @@@ cache decrypted record keys ? */
+
+			/* --- decrypt the payload --- */
+
+			length = db_try_decrypt(content,size, block, encrypted,
+			    i, b, shared);
+
+			if (length != -1) {
+				debug("db_decrypt: found at %u / %u\n",
+				    i, n_readers);
+				goto done;
+			}
+
+			b += crypto_secretbox_KEYBYTES;
+		}
+	}
+
+	/* --- clean up --- */
+
+done:
 	memset(shared, 0, sizeof(shared));
 
 	return length;
-
 }
 
 

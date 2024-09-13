@@ -58,7 +58,6 @@ def write_new(data, writer, readers):
 		print("RK", rk.hex(), file = sys.stderr)
 		print("Readers", len(readers), file = sys.stderr)
 	blob = bytes(writer.public_key) + nonce
-	blob += struct.pack("B", len(readers))
 
 	i = 0
 	for rd in readers:
@@ -69,7 +68,7 @@ def write_new(data, writer, readers):
 		box = SecretBox(shared)
 		ek = box.encrypt(rk, bytes(nonce2))[Box.NONCE_SIZE +
 		    SecretBox.MACBYTES:]
-		blob += bytes(rd) + ek
+		blob += ek
 		if debug:
 			print("\tShared", bytes(shared).hex(),
 			    file = sys.stderr)

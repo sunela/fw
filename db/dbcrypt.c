@@ -135,6 +135,31 @@ static uint8_t out_buf[STORAGE_BLOCK_SIZE + crypto_secretbox_ZEROBYTES];
 /* --- Encrypt ------------------------------------------------------------- */
 
 
+static void db_encrypt_payload(void *block, uint8_t *encrypted,
+    const void *content, unsigned length, const uint8_t *rk)
+{
+	const uint8_t *block_end = block + STORAGE_BLOCK_SIZE;
+	uint8_t *nonce = block + crypto_box_PUBLICKEYBYTES;
+	unsigned encrypted_bytes = block_end - encrypted;
+	unsigned mlen = crypto_secretbox_ZEROBYTES - BOX_OVERHEAD +
+	    encrypted_bytes;
+
+	assert(mlen <= sizeof(in_buf));
+	assert(mlen <= sizeof(out_buf));
+	memset(in_buf, 0, sizeof(in_buf));
+	memcpy(in_buf + crypto_secretbox_ZEROBYTES, content, length);
+
+	t0();
+	if (crypto_secretbox(out_buf, in_buf, mlen, nonce, rk))
+		DIE("crypto_secretbox failed");
+	t1("db_encrypt:crypto_secretbox\n");
+
+	memcpy(encrypted, out_buf + crypto_secretbox_BOXZEROBYTES,
+	    mlen - crypto_secretbox_BOXZEROBYTES);
+	assert(encrypted + mlen - crypto_secretbox_BOXZEROBYTES == block_end);
+}
+
+
 bool db_encrypt(const struct dbcrypt *c, void *block, const void *content,
     unsigned length)
 {
@@ -168,22 +193,7 @@ bool db_encrypt(const struct dbcrypt *c, void *block, const void *content,
 
 	/* --- encrypt --- */
 
-	unsigned mlen = crypto_secretbox_ZEROBYTES - BOX_OVERHEAD +
-	    encrypted_bytes;
-
-	assert(mlen <= sizeof(in_buf));
-	assert(mlen <= sizeof(out_buf));
-	memset(in_buf, 0, sizeof(in_buf));
-	memcpy(in_buf + crypto_secretbox_ZEROBYTES, content, length);
-
-	t0();
-	if (crypto_secretbox(out_buf, in_buf, mlen, nonce, rk))
-		DIE("crypto_secretbox failed");
-	t1("db_encrypt:crypto_secretbox\n");
-
-	memcpy(encrypted, out_buf + crypto_secretbox_BOXZEROBYTES,
-	    mlen - crypto_secretbox_BOXZEROBYTES);
-	assert(encrypted + mlen - crypto_secretbox_BOXZEROBYTES == block_end);
+	db_encrypt_payload(block, encrypted, content, length, rk);
 
 	/* --- populate the rest of the block --- */
 
@@ -229,6 +239,48 @@ bool db_encrypt(const struct dbcrypt *c, void *block, const void *content,
 
 
 /* --- Decrypt ------------------------------------------------------------- */
+
+
+static int db_decrypt_payload(void *content, unsigned size, const void *block,
+    const uint8_t *encrypted, const uint8_t *rk)
+{
+	int length = -1; /* -1 means that we could not decrypt the block */
+	const uint8_t *block_end = block + STORAGE_BLOCK_SIZE;
+	const uint8_t *nonce = block + crypto_box_PUBLICKEYBYTES;
+	unsigned encrypted_bytes = block_end - encrypted;
+
+	/* --- decrypt the payload --- */
+
+	unsigned mlen = crypto_secretbox_BOXZEROBYTES + encrypted_bytes;
+
+	assert(mlen <= sizeof(in_buf));
+	assert(mlen <= sizeof(out_buf));
+	memset(in_buf, 0, crypto_secretbox_BOXZEROBYTES);
+	memcpy(in_buf + crypto_secretbox_BOXZEROBYTES, encrypted,
+	    encrypted_bytes);
+
+	t0();
+	if (crypto_secretbox_open(out_buf, in_buf, mlen, nonce, rk)) {
+                debug("crypto_secretbox failed\n");
+		goto cleanup;
+	}
+	t1("db_decrypt:crypto_secretbox_open\n");
+
+	/* --- extract the payload --- */
+
+	length = mlen - crypto_secretbox_ZEROBYTES;
+	assert(mlen >= crypto_secretbox_ZEROBYTES);
+	assert((unsigned) length <= size);
+	memcpy(content, out_buf + crypto_secretbox_ZEROBYTES, length);
+
+	/* --- clean up --- */
+
+cleanup:
+	memset(in_buf, 0, sizeof(in_buf));
+	memset(out_buf, 0, sizeof(out_buf));
+
+	return length;
+}
 
 
 int db_decrypt(const struct dbcrypt *c, void *content, unsigned size,
@@ -312,34 +364,11 @@ int db_decrypt(const struct dbcrypt *c, void *content, unsigned size,
 
 	/* --- decrypt the payload --- */
 
-	unsigned mlen = crypto_secretbox_BOXZEROBYTES + encrypted_bytes;
-
-	assert(mlen <= sizeof(in_buf));
-	assert(mlen <= sizeof(out_buf));
-	memset(in_buf, 0, crypto_secretbox_BOXZEROBYTES);
-	memcpy(in_buf + crypto_secretbox_BOXZEROBYTES, encrypted,
-	    encrypted_bytes);
-
-	t0();
-	if (crypto_secretbox_open(out_buf, in_buf, mlen, nonce, rk)) {
-                debug("crypto_secretbox failed\n");
-		goto cleanup;
-	}
-	t1("db_decrypt:crypto_secretbox_open\n");
-
-	/* --- extract the payload --- */
-
-	length = mlen - crypto_secretbox_ZEROBYTES;
-	assert(mlen >= crypto_secretbox_ZEROBYTES);
-	assert((unsigned) length <= size);
-	memcpy(content, out_buf + crypto_secretbox_ZEROBYTES, length);
+	length = db_decrypt_payload(content, size, block, encrypted, rk);
 
 	/* --- clean up --- */
-
 cleanup:
 	memset(rk, 0, sizeof(rk));
-	memset(in_buf, 0, sizeof(in_buf));
-	memset(out_buf, 0, sizeof(out_buf));
 
 	return length;
 }

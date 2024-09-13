@@ -29,6 +29,9 @@
 #include "gfx.h"
 
 
+#define	DEBUG	0
+
+
 /* scripting is only available in the simulator */
 bool scripting = 0;
 
@@ -42,14 +45,18 @@ static void process_touch(void)
 	const struct cst816_event *e = t.event;
 	static bool down = 0;
 
+#if DEBUG
 	debug("TOUCH (%u)\n", down);
+#endif
 	mdelay(1);
 	cst816_read(&t);
 	mdelay(1);
+#if DEBUG
 	if (t.events)
 		debug("\t%u %u %u\n", e->action, e->x, e->y);
 	else
 		debug("\tUP\n");
+#endif /* DEBUG */
 	if (t.events && e->action != cst816_up) {
 		unsigned x = GFX_WIDTH - 1 - e->x;
 		unsigned y = GFX_HEIGHT - 1 - e->y;
@@ -120,16 +127,22 @@ void update_display(struct gfx_drawable *da)
 	assert(da->damage.w);
 	assert(da->damage.h);
 
+#if DEBUG
 	unsigned n_pix = da->damage.w * da->damage.h;
 	double dt;
 
 	t0();
+#endif /* DEBUG */
+
 	st7789_update(da->fb, da->damage.x, da->damage.y,
 	    da->damage.x + da->damage.w - 1, da->damage.y + da->damage.h - 1);
+
+#if DEBUG
 	dt = t1(NULL);
 	t1("D %u %u + %u %u: %u px (%.3f Mbps)\n",
 	    da->damage.x, da->damage.y, da->damage.w, da->damage.h,
 	     n_pix, n_pix / dt * 16e-6);
+#endif /* DEBUG */
 }
 
 

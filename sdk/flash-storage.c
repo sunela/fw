@@ -51,7 +51,7 @@ bool storage_read_block(void *buf, unsigned n)
 
 	assert(n < FLASH_STORAGE_SIZE / STORAGE_BLOCK_SIZE);
 	ret = bflb_flash_read(addr, buf, STORAGE_BLOCK_SIZE);
-debug("read (%d 0x%08lx) %d\n", n, (unsigned long) addr, ret);
+//debug("read (%d 0x%08lx) %d\n", n, (unsigned long) addr, ret);
 	return !ret;
 }
 

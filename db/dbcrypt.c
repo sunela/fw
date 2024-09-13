@@ -283,11 +283,51 @@ cleanup:
 }
 
 
+static int db_try_decrypt(void *content, unsigned size, const void *block,
+    const uint8_t *encrypted, unsigned i, const uint8_t *ek,
+    const uint8_t *shared)
+{
+	int length = -1; /* means that we could not decrypt the block */
+	const uint8_t *nonce = block + crypto_box_PUBLICKEYBYTES;
+	uint8_t rk[crypto_box_PUBLICKEYBYTES];
+	uint8_t nonce2[crypto_secretbox_NONCEBYTES];
+
+	/* --- decrypt the record key --- */
+
+	memcpy(nonce2, nonce, crypto_secretbox_NONCEBYTES);
+	nonce2[0] ^= i + 1;
+	memset(in_buf, 0, crypto_secretbox_ZEROBYTES);
+	memcpy(in_buf + crypto_secretbox_ZEROBYTES, ek,
+	    crypto_secretbox_KEYBYTES);
+
+	t0();
+	if (crypto_stream_xor(out_buf, in_buf,
+            crypto_secretbox_ZEROBYTES + crypto_secretbox_KEYBYTES, nonce2,
+	    shared)) {
+		debug("crypto_stream_xor failed\b");
+		goto cleanup;
+	}
+	t1("db_decrypt:crypto_stream_xor\n");
+
+	memcpy(rk, out_buf + crypto_secretbox_ZEROBYTES,
+	    crypto_secretbox_KEYBYTES);
+
+	/* --- decrypt the payload --- */
+
+	length = db_decrypt_payload(content, size, block, encrypted, rk);
+
+	/* --- clean up --- */
+
+cleanup:
+	memset(rk, 0, sizeof(rk));
+
+	return length;
+}
+
+
 int db_decrypt(const struct dbcrypt *c, void *content, unsigned size,
     const void *block)
 {
-	int length = -1; /* -1 means that we could not decrypt the block */
-
 	/* --- block layout --- */
 
 	const uint8_t *block_end = block + STORAGE_BLOCK_SIZE;
@@ -327,11 +367,9 @@ int db_decrypt(const struct dbcrypt *c, void *content, unsigned size,
 	assert(b + crypto_box_PUBLICKEYBYTES + crypto_secretbox_KEYBYTES <=
 	    encrypted);
 
-	/* --- decrypt the record key --- */
+	/* --- decrypt --- */
 
 	uint8_t shared[crypto_secretbox_KEYBYTES];
-	uint8_t rk[crypto_box_PUBLICKEYBYTES];
-	uint8_t nonce2[crypto_secretbox_NONCEBYTES];
 
 	/* @@@ should first search the reader list and the cache */
 	t0();
@@ -341,36 +379,17 @@ int db_decrypt(const struct dbcrypt *c, void *content, unsigned size,
 	}
 	t1("db_decrypt:crypto_box_beforenm\n");
 
-	memcpy(nonce2, nonce, crypto_secretbox_NONCEBYTES);
-	nonce2[0] ^= i + 1;
-	memset(in_buf, 0, crypto_secretbox_ZEROBYTES);
-	memcpy(in_buf + crypto_secretbox_ZEROBYTES,
-	    b + crypto_box_PUBLICKEYBYTES, crypto_secretbox_KEYBYTES);
+	/* --- decrypt the payload --- */
 
-	t0();
-	if (crypto_stream_xor(out_buf, in_buf,
-            crypto_secretbox_ZEROBYTES + crypto_secretbox_KEYBYTES, nonce2,
-	    shared)) {
-		debug("crypto_stream_xor failed\b");
-		memset(shared, 0, sizeof(shared));
-		goto cleanup;
-	}
-	t1("db_decrypt:crypto_stream_xor\n");
+	int length;
 
-	memcpy(rk, out_buf + crypto_secretbox_ZEROBYTES,
-	    crypto_secretbox_KEYBYTES);
+	length = db_try_decrypt(content,size, block, encrypted,
+	    i, b + crypto_box_PUBLICKEYBYTES, shared);
 
 	memset(shared, 0, sizeof(shared));
 
-	/* --- decrypt the payload --- */
-
-	length = db_decrypt_payload(content, size, block, encrypted, rk);
-
-	/* --- clean up --- */
-cleanup:
-	memset(rk, 0, sizeof(rk));
-
 	return length;
+
 }
 
 

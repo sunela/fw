@@ -110,7 +110,7 @@ bool block_write(const struct dbcrypt *c, enum block_type type, uint16_t seq,
 	hdr->seq = seq;
 	switch (type) {
 	case bt_empty:
-		memset(bc, 0, sizeof(bc));
+		length = 0;
 		break;
 	case bt_data:
 	case bt_settings:

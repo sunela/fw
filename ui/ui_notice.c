@@ -148,7 +148,7 @@ static void vnotice_common(enum notice_type type, const char *fmt, va_list ap,
 		style.bg = INFO_BG;
 		break;
 	default:
-		abort();
+		ABORT();
 	}
 	chain(&ui_notice, &params);
 	free((char *) params.s);

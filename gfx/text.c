@@ -11,6 +11,7 @@
 #include <ctype.h>
 #include <assert.h>
 
+#include "hal.h"
 #include "debug.h"
 #include "alloc.h"
 #include "gfx.h"
@@ -191,7 +192,7 @@ static void text_align(struct text_query *q, const struct text_area *a,
 		q->ox = x - (q->w ? q->w - 1 : 0) - a->x0;
 		break;
 	default:
-		abort();
+		ABORT();
 	}
 	switch (align_y & GFX_ALIGN_MASK) {
 	case GFX_ORIGIN:
@@ -211,7 +212,7 @@ static void text_align(struct text_query *q, const struct text_area *a,
 		q->oy = y - (q->h ? q->h - 1 : 0) + a->y1;
 		break;
 	default:
-		abort();
+		ABORT();
 	}
 	q->next = q->ox + a->next;
 #ifdef DEBUG
@@ -384,7 +385,7 @@ int text_format(struct gfx_drawable *da, int x, int y, unsigned w, unsigned h,
 				x0 = x + (w - q.w) / 2;
 				break;
 			default:
-				abort();
+				ABORT();
 			}
 			gfx_clip_xy(da, x, y, w, h);
 			text_text(da, x0, y + pos + q.oy, p, font,

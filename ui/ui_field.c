@@ -129,7 +129,7 @@ static void field_edited(struct ui_field_edit_ctx *c)
 		db_change_field(c->de, c->type, &counter, sizeof(counter));
 		break;
 	default:
-		abort();
+		ABORT();
 	}
 	ui_return();
 }
@@ -167,7 +167,7 @@ static void copy_decimal(char *to, const struct db_field *from)
 		format(add_char, &to, "%llu", (unsigned long long) tmp);
 		break;
 	default:
-		abort();
+		ABORT();
 	}
 }
 
@@ -243,7 +243,7 @@ static void ui_field_edit_open(void *ctx, void *params)
 		copy_string(c->buf, f);	
 		break;
 	default:
-		abort();
+		ABORT();
 	}
 	ui_call(&ui_entry, &entry_params);
 }

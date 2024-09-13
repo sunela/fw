@@ -42,7 +42,6 @@
  */
 
 #include <stddef.h>
-#include <stdlib.h>
 
 #include "hal.h"
 #include "debug.h"
@@ -334,7 +333,7 @@ static void ui_overlay_open(void *ctx, void *params)
 		ny = 3;
 		break;
 	default:
-		abort();
+		ABORT();
 	}
 	for (iy = 0; iy != ny; iy++)
 		for (ix = 0; ix != nx; ix++) {

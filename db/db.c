@@ -831,7 +831,7 @@ bool db_open_progress(struct db *db, const struct dbcrypt *c,
 			}
 			break;
 		default:
-			abort();
+			ABORT();
 		}
 	}
 	if (progress)

@@ -11,6 +11,7 @@
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <assert.h>
 
 #ifndef SDK_MAIN
 #include "gfx.h"
@@ -29,6 +30,7 @@
 #define	CPU_ID_LENGTH	20
 
 #define	DIE(msg)	assert(((void) msg, 0))
+#define	ABORT()		DIE("aborted")
 
 
 extern bool quiet;

@@ -410,7 +410,7 @@ static void delete_field(void *user)
 		prm.name = "comment";
 		break;
 	default:
-		abort();
+		ABORT();
 	}
 	ui_switch(&ui_confirm, &prm);
 }
@@ -541,7 +541,7 @@ static void ui_account_open(void *ctx, void *params)
 			add_string(c, "Comment", f->data, f->len, f);
 			break;
 		default:
-			abort();
+			ABORT();
 		}
 	}
 	wi_list_end(&c->list);

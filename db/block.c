@@ -7,7 +7,6 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 
@@ -117,7 +116,7 @@ bool block_write(const struct dbcrypt *c, enum block_type type, uint16_t seq,
 		memcpy(bc + sizeof(*hdr), payload, length);
 		break;
 	default:
-		abort();
+		ABORT();
 	}
 	if (!db_encrypt(c, io_buf, bc, sizeof(*hdr) + length))
 		return 0;

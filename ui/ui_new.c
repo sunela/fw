@@ -6,7 +6,6 @@
  */
 
 #include <stdint.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "pin.h"
@@ -76,7 +75,7 @@ static void entry(struct ui_new_ctx *c)
 		params.input.title = "Confirm PIN";
 		break;
 	default:
-		abort();
+		ABORT();
 	}
 	progress();
 	ui_call(&ui_entry, &params);
@@ -147,7 +146,7 @@ static void ui_new_resume(void *ctx)
 		}
 		return;
 	default:
-		abort();
+		ABORT();
 	}
 	c->stage++;
 	entry(c);

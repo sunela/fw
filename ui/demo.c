@@ -239,7 +239,7 @@ static bool demo_vscroll(char *const *args, unsigned n_args)
 		    atoi(args[3]));
 		break;
 	default:
-		abort();
+		ABORT();
 	}
 #endif /* !SIM */
 

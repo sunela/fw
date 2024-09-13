@@ -7,8 +7,6 @@
 
 #include <stddef.h>
 #include <stdbool.h>
-#include <stdlib.h>
-//#include <assert.h>
 
 #include "hal.h"
 #include "debug.h"
@@ -75,7 +73,7 @@ static void render_rd(const struct wi_list *l,
 		    LIST_FG, odd ? ODD_BG : EVEN_BG);
 		break;
 	default:
-		abort();
+		ABORT();
 	}
 }
 
@@ -101,7 +99,7 @@ static void ui_rd_tap(void *ctx, unsigned x, unsigned y)
 		settings_update(); // @@@ check for errors
 		break;
 	default:
-		abort();
+		ABORT();
 	}
 
 	progress();

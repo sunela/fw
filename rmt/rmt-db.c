@@ -6,7 +6,6 @@
  */
 
 #include <stdint.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "hal.h"
@@ -242,7 +241,7 @@ void rmt_db_poll(void)
 						return;
 					break;
 				default:
-					abort();
+					ABORT();
 				}
 				f = f->next;
 			}
@@ -279,7 +278,7 @@ void rmt_db_poll(void)
 			state = RDS_END;
 			break;
 		default:
-			abort();
+			ABORT();
 		}
 		break;
 	case RDS_END:

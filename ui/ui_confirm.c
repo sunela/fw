@@ -6,7 +6,6 @@
  */
 
 #include <stddef.h>
-#include <stdlib.h>
 
 #include "hal.h"
 #include "debug.h"
@@ -126,7 +125,7 @@ static void ui_confirm_moving(void *ctx, unsigned from_x, unsigned from_y,
 		color = CHEVRONS_ACCEPT_COLOR;
 		break;
 	default:
-		abort();
+		ABORT();
 	}
 
 	if (decision == c->last_decision) {

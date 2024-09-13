@@ -495,8 +495,11 @@ void ui_empty_stack(void)
 		free(current_ctx());
 		sp--;
 	}
-	assert(current_ui()->resume);
-	current_ui()->resume(current_ctx());
+// @@@ ui_empty_stack is only used to turn the device off, so we don't want to
+// run any resume action of the top-level page. May need to revise this if we
+// add other uses.
+//	assert(current_ui()->resume);
+//	current_ui()->resume(current_ctx());
 }
 
 

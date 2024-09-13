@@ -69,9 +69,11 @@ static void entry(struct ui_new_ctx *c)
 	memset(c->buf, 0, MAX_PIN_LEN + 1);
 	switch (c->stage) {
 	case S_NEW:
+		wi_general_entry_setup(&c->general_entry_ctx, 1);
 		params.input.title = "New device PIN";
 		break;
 	case S_CONFIRM:
+		wi_general_entry_setup(&c->general_entry_ctx, 0);
 		params.input.title = "Confirm PIN";
 		break;
 	default:
@@ -100,15 +102,19 @@ static void ui_new_resume(void *ctx)
 	struct ui_new_ctx *c = ctx;
 	uint32_t pin;
 
-	if (!*c->buf) {
-		turn_off();
-		return;
-	}
 	switch (c->stage) {
 	case S_NEW:
+		if (!*c->buf) {
+			turn_off();
+			return;
+		}
 		c->new_pin = pin_encode(c->buf);
 		break;
 	case S_CONFIRM:
+		if (!*c->buf) {
+			ui_new_open(c, NULL);
+			return;
+		}
 		pin = pin_encode(c->buf);
 		if (pin != c->new_pin) {
 			notice_switch(&ui_new, NULL, nt_error, "PIN mismatch");

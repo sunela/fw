@@ -61,6 +61,7 @@ static void entry(struct ui_pin_change_ctx *c)
 	};
 
 	memset(c->buf, 0, MAX_PIN_LEN + 1);
+	wi_general_entry_setup(&c->general_entry_ctx, 0);
 	switch (c->stage) {
 	case S_OLD:
 		params.input.title = "Current PIN";

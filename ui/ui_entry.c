@@ -395,6 +395,7 @@ static void ui_entry_open(void *ctx, void *params)
 		c->entry_user = prm->entry_user;
 	} else {
 		c->entry_ops = &wi_general_entry_ops;
+		wi_general_entry_setup(&c->default_entry_ctx, 0);
 		c->entry_user = &c->default_entry_ctx;
 	}
 	if (c->entry_ops->init)

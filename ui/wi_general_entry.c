@@ -223,9 +223,14 @@ static void wi_general_entry_button(void *user, unsigned col, unsigned row,
 		if (*in->buf || second)
 			gfx_equilateral(&main_da, x, y, BUTTON_H * 0.7, -1,
 			    GFX_BLACK);
-		else
-			gfx_diagonal_cross(&main_da, x, y, BUTTON_H * 0.4, 4,
-			    GFX_BLACK);
+		else {
+			if (c->new)
+				gfx_power_sym(&main_da, x, y, BUTTON_H * 0.3,
+				    5, GFX_BLACK, bg);
+			else
+				gfx_diagonal_cross(&main_da, x, y,
+				    BUTTON_H * 0.4, 4, GFX_BLACK);
+		}
 	} else {	// >
 		if (*in->buf && !second) {
 			base(x, y, bg);
@@ -281,6 +286,12 @@ static void wi_general_entry_init(void *ctx, struct ui_entry_input *input,
             style->input_font ? style->input_font : &DEFAULT_INPUT_FONT,
             GFX_TOP | GFX_MAX, GFX_TOP | GFX_MAX, &q);
         c->input_max_height = q.h;
+}
+
+
+void wi_general_entry_setup(struct wi_general_entry_ctx *c, bool new)
+{
+	c->new = new;
 }
 
 

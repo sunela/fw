@@ -373,7 +373,7 @@ int db_decrypt(const struct dbcrypt *c, void *content, unsigned size,
 
 	/* @@@ should first search the reader list and the cache */
 	t0();
-	if (crypto_box_beforenm(shared, b, c->sk)) {
+	if (crypto_box_beforenm(shared, wpk, c->sk)) {
 		debug("crypto_box_beforenm failed\n");
 		return -1;
 	}

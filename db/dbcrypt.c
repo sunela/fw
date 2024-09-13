@@ -353,6 +353,7 @@ struct dbcrypt *dbcrypt_init(const void *sk, unsigned bytes)
 	struct dbcrypt *c = alloc_type(struct dbcrypt);
 	struct peer *p;
 
+	assert(crypto_box_SECRETKEYBYTES == crypto_box_BEFORENMBYTES);
 	assert(bytes == crypto_box_SECRETKEYBYTES);
 	memcpy(c->sk, sk, crypto_box_SECRETKEYBYTES);
 

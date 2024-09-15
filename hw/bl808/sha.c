@@ -107,7 +107,7 @@ static void *peek(unsigned long paddr)
 #endif
 
 
-void sha1_begin(void)
+static void sha_begin(unsigned mode)
 {
 	uint32_t ctrl;
 
@@ -126,7 +126,7 @@ void sha1_begin(void)
 	ctrl &= SHA_DEL(MODE_EXT) & SHA_DEL(MODE) & SHA_DEL(CTRL_MSG_LEN) &
 	    ~SHA_MASK_HASH_SEL & ~SHA_MASK_EN & ~SHA_MASK_TRIG;
 	ctrl |= SHA_ADD(MODE_EXT, SHA_MODE_EXT_SHA) | SHA_ADD(CTRL_MSG_LEN, 1) |
-	    SHA_ADD(MODE, SHA_MODE_SHA1);
+	    SHA_ADD(MODE, mode);
 	SHA_CTRL = ctrl;
 	SHA_CTRL |= SHA_MASK_EN;
 //debug("virt %p phys 0x%llx\n", buf, (unsigned long long) buf_paddr);
@@ -136,6 +136,18 @@ void sha1_begin(void)
 	check = peek(buf_paddr);
 #endif
 	length = 0;
+}
+
+
+void sha1_begin(void)
+{
+	sha_begin(SHA_MODE_SHA1);
+}
+
+
+void sha256_begin(void)
+{
+	sha_begin(SHA_MODE_SHA256);
 }
 
 
@@ -175,7 +187,14 @@ void sha1_hash(const uint8_t *data, size_t size)
 }
 
 
-void sha1_end(uint8_t res[SHA1_HASH_BYTES])
+void sha256_hash(const uint8_t *data, size_t size)
+{
+	assert(SHA1_BLOCK_BYTES == SHA256_BLOCK_BYTES);
+	sha1_hash(data, size);
+}
+
+
+static void sha_end(uint8_t *res, unsigned bytes)
 {
 	static const uint8_t bit1 = 0x80;
 	static const uint8_t zero[SHA1_BLOCK_BYTES] = { 0, };
@@ -191,8 +210,21 @@ void sha1_end(uint8_t res[SHA1_HASH_BYTES])
 		sha1_hash(&tmp, 1);
 	}
 	assert(!got);
-	for (i = 0; i != SHA1_HASH_BYTES; i++)
+	for (i = 0; i != bytes; i++)
 		res[i] = SHA_HASH_I(i >> 2) >> ((i & 3) << 3);
 	SHA_CTRL &= ~SHA_MASK_EN & ~SHA_MASK_HASH_SEL;
 //	SHA_CTRL &= ~SHA_MASK_EN;
+}
+
+
+void sha1_end(uint8_t res[SHA1_HASH_BYTES])
+{
+	sha_end(res, SHA1_HASH_BYTES);
+}
+
+
+void sha256_end(uint8_t res[SHA256_HASH_BYTES])
+{
+	assert(SHA1_BLOCK_BYTES == SHA256_BLOCK_BYTES);
+	sha_end(res, SHA256_HASH_BYTES);
 }

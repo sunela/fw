@@ -298,6 +298,29 @@ static bool demo_sha1(char *const *args, unsigned n_args)
 }
 
 
+/* SHA256, hardware accelerator or gcrypt */
+
+static bool demo_sha256(char *const *args, unsigned n_args)
+{
+	if (n_args != 1)
+		return 0;
+
+	const char *s = args[0];
+	uint8_t res[SHA256_HASH_BYTES];
+	unsigned i;
+
+	sha256_begin();
+	sha256_hash((const void *) s, strlen(s));
+	sha256_end(res);
+
+	for (i = 0; i != SHA256_HASH_BYTES; i++)
+		debug("%02x%c", res[i],
+		    i == SHA256_HASH_BYTES - 1 ? '\n' : ' ');
+
+	return 1;
+}
+
+
 /* HMAC-SHA1 */
 
 static bool demo_hmac(char *const *args, unsigned n_args)
@@ -836,6 +859,7 @@ static const struct demo {
 	{ "checkbox",	demo_checkbox,	"[w [lw]] 0|1" },
 	{ "pccomm",	demo_pccomm,	"[side]" },
 	{ "format",	demo_format,	"string [w [h [offset [l|r|c]]]]" },
+	{ "sha256",	demo_sha256,	"string" },
 };
 
 

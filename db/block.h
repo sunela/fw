@@ -18,20 +18,17 @@
 /*
  * Block structure:
  *
- * 
  * Offset
  * |	Size
  * 0	32	Writer's public key
- * 32	24	Nonce
- * 56	1	Number of readers
- * 57	For each reader:
- *	32	Reader's public key
+ * 32	24	Nonce (all-zero: block is deleted)
+ * 56	For each reader:
  *	32	Encrypted record key
  * Encrypted data:
  *	16	Hash
  *	*	Payload (zero-padded to fill the block)
  *	1	  Content type (empty, data)
- *	1	  Reserved (set to zero)
+ *	1	  Reserved (set to zero when writing, ignore when reading)
  *	2	  Sequence number (little-endian)
  */
 

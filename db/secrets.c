@@ -16,6 +16,8 @@
 #include "hal.h"
 #include "sha.h"
 #include "tweetnacl.h"
+#include "storage.h"
+#include "block.h"
 #include "pin.h"
 #include "secrets.h"
 
@@ -27,9 +29,23 @@
 #endif
 
 
+/*
+ * device_secret is a secret stored in the device such that it cannot be
+ * retrieved by an attacker and that it does not get leaked.
+ *
+ * master_pattern is a secret pattern obtained by hashing the device secret 
+ * with the PIN.
+ *
+ * master_key is a secret key obtained by XOR-ing the master pattern with a
+ * (non-secret) pad. This pad is recalculated each time the PIN - and thus the
+ * master secred - changes, so that the master key remains the same.
+ */
+
+
 uint8_t device_secret[MASTER_SECRET_BYTES];
 uint8_t master_secret[MASTER_SECRET_BYTES];
 
+static uint8_t pad_id[MASTER_SECRET_BYTES];
 static uint8_t master_pattern[MASTER_SECRET_BYTES];
 
 
@@ -94,7 +110,14 @@ static void mult(void *out, const void *n, const void *p)
 	assert(crypto_scalarmult_BYTES == MASTER_SECRET_BYTES);
 	hex("\tN =", n, MASTER_SECRET_BYTES);
 	hex("\tP =", p, MASTER_SECRET_BYTES);
-	crypto_scalarmult(out, n, p);
+//	crypto_scalarmult(out, n, p);
+	/*
+	 * crypto_box_beforenm is hsalsa20(n * p)
+	 * which is the same as bytes(Box(PrivateKey(n), PublicKey(p)))
+	 * in PyNaCl. We use this instead of plain crypto_scalarmult() for
+	 * easier compatibility with Python.
+	 */
+	crypto_box_beforenm(out, p, n);
 	hex("N * P =", out, MASTER_SECRET_BYTES);
 }
 
@@ -163,7 +186,77 @@ static void id_hash(void *out, uint32_t pin)
 }
 
 
-/* --- Management of secrets --- */
+/* --- Adapt master key ---------------------------------------------------- */
+
+
+static bool have_pad = 0;
+static uint16_t pad_seq;
+
+
+static bool apply_pad(uint16_t seq, const uint8_t *pads, unsigned size,
+    uint8_t *id)
+    
+{
+	const uint8_t *end = pads + size;
+	const uint8_t *p;
+
+	if (have_pad && ((seq + 0x10000 - pad_seq) & 0xffff) >= 0x8000)
+		return 0;
+	for (p = pads; p + 2 * MASTER_SECRET_BYTES <= end;
+	    p += 2 * MASTER_SECRET_BYTES) {
+		unsigned i;
+
+		if (memcmp(p, id, MASTER_SECRET_BYTES))
+			continue;
+		for (i = 0; i != MASTER_SECRET_BYTES; i++)
+			master_secret[i] =
+			    master_pattern[i] ^ p[MASTER_SECRET_BYTES + i];
+		have_pad = 1;
+		pad_seq = seq;
+hex("ID", p, MASTER_SECRET_BYTES);
+hex("pad", p + MASTER_SECRET_BYTES, MASTER_SECRET_BYTES);
+		return 1;
+	}
+	return 0;
+}
+
+
+/* --- Write a new pad ----------------------------------------------------- */
+
+
+static bool change_pad(uint8_t *out, const uint8_t *in, unsigned size,
+    const uint8_t *old_id, const uint8_t *new_id, const uint8_t *new_pad)
+{
+	const uint8_t *end = out + size;
+	uint8_t *p;
+	uint8_t *erased = NULL;
+
+	memcpy(out, in, size);
+	for (p = out; p + 2 * MASTER_SECRET_BYTES <= end;
+	    p += 2 * MASTER_SECRET_BYTES) {
+		if (!memcmp(p, old_id, MASTER_SECRET_BYTES))
+			goto found;
+		if (!erased) {
+			unsigned i;
+
+			for (i = 0; i != 2 * MASTER_SECRET_BYTES; i++)
+				if (p[i] != 0xff)
+					goto next;
+			erased = p;
+		}
+next: ;
+	}
+	if (!erased)
+		return 0;
+	p = erased;
+found:
+	memcpy(p, new_id, MASTER_SECRET_BYTES);
+	memcpy(p + MASTER_SECRET_BYTES, new_pad, MASTER_SECRET_BYTES);
+	return 1;
+}
+
+
+/* --- Management of secrets ----------------------------------------------- */
 
 
 bool secrets_change(uint32_t old_pin, uint32_t new_pin)
@@ -176,9 +269,25 @@ bool secrets_change(uint32_t old_pin, uint32_t new_pin)
 
 bool secrets_setup(uint32_t pin)
 {
-	memcpy(master_secret, master_pattern, MASTER_SECRET_BYTES);
-	pin_xor(master_secret, pin);
-	return 1;
+	unsigned n;
+
+	master_hash(master_pattern, pin);
+	id_hash(pad_id, pin);
+
+	have_pad = 0;
+	for (n = 0; n < PAD_BLOCKS; n += storage_erase_size()) {
+		/* block layout */
+
+		const uint16_t *seq = (const void *) io_buf;
+		const uint8_t *pads = io_buf + MASTER_SECRET_BYTES;
+		unsigned pads_size = STORAGE_BLOCK_SIZE - MASTER_SECRET_BYTES;
+
+		if (!storage_read_block(io_buf, n))
+			continue;
+		apply_pad(*seq, pads, pads_size, pad_id);
+	}
+debug("PAD: have %u seq %u\n", have_pad, pad_seq);
+	return have_pad;
 }
 
 
@@ -192,7 +301,7 @@ bool secrets_new(uint32_t pin)
 }
 
 
-static void try(void)
+void secrets_test_pad(void)
 {
 	uint8_t res[MASTER_SECRET_BYTES];
 	uint32_t pin = 0xffff1234;
@@ -212,8 +321,6 @@ static void try(void)
 
 bool secrets_init(void)
 {
-	try();
-
 	/* @@@ obtain from protected persistent storage */
 	memset(device_secret, 0, sizeof(device_secret));
 
@@ -223,5 +330,8 @@ bool secrets_init(void)
 	/* @@@ the master secret we want to obtain, for now, is all-zero */
 	memset(master_pattern, 0, sizeof(master_pattern));
 	pin_xor(master_pattern, DUMMY_PIN);
+
+	have_pad = 0;
+
 	return 1;
 }

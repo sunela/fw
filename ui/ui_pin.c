@@ -70,7 +70,10 @@ static bool accept_pin(uint32_t pin)
 	struct dbcrypt *c;
 
 	secrets_init();
-	secrets_setup(pin);
+	if (!secrets_setup(pin)) {
+		debug("no pad found\n");
+		return 0;
+	}
 	c = dbcrypt_init(master_secret, sizeof(master_secret));
 	if (!db_open_progress(&main_db, c, open_progress, &progress)) {
 		dbcrypt_free(c);

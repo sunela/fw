@@ -63,6 +63,10 @@ struct block_header {
 };
 
 
+/* shared with secrets.c */
+extern PSRAM_NOINIT uint8_t io_buf[STORAGE_BLOCK_SIZE];
+
+
 /*
  * block_read returns the decrypted payload in the buffer at "payload".
  * When calling block_read, payload_len points to the size of the buffer. After

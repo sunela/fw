@@ -19,7 +19,8 @@
 #include "debug.h"
 
 
-static PSRAM_NOINIT uint8_t io_buf[STORAGE_BLOCK_SIZE];
+PSRAM_NOINIT uint8_t io_buf[STORAGE_BLOCK_SIZE];
+
 static PSRAM_NOINIT uint8_t bc[STORAGE_BLOCK_SIZE];
 	// @@@ beyond-worst-case size
 

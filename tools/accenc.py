@@ -19,7 +19,10 @@ PAYLOAD_SIZE = 956
 HASH_SIZE = 20
 HASH_PAD = 12
 
-STORAGE_BLOCKS = 2048
+STORAGE_BLOCKS = 2048	# total number of blocks, including pad block
+PAD_BLOCKS = 8		# blocks reserved for pads
+RESERVED_BLOCKS = PAD_BLOCKS
+
 
 keys = ( "id", "prev", "user", "email", "pw", "hotp_secret", "hotp_counter",
     "totp_secret", "comment", "pw2" )
@@ -108,6 +111,8 @@ else:
 		readers = map(lambda x: PublicKey(base64.b32decode(x)),
 		    sys.argv[3:])
 
+sys.stdout.buffer.write(b'\xff' * RESERVED_BLOCKS * BLOCK_SIZE)
+
 for e in db:
 	b = b''
 	i = 1
@@ -121,4 +126,5 @@ for e in db:
 		write_new(struct.pack("<BBH", 4, 0, 0) + b,
 		    writer, [ writer.public_key ])
 	
-sys.stdout.buffer.write((b'\xff' * (STORAGE_BLOCKS - len(db)) * BLOCK_SIZE))
+sys.stdout.buffer.write(
+    (b'\xff' * (STORAGE_BLOCKS - RESERVED_BLOCKS - len(db)) * BLOCK_SIZE))

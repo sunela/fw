@@ -15,6 +15,9 @@
 #include "dbcrypt.h"
 
 
+#define	PAD_BLOCKS	8
+#define	RESERVED_BLOCKS	PAD_BLOCKS
+
 /*
  * Block structure:
  *

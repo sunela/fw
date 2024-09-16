@@ -55,6 +55,9 @@ enum block_type block_read(const struct dbcrypt *c, uint16_t *seq,
 	enum block_type type;
 	int got;
 
+	assert(n >= RESERVED_BLOCKS);
+	assert(n < storage_blocks());
+
 	if (!storage_read_block(io_buf, n))
 		return bt_error;
 	type = classify_block(io_buf);
@@ -102,7 +105,10 @@ bool block_write(const struct dbcrypt *c, enum block_type type, uint16_t seq,
 {
 	struct block_header *hdr = (void *) bc;
 
+	assert(n >= RESERVED_BLOCKS);
+	assert(n < storage_blocks());
 	assert(sizeof(*hdr) + length <= sizeof(bc));
+
 	memset(io_buf, 0, sizeof(io_buf));
 	memset(hdr, 0, sizeof(*hdr));
 	hdr->type = type;
@@ -127,6 +133,9 @@ bool block_write(const struct dbcrypt *c, enum block_type type, uint16_t seq,
 
 bool block_delete(unsigned n)
 {
+	assert(n >= RESERVED_BLOCKS);
+	assert(n < storage_blocks());
+
 	memset(io_buf, 0, sizeof(io_buf));
 	return storage_write_block(io_buf, n);
 }

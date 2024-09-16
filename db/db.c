@@ -791,7 +791,7 @@ bool db_open_progress(struct db *db, const struct dbcrypt *c,
 	uint16_t seq;
 
 	db_open_empty(db, c);
-	for (i = 0; i != db->stats.total; i++) {
+	for (i = RESERVED_BLOCKS; i != db->stats.total; i++) {
 		unsigned payload_len = sizeof(payload_buf);
 
 		if (progress)
@@ -867,7 +867,11 @@ bool db_is_erased(void)
 	unsigned n = storage_blocks();
 	unsigned i;
 
-	for (i = 0; i != n; i++) {
+	/*
+	 * @@@ We should tart at zero because also the presence of pad blocks
+	 * is sufficient to indicate that the Flash is initialized.
+	 */
+	for (i = RESERVED_BLOCKS; i != n; i++) {
 		enum block_type type = block_read(NULL, NULL, NULL, NULL, i);
 
 		if (type != bt_error && type != bt_erased)
@@ -881,6 +885,7 @@ void db_init(void)
 {
 	unsigned i;
 
+	assert(PAD_BLOCKS >= storage_erase_size() * 2);
 	for (i = 0; i != sizeof(ft2order); i++)
 		ft2order[order2ft[i]] = i;
 }

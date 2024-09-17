@@ -20,7 +20,8 @@ extern uint8_t master_secret[MASTER_SECRET_BYTES];
 
 
 bool secrets_change(uint32_t old_pin, uint32_t new_pin);
-bool secrets_setup(uint32_t pin);
+bool secrets_setup(uint8_t *secret, uint32_t pin);
+bool secrets_setup_master(uint32_t pin);
 bool secrets_new(uint32_t pin);
 
 void secrets_test_pad(void);

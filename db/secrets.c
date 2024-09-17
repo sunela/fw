@@ -193,14 +193,14 @@ static bool have_pad = 0;
 static uint16_t pad_seq;
 
 
-static bool apply_pad(uint16_t seq, const uint8_t *pads, unsigned size,
-    uint8_t *id)
+static bool apply_pad(uint8_t *secret, int last_seq, uint16_t seq,
+    const uint8_t *pads, unsigned size, const uint8_t *id)
     
 {
 	const uint8_t *end = pads + size;
 	const uint8_t *p;
 
-	if (have_pad && ((seq + 0x10000 - pad_seq) & 0xffff) >= 0x8000)
+	if (last_seq >= 0 && ((seq + 0x10000 - last_seq) & 0xffff) >= 0x8000)
 		return 0;
 	for (p = pads; p + 2 * MASTER_SECRET_BYTES <= end;
 	    p += 2 * MASTER_SECRET_BYTES) {
@@ -209,10 +209,8 @@ static bool apply_pad(uint16_t seq, const uint8_t *pads, unsigned size,
 		if (memcmp(p, id, MASTER_SECRET_BYTES))
 			continue;
 		for (i = 0; i != MASTER_SECRET_BYTES; i++)
-			master_secret[i] =
+			secret[i] =
 			    master_pattern[i] ^ p[MASTER_SECRET_BYTES + i];
-		have_pad = 1;
-		pad_seq = seq;
 hex("ID", p, MASTER_SECRET_BYTES);
 hex("pad", p + MASTER_SECRET_BYTES, MASTER_SECRET_BYTES);
 		return 1;
@@ -267,14 +265,14 @@ bool secrets_change(uint32_t old_pin, uint32_t new_pin)
 }
 
 
-bool secrets_setup(uint32_t pin)
+bool secrets_setup(uint8_t *secret, uint32_t pin)
 {
+	bool found = 0;
 	unsigned n;
 
 	master_hash(master_pattern, pin);
 	id_hash(pad_id, pin);
 
-	have_pad = 0;
 	for (n = 0; n < PAD_BLOCKS; n += storage_erase_size()) {
 		/* block layout */
 
@@ -284,10 +282,23 @@ bool secrets_setup(uint32_t pin)
 
 		if (!storage_read_block(io_buf, n))
 			continue;
-		apply_pad(*seq, pads, pads_size, pad_id);
+		if (apply_pad(secret, found ? pad_seq : -1, *seq,
+		    pads, pads_size, pad_id)) {
+			pad_seq = *seq;
+			found = 1;
+		}
 	}
 debug("PAD: have %u seq %u\n", have_pad, pad_seq);
-	return have_pad;
+	memset(pad_id, 0, sizeof(pad_id));
+	memset(master_pattern, 0, sizeof(master_pattern));
+	
+	return found;
+}
+
+
+bool secrets_setup_master(uint32_t pin)
+{
+	return secrets_setup(master_secret, pin);
 }
 
 

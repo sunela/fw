@@ -84,6 +84,35 @@ static void entry(struct ui_new_ctx *c)
 }
 
 
+/* --- Set the new pin ----------------------------------------------------- */
+
+
+static void write_new_settings(void)
+{
+	struct dbcrypt *crypt;
+
+	crypt = dbcrypt_init(master_secret, sizeof(master_secret));
+	if (!crypt) {
+		notice_switch(&ui_off, NULL, nt_fault,
+		    "Could not set up secrets");
+		return;
+	}
+	if (!db_open(&main_db, crypt)) {
+		notice_switch(&ui_off, NULL, nt_fault,
+		    "Could not open database\n");
+		return;
+	}
+	settings_reset();
+	if (!settings_update()) {
+		notice_switch(&ui_off, NULL, nt_fault,
+		    "Could not store initial settings");
+		return;
+	}
+	notice_switch(&ui_accounts, NULL, nt_success,
+	    "PIN set");
+}
+
+
 /* --- Open/close ---------------------------------------------------------- */
 
 
@@ -119,33 +148,7 @@ static void ui_new_resume(void *ctx)
 		if (pin != c->new_pin) {
 			notice_switch(&ui_new, NULL, nt_error, "PIN mismatch");
 		} else if (pin_set(pin)) {
-			struct dbcrypt *crypt;
-
-			crypt =
-			    dbcrypt_init(master_secret, sizeof(master_secret));
-			if (!crypt) {
-				notice_switch(&ui_off, NULL, nt_fault,
-				    "Could not set up secrets");
-				return;
-			}
-			if (!db_open(&main_db, crypt)) {
-				notice_switch(&ui_off, NULL, nt_fault,
-				    "Could not open database\n");
-				return;
-			}
-			settings_reset();
-			if (!settings_update()) {
-				notice_switch(&ui_off, NULL, nt_fault,
-				    "Could not store initial settings");
-				return;
-			}
-			notice_switch(&ui_accounts, NULL, nt_success,
-			    "PIN set");
-/*
- * @@@ Note that the PIN reverts to the dummy default when we restart, since
- * we don't store the master pattern yet (instead, we generate it for the dummy
- * PIN in secrets_init).
- */
+			write_new_settings();
 		} else {
 			notice_switch(&ui_off, NULL, nt_fault,
 			    "Could not set PIN");

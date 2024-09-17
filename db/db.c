@@ -29,6 +29,8 @@ static bool update_entry(struct db_entry *de, unsigned new);
 
 PSRAM_NOINIT uint8_t payload_buf[STORAGE_BLOCK_SIZE];
 	// @@@ beyond-worst-case size
+
+struct db main_db;
 const enum field_type order2ft[] = {
     ft_end, ft_id, ft_prev, ft_user, ft_email, ft_pw, ft_pw2,
     ft_hotp_secret, ft_hotp_counter, ft_totp_secret, ft_comment };

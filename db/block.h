@@ -11,8 +11,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "hal.h"
 #include "sha.h"
 #include "dbcrypt.h"
+#include "storage.h"
 
 
 #define	PAD_BLOCKS	8

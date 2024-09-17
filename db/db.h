@@ -103,6 +103,8 @@ struct db {
 
 extern PSRAM_NOINIT uint8_t payload_buf[STORAGE_BLOCK_SIZE];
 	// @@@ beyond-worst-case size
+
+extern struct db main_db;
 extern const enum field_type order2ft[];
 extern uint8_t ft2order[];
 extern const unsigned field_types;

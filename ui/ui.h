@@ -82,7 +82,6 @@ struct ui {
 
 
 extern struct gfx_drawable main_da;
-extern struct db main_db;
 
 /* User interface pages */
 

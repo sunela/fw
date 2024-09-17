@@ -101,6 +101,19 @@ enum block_type block_read(const struct dbcrypt *c, uint16_t *seq,
 }
 
 
+bool block_validate(const struct dbcrypt *c, unsigned n)
+{
+	int got;
+
+	assert(n < storage_blocks());
+	if (!storage_read_block(io_buf, n))
+		return 0;
+	got =  db_decrypt(c, bc, sizeof(bc), io_buf);
+	memset(bc, 0, sizeof(bc));
+	return got >= 0;
+}
+
+
 bool block_write(const struct dbcrypt *c, enum block_type type, uint16_t seq,
     const void *payload, unsigned length, unsigned n)
 {

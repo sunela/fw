@@ -86,6 +86,8 @@ extern PSRAM_NOINIT uint8_t io_buf[STORAGE_BLOCK_SIZE];
 enum block_type block_read(const struct dbcrypt *c, uint16_t *seq,
     void *payload, unsigned *payload_len, unsigned n);
 
+bool block_validate(const struct dbcrypt *c, unsigned n);
+
 /*
  * block_write requires the block to be erased. Note that attempting to write
  * to a block that is not completelly erased is likely to produce an invalid

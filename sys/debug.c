@@ -6,6 +6,7 @@
  */
 
 #include <stdarg.h>
+#include <stdint.h>
 
 #include "hal.h"
 #include "debug.h"
@@ -26,3 +27,14 @@ void debug(const char *fmt, ...)
 	va_end(ap);
 }
 
+
+void hexdump(const char *s, const void *data, unsigned size)
+{
+	const uint8_t *d = data;
+	unsigned i;
+
+	debug("%s ", s);
+	for (i = 0; i != size; i++)
+		debug("%02x", d[i]);
+	debug("\n");
+}

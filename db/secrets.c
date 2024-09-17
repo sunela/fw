@@ -49,20 +49,6 @@ static uint8_t pad_id[MASTER_SECRET_BYTES];
 static uint8_t master_pattern[MASTER_SECRET_BYTES];
 
 
-/* --- Debug output -------------------------------------------------------- */
-
-
-static void hex(const char *s, const uint8_t *data, unsigned size)
-{
-	unsigned i;
-
-	debug("%s ", s);
-	for (i = 0; i != size; i++)
-		debug("%02x", data[i]);
-	debug("\n");
-}
-
-
 /* --- Hash functions f(dev_sec, pin) -> the master secret and ID hash ----- */
 
 
@@ -95,11 +81,11 @@ static void hash(uint8_t *out, ...)
 		if (!p)
 			break;
 		size = va_arg(ap, unsigned);	
-		hex("\tIN =", p, size);
+		hexdump("\tIN =", p, size);
 		sha256_hash(p, size);
 	}
 	sha256_end(out);
-	hex("HASH =", out, MASTER_SECRET_BYTES);
+	hexdump("HASH =", out, MASTER_SECRET_BYTES);
 }
 
 
@@ -108,8 +94,8 @@ static void mult(void *out, const void *n, const void *p)
 	assert(crypto_scalarmult_BYTES == MASTER_SECRET_BYTES);
 	assert(crypto_scalarmult_SCALARBYTES == MASTER_SECRET_BYTES);
 	assert(crypto_scalarmult_BYTES == MASTER_SECRET_BYTES);
-	hex("\tN =", n, MASTER_SECRET_BYTES);
-	hex("\tP =", p, MASTER_SECRET_BYTES);
+	hexdump("\tN =", n, MASTER_SECRET_BYTES);
+	hexdump("\tP =", p, MASTER_SECRET_BYTES);
 //	crypto_scalarmult(out, n, p);
 	/*
 	 * crypto_box_beforenm is hsalsa20(n * p)
@@ -118,7 +104,7 @@ static void mult(void *out, const void *n, const void *p)
 	 * easier compatibility with Python.
 	 */
 	crypto_box_beforenm(out, p, n);
-	hex("N * P =", out, MASTER_SECRET_BYTES);
+	hexdump("N * P =", out, MASTER_SECRET_BYTES);
 }
 
 
@@ -212,8 +198,8 @@ static bool apply_pad(uint8_t *secret, int last_seq, uint16_t seq,
 		for (i = 0; i != MASTER_SECRET_BYTES; i++)
 			secret[i] =
 			    master_pattern[i] ^ p[MASTER_SECRET_BYTES + i];
-hex("ID", p, MASTER_SECRET_BYTES);
-hex("pad", p + MASTER_SECRET_BYTES, MASTER_SECRET_BYTES);
+hexdump("ID", p, MASTER_SECRET_BYTES);
+hexdump("pad", p + MASTER_SECRET_BYTES, MASTER_SECRET_BYTES);
 		return 1;
 	}
 	return 0;

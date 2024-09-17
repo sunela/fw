@@ -22,5 +22,6 @@ extern bool debugging;
 
 void debug(const char *fmt, ...)
     __attribute__((format(printf, 1, 2)));
+void hexdump(const char *s, const void *data, unsigned size);
 
 #endif /* !DEBUG_H */

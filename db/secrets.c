@@ -191,6 +191,7 @@ static void id_hash(void *out, uint32_t pin)
 
 static bool have_pad = 0;
 static uint16_t pad_seq;
+static int pad_block = -1;
 
 
 static bool apply_pad(uint8_t *secret, int last_seq, uint16_t seq,
@@ -222,15 +223,14 @@ hex("pad", p + MASTER_SECRET_BYTES, MASTER_SECRET_BYTES);
 /* --- Write a new pad ----------------------------------------------------- */
 
 
-static bool change_pad(uint8_t *out, const uint8_t *in, unsigned size,
+static bool change_pad(uint8_t *buf, unsigned size,
     const uint8_t *old_id, const uint8_t *new_id, const uint8_t *new_pad)
 {
-	const uint8_t *end = out + size;
+	const uint8_t *end = buf + size;
 	uint8_t *p;
 	uint8_t *erased = NULL;
 
-	memcpy(out, in, size);
-	for (p = out; p + 2 * MASTER_SECRET_BYTES <= end;
+	for (p = buf; p + 2 * MASTER_SECRET_BYTES <= end;
 	    p += 2 * MASTER_SECRET_BYTES) {
 		if (!memcmp(p, old_id, MASTER_SECRET_BYTES))
 			goto found;
@@ -259,13 +259,95 @@ found:
 
 bool secrets_change(uint32_t old_pin, uint32_t new_pin)
 {
-	pin_xor(master_pattern, old_pin);
-	pin_xor(master_pattern, new_pin);
+	unsigned n;
+	int best_seq = -1;
+	unsigned new_block;
+	uint16_t *seq = (void *) io_buf;
+
+	assert(have_pad);
+	assert(pad_block > -1);
+
+	for (n = 0; n < PAD_BLOCKS; n += storage_erase_size())
+		if (n != (unsigned) pad_block &&
+		    storage_read_block(io_buf, pad_block)) {
+			unsigned i;
+
+			for (i = 0; i != STORAGE_BLOCK_SIZE; i++)
+				if (io_buf[i] != 0xff)
+					break;
+			if (i == STORAGE_BLOCK_SIZE) {
+				new_block = n;
+				goto erased;
+			}
+			if (best_seq < 0 || *seq < best_seq) {
+				best_seq = *seq;
+				new_block = n;
+			}
+		}
+	if (best_seq < 0) {
+		debug("could not find block for pad");
+		return 0;
+	}
+	if (!storage_erase_blocks(new_block, storage_erase_size())) {
+		debug("could not erase new block %u\n", new_block);
+		return 0;
+	}
+erased:
+	if (!storage_read_block(io_buf, pad_block)) {
+		debug("could not read pad block %u\n", pad_block);
+		return 0;
+	}
+
+	uint8_t new_pad[MASTER_SECRET_BYTES];
+	uint8_t old_id[MASTER_SECRET_BYTES];
+	unsigned i;
+	bool ok;
+
+	master_hash(master_pattern, new_pin);
+	id_hash(old_id, old_pin);
+	id_hash(pad_id, new_pin);
+
+	for (i = 0; i != MASTER_SECRET_BYTES; i++)
+		new_pad[i] = master_pattern[i] ^ master_secret[i];
+
+	memset(io_buf, 0xff, MASTER_SECRET_BYTES);
+	*seq = pad_seq + 1;
+
+	ok = change_pad(io_buf + MASTER_SECRET_BYTES,
+	    STORAGE_BLOCK_SIZE - MASTER_SECRET_BYTES,
+	    old_id, pad_id, new_pad);
+
+	memset(pad_id, 0, sizeof(pad_id));
+	memset(master_pattern, 0, sizeof(master_pattern));
+
+	if (!ok) {
+		debug("change_pad failed\n");
+		return 0;
+	}
+
+	if (!storage_write_block(io_buf, new_block)) {
+		debug("storage_write_block failed\n");
+		return 0;
+	}
+	/*
+	 * We need to erase the old block. Else, both the old and the new PIN
+	 * will be valid to produce the same secret key.
+	 */
+	if (!storage_erase_blocks(pad_block, storage_erase_size())) {
+		debug("could not erase old block %u\n", new_block);
+		return 0;
+	}
+
+	pad_block = new_block;
+	pad_seq++;
+
+	debug("secrets_change: block %u, seq %u\n", pad_block, pad_seq);
+
 	return 1;
 }
 
 
-bool secrets_setup(uint8_t *secret, uint32_t pin)
+bool secrets_setup(uint8_t *secret, int *block, uint32_t pin)
 {
 	bool found = 0;
 	unsigned n;
@@ -285,10 +367,12 @@ bool secrets_setup(uint8_t *secret, uint32_t pin)
 		if (apply_pad(secret, found ? pad_seq : -1, *seq,
 		    pads, pads_size, pad_id)) {
 			pad_seq = *seq;
+			if (block)
+				*block = n;
 			found = 1;
 		}
 	}
-debug("PAD: have %u seq %u\n", have_pad, pad_seq);
+debug("PAD: found %u seq %u\n", found, pad_seq);
 	memset(pad_id, 0, sizeof(pad_id));
 	memset(master_pattern, 0, sizeof(master_pattern));
 	
@@ -298,7 +382,9 @@ debug("PAD: have %u seq %u\n", have_pad, pad_seq);
 
 bool secrets_setup_master(uint32_t pin)
 {
-	return secrets_setup(master_secret, pin);
+	pad_block = -1;
+	have_pad = secrets_setup(master_secret, &pad_block, pin);
+	return have_pad;
 }
 
 

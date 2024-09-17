@@ -13,7 +13,10 @@
 #include "rnd.h"
 #include "sha.h"
 #include "timer.h"
+#include "block.h"
 #include "secrets.h"
+#include "dbcrypt.h"
+#include "db.h"
 #include "pin.h"
 
 
@@ -57,8 +60,23 @@ void pin_fail(void)
 
 bool pin_revalidate(uint32_t pin)
 {
-	/* @@@ */
-	if (pin == secret_pin) {
+	uint8_t secret[MASTER_SECRET_BYTES];
+	struct dbcrypt *c;
+	bool ok;
+
+	if (!secrets_setup(secret, NULL, pin)) {
+		memset(secret, 0, sizeof(secret));
+		return 0;
+	}
+	c = dbcrypt_init(secret, sizeof(secret));
+	ok = main_db.settings_block != -1 &&
+	    block_validate(c, main_db.settings_block);
+	if (!ok)
+		ok = main_db.entries &&
+		    block_validate(c, main_db.entries->block);
+	dbcrypt_free(c);
+	memset(secret, 0, sizeof(secret));
+	if (ok) {
 		pin_success();
 		return 1;
 	} else {
@@ -82,8 +100,7 @@ int pin_change(uint32_t old_pin, uint32_t new_pin)
 		return 0;
 	if (old_pin == new_pin)
 		return 0;
-	secret_pin = new_pin;
-	return 1;
+	return secrets_change(old_pin, new_pin);
 }
 
 

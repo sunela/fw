@@ -88,7 +88,7 @@ static bool accept_pin(uint32_t pin)
 	 * dialog and go through a setup procedure, e.g., asking for a new PIN,
 	 * and writing some record (configuration ?), to "pin" the PIN.
 	 */
-	return s.data || s.empty || s.erased == s.total;
+	return s.data || s.special || s.empty || s.erased == s.total;
 }
 
 

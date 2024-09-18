@@ -9,7 +9,7 @@ TARGETS = sim sdk
 
 FONTS = mono14.font mono18.font mono24.font mono34.font mono36.font mono58.font
 
-.PHONY:	all sim sdk fonts empty-db gdb nm clean spotless test tests
+.PHONY:	all sim sdk fonts db empty-db gdb nm clean spotless test tests
 .PHONY:	flash picocom upload download download-all erase
 
 all:	fonts $(TARGETS) dummy.db
@@ -30,6 +30,9 @@ $(FONTS:%=font/%): font/Makefile font/cvtfont.py
 
 # dd if=/dev/zero bs=32 count=1 | base32
 PK = AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA====
+
+db:
+	rm -f dummy.db && make dummy.db
 
 dummy.db: tools/accenc.py accounts.json
 	$(BUILD) $^ >$@ $(PK) || { rm -f $@; exit 1; }

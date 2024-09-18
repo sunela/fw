@@ -15,6 +15,7 @@
 #include "debug.h"
 #include "hal.h"
 #include "sha.h"
+#include "rnd.h"
 #include "tweetnacl.h"
 #include "storage.h"
 #include "block.h"
@@ -376,11 +377,44 @@ bool secrets_setup_master(uint32_t pin)
 
 bool secrets_new(uint32_t pin)
 {
-	/* @@@ obtain from protected persistent storage */
-	memset(device_secret, 0, sizeof(device_secret));
-	memcpy(master_pattern, device_secret, MASTER_SECRET_BYTES);
-	pin_xor(master_pattern, pin);
+	/* block layout */
+
+	uint16_t *seq = (void *) io_buf;
+	uint8_t *id = io_buf + MASTER_SECRET_BYTES;
+	uint8_t *pad = id + MASTER_SECRET_BYTES;
+	unsigned n, i;
+
+	/*
+	 * If an empty devvice is detected, it may still have some (useless)
+	 * pads. Try to get rid of them.
+	 */
+	for (n = 0; n < PAD_BLOCKS; n += storage_erase_size())
+		if (!storage_erase_blocks(n, storage_erase_size()))
+	                debug("could not erase %u\n", n);
+
+	/*
+	 * @@@ For later: optionally generate existing master secret from
+	 * BIP-0039 mnemonic sentence.
+	 */
+	memset(io_buf, 0xff, STORAGE_BLOCK_SIZE);
+	*seq = 0;
+	rnd_bytes(master_secret, MASTER_SECRET_BYTES);
+	master_hash(master_pattern, pin);
+	for (i = 0; i != MASTER_SECRET_BYTES; i++)
+		pad[i] = master_pattern[i] ^ master_secret[i];
+	id_hash(id, pin);
+	memset(master_pattern, 0, sizeof(master_pattern));
+
+	pad_block = 0;
+	if (!storage_write_block(io_buf, pad_block)) {
+		debug("storage_write_block (0) failed\n");
+		return 0;
+        }
+
+	have_pad = 1;
+
 	return 1;
+	
 }
 
 

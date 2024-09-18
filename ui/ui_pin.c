@@ -82,13 +82,7 @@ static bool accept_pin(uint32_t pin)
 	/* @@@ need to dbcrypt_free also when we turn off */
 	db_stats(&main_db, &s);
 
-	/*
-	 * @@@ also let us in if the Flash has been erased. This is for
-	 * development - in the end, an erased Flash should bypass the PIN
-	 * dialog and go through a setup procedure, e.g., asking for a new PIN,
-	 * and writing some record (configuration ?), to "pin" the PIN.
-	 */
-	return s.data || s.special || s.empty || s.erased == s.total;
+	return s.data || s.special || s.empty;
 }
 
 

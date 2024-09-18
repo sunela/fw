@@ -20,12 +20,8 @@
 #include "pin.h"
 
 
-#define	DUMMY_PIN	0xffff1234
-
-
 uint8_t pin_shuffle[10] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
-static uint32_t secret_pin = DUMMY_PIN;
 static unsigned pin_cooldown; /* time when the PIN cooldown ends */
 static unsigned pin_attempts; /* number of failed PIN entries */
 
@@ -107,10 +103,7 @@ int pin_change(uint32_t old_pin, uint32_t new_pin)
 bool pin_set(uint32_t new_pin)
 {
 	secrets_init();
-	if (!secrets_new(new_pin))
-		return 0;
-	secret_pin = new_pin;
-	return 1;
+	return secrets_new(new_pin);
 }
 
 

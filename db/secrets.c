@@ -444,10 +444,6 @@ bool secrets_init(void)
 	/* we don't have a master secret yet */
 	memset(master_secret, 0, sizeof(master_secret));
 
-	/* @@@ the master secret we want to obtain, for now, is all-zero */
-	memset(master_pattern, 0, sizeof(master_pattern));
-	pin_xor(master_pattern, DUMMY_PIN);
-
 	have_pad = 0;
 
 	return 1;

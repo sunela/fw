@@ -14,7 +14,6 @@
 #include "secrets.h"
 
 
-#define DUMMY_PIN		0xffff1234
 #define MIN_PIN_LEN		4
 #define MAX_PIN_LEN		8
 

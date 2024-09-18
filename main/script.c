@@ -604,7 +604,7 @@ static bool process_cmd(const char *cmd)
 			bool first = 1;
 			unsigned i;
 
-			for (i = 0; i != main_db.stats.total; i++)
+			for (i = RESERVED_BLOCKS; i != main_db.stats.total; i++)
 				switch (block_read(main_db.c,
 				    NULL, NULL, NULL, i)) {
 				case bt_data:

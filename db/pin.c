@@ -11,7 +11,6 @@
 #include <assert.h>
 
 #include "rnd.h"
-#include "sha.h"
 #include "timer.h"
 #include "block.h"
 #include "secrets.h"
@@ -104,27 +103,6 @@ bool pin_set(uint32_t new_pin)
 {
 	secrets_init();
 	return secrets_new(new_pin);
-}
-
-
-void pin_xor(uint8_t secret[MASTER_SECRET_BYTES], uint32_t pin)
-{
-	/*
-	 * @@@ SHA1(device_secret + PIN) is a poor KDF. Pick something better.
-	 */
-	uint8_t hash[MASTER_SECRET_BYTES];
-	unsigned i;
-
-	assert(SHA1_HASH_BYTES <= MASTER_SECRET_BYTES);
-	memset(hash, 0, sizeof(hash));
-	sha1_begin();
-	sha1_hash(device_secret, sizeof(device_secret));
-	sha1_hash((const void *) &pin, sizeof(pin));
-	sha1_end(hash);
-
-	for (i = 0; i != MASTER_SECRET_BYTES; i++)
-		secret[i] ^= hash[i];
-	memset(hash, 0, sizeof(hash));
 }
 
 

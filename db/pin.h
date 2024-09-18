@@ -38,8 +38,6 @@ void pin_fail(void);
 bool pin_revalidate(uint32_t pin);
 unsigned pin_cooldown_ms(void);
 
-void pin_xor(uint8_t secret[MASTER_SECRET_BYTES], uint32_t pin);
-
 /*
  * pin_change returns the following results:
  * -1 the change was attempted, but an IO error occurred

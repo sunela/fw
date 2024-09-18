@@ -85,37 +85,37 @@ done
 
 empty erased "db open" "db stats" "db blocks" <<EOF
 total 2048 invalid 0 data 0
-erased 2048 deleted 0 empty 0
+erased 2040 deleted 0 empty 0
 EOF
 
 # --- Create a new entry ------------------------------------------------------
 
 empty new "db open" "db new blah" "db stats" "db blocks" <<EOF
-0
+8
 total 2048 invalid 0 data 1
-erased 2047 deleted 0 empty 0
-D0
+erased 2039 deleted 0 empty 0
+D8
 EOF
 
 # --- Create then delete an entry ---------------------------------------------
 
 empty new-delete "db open" "db new blah" "db delete blah" "db stats" \
     "db blocks" <<EOF
-0
+8
 total 2048 invalid 0 data 0
-erased 2047 deleted 1 empty 0
-X0
+erased 2039 deleted 1 empty 0
+X8
 EOF
 
 # --- Create then change an entry ---------------------------------------------
 
 empty new-change "db open" "db new blah" "db change blah" "db stats" \
     "db blocks" <<EOF
-0
-1
+8
+9
 total 2048 invalid 0 data 1
-erased 2046 deleted 1 empty 0
-X0 D1
+erased 2038 deleted 1 empty 0
+X8 D9
 EOF
 
 # --- One existing entry ------------------------------------------------------
@@ -126,8 +126,8 @@ EOF
 
 run existing "db open" "db stats" "db blocks" <<EOF
 total 2048 invalid 0 data 1
-erased 2047 deleted 0 empty 0
-D0
+erased 2039 deleted 0 empty 0
+D8
 EOF
 
 # --- Delete existing entry ---------------------------------------------------
@@ -138,8 +138,8 @@ EOF
 
 run existing-delete "db open" "db delete id" "db stats" "db blocks" <<EOF
 total 2048 invalid 0 data 0
-erased 2047 deleted 1 empty 0
-X0
+erased 2039 deleted 1 empty 0
+X8
 EOF
 
 # --- Change field in existing entry ------------------------------------------
@@ -149,10 +149,10 @@ json <<EOF
 EOF
 
 run existing-change "db open" "db change id" "db stats" "db blocks" <<EOF
-1
+9
 total 2048 invalid 0 data 1
-erased 2046 deleted 1 empty 0
-X0 D1
+erased 2038 deleted 1 empty 0
+X8 D9
 EOF
 
 # --- Remove field from existing entry ----------------------------------------
@@ -162,8 +162,8 @@ json <<EOF
 EOF
 
 run existing-remove "db open" "db remove id" "db stats" "db blocks" <<EOF
-1
+9
 total 2048 invalid 0 data 1
-erased 2046 deleted 1 empty 0
-X0 D1
+erased 2038 deleted 1 empty 0
+X8 D9
 EOF

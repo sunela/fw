@@ -823,7 +823,7 @@ accounts $mode setup-master-pin "long 201 23" "tap 152 141" "tap 81 168" \
 # -----------------------------------------------------------------------------
 
 accounts $mode setup-master-show "long 201 23" "tap 152 141" "tap 81 168" \
-    "tap 129 69" \
+    "master scramble" "tap 129 69" \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R"
 
 # -----------------------------------------------------------------------------

@@ -28,14 +28,16 @@ there are some issues we need to work around.)
 Prerequisites
 -------------
 
-The following packages are needed (the names given here are for Ubuntu 22.04):
+The following packages are needed (the package names given here are for
+Ubuntu 22.04):
 
-Liberation fonts: fonts-liberation
-Font configuration utility fc-list: fontconfig
-OpenType/TrueType BDF converter otf2bdf: otf2bdf
-Simple Directmedia Layer (SDL2): libsdl2-dev
-GNU Crypto library: libgcrypt20-dev
-PyNaCl: python3-nacl
+fontconfig		Font configuration utility fc-list:
+fonts-liberation	Liberation fonts:
+jq			Command-line JSON processor
+libgcrypt20-dev		GNU Crypto library
+libsdl2-dev		Simple Directmedia Layer (SDL2)
+otf2bdf			OpenType/TrueType BDF converter otf2bdf
+python3-nacl		PyNaCl
 
 
 Running on the Sipeed M1s Dock

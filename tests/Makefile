@@ -16,3 +16,4 @@ all:
 	./move.sh
 	./rmt.sh
 	./db.sh
+	./bip39.sh

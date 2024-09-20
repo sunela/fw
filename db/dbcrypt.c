@@ -360,6 +360,15 @@ done:
 }
 
 
+/* --- Retrieve the public key --------------------------------------------- */
+
+
+const void *dbcrypt_pubkey(const struct dbcrypt *c)
+{
+	return c->pk;
+}
+
+
 /* --- Manage the dbcrypt context ------------------------------------------ */
 
 

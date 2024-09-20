@@ -361,7 +361,7 @@ accounts $mode setup-time "time 1716272769" \
 
 # --- setup storage -----------------------------------------------------------
 
-accounts $mode setup-storage "long 201 23" "tap 152 141" "tap 81 164"
+accounts $mode setup-storage "long 201 23" "tap 152 141" "tap 81 214"
 
 # --- delete account (swipe not started) --------------------------------------
 
@@ -501,11 +501,12 @@ accounts $mode delete-pw1 "tap 86 67" \
 
 # --- setup version -----------------------------------------------------------
 
-accounts $mode setup-version "long 201 23" "tap 152 141" static "tap 81 218"
+accounts $mode setup-version "long 201 23" "tap 152 141" static "tap 81 268"
 
 # --- setup R&D ---------------------------------------------------------------
 
-accounts $mode setup-rd "long 201 23" "tap 152 141" "tap 81 269"
+accounts $mode setup-rd "long 201 23" "tap 152 141" \
+    "drag 66 200 68 153" "tap 68 219"
 
 # --- Move from ---------------------------------------------------------------
 
@@ -809,6 +810,21 @@ page -j "[]" $mode new-repeat "random 1" button \
 ## --- accounts (empty) --------------------------------------------------------
 #
 #accounts -j "[]" $mode accounts-empty
+
+# --- setup master secret -----------------------------------------------------
+
+accounts $mode setup-master "long 201 23" "tap 152 141" "tap 81 168"
+
+# --- setup master secret, PIN ------------------------------------------------
+
+accounts $mode setup-master-pin "long 201 23" "tap 152 141" "tap 81 168" \
+    "tap 129 69"
+
+# -----------------------------------------------------------------------------
+
+accounts $mode setup-master-show "long 201 23" "tap 152 141" "tap 81 168" \
+    "tap 129 69" \
+    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R"
 
 # -----------------------------------------------------------------------------
 

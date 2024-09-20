@@ -17,6 +17,7 @@
 #include "hal.h"
 #include "rnd.h"
 #include "timer.h"
+#include "bip39.h"
 #include "block.h"
 #include "secrets.h"
 #include "dbcrypt.h"
@@ -295,10 +296,48 @@ static void rmt(const char *s)
 }
 
 
+static bool bip39(const char *arg)
+{
+	struct bip39 bip;
+	uint8_t buf[(strlen(arg) + 1) / 2 + 1];
+	unsigned n;
+
+	n = 0;
+	while (*arg) {
+		char byte[3] = "??";
+		unsigned long tmp;
+		char *end;
+
+		byte[0] = arg[0];
+		byte[1] = arg[1];
+		tmp = strtoul(byte, &end, 16);
+		if (*end)
+			return 0;
+		buf[n++] = tmp;
+		arg += arg[1] ? 2 : 1;
+	}
+
+	bip39_words(&bip, buf, n);
+	n = 0;
+	while (1) {
+		const char *s;
+
+		s = bip39_next_word(&bip);
+		if (!s)
+			break;
+		printf("%s%s", n ? " " : "", s);
+		n++;
+	}
+	printf("\n");
+	return 1;
+}
+
+
 static void show_help(void)
 {
 	printf("Commands:\n\n"
 "button\t\tpress the button long enough to debounce, then release it\n"
+"bip39 HEXSTRING\tencode the hex string as words\n"
 "db dummy\tuse a dummy database. This must be the first command in the\n"
 "\t\tscript.\n"
 "db add NAME [PREV]\n\t\tadd an entry to the dummy database\n"
@@ -674,6 +713,15 @@ static bool process_cmd(const char *cmd)
 			return 1;
 		}
 		goto fail;
+	}
+
+	/* BIP39 */
+
+	arg = cmd_arg("bip39", cmd);
+	if (arg) {
+		if (!bip39(arg))
+			goto fail;
+		return 1;
 	}
 
 	/* help */

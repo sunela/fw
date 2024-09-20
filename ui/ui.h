@@ -24,6 +24,7 @@
 #define	IDLE_OVERLAY_S	10	/* note: this is "back", not "off" */
 #define	IDLE_SETUP_S	15	/* keep it short, in case we got there by
 				   accident */
+#define	IDLE_NEW_S	15	/* idem */
 #define	IDLE_SET_TIME_S	30	/* long - the page is complex */
 #define	IDLE_CONFIRM_S	10	/* keep it short, but not rushing */
 #define	IDLE_NOTICE_S	60	/* no rush */
@@ -105,6 +106,7 @@ extern const struct ui ui_notice;
 extern const struct ui ui_pin_change;
 extern const struct ui ui_rmt;
 extern const struct ui ui_new;
+extern const struct ui ui_choices;
 
 void progress(void);
 void set_idle(unsigned seconds);

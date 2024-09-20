@@ -18,6 +18,7 @@
 static void ui_setup_open(void *ctx, void *params)
 {
 	static const struct ui_choice choices_l2[] = {
+		{ "Public key",		&ui_show_pubkey,	NULL },
 		{ "Show secret",	&ui_show_master,	NULL },
 	};
 	static const struct ui_choices_params choice_params_l2 = {

@@ -19,7 +19,7 @@ OBJS = ui.o demo.o timer.o debug.o mbox.o rnd.o hmac.o hotp.o base32.o \
     wi_list.o ui_entry.o wi_general_entry.o ui_time.o ui_overlay.o \
     ui_confirm.o ui_setup.o ui_storage.o ui_version.o ui_rd.o ui_notice.o \
     ui_pin_change.o wi_pin_entry.o ui_rmt.o ui_new.o ui_choices.o \
-    ui_show_master.o
+    ui_show_master.o ui_show_pubkey.o
 
 include Makefile.c-common
 
@@ -77,6 +77,7 @@ vpath ui_rmt.c ui
 vpath ui_new.c ui
 vpath ui_choices.c ui
 vpath ui_show_master.c ui
+vpath ui_show_pubkey.c ui
 
 vpath wi_list.c ui
 vpath wi_general_entry.c ui

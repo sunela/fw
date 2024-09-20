@@ -109,6 +109,7 @@ extern const struct ui ui_rmt;
 extern const struct ui ui_new;
 extern const struct ui ui_choices;
 extern const struct ui ui_show_master;
+extern const struct ui ui_show_pubkey;
 
 void swipe_back(void *ctx, unsigned from_x, unsigned from_y,
     unsigned to_x, unsigned to_y, enum ui_swipe swipe);

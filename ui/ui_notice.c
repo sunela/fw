@@ -92,7 +92,7 @@ static void ui_notice_open(void *ctx, void *params)
 	text_format(&main_da, (GFX_WIDTH - w) / 2 + margin,
 	    (GFX_HEIGHT - h) / 2, w - 2 * margin, h, 0, p->s,
 	    font, style->x_align, style->fg);
-	set_idle(IDLE_NOTICE_S);
+	set_idle(p->idle_s ? p->idle_s : IDLE_NOTICE_S);
 }
 
 
@@ -115,7 +115,8 @@ const struct ui ui_notice = {
 /* --- Wrappers ------------------------------------------------------------ */
 
 
-static void vnotice_common(enum notice_type type, const char *fmt, va_list ap,
+static void vnotice_common(enum notice_type type, unsigned idle_s,
+    const char *fmt, va_list ap,
     void (*chain)(const struct ui *ui, void *params), const struct ui *next,
     void *next_params)
 {
@@ -125,6 +126,7 @@ static void vnotice_common(enum notice_type type, const char *fmt, va_list ap,
 	};
 	struct ui_notice_params params = {
 		.style		= &style,
+		.idle_s		= idle_s,
 		.next		= next,
 		.next_params	= next_params,
         };
@@ -155,9 +157,26 @@ static void vnotice_common(enum notice_type type, const char *fmt, va_list ap,
 }
 
 
+void vnotice_idle(enum notice_type type, unsigned idle_s, const char *fmt,
+    va_list ap)
+{
+	vnotice_common(type, idle_s, fmt, ap, ui_switch, NULL, NULL);
+}
+
+
+void notice_idle(enum notice_type type, unsigned idle_s, const char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	vnotice_idle(type, idle_s, fmt, ap);
+	va_end(ap);
+}
+
+
 void vnotice(enum notice_type type, const char *fmt, va_list ap)
 {
-	vnotice_common(type, fmt, ap, ui_switch, NULL, NULL);
+	vnotice_common(type, 0, fmt, ap, ui_switch, NULL, NULL);
 }
 
 
@@ -173,7 +192,7 @@ void notice(enum notice_type type, const char *fmt, ...)
 
 void vnotice_call(enum notice_type type, const char *fmt, va_list ap)
 {
-	vnotice_common(type, fmt, ap, ui_call, NULL, NULL);
+	vnotice_common(type, 0, fmt, ap, ui_call, NULL, NULL);
 }
 
 
@@ -190,7 +209,7 @@ void notice_call(enum notice_type type, const char *fmt, ...)
 void vnotice_switch(const struct ui *next, void *params, enum notice_type type,
     const char *fmt, va_list ap)
 {
-	vnotice_common(type, fmt, ap, ui_switch, next, params);
+	vnotice_common(type, 0, fmt, ap, ui_switch, next, params);
 }
 
 

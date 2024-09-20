@@ -58,14 +58,6 @@ static void ui_choices_tap(void *ctx, unsigned x, unsigned y)
 }
 
 
-static void ui_choices_to(void *ctx, unsigned from_x, unsigned from_y,
-    unsigned to_x, unsigned to_y, enum ui_swipe swipe)
-{
-	if (swipe == us_left)
-		ui_return();
-}
-
-
 /* --- Open/close ---------------------------------------------------------- */
 
 
@@ -120,7 +112,7 @@ static void ui_choices_resume(void *ctx)
 
 static const struct ui_events ui_choices_events = {
 	.touch_tap	= ui_choices_tap,
-	.touch_to	= ui_choices_to,
+	.touch_to	= swipe_back,
 	.lists		= lists,
 	.n_lists	= 1,
 };

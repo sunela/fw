@@ -22,8 +22,6 @@
 
 
 static void ui_show_master_2_open(void *ctx, void *params);
-static void ui_show_master_to(void *ctx, unsigned from_x, unsigned from_y,
-    unsigned to_x, unsigned to_y, enum ui_swipe swipe);
 
 
 struct ui_show_master_ctx {
@@ -45,7 +43,7 @@ static const struct wi_list_style style = {
 
 static struct wi_list *lists[1];
 static const struct ui_events ui_show_master_2_events = {
-	.touch_to       = ui_show_master_to,
+	.touch_to       = swipe_back,
 	.lists		= lists,
 	.n_lists	= 1,
 };
@@ -56,17 +54,6 @@ static const struct ui ui_show_master_2 = {
 	.events		= &ui_show_master_2_events,
 };
 
-
-
-/* --- Events -------------------------------------------------------------- */
-
-
-static void ui_show_master_to(void *ctx, unsigned from_x, unsigned from_y,
-    unsigned to_x, unsigned to_y, enum ui_swipe swipe)
-{
-	if (swipe == us_left)
-		ui_return();
-}
 
 
 /* --- Helper functions ---------------------------------------------------- */

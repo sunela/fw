@@ -72,17 +72,6 @@ static void ui_version_long(void *ctx, unsigned x, unsigned y)
 }
 
 
-/* --- Swipe --------------------------------------------------------------- */
-
-
-static void ui_version_to(void *ctx, unsigned from_x, unsigned from_y,
-    unsigned to_x, unsigned to_y, enum ui_swipe swipe)
-{
-	if (swipe == us_left)
-		ui_return();
-}
-
-
 /* --- Open/close ---------------------------------------------------------- */
 
 
@@ -138,7 +127,7 @@ static void ui_version_resume(void *ctx)
 
 static const struct ui_events ui_version_events = {
 	.touch_long	= ui_version_long,
-	.touch_to	= ui_version_to,
+	.touch_to	= swipe_back,
 	.lists		= lists,
 	.n_lists	= 1,
 };

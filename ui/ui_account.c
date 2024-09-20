@@ -459,17 +459,6 @@ static void ui_account_long(void *ctx, unsigned x, unsigned y)
 }
 
 
-/* --- Swipe --------------------------------------------------------------- */
-
-
-static void ui_account_to(void *ctx, unsigned from_x, unsigned from_y,
-    unsigned to_x, unsigned to_y, enum ui_swipe swipe)
-{
-	if (swipe == us_left)
-		ui_return();
-}
-
-
 /* --- Open/close ---------------------------------------------------------- */
 
 
@@ -582,7 +571,7 @@ static void ui_account_resume(void *ctx)
 static const struct ui_events ui_account_events = {
 	.touch_tap	= ui_account_tap,
 	.touch_long	= ui_account_long,
-	.touch_to	= ui_account_to,
+	.touch_to	= swipe_back,
 	.tick		= ui_account_tick,
 	.lists		= lists,
 	.n_lists	= 1,

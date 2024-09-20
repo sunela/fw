@@ -235,6 +235,17 @@ static enum ui_swipe classify_swipe(unsigned ax, unsigned ay,
 }
 
 
+/* --- Common functions ---------------------------------------------------- */
+
+
+void swipe_back(void *ctx, unsigned from_x, unsigned from_y,
+    unsigned to_x, unsigned to_y, enum ui_swipe swipe)
+{
+	if (swipe == us_left)
+		ui_return();
+}
+
+
 /* --- Touch screen / mouse ------------------------------------------------ */
 
 

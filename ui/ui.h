@@ -110,6 +110,9 @@ extern const struct ui ui_new;
 extern const struct ui ui_choices;
 extern const struct ui ui_show_master;
 
+void swipe_back(void *ctx, unsigned from_x, unsigned from_y,
+    unsigned to_x, unsigned to_y, enum ui_swipe swipe);
+
 void progress(void);
 void set_idle(unsigned seconds);
 void turn_off(void);

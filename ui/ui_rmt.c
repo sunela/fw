@@ -298,14 +298,6 @@ static void ui_rmt_tick(void *ctx)
 }
 
 
-static void ui_rmt_to(void *ctx, unsigned from_x, unsigned from_y,
-    unsigned to_x, unsigned to_y, enum ui_swipe swipe)
-{
-	if (swipe == us_left)
-		ui_return();
-}
-
-
 /* --- Open/close ---------------------------------------------------------- */
 
 
@@ -337,7 +329,7 @@ static void ui_rmt_close(void *ctx)
 
 static const struct ui_events ui_rmt_events = {
 	.touch_tap	= ui_rmt_tap,
-	.touch_to	= ui_rmt_to,
+	.touch_to	= swipe_back,
 	.tick		= ui_rmt_tick,
 };
 

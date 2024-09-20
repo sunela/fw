@@ -141,17 +141,6 @@ static void ui_rd_long(void *ctx, unsigned x, unsigned y)
 }
 
 
-/* --- Swipe --------------------------------------------------------------- */
-
-
-static void ui_rd_to(void *ctx, unsigned from_x, unsigned from_y,
-    unsigned to_x, unsigned to_y, enum ui_swipe swipe)
-{
-	if (swipe == us_left)
-		ui_return();
-}
-
-
 /* --- Open/close ---------------------------------------------------------- */
 
 
@@ -201,7 +190,7 @@ static void ui_rd_resume(void *ctx)
 static const struct ui_events ui_rd_events = {
 	.touch_tap	= ui_rd_tap,
 	.touch_long	= ui_rd_long,
-	.touch_to	= ui_rd_to,
+	.touch_to	= swipe_back,
 	.lists		= lists,
 	.n_lists	= 1,
 };

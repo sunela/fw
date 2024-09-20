@@ -17,6 +17,7 @@
 #include "hal.h"
 #include "rnd.h"
 #include "timer.h"
+#include "sha.h"
 #include "bip39.h"
 #include "block.h"
 #include "secrets.h"
@@ -359,6 +360,7 @@ static void show_help(void)
 "help\t\tthis help text\n"
 "interact\tshow the display and interact with the user\n"
 "long X Y\tlong press the touch screen\n"
+"master scramble\tdeterministically scamble the master secret\n"
 "move X Y\tmove on the touch screen\n"
 "press\t\tpress the side button\n"
 "random\t\tenable random number generation\n"
@@ -722,6 +724,19 @@ static bool process_cmd(const char *cmd)
 		if (!bip39(arg))
 			goto fail;
 		return 1;
+	}
+
+	/* master*/
+
+	arg = cmd_arg("master", cmd);
+	if (arg) {
+		if (!strcmp(arg, "scramble")) {
+			sha256_begin();
+			sha256_hash(master_secret, sizeof(master_secret));
+			sha256_end(master_secret);
+			return 1;
+		}
+		goto fail;
 	}
 
 	/* help */

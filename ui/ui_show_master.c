@@ -145,6 +145,7 @@ static void ui_show_master_2_open(void *ctx, void *params)
 		wi_list_add(&c->list, buf, NULL, NULL);
 	}
 	wi_list_end(&c->list);
+	set_idle(IDLE_MASTER_S);
 }
 
 

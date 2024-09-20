@@ -30,6 +30,8 @@
 #define	IDLE_NOTICE_S	60	/* no rush */
 #define	IDLE_MASTER_S	600	/* measured to need about 4 minutes to write
 				   down and verify the secret; add margin */
+#define	IDLE_PUBKEY_S	400	/* measured to need about 3 minutes to write
+				   down and verify; add margin */
 #define	MAX_INPUT_LEN	32	/* for ui_entry */
 
 

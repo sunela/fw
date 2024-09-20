@@ -1,5 +1,5 @@
 /*
- * ui_show_pubkey.c - User interface: Version information
+ * ui_show_pubkey.c - User interface: show the public key
  *
  * This work is licensed under the terms of the MIT License.
  * A copy of the license can be found in the file LICENSE.MIT
@@ -25,7 +25,7 @@ static void ui_show_pubkey_open(void *ctx, void *params)
 
 	base32_encode(buf, sizeof(buf), dbcrypt_pubkey(main_db.c),
 	    crypto_box_PUBLICKEYBYTES);
-	notice(nt_info, "%s", buf);
+	notice_idle(nt_info, IDLE_PUBKEY_S, "%s", buf);
 }
 
 

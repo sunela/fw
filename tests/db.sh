@@ -85,37 +85,38 @@ done
 
 empty erased "db open" "db stats" "db blocks" <<EOF
 total 2048 invalid 0 data 0
-erased 2040 deleted 0 empty 0
+erased 2039 deleted 0 empty 0
+D8
 EOF
 
 # --- Create a new entry ------------------------------------------------------
 
 empty new "db open" "db new blah" "db stats" "db blocks" <<EOF
-8
+9
 total 2048 invalid 0 data 1
-erased 2039 deleted 0 empty 0
-D8
+erased 2038 deleted 0 empty 0
+D8 D9
 EOF
 
 # --- Create then delete an entry ---------------------------------------------
 
 empty new-delete "db open" "db new blah" "db delete blah" "db stats" \
     "db blocks" <<EOF
-8
+9
 total 2048 invalid 0 data 0
-erased 2039 deleted 1 empty 0
-X8
+erased 2038 deleted 1 empty 0
+D8 X9
 EOF
 
 # --- Create then change an entry ---------------------------------------------
 
 empty new-change "db open" "db new blah" "db change blah" "db stats" \
     "db blocks" <<EOF
-8
 9
+10
 total 2048 invalid 0 data 1
-erased 2038 deleted 1 empty 0
-X8 D9
+erased 2037 deleted 1 empty 0
+D8 X9 D10
 EOF
 
 # --- One existing entry ------------------------------------------------------
@@ -126,8 +127,8 @@ EOF
 
 run existing "db open" "db stats" "db blocks" <<EOF
 total 2048 invalid 0 data 1
-erased 2039 deleted 0 empty 0
-D8
+erased 2038 deleted 0 empty 0
+D8 D9
 EOF
 
 # --- Delete existing entry ---------------------------------------------------
@@ -138,8 +139,8 @@ EOF
 
 run existing-delete "db open" "db delete id" "db stats" "db blocks" <<EOF
 total 2048 invalid 0 data 0
-erased 2039 deleted 1 empty 0
-X8
+erased 2038 deleted 1 empty 0
+D8 X9
 EOF
 
 # --- Change field in existing entry ------------------------------------------
@@ -149,10 +150,10 @@ json <<EOF
 EOF
 
 run existing-change "db open" "db change id" "db stats" "db blocks" <<EOF
-9
+10
 total 2048 invalid 0 data 1
-erased 2038 deleted 1 empty 0
-X8 D9
+erased 2037 deleted 1 empty 0
+D8 X9 D10
 EOF
 
 # --- Remove field from existing entry ----------------------------------------
@@ -162,8 +163,8 @@ json <<EOF
 EOF
 
 run existing-remove "db open" "db remove id" "db stats" "db blocks" <<EOF
-9
+10
 total 2048 invalid 0 data 1
-erased 2038 deleted 1 empty 0
-X8 D9
+erased 2037 deleted 1 empty 0
+D8 X9 D10
 EOF

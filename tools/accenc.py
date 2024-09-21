@@ -198,6 +198,11 @@ sys.stdout.buffer.write(b'\xff' * (RESERVED_BLOCKS - 1) * BLOCK_SIZE)
 #print(id_hash(dev_secret, 0xffff1234).hex())
 #sys.exit(0)
 
+if writer is None:
+	settings = 0
+else:
+	write_new(struct.pack("<BBH", 5, 0, 0), writer, [ writer.public_key ])
+	settings = 1
 
 for e in db:
 	b = b''
@@ -209,8 +214,10 @@ for e in db:
 	if writer is None:
 		write_old(b)
 	else:
+		# empty settings record
 		write_new(struct.pack("<BBH", 4, 0, 0) + b,
 		    writer, [ writer.public_key ])
 	
 sys.stdout.buffer.write(
-    (b'\xff' * (STORAGE_BLOCKS - RESERVED_BLOCKS - len(db)) * BLOCK_SIZE))
+    (b'\xff' * (STORAGE_BLOCKS - RESERVED_BLOCKS - len(db) - settings) *
+    BLOCK_SIZE))

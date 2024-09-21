@@ -12,7 +12,7 @@ CFLAGS += -g -Wall -Wextra -Wshadow -Wno-unused-parameter \
 	 -Irmt -Ilib/bip39
 OBJS = ui.o demo.o timer.o debug.o mbox.o rnd.o hmac.o hotp.o base32.o \
     tweetnacl.o \
-    fmt.o imath.o bip39enc.o version.o rmt.o rmt-db.o \
+    fmt.o imath.o bip39enc.o bip39in.o version.o rmt.o rmt-db.o \
     basic.o poly.o shape.o long_text.o font.o text.o \
     dbcrypt.o block.o span.o db.o settings.o pin.o secrets.o \
     ui_off.o ui_pin.o ui_fail.o ui_accounts.o ui_account.o ui_field.o \
@@ -27,6 +27,7 @@ include Makefile.c-common
 vpath fmt.c lib
 vpath imath.c lib
 vpath bip39enc.c lib/bip39
+vpath bip39in.c lib/bip39
 
 vpath basic.c gfx
 vpath poly.c gfx

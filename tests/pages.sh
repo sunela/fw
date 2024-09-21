@@ -808,22 +808,27 @@ page -j "[]" $mode new-repeat "random 1" button \
     "$ENTRY_5"
 
 ## --- accounts (empty) --------------------------------------------------------
-#
-#accounts -j "[]" $mode accounts-empty
+
+accounts -j "[]" $mode accounts-empty
 
 # --- setup master secret -----------------------------------------------------
 
 accounts $mode setup-master "long 201 23" "tap 152 141" "tap 81 168"
 
+# --- setup master secret, show pubkey ----------------------------------------
+
+accounts $mode setup-master-pubkey "long 201 23" "tap 152 141" "tap 81 168" \
+    "tap 128 69"
+
 # --- setup master secret, PIN ------------------------------------------------
 
 accounts $mode setup-master-pin "long 201 23" "tap 152 141" "tap 81 168" \
-    "tap 129 69"
+    "tap 129 119"
 
-# -----------------------------------------------------------------------------
+# --- setup master secret, show -----------------------------------------------
 
 accounts $mode setup-master-show "long 201 23" "tap 152 141" "tap 81 168" \
-    "master scramble" "tap 129 69" \
+    "master scramble" "tap 129 119" \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R"
 
 # -----------------------------------------------------------------------------

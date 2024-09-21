@@ -12,7 +12,7 @@ jq -r '.english[] | .[0]+" "+.[1]' $VECTORS | while read l; do
 	set - $l
 	hex=$1
 	shift
-	res=`../sim -q -C "bip39 $hex"` || exit
+	res=`../sim -q -C "bip39 encode $hex"` || exit
 	if [ "$*" != "$res" ]; then
 		cat <<EOF 2>&2
 Vector mismatch:

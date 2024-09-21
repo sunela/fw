@@ -338,7 +338,7 @@ static void show_help(void)
 {
 	printf("Commands:\n\n"
 "button\t\tpress the button long enough to debounce, then release it\n"
-"bip39 HEXSTRING\tencode the hex string as words\n"
+"bip39 encode HEXSTRING\n\t\tencode the hex string as words\n"
 "db dummy\tuse a dummy database. This must be the first command in the\n"
 "\t\tscript.\n"
 "db add NAME [PREV]\n\t\tadd an entry to the dummy database\n"
@@ -721,9 +721,15 @@ static bool process_cmd(const char *cmd)
 
 	arg = cmd_arg("bip39", cmd);
 	if (arg) {
-		if (!bip39(arg))
-			goto fail;
-		return 1;
+		const char *arg2;
+
+		arg2 = cmd_arg("encode", arg);
+		if (arg2) {
+			if (!bip39(arg2))
+				goto fail;
+			return 1;
+		}
+		goto fail;
 	}
 
 	/* master*/

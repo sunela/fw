@@ -112,12 +112,12 @@ static void ui_show_master_2_open(void *ctx, void *params)
 	lists[0] = &c->list;
 
 	wi_list_begin(&c->list, &style);
-	bip39_words(&bip, master_secret, sizeof(master_secret));
+	bip39_encode(&bip, master_secret, sizeof(master_secret));
 	while (1) {
-		const char *s;
+		int i;
 
-		s = bip39_next_word(&bip);
-		if (!s)
+		i = bip39_next_word(&bip);
+		if (i < 0)
 			break;
 
 		char buf[11];
@@ -128,7 +128,7 @@ static void ui_show_master_2_open(void *ctx, void *params)
 		/* @@@ fix format() */
 		if (n < 10)
 			buf[0] = ' ';
-		strcpy(buf + 3, s);
+		strcpy(buf + 3, bip39_words[i]);
 		wi_list_add(&c->list, buf, NULL, NULL);
 	}
 	wi_list_end(&c->list);

@@ -20,7 +20,10 @@ struct bip39enc {
 };
 
 
-void bip39_words(struct bip39enc *b, const uint8_t *data, unsigned bytes);
-const char *bip39_next_word(struct bip39enc *b);
+extern const char *bip39_words[];
+
+
+void bip39_encode(struct bip39enc *b, const uint8_t *data, unsigned bytes);
+int bip39_next_word(struct bip39enc *b);
 
 #endif /* !BIP39ENC_H */

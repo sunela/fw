@@ -5,7 +5,6 @@
  * A copy of the license can be found in the file LICENSE.MIT
  */
 
-#include <stddef.h>
 #include <stdint.h>
 #include <assert.h>
 
@@ -17,12 +16,12 @@
 #define	BITS	11
 
 
-static const char *words[] = {
+const char *bip39_words[] = {
 #include "english.inc"
 };
 
 
-void bip39_words(struct bip39enc *b, const uint8_t *data, unsigned bytes)
+void bip39_encode(struct bip39enc *b, const uint8_t *data, unsigned bytes)
 {
 	uint8_t tmp[SHA256_HASH_BYTES];
 
@@ -37,16 +36,16 @@ void bip39_words(struct bip39enc *b, const uint8_t *data, unsigned bytes)
 }
 
 
-const char *bip39_next_word(struct bip39enc *b)
+int bip39_next_word(struct bip39enc *b)
 {
 	uint16_t buf = 0;
 	unsigned got = 0;
 	unsigned n;
 
 	if (b->p == b->end)
-		return NULL;
+		return -1;
 //printf("pos %u %p\n", b->pos, b->p);
-	assert(ARRAY_ENTRIES(words) == 1 << BITS);
+	assert(ARRAY_ENTRIES(bip39_words) == 1 << BITS);
 	while (got < BITS) {
 		unsigned left = 8 - (b->pos & 7);
 		unsigned want = BITS - got;
@@ -78,5 +77,5 @@ const char *bip39_next_word(struct bip39enc *b)
 	}
 	n = buf & ((1 << BITS) - 1);
 //printf("\t0x%x -> 0x%x\n", buf, n);
-	return words[n];
+	return n;
 }

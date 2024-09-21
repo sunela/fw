@@ -318,15 +318,15 @@ static bool bip39(const char *arg)
 		arg += arg[1] ? 2 : 1;
 	}
 
-	bip39_words(&bip, buf, n);
+	bip39_encode(&bip, buf, n);
 	n = 0;
 	while (1) {
-		const char *s;
+		int i;
 
-		s = bip39_next_word(&bip);
-		if (!s)
+		i = bip39_next_word(&bip);
+		if (i < 0)
 			break;
-		printf("%s%s", n ? " " : "", s);
+		printf("%s%s", n ? " " : "", bip39_words[i]);
 		n++;
 	}
 	printf("\n");

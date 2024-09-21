@@ -19,6 +19,7 @@
 #include "timer.h"
 #include "sha.h"
 #include "bip39enc.h"
+#include "bip39in.h"
 #include "block.h"
 #include "secrets.h"
 #include "dbcrypt.h"
@@ -297,7 +298,7 @@ static void rmt(const char *s)
 }
 
 
-static bool bip39(const char *arg)
+static bool do_bip39_enc(const char *arg)
 {
 	struct bip39enc bip;
 	uint8_t buf[(strlen(arg) + 1) / 2 + 1];
@@ -334,11 +335,28 @@ static bool bip39(const char *arg)
 }
 
 
+static void do_bip39_match(const char *arg)
+{
+	uint16_t matches[BIP39_MAX_FINAL_CHOICES];
+	char next[10 + 1];
+	unsigned n, i;
+
+	n = bip39_match(arg, matches, BIP39_MAX_FINAL_CHOICES,
+	    next, sizeof(next));
+	printf("%u", n);
+	for (i = 0; i != n && i != BIP39_MAX_FINAL_CHOICES; i++)
+		printf("%s %s", i ? "" : ":", bip39_words[matches[i]]);
+	printf("\n");
+	printf("Next \"%s\"\n", next);
+}
+
+
 static void show_help(void)
 {
 	printf("Commands:\n\n"
 "button\t\tpress the button long enough to debounce, then release it\n"
 "bip39 encode HEXSTRING\n\t\tencode the hex string as words\n"
+"bip39 match [KEYS]\n\t\tfind matching words for the key sequence\n"
 "db dummy\tuse a dummy database. This must be the first command in the\n"
 "\t\tscript.\n"
 "db add NAME [PREV]\n\t\tadd an entry to the dummy database\n"
@@ -725,8 +743,17 @@ static bool process_cmd(const char *cmd)
 
 		arg2 = cmd_arg("encode", arg);
 		if (arg2) {
-			if (!bip39(arg2))
+			if (!do_bip39_enc(arg2))
 				goto fail;
+			return 1;
+		}
+		if (!strcmp("match", arg)) {
+			do_bip39_match("");
+			return 1;
+		}
+		arg2 = cmd_arg("match", arg);
+		if (arg2) {
+			do_bip39_match(arg2);
 			return 1;
 		}
 		goto fail;

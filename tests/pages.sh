@@ -36,11 +36,14 @@ json()
 
 page_inner()
 {
+	local erase=false
 	local json=
 	local title=true
 
 	while [ "$1" ]; do
 		case "$1" in
+		-e)	erase=true
+			shift;;
 		-j)	json=$2
 			shift 2;;
 		-n)	title=false
@@ -64,7 +67,10 @@ page_inner()
 	found=true
 
 	if [ ! -r "$dir/_db" ]; then
-		if [ "$json" ]; then
+		if $erase; then
+			python3 -c 'import sys
+sys.stdout.buffer.write(b"\xff" * 1024 * 2048);' >"$dir/_db" || exit
+		elif [ "$json" ]; then
 			echo "$json" |
 			    "$top/tools/accenc.py" /dev/stdin $PK >"$dir/_db" ||
 			    exit
@@ -764,45 +770,45 @@ fi
 
 # --- New device --------------------------------------------------------------
 
-page -j "[]" $mode new-on "random 1" button
+page -e $mode new-on "random 1" button
 
 # --- New device, cancel ------------------------------------------------------
 
-page -j "[]" $mode new-cancel "random 1" button \
+page -e $mode new-cancel "random 1" button \
     "$ENTRY_L"
 
 # --- New device, PIN ---------------------------------------------------------
 
-page -j "[]" $mode new-pin "random 1" button \
+page -e $mode new-pin "random 1" button \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4"
 
 # --- New device, confirm -----------------------------------------------------
 
-page -j "[]" $mode new-confirm "random 1" button \
+page -e $mode new-confirm "random 1" button \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R"
 
 # --- New device, confirmed ---------------------------------------------------
 
-page -j "[]" $mode new-confirmed "random 1" button \
+page -e $mode new-confirmed "random 1" button \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R"
 
 # --- New device, enter -------------------------------------------------------
 
-page -j "[]" $mode new-enter "random 1" button \
+page -e $mode new-enter "random 1" button \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
     "$ENTRY_5"
 
 # --- New device, mismatch ---------------------------------------------------
 
-page -j "[]" $mode new-mismatch "random 1" button \
+page -e $mode new-mismatch "random 1" button \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
     "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_R"
 
 # --- New device, repeat ---------------------------------------------------
 
-page -j "[]" $mode new-repeat "random 1" button \
+page -e $mode new-repeat "random 1" button \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
     "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_R" \
     "$ENTRY_5"

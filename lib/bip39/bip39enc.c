@@ -1,5 +1,5 @@
 /*
- * bip39.c - BIP39 (Mnemonic Code) encoding and decoding
+ * bip39enc.c - BIP39 (Mnemonic Code) encoding
  *
  * This work is licensed under the terms of the MIT License.
  * A copy of the license can be found in the file LICENSE.MIT
@@ -11,7 +11,7 @@
 
 #include "util.h"
 #include "sha.h"
-#include "bip39.h"
+#include "bip39enc.h"
 
 
 #define	BITS	11
@@ -22,7 +22,7 @@ static const char *words[] = {
 };
 
 
-void bip39_words(struct bip39 *b, const uint8_t *data, unsigned bytes)
+void bip39_words(struct bip39enc *b, const uint8_t *data, unsigned bytes)
 {
 	uint8_t tmp[SHA256_HASH_BYTES];
 
@@ -37,8 +37,7 @@ void bip39_words(struct bip39 *b, const uint8_t *data, unsigned bytes)
 }
 
 
-#include <stdio.h>
-const char *bip39_next_word(struct bip39 *b)
+const char *bip39_next_word(struct bip39enc *b)
 {
 	uint16_t buf = 0;
 	unsigned got = 0;

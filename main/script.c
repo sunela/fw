@@ -18,7 +18,7 @@
 #include "rnd.h"
 #include "timer.h"
 #include "sha.h"
-#include "bip39.h"
+#include "bip39enc.h"
 #include "block.h"
 #include "secrets.h"
 #include "dbcrypt.h"
@@ -299,7 +299,7 @@ static void rmt(const char *s)
 
 static bool bip39(const char *arg)
 {
-	struct bip39 bip;
+	struct bip39enc bip;
 	uint8_t buf[(strlen(arg) + 1) / 2 + 1];
 	unsigned n;
 

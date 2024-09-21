@@ -11,7 +11,7 @@
 #include "fmt.h"
 #include "pin.h"
 #include "gfx.h"
-#include "bip39.h"
+#include "bip39enc.h"
 #include "secrets.h"
 #include "wi_list.h"
 #include "style.h"
@@ -106,7 +106,7 @@ static void ui_show_master_open(void *ctx, void *params)
 static void ui_show_master_2_open(void *ctx, void *params)
 {
 	struct ui_show_master_ctx *c = ctx;
-	struct bip39 bip;
+	struct bip39enc bip;
 	unsigned n = 0;
 
 	lists[0] = &c->list;

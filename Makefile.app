@@ -99,7 +99,7 @@ citrine.inc:    citrine.jpg scripts/pnmtorgb.pl
 sin.inc:	mksintab.pl
 		$(BUILD) perl $< >$@ || { rm -f $@; exit 1; }
 
-bip39.c:	lib/bip39/english.inc
+lib/bip39/bip39.c: lib/bip39/english.inc
 
 lib/bip39/english.inc: lib/bip39/english.txt Makefile
 		sed 's/.*/"&",/' <$< > $@ || { rm -f $@; exit 1; }

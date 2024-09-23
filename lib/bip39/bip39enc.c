@@ -13,9 +13,6 @@
 #include "bip39enc.h"
 
 
-#define	BITS	11
-
-
 const char *bip39_words[] = {
 #include "english.inc"
 };
@@ -45,10 +42,10 @@ int bip39_next_word(struct bip39enc *b)
 	if (b->p == b->end)
 		return -1;
 //printf("pos %u %p\n", b->pos, b->p);
-	assert(ARRAY_ENTRIES(bip39_words) == 1 << BITS);
-	while (got < BITS) {
+	assert(ARRAY_ENTRIES(bip39_words) == 1 << BIP39_WORD_BITS);
+	while (got < BIP39_WORD_BITS) {
 		unsigned left = 8 - (b->pos & 7);
-		unsigned want = BITS - got;
+		unsigned want = BIP39_WORD_BITS - got;
 		unsigned mask = (1 << want) - 1;
 
 //printf("\tbuf 0x%x pos %u got left %u %u want %u\n",
@@ -75,7 +72,7 @@ int bip39_next_word(struct bip39enc *b)
 		b->pos += left;
 		got += left;
 	}
-	n = buf & ((1 << BITS) - 1);
+	n = buf & ((1 << BIP39_WORD_BITS) - 1);
 //printf("\t0x%x -> 0x%x\n", buf, n);
 	return n;
 }

@@ -20,6 +20,10 @@ struct bip39enc {
 };
 
 
+#define	BIP39_WORD_BITS		11
+#define	BIP39_WORDS		(1 << BIP39_WORD_BITS)
+
+
 extern const char *bip39_words[];
 
 

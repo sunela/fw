@@ -25,7 +25,7 @@ unsigned bip39_match(const char *s, uint16_t *matches, unsigned max_matches,
 	unsigned n_matches = 0;
 	unsigned i;
 
-	for (i = 0; i != 2048; i++) {
+	for (i = 0; i != BIP39_WORDS; i++) {
 		const char *w = bip39_words[i];
 		unsigned j = 0;
 		const char *t;

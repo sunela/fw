@@ -11,7 +11,8 @@
 #include <stdint.h>
 
 
-#define	BIP39_MAX_FINAL_CHOICES	4
+#define	BIP39_MAX_SETS		4	/* [AB] type of sets */
+#define	BIP39_MAX_FINAL_CHOICES	4	/* max. results after MAX_SETS inputs */
 
 
 extern const char *bip39_sets[10];

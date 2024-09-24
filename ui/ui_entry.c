@@ -45,6 +45,7 @@ struct ui_entry_ctx {
 		unsigned col;
 		unsigned row;
 	} down;
+	uint16_t last_enabled;
 };
 
 
@@ -161,6 +162,31 @@ static void draw_first(struct ui_entry_ctx *c, bool enabled)
 				draw_button(c, col, row, c->maps->first[n],
 				    enabled, 1);
 		}
+	c->last_enabled = enabled * ((1 << 11) - 1);
+}
+
+
+static bool draw_enabled_change(struct ui_entry_ctx *c, bool up)
+{
+	uint16_t set;
+	unsigned row, col;
+
+	if (!c->entry_ops->enabled_set)
+		return 0;
+	set = c->entry_ops->enabled_set(c->entry_user);
+	for (col = 0; col != 3; col++)
+		for (row = 0; row != 4; row++) {
+			int n = c->entry_ops->n(c->entry_user, col, row);
+
+			if (n < 0)
+				continue;
+			if (((c->last_enabled ^ set) >> n) & 1)
+				draw_button(c, col, row,
+				    c->maps->first[n],
+				    (set >> n) & 1, up);
+		}
+	c->last_enabled = set;
+	return 1;
 }
 
 
@@ -220,7 +246,11 @@ static bool button_is_enabled(struct ui_entry_ctx *c, int n)
 	case UI_ENTRY_RIGHT:
 		return *in->buf && ui_entry_valid(&c->input);
 	default:
-		return strlen(in->buf) < in->max_len;
+		if (strlen(in->buf) == in->max_len)
+			return 0;
+		if (c->entry_ops->enabled_set)
+			return (c->last_enabled >> n) & 1;
+		return 1;
 	}
 }
 
@@ -313,7 +343,8 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 		show_input(c);
 		if (!*in->buf || !ui_entry_valid(&c->input))
 			draw_button(c, 2, 0, NULL, 0, 0);
-		if (end - in->buf == (int) in->max_len)
+		if (!draw_enabled_change(c, 1) &&
+		    end - in->buf == (int) in->max_len)
 			draw_first(c, 1);
 		ui_update_display();
 		return;
@@ -327,11 +358,15 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 		char ch;
 		int valid;
 
-		if (c->second) {
-			timer_cancel(&c->t_button);
-			ch = c->second[n];
+		if (c->entry_ops->key_char) {
+			ch = c->entry_ops->key_char(c->entry_user, n);
 		} else {
-			ch = *c->maps->first[n];
+			if (c->second) {
+				timer_cancel(&c->t_button);
+				ch = c->second[n];
+			} else {
+				ch = *c->maps->first[n];
+			}
 		}
 		end[0] = ch;
 		end[1] = 0;
@@ -344,13 +379,17 @@ static void ui_entry_tap(void *ctx, unsigned x, unsigned y)
 			draw_button(c, 0, 0, NULL, 1, 1);
 			draw_button(c, 2, 0, NULL, valid > 0, 1);
 		}
-		draw_first(c, strlen(in->buf) != in->max_len);
+		if (!draw_enabled_change(c, 1))
+			draw_first(c, strlen(in->buf) != in->max_len);
 	} else {
 		timer_cancel(&c->t_button);
 		c->second = c->maps->second[n];
 		draw_second(c, c->second);
 	}
-	ui_update_display();
+	if (c->entry_ops->accept && c->entry_ops->accept(c->entry_user))
+		ui_return();
+	else
+		ui_update_display();
 }
 
 
@@ -389,6 +428,7 @@ static void ui_entry_open(void *ctx, void *params)
 	c->style = prm->style ? prm->style : &ui_entry_default_style;
 	c->maps = prm->maps ? prm->maps : &ui_entry_text_maps;
 	c->second = NULL;
+	c->last_enabled = 0;
 
 	if (prm->entry_ops) {
 		c->entry_ops = prm->entry_ops;

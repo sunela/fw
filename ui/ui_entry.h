@@ -94,6 +94,28 @@ struct ui_entry_ops {
 	void (*button)(void *user, unsigned col, unsigned row,
 	    const char *label, bool second, bool enabled, bool up);
 	void (*clear_pad)(void *user);
+
+	/* --- Specialized customization ----------------------------------- */
+
+	/*
+	 * Normally, which character add to the input when a given key is
+	 * pressed is determined by the maps. By setting key_char, translating
+	 * key positions to characters is delegated to the caller. (E.g., for
+	 * BIP39, where keys correspong to character sets.)
+	 */
+	char (*key_char)(void *user, unsigned n);
+	/*
+	 * If enabled_set is set, it provides fine-grained control over when
+	 * buttons are enabled. It returns a bit set of the buttons enabled at
+	 * the current input.
+	 */
+	uint16_t (*enabled_set)(void *user);
+	/*
+	 * If "accept" is not NULL, it is called each time the input has grown.
+	 * If it returns "true", the input is accepted immediately, without
+	 * further user input.
+	 */
+	bool (*accept)(void *user);
 };
 
 struct ui_entry_params {

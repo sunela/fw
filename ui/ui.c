@@ -26,7 +26,7 @@
 
 #define	CROSSHAIR	0
 
-#define	UI_STACK_SIZE	5
+#define	UI_STACK_SIZE	10
 #define	UI_TIMERS	3
 
 
@@ -452,7 +452,7 @@ void ui_call(const struct ui *ui, void *params)
 	    sp + 1, ui->name, ui);
 	if (current_ui() && current_ui()->close)
 		current_ui()->close(current_ctx());
-	assert(sp < UI_STACK_SIZE);
+	assert(sp <= UI_STACK_SIZE);
 	gfx_clear(&main_da, GFX_BLACK);
 	sp++;
 	stack[sp].ui = ui;

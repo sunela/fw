@@ -337,15 +337,13 @@ static bool do_bip39_enc(const char *arg)
 
 static void do_bip39_match(const char *arg)
 {
-	uint16_t matches[BIP39_MAX_FINAL_CHOICES];
 	char next[10 + 1];
 	unsigned n, i;
 
-	n = bip39_match(arg, matches, BIP39_MAX_FINAL_CHOICES,
-	    next, sizeof(next));
+	n = bip39_match(arg, next, sizeof(next));
 	printf("%u", n);
 	for (i = 0; i != n && i != BIP39_MAX_FINAL_CHOICES; i++)
-		printf("%s %s", i ? "" : ":", bip39_words[matches[i]]);
+		printf("%s %s", i ? "" : ":", bip39_words[bip39_matches[i]]);
 	printf("\n");
 	printf("Next \"%s\"\n", next);
 }

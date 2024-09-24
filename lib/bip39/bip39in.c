@@ -10,16 +10,17 @@
 #include <string.h>
 #include <assert.h>
 
+#include "hal.h"
 #include "bip39enc.h"
 #include "bip39in.h"
 
 
+PSRAM_NOINIT uint16_t bip39_matches[BIP39_WORDS];
 const char *bip39_sets[10] = {
 	"ab", "cd", "ef", "ghi", "jklm", "nop", "qr", "s", "tu", "vwxyz" };
 
 
-unsigned bip39_match(const char *s, uint16_t *matches, unsigned max_matches,
-    char *next, unsigned next_size)
+unsigned bip39_match(const char *s, char *next, unsigned next_size)
 {
 	bool next_set[10] = { 0, };
 	unsigned n_matches = 0;
@@ -31,6 +32,7 @@ unsigned bip39_match(const char *s, uint16_t *matches, unsigned max_matches,
 		const char *t;
 
 		for (t = s; *t; t++) {
+			assert(*t >= '0' && *t <= '9');
 			if (!w[j])
 				break;
 			if (!strchr(bip39_sets[*t - '0'], w[j]))
@@ -39,10 +41,9 @@ unsigned bip39_match(const char *s, uint16_t *matches, unsigned max_matches,
 		}
 		if (*t)
 			continue;
-		if (n_matches < max_matches)
-			matches[n_matches] = i;
+		bip39_matches[n_matches] = i;
 		n_matches++;
-		if (w[j]) {
+		if (next && w[j]) {
 			unsigned k;
 
 			for (k = 0; k != 10; k++)
@@ -53,15 +54,18 @@ unsigned bip39_match(const char *s, uint16_t *matches, unsigned max_matches,
 		}
 	}
 
-	char *p;
+	if (next) {
+		char *p;
 
-	p = next;
-	for (i = 0; i != 10; i++)
-		if (next_set[i]) {
-			assert(p + 1 <= next + next_size);
-			*p++ = '0' + i;
-		}
-	assert(p + 1 <= next + next_size);
-	*p = 0;
+		p = next;
+		for (i = 0; i != 10; i++)
+			if (next_set[i]) {
+				assert(p + 1 <= next + next_size);
+				*p++ = '0' + i;
+			}
+		assert(p + 1 <= next + next_size);
+		*p = 0;
+	}
+
 	return n_matches;
 }

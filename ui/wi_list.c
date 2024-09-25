@@ -83,9 +83,8 @@ static const struct font *list_font(const struct wi_list *list)
 struct wi_list_entry *wi_list_pick(const struct wi_list *list,
     unsigned x, unsigned y)
 {
-	const struct wi_list_style *style = list->style;
 	struct wi_list_entry *e;
-	int pos = style->y0 - list->up;
+	int pos = list->y0 - list->up;
 
 	if ((int) y < pos)
 		return NULL;
@@ -110,17 +109,17 @@ void *wi_list_user(const struct wi_list_entry *entry)
 /* --- Shared clipping function -------------------------------------------- */
 
 
-static void clip_bb(struct gfx_drawable *da, const struct wi_list_style *style,
+static void clip_bb(struct gfx_drawable *da, const struct wi_list *list,
     const struct gfx_rect *bb)
 {
 	struct gfx_rect clip = *bb;
 
-	if (clip.y < (int) style->y0) {
-		clip.h -= style->y0 - clip.y;
-		clip.y = style->y0;
+	if (clip.y < (int) list->y0) {
+		clip.h -= list->y0 - clip.y;
+		clip.y = list->y0;
 	}
-	if (clip.y + clip.h > (int) style->y1 + 1)
-		clip.h = style->y1 + 1 - clip.y;
+	if (clip.y + clip.h > (int) list->style->y1 + 1)
+		clip.h = list->style->y1 + 1 - clip.y;
 	gfx_clip(da, &clip);
 }
 
@@ -132,11 +131,10 @@ void wi_list_render_entry(struct wi_list *list, struct wi_list_entry *entry)
 {
 	struct gfx_rect bb = {
 		.x = 0,
-		.y = list->style->y0 - list->up,
+		.y = list->y0 - list->up,
 		.w = GFX_WIDTH,
 		.h = entry_height(list, entry),
 	};
-	const struct wi_list_style *style = list->style;
 	const struct wi_list_entry_style *entry_style = entry->style;
 	const struct wi_list_entry *e;
 	bool odd = 0;
@@ -152,7 +150,7 @@ void wi_list_render_entry(struct wi_list *list, struct wi_list_entry *entry)
 		bb.y += es->min_h < h ? h : es->min_h;
 		odd = !odd;
 	}
-	clip_bb(&main_da, style, &bb);
+	clip_bb(&main_da, list, &bb);
 	entry_style->render(list, entry, &main_da, &bb, odd);
 	gfx_clip(&main_da, NULL);
 }
@@ -188,10 +186,9 @@ static void do_draw_entry(const struct wi_list *list,
     const struct wi_list_entry *e, struct gfx_drawable *da,
     const struct gfx_rect *bb, unsigned y, bool odd)
 {
-	const struct wi_list_style *style = list->style;
 	const struct wi_list_entry_style *entry_style = e->style;
 
-	clip_bb(da, style, bb);
+	clip_bb(da, list, bb);
 	gfx_rect(da, bb, entry_style->bg[odd]);
 	text_text(da, 0, y + opad(list, e), e->first, list_font(list),
 	    GFX_LEFT, GFX_TOP | GFX_MAX, entry_style->fg[odd]);
@@ -219,13 +216,13 @@ static unsigned draw_entry(const struct wi_list *list,
 		y += (entry_style->min_h - h) / 2;
 		bb.h = entry_style->min_h;
 	}
-	assert((unsigned) bb.h <= style->y1 - style->y0 + 1);
+	assert((unsigned) bb.h <= style->y1 - list->y0 + 1);
 
-	if (top + (int) bb.h <= (int) style->y0)
+	if (top + (int) bb.h <= (int) list->y0)
 		return bb.h;
 	if (top > (int) style->y1)
 		return bb.h;
-	if (top >= (int) style->y0 && top + (int) bb.h - 1 <= (int) style->y1) {
+	if (top >= (int) list->y0 && top + (int) bb.h - 1 <= (int) style->y1) {
 		do_draw_entry(list, e, da, &bb, y, odd);
 		return bb.h;
 	}
@@ -239,7 +236,7 @@ static unsigned draw_list(struct wi_list *list)
 {
 	const struct wi_list_style *style = list->style;
 	const struct wi_list_entry *e;
-	unsigned y = style->y0;
+	unsigned y = list->y0;
 	unsigned i = 0;
 
 //debug("  up %u\n", list->up);
@@ -257,7 +254,7 @@ static unsigned draw_list(struct wi_list *list)
 	if (ys >= 0 && ys <= (int) style->y1)
 		gfx_rect_xy(&main_da, 0, ys, GFX_WIDTH, style->y1 - ys + 1,
 		    GFX_BLACK);
-	return y - style->y0;
+	return y - list->y0;
 }
 
 
@@ -270,7 +267,7 @@ bool list_scroll(struct wi_list *list, int dy)
 
 #if 0
 debug("scrolling %u up %u scroll_from %u dy %d y0 %u y1 %u th %u\n",
-    list->scrolling, list->up, list->scroll_from, dy, style->y0, style->y1,
+    list->scrolling, list->up, list->scroll_from, dy, list->y0, style->y1,
     list->total_height);
 #endif
 	if (dy > 0) {
@@ -279,7 +276,7 @@ debug("scrolling %u up %u scroll_from %u dy %d y0 %u y1 %u th %u\n",
 	} else {
 		unsigned visible_h =
 		    list->total_height + OVER_SCROLL - list->up;
-		unsigned win_h = style->y1 - style->y0 + 1;
+		unsigned win_h = style->y1 - list->y0 + 1;
 
 		if (visible_h < win_h)
 			return 0;
@@ -300,7 +297,7 @@ bool wi_list_moving(struct wi_list *list, unsigned from_x, unsigned from_y,
 {
 	const struct wi_list_style *style = list->style;
 
-	if (from_y < style->y0 || from_y > style->y1)
+	if (from_y < list->y0 || from_y > style->y1)
 		return 0;
 	if (!list->scrolling) {
 		list->scroll_from = list->up;
@@ -341,6 +338,16 @@ debug("wi_list_cancel\n");
 }
 
 
+/* --- Relocate list (e.g., for vertical centering) ------------------------ */
+
+
+void wi_list_y0(struct wi_list *list, unsigned y0)
+{
+	list->y0 = y0;
+	draw_list(list);
+}
+
+
 /* --- List construction, update, destruction ------------------------------ */
 
 
@@ -349,6 +356,7 @@ void wi_list_begin(struct wi_list *list, const struct wi_list_style *style)
 	struct text_query q;
 
 	list->style = style;
+	list->y0 = style->y0;
 
 	text_query(0, 0, "", list_font(list),
 	    GFX_TOP | GFX_MAX, GFX_TOP | GFX_MAX, &q);
@@ -383,13 +391,12 @@ struct wi_list_entry *wi_list_add(struct wi_list *list,
 void wi_list_update_entry(struct wi_list *list, struct wi_list_entry *entry,
     const char *first, const char *second, void *user)
 {
-	const struct wi_list_style *style = list->style;
 	bool changed = (first ? !entry->first || strcmp(first, entry->first) :
 	    !!entry->first) ||
 	    (second ? !entry->second || strcmp(second, entry->second) :
 	    !!entry->second);
 	const struct wi_list_entry *e;
-	unsigned y = style->y0 - list->up;
+	unsigned y = list->y0 - list->up;
 	int odd = 0;
 
 	entry->user = user;
@@ -419,9 +426,10 @@ void wi_list_entry_style(struct wi_list *list, struct wi_list_entry *entry,
 }
 
 
-void wi_list_end(struct wi_list *list)
+unsigned wi_list_end(struct wi_list *list)
 {
 	list->total_height = draw_list(list);
+	return list->total_height;
 }
 
 

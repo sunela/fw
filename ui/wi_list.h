@@ -39,6 +39,7 @@ struct wi_list {
 	struct wi_list_entry	*list;
 	struct wi_list_entry	**anchor;
 	const struct wi_list_style *style;
+	unsigned		y0; /* defaults to style->y0 */
 	unsigned		text_height;
 	unsigned		total_height;	/* set by wi_list_end */
 	unsigned		up;		/* distance scrolled up */
@@ -74,6 +75,8 @@ bool wi_list_to(struct wi_list *list, unsigned from_x, unsigned from_y,
     unsigned to_x, unsigned to_y, enum ui_swipe swipe);
 void wi_list_cancel(struct wi_list *list);
 
+void wi_list_y0(struct wi_list *list, unsigned y0);
+
 void wi_list_begin(struct wi_list *ctx, const struct wi_list_style *style);
 struct wi_list_entry *wi_list_add(struct wi_list *ctx,
     const char *first, const char *second, void *user);
@@ -81,7 +84,7 @@ void wi_list_update_entry(struct wi_list *list, struct wi_list_entry *entry,
     const char *first, const char *second, void *user);
 void wi_list_entry_style(struct wi_list *list, struct wi_list_entry *entry,
     const struct wi_list_entry_style *style);
-void wi_list_end(struct wi_list *ctx);
+unsigned wi_list_end(struct wi_list *ctx);
 
 void wi_list_destroy(struct wi_list *ctx);
 

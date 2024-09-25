@@ -42,11 +42,13 @@ static const struct wi_list_style style = {
 
 
 static struct wi_list *lists[1];
+
 static const struct ui_events ui_show_master_2_events = {
 	.touch_to       = swipe_back,
 	.lists		= lists,
 	.n_lists	= 1,
 };
+
 static const struct ui ui_show_master_2 = {
 	.name		= "show master 2",
 	.ctx_size	= sizeof(struct ui_show_master_ctx),

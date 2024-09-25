@@ -32,6 +32,7 @@
 				   down and verify the secret; add margin */
 #define	IDLE_PUBKEY_S	400	/* measured to need about 3 minutes to write
 				   down and verify; add margin */
+#define	IDLE_SECRET_S	60	/* no rush, the system is somewhat complex */
 #define	MAX_INPUT_LEN	32	/* for ui_entry */
 
 
@@ -112,6 +113,8 @@ extern const struct ui ui_new;
 extern const struct ui ui_choices;
 extern const struct ui ui_show_master;
 extern const struct ui ui_show_pubkey;
+extern const struct ui ui_set_master;
+extern const struct ui ui_bip39;
 
 void swipe_back(void *ctx, unsigned from_x, unsigned from_y,
     unsigned to_x, unsigned to_y, enum ui_swipe swipe);

@@ -837,6 +837,129 @@ accounts $mode setup-master-show "long 201 23" "tap 152 141" "tap 81 168" \
     "master scramble" "tap 129 119" \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R"
 
+# --- set master, PIN ---------------------------------------------------------
+
+set_master()
+{
+	local opts=
+
+	while [ "$1" ]; do
+		case "$1" in
+		-j)	opts="$opts -j $2"
+			shift 2;;
+		*)	break;;
+		esac
+	done
+
+	local mode=$1
+	local name=$2
+	shift 2
+
+	page $opts $mode $name \
+	    "random 1" button "$PIN_1" "$PIN_2" "$PIN_3" "$PIN_4" "$PIN_NEXT" \
+	    "long 201 23" "tap 152 141" "tap 81 168" "tap 71 172" "$@"
+}
+
+set_master $mode sm-pin
+
+# --- set-master, 1st ---------------------------------------------------------
+
+sm()
+{
+	local opts=
+
+	while [ "$1" ]; do
+		case "$1" in
+		-j)	opts="$opts -j $2"
+			shift 2;;
+		*)	break;;
+		esac
+	done
+
+	local mode=$1
+	local name=$2
+	shift 2
+
+	set_master $opts $mode $name \
+	    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" "$@"
+}
+
+
+sm $mode sm-1
+
+# --- set-master, 1st, "p" ----------------------------------------------------
+
+sm $mode sm-1-p "$ENTRY_6"
+
+# --- set-master, 1st, "pa" --------------------------------------------------
+
+sm $mode sm-1-pa "$ENTRY_6" "$ENTRY_1"
+
+# --- set-master, 1st, "pad" --------------------------------------------------
+
+sm $mode sm-1-pad "$ENTRY_6" "$ENTRY_1" "$ENTRY_2"
+
+# --- set-master, 1st, "padd" -------------------------------------------------
+
+sm $mode sm-1-padd "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2"
+
+# --- set-master, 2nd ---------------------------------------------------------
+
+FIRST="tap 70 139"
+
+sm $mode sm-2 "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST"
+
+# --- set-master, 2nd, "p" ----------------------------------------------------
+
+FIRST="tap 70 139"
+
+sm $mode sm-2-p "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
+    "$ENTRY_6"
+
+# --- set-master, 2nd, "pi" ---------------------------------------------------
+
+sm $mode sm-2-pi "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
+    "$ENTRY_6" "$ENTRY_4"
+
+# --- set-master, 2nd, "pig" ---------------------------------------------------
+
+sm $mode sm-2-pig "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
+    "$ENTRY_6" "$ENTRY_4" "$ENTRY_4"
+
+# --- set-master, 2nd, "pig", accept ------------------------------------------
+
+sm $mode sm-2-pig-accept "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
+    "$ENTRY_6" "$ENTRY_4" "$ENTRY_4" "$ENTRY_R"
+
+# --- set-master, 3nd ---------------------------------------------------------
+
+sm $mode sm-3 "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
+    "$ENTRY_6" "$ENTRY_4" "$ENTRY_4" "$ENTRY_R" "$FIRST"
+
+# --- set-master, 3nd, "s" ----------------------------------------------------
+
+sm $mode sm-3-s "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
+    "$ENTRY_6" "$ENTRY_4" "$ENTRY_4" "$ENTRY_R" "$FIRST" \
+    "$ENTRY_8"
+
+# --- set-master, 3nd, "sh" ---------------------------------------------------
+
+sm $mode sm-3-sh "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
+    "$ENTRY_6" "$ENTRY_4" "$ENTRY_4" "$ENTRY_R" "$FIRST" \
+    "$ENTRY_8" "$ENTRY_4"
+
+# --- set-master, 3nd, "shi" --------------------------------------------------
+
+sm $mode sm-3-shi "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
+    "$ENTRY_6" "$ENTRY_4" "$ENTRY_4" "$ENTRY_R" "$FIRST" \
+    "$ENTRY_8" "$ENTRY_4" "$ENTRY_4"
+
+# --- set-master, 3nd, "ship" -------------------------------------------------
+
+sm $mode sm-3-ship "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
+    "$ENTRY_6" "$ENTRY_4" "$ENTRY_4" "$ENTRY_R" "$FIRST" \
+    "$ENTRY_8" "$ENTRY_4" "$ENTRY_4" "$ENTRY_6"
+
 # -----------------------------------------------------------------------------
 
 if [ "$select" ] && ! $found; then

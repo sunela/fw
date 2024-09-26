@@ -394,7 +394,7 @@ static void do_bip39_match(const char *arg)
 
 	n = bip39_match(arg, next, sizeof(next));
 	printf("%u", n);
-	for (i = 0; i != n && i != BIP39_MAX_FINAL_CHOICES; i++)
+	for (i = 0; i != n && i != n; i++)
 		printf("%s %s", i ? "" : ":", bip39_words[bip39_matches[i]]);
 	printf("\n");
 	printf("Next \"%s\"\n", next);

@@ -147,6 +147,18 @@ add()
 }
 
 
+save()
+{
+	saved_args=$last_args
+}
+
+
+restore()
+{
+	last_args=$saved_args
+}
+
+
 usage()
 {
 	cat <<EOF 1>&2
@@ -962,6 +974,11 @@ add sm-21-unfair "$FIRST" "$ENTRY_9" "$ENTRY_6" "$ENTRY_3" "$ENTRY_1"
 add sm-22-unfold "$FIRST" "$ENTRY_9" "$ENTRY_6" "$ENTRY_3" "$ENTRY_6"
 add sm-23-merit "$FIRST" "$ENTRY_5" "$ENTRY_3" "$ENTRY_7" "$ENTRY_4"
 add sm-24-almost "$SECOND" "$ENTRY_1" "$ENTRY_5" "$ENTRY_5" "$ENTRY_6"
+
+save
+add sm-24-fail "$FIRST"
+restore
+
 add sm-24-done "$SECOND"
 
 # bip39 decode paddle pig ship cat sword duck way wave abandon cluster effort giggle mammal oppose rural squeeze turtle wrong orient toe unfair unfold merit almost

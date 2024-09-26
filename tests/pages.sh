@@ -55,9 +55,8 @@ page_inner()
 		esac
 	done
 
-	local mode=$1
-	local name=$2
-	shift 2
+	local name=$1
+	shift
 
 	if [ "$mode" = names ]; then
 		$title && echo $name
@@ -199,7 +198,7 @@ rm -f "$dir/_db"
 
 # --- on ----------------------------------------------------------------------
 
-page $mode on "random 1" button
+page on "random 1" button
 
 # --- pin ---------------------------------------------------------------------
 
@@ -209,23 +208,23 @@ PIN_3="tap 130 252"
 PIN_4="tap 125 135"
 PIN_NEXT="tap 191 252"
 
-page $mode pin "random 1" button "$PIN_1" "$PIN_2" "$PIN_3" "$PIN_4"
+page pin "random 1" button "$PIN_1" "$PIN_2" "$PIN_3" "$PIN_4"
 
 # --- bad pin (once) ----------------------------------------------------------
 
-page $mode pin-bad1 "random 1" button \
+page pin-bad1 "random 1" button \
     "$PIN_2" "$PIN_2" "$PIN_3" "$PIN_4" "$PIN_NEXT"
 
 # --- bad pin (thrice) --------------------------------------------------------
 
-page $mode pin-bad3 "random 3" button \
+page pin-bad3 "random 3" button \
     "$PIN_2" "$PIN_2" "$PIN_3" "$PIN_4" "$PIN_NEXT" \
     "$PIN_2" "$PIN_2" "$PIN_3" "$PIN_4" "$PIN_NEXT" \
     "$PIN_2" "$PIN_2" "$PIN_3" "$PIN_4" "$PIN_NEXT"
 
 # --- four seconds into cooldown  ---------------------------------------------
 
-page $mode cool-4s "random 3" button \
+page cool-4s "random 3" button \
     "$PIN_2" "$PIN_2" "$PIN_3" "$PIN_4" "$PIN_NEXT" \
     "$PIN_2" "$PIN_2" "$PIN_3" "$PIN_4" "$PIN_NEXT" \
     "$PIN_2" "$PIN_2" "$PIN_3" "$PIN_4" "$PIN_NEXT" \
@@ -245,33 +244,32 @@ accounts()
 		esac
 	done
 
-	local mode=$1
-	local name=$2
-	shift 2
+	local name=$1
+	shift
 
-	page $opts $mode $name \
+	page $opts $name \
 	    "random 1" button "$PIN_1" "$PIN_2" "$PIN_3" "$PIN_4" \
 	    "$PIN_NEXT" "$@"
 }
 
 
-accounts $mode accounts
+accounts accounts
 
 # --- accounts scrolled up ----------------------------------------------------
 
-accounts $mode accounts-up "drag 158 243 159 180"
+accounts accounts-up "drag 158 243 159 180"
 
 # --- account (demo)-----------------------------------------------------------
 
-accounts $mode account-demo "tap 86 67"
+accounts account-demo "tap 86 67"
 
 # --- account (HOTP hidden) ---------------------------------------------------
 
-accounts $mode account-hotp "drag 158 243 159 196" "tap 50 221"
+accounts account-hotp "drag 158 243 159 196" "tap 50 221"
 
 # --- account (HOTP revealed)--------------------------------------------------
 
-accounts $mode account-hotp-reveal \
+accounts account-hotp-reveal \
     "drag 158 243 159 196" "tap 50 221" "tap 38 80"
 
 # --- account (TOTP)-----------------------------------------------------------
@@ -280,20 +278,20 @@ accounts $mode account-hotp-reveal \
 # UTC 2024-05-21 06:26:09
 # Code 605617
 
-accounts $mode account-totp \
+accounts account-totp \
     "time 1716272769" "drag 158 243 159 180" "tap 41 241" tick
 
 # --- accounts overlay (top) --------------------------------------------------
 
-accounts $mode accounts-over-top "long 201 23"
+accounts accounts-over-top "long 201 23"
 
 # --- accounts overlay (demo) --------------------------------------------------
 
-accounts $mode accounts-over-demo "long 45 69"
+accounts accounts-over-demo "long 45 69"
 
 # ---  account overlay (demo) --------------------------------------------------
 
-accounts $mode account-demo-top-over "tap 86 67" "long 201 23"
+accounts account-demo-top-over "tap 86 67" "long 201 23"
 
 # ---  accounts overlay add (demo) ---------------------------------------------
 
@@ -302,42 +300,42 @@ ACCOUNTS_MOVE="tap 120 168"
 ACCOUNTS_CANCEL_MOVE="tap 193 177"
 ACCOUNTS_REMOTE="tap 181 109"
 
-accounts $mode accounts-demo-add "long 45 69" "$ACCOUNTS_ADD"
+accounts accounts-demo-add "long 45 69" "$ACCOUNTS_ADD"
 
 # ---  accounts overlay add M, level 1 (demo) ---------------------------------
 
-accounts $mode accounts-demo-add-m1 "long 45 69" "$ACCOUNTS_ADD" "tap 200 136"
+accounts accounts-demo-add-m1 "long 45 69" "$ACCOUNTS_ADD" "tap 200 136"
 
 # ---  accounts overlay add M, level 2 (demo) ---------------------------------
 
-accounts $mode accounts-demo-add-m2 "long 45 69" "$ACCOUNTS_ADD" \
+accounts accounts-demo-add-m2 "long 45 69" "$ACCOUNTS_ADD" \
     "tap 200 136" "tap 42 81"
 
 # ---  accounts overlay add Me ------------------------------------------------
 
-accounts $mode accounts-demo-add-me "long 45 69" "$ACCOUNTS_ADD" \
+accounts accounts-demo-add-me "long 45 69" "$ACCOUNTS_ADD" \
     "tap 200 136" "tap 42 81" "tap 194 83" "tap 119 137"
 
 # ---  accounts added Me ------------------------------------------------------
 
-accounts $mode accounts-demo-added-me "long 45 69" "$ACCOUNTS_ADD" \
+accounts accounts-demo-added-me "long 45 69" "$ACCOUNTS_ADD" \
     "tap 200 136" "tap 42 81" "tap 194 83" "tap 119 137" "tap 201 247"
 
 # ---  account Me -------------------------------------------------------------
 
-accounts $mode account-me "long 45 69" "$ACCOUNTS_ADD" \
+accounts account-me "long 45 69" "$ACCOUNTS_ADD" \
     "tap 200 136" "tap 42 81" "tap 194 83" "tap 119 137" "tap 201 247" \
     "tap 23 68"
 
 # ---  account Me: fields list ------------------------------------------------
 
-accounts $mode account-me-fields "long 45 69" "$ACCOUNTS_ADD" \
+accounts account-me-fields "long 45 69" "$ACCOUNTS_ADD" \
     "tap 200 136" "tap 42 81" "tap 194 83" "tap 119 137" "tap 201 247" \
     "tap 23 68" "tap 119 165"
 
 # ---  account Me: enter Password ---------------------------------------------
 
-accounts $mode account-me-pw "long 45 69" "$ACCOUNTS_ADD" \
+accounts account-me-pw "long 45 69" "$ACCOUNTS_ADD" \
     "tap 200 136" "tap 42 81" "tap 194 83" "tap 119 137" "tap 201 247" \
     "tap 23 68" "tap 119 165" "tap 71 167"
 
@@ -356,7 +354,7 @@ ENTRY_L="tap 43 245"
 ENTRY_0="tap 119 245"
 ENTRY_R="tap 200 245"
 
-accounts $mode account-me-pw-secret "long 45 69" "$ACCOUNTS_ADD" \
+accounts account-me-pw-secret "long 45 69" "$ACCOUNTS_ADD" \
     "tap 200 136" "tap 42 81" "tap 194 83" "tap 119 137" "tap 201 247" \
     "tap 23 68" "tap 119 165" "tap 71 167" \
     "$ENTRY_7" "$ENTRY_7" "$ENTRY_3" "$ENTRY_5" "$ENTRY_2" "$ENTRY_6" \
@@ -364,7 +362,7 @@ accounts $mode account-me-pw-secret "long 45 69" "$ACCOUNTS_ADD" \
 
 # ---  account Me: password added ---------------------------------------------
 
-accounts $mode account-me-pw-added "long 45 69" "$ACCOUNTS_ADD" \
+accounts account-me-pw-added "long 45 69" "$ACCOUNTS_ADD" \
     "tap 200 136" "tap 42 81" "tap 194 83" "tap 119 137" "tap 201 247" \
     "tap 23 68" "tap 119 165" "tap 71 167" \
     "$ENTRY_7" "$ENTRY_7" "$ENTRY_3" "$ENTRY_5" "$ENTRY_2" "$ENTRY_6" \
@@ -373,77 +371,77 @@ accounts $mode account-me-pw-added "long 45 69" "$ACCOUNTS_ADD" \
 
 # --- setup -------------------------------------------------------------------
 
-accounts $mode setup "long 201 23" "tap 152 141"
+accounts setup "long 201 23" "tap 152 141"
 
 # --- setup time --------------------------------------------------------------
 
-accounts $mode setup-time "time 1716272769" \
+accounts setup-time "time 1716272769" \
     "long 201 23" "tap 152 141" "tap 93 119"
 
 # --- setup storage -----------------------------------------------------------
 
-accounts $mode setup-storage "long 201 23" "tap 152 141" "tap 81 214"
+accounts setup-storage "long 201 23" "tap 152 141" "tap 81 214"
 
 # --- delete account (swipe not started) --------------------------------------
 
-accounts $mode account-demo-top-delete "tap 86 67" "long 201 23" \
+accounts account-demo-top-delete "tap 86 67" "long 201 23" \
     "tap 193 142"
 
 # --- delete account (yellow) -------------------------------------------------
 
-accounts $mode account-demo-top-delete-yellow "tap 86 67" "long 201 23" \
+accounts account-demo-top-delete-yellow "tap 86 67" "long 201 23" \
     "tap 193 142" "down 53 189" "move 116 200"
 
 # --- delete account (green) --------------------------------------------------
 
-accounts $mode account-demo-top-delete-green "tap 86 67" "long 201 23" \
+accounts account-demo-top-delete-green "tap 86 67" "long 201 23" \
     "tap 193 142" "down 53 189" "move 180 200"
 
 # --- deleted account ---------------------------------------------------------
 
-accounts $mode account-demo-deleted "tap 86 67" "long 201 23" \
+accounts account-demo-deleted "tap 86 67" "long 201 23" \
     "tap 193 142" "drag 53 189 180 200"
 
 # --- delete account (red) ---------------------------------------------------
 
-accounts $mode account-demo-top-delete-red "tap 86 67" "long 201 23" \
+accounts account-demo-top-delete-red "tap 86 67" "long 201 23" \
     "tap 193 142" "down 53 189" "move 180 150"
 
 # --- account overlay (password field) ---------------------------------------
 
-accounts $mode account-demo-pw-over "tap 86 67" "long 199 119"
+accounts account-demo-pw-over "tap 86 67" "long 199 119"
 
 # --- delete field (swipe not started) ---------------------------------------
 
-accounts $mode account-demo-pw-delete "tap 86 67" "long 199 119" \
+accounts account-demo-pw-delete "tap 86 67" "long 199 119" \
     "tap 153 174"
 
 # --- deleted field  ----------------------------------------------------------
 
-accounts $mode account-demo-pw-deleted "tap 86 67" "long 199 119" \
+accounts account-demo-pw-deleted "tap 86 67" "long 199 119" \
     "tap 153 174" "drag 53 189 180 200"
 
 # --- account overlay (bottom) ------------------------------------------------
 
-accounts $mode account-demo-bottom-over "tap 86 67" "long 107 194"
+accounts account-demo-bottom-over "tap 86 67" "long 107 194"
 
 # --- account overlay (bottom) ------------------------------------------------
 
-accounts $mode account-demo-bottom-over "tap 86 67" "long 107 194"
+accounts account-demo-bottom-over "tap 86 67" "long 107 194"
 
 # --- account edit password (Geheimx) -----------------------------------------
 
 # Adding an "x" to "Geheim" makes the text too long for centering, but doesn't
 # yet require cutting any off-screen part.
 
-accounts $mode account-demo-pw-geheimx "tap 86 67" "long 199 119" \
+accounts account-demo-pw-geheimx "tap 86 67" "long 199 119" \
     "tap 88 172" "$ENTRY_9" "$ENTRY_5"
 
 # --- account show secret (HOTP) ----------------------------------------------
 
 # The secret is a long base32 string that gets cut off at the screen edge.
 
-accounts $mode account-hotp-secret "drag 158 243 159 196" "tap 50 221" \
+accounts account-hotp-secret "drag 158 243 159 196" "tap 50 221" \
     "long 75 66" "tap 91 173"
 
 # --- account with "comment" field --------------------------------------------
@@ -453,7 +451,7 @@ json <<EOF
     "comment":"comment" } ]
 EOF
 
-accounts $mode account-comment "tap 86 67"
+accounts account-comment "tap 86 67"
 
 # --- account with 2nd password field -----------------------------------------
 
@@ -461,7 +459,7 @@ json <<EOF
 [ { "id":"id", "user":"user", "email":"email", "pw":"pw", "pw2":"pw2" } ]
 EOF
 
-accounts $mode account-pw2 "tap 86 67"
+accounts account-pw2 "tap 86 67"
 
 # --- account with 2nd password and TOTP --------------------------------------
 
@@ -470,7 +468,7 @@ json <<EOF
     "totp_secret": "GZ4FORKTNBVFGQTFJJGEIRDOKY======" } ]
 EOF
 
-accounts $mode account-pw2-totp "time 0" "tap 86 67"
+accounts account-pw2-totp "time 0" "tap 86 67"
 
 # --- account with 2nd password and TOTP, scrolled up, at 5 s -----------------
 
@@ -479,7 +477,7 @@ json <<EOF
     "totp_secret": "GZ4FORKTNBVFGQTFJJGEIRDOKY======" } ]
 EOF
 
-accounts $mode account-pw2-totp-up-5 \
+accounts account-pw2-totp-up-5 \
     "time 5" "tap 86 67" "drag 158 243 159 196"
 
 # --- account with 2nd password and TOTP, scrolled up, at 20 s ----------------
@@ -489,7 +487,7 @@ json <<EOF
     "totp_secret": "GZ4FORKTNBVFGQTFJJGEIRDOKY======" } ]
 EOF
 
-accounts $mode account-pw2-totp-up-20 \
+accounts account-pw2-totp-up-20 \
     "time 20" "tap 86 67" "drag 158 243 159 196"
 
 # --- account with 2nd password and TOTP, scrolled up, at 31 s ----------------
@@ -499,7 +497,7 @@ json <<EOF
     "totp_secret": "GZ4FORKTNBVFGQTFJJGEIRDOKY======" } ]
 EOF
 
-accounts $mode account-pw2-totp-up-31 \
+accounts account-pw2-totp-up-31 \
     "time 31" "tap 86 67" "drag 158 243 159 196"
 
 # --- delete 2nd password field -----------------------------------------------
@@ -508,7 +506,7 @@ json <<EOF
 [ { "id":"id", "user":"user", "email":"email", "pw":"pw", "pw2":"pw2" } ]
 EOF
 
-accounts $mode delete-pw2 "tap 86 67" \
+accounts delete-pw2 "tap 86 67" \
     "long 119 233" "tap 154 173" "drag 56 190 183 191"
 
 # --- delete 1st password field -----------------------------------------------
@@ -517,48 +515,48 @@ json <<EOF
 [ { "id":"id", "user":"user", "email":"email", "pw":"pw", "pw2":"pw2" } ]
 EOF
 
-accounts $mode delete-pw1 "tap 86 67" \
+accounts delete-pw1 "tap 86 67" \
     "long 119 177" "tap 154 173" "drag 56 190 183 191"
 
 # --- setup version -----------------------------------------------------------
 
-accounts $mode setup-version "long 201 23" "tap 152 141" static "tap 81 268"
+accounts setup-version "long 201 23" "tap 152 141" static "tap 81 268"
 
 # --- setup R&D ---------------------------------------------------------------
 
-accounts $mode setup-rd "long 201 23" "tap 152 141" \
+accounts setup-rd "long 201 23" "tap 152 141" \
     "drag 66 200 68 153" "tap 68 219"
 
 # --- Move from ---------------------------------------------------------------
 
-accounts $mode move-from "long 200 72" "tap 98 165"
+accounts move-from "long 200 72" "tap 98 165"
 
 # --- Moving -----------------------------------------------------------------
 
-accounts $mode moving "long 200 72" "$ACCOUNTS_MOVE" "long 114 166"
+accounts moving "long 200 72" "$ACCOUNTS_MOVE" "long 114 166"
 
 # --- Moved -------------------------------------------------------------------
 
-accounts $mode moved "long 200 72" "$ACCOUNTS_MOVE" \
+accounts moved "long 200 72" "$ACCOUNTS_MOVE" \
     "long 114 166" "$ACCOUNTS_MOVE"
 
 # --- Move cancel -------------------------------------------------------------
 
-accounts $mode move-cancel "long 200 72" "$ACCOUNTS_MOVE" "long 114 166" \
+accounts move-cancel "long 200 72" "$ACCOUNTS_MOVE" "long 114 166" \
     "$ACCOUNTS_CANCEL_MOVE"
 
 # --- Edit entry name (demo) --------------------------------------------------
 
-accounts $mode entry-edit "tap 86 67" "long 201 23" "tap 116 141"
+accounts entry-edit "tap 86 67" "long 201 23" "tap 116 141"
 
 # --- Edit entry name (remove "emo") -------------------------------------------
 
-accounts $mode entry-edit-d "tap 86 67" "long 201 23" "tap 116 141" \
+accounts entry-edit-d "tap 86 67" "long 201 23" "tap 116 141" \
     "$ENTRY_L" "$ENTRY_L" "$ENTRY_L"
 
 # --- Edit entry name ("dummy1", duplicate) -----------------------------------
 
-accounts $mode entry-edit-dummy1 "tap 86 67" "long 201 23" "tap 116 141" \
+accounts entry-edit-dummy1 "tap 86 67" "long 201 23" "tap 116 141" \
     "$ENTRY_L" "$ENTRY_L" "$ENTRY_L" \
     "$ENTRY_8" "$ENTRY_5" \
     "$ENTRY_6" "$ENTRY_4" "$ENTRY_6" "$ENTRY_4" \
@@ -567,7 +565,7 @@ accounts $mode entry-edit-dummy1 "tap 86 67" "long 201 23" "tap 116 141" \
 
 # --- Edit entry name ("dummy12", then back, duplicate) -----------------------
 
-accounts $mode entry-edit-dummy12 "tap 86 67" "long 201 23" "tap 116 141" \
+accounts entry-edit-dummy12 "tap 86 67" "long 201 23" "tap 116 141" \
     "$ENTRY_L" "$ENTRY_L" "$ENTRY_L" \
     "$ENTRY_8" "$ENTRY_5" \
     "$ENTRY_6" "$ENTRY_4" "$ENTRY_6" "$ENTRY_4" \
@@ -578,7 +576,7 @@ accounts $mode entry-edit-dummy12 "tap 86 67" "long 201 23" "tap 116 141" \
 
 # --- Edit entry name ("dummy1xxx" ) ------------------------------------------
 
-accounts $mode entry-edit-dummy1xxx "tap 86 67" "long 201 23" "tap 116 141" \
+accounts entry-edit-dummy1xxx "tap 86 67" "long 201 23" "tap 116 141" \
     "$ENTRY_L" "$ENTRY_L" "$ENTRY_L" \
     "$ENTRY_8" "$ENTRY_5" \
     "$ENTRY_6" "$ENTRY_4" "$ENTRY_6" "$ENTRY_4" \
@@ -588,7 +586,7 @@ accounts $mode entry-edit-dummy1xxx "tap 86 67" "long 201 23" "tap 116 141" \
 
 # --- Edit entry name ("dummy1xxx123456" ) ------------------------------------
 
-accounts $mode entry-edit-6 \
+accounts entry-edit-6 \
     "tap 86 67" "long 201 23" "tap 116 141" \
     "$ENTRY_L" "$ENTRY_L" "$ENTRY_L" \
     "$ENTRY_8" "$ENTRY_5" \
@@ -601,7 +599,7 @@ accounts $mode entry-edit-6 \
 
 # --- Edit entry name ("dummy1xxx1234567", maximum length) --------------------
 
-accounts $mode entry-edit-7 \
+accounts entry-edit-7 \
     "tap 86 67" "long 201 23" "tap 116 141" \
     "$ENTRY_L" "$ENTRY_L" "$ENTRY_L" \
     "$ENTRY_8" "$ENTRY_5" \
@@ -615,7 +613,7 @@ accounts $mode entry-edit-7 \
 
 # --- Edit entry name ("dummy1xxx1234567", no more) ---------------------------
 
-accounts $mode entry-edit-8 \
+accounts entry-edit-8 \
     "tap 86 67" "long 201 23" "tap 116 141" \
     "$ENTRY_L" "$ENTRY_L" "$ENTRY_L" \
     "$ENTRY_8" "$ENTRY_5" \
@@ -629,62 +627,62 @@ accounts $mode entry-edit-8 \
 
 # --- Pin change, old PIN, empty ----------------------------------------------
 
-accounts $mode change-old \
+accounts change-old \
     "long 201 23" "tap 152 141" "tap 86 70"
 
 # --- Pin change, old PIN, cancel ---------------------------------------------
 
-accounts $mode change-old-cancel \
+accounts change-old-cancel \
     "long 201 23" "tap 152 141" "tap 86 70" "$ENTRY_L"
 
 # --- Pin change, old PIN, first digit ----------------------------------------
 
-accounts $mode change-old-1 \
+accounts change-old-1 \
     "long 201 23" "tap 152 141" "tap 86 70" \
     "$ENTRY_1"
 
 # --- Pin change, invalid PIN  ------------------------------------------------
 
-accounts $mode change-invalid \
+accounts change-invalid \
     "long 201 23" "tap 152 141" "tap 86 70" \
     "$ENTRY_1" "$ENTRY_1" "$ENTRY_1" "$ENTRY_1" "$ENTRY_R"
 
 # --- Pin change, new PIN  ----------------------------------------------------
 
-accounts $mode change-new \
+accounts change-new \
     "long 201 23" "tap 152 141" "tap 86 70" \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R"
 
 # --- Pin change, new PIN, cancel  --------------------------------------------
 
-accounts $mode change-new-cancel \
+accounts change-new-cancel \
     "long 201 23" "tap 152 141" "tap 86 70" \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" "$ENTRY_L"
 
 # --- Pin change, new PIN, first digit  ---------------------------------------
 
-accounts $mode change-new-first \
+accounts change-new-first \
     "long 201 23" "tap 152 141" "tap 86 70" \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
     "$ENTRY_1"
 
 # --- Pin change, same PIN  ---------------------------------------------------
 
-accounts $mode change-same \
+accounts change-same \
     "long 201 23" "tap 152 141" "tap 86 70" \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R"
 
 # --- Pin change, new PIN, all six digits  ------------------------------------
 
-accounts $mode change-new-all \
+accounts change-new-all \
     "long 201 23" "tap 152 141" "tap 86 70" \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_9" "$ENTRY_5" "$ENTRY_8" "$ENTRY_0"
 
 # --- Pin change, confirm PIN -------------------------------------------------
 
-accounts $mode change-confirm \
+accounts change-confirm \
     "long 201 23" "tap 152 141" "tap 86 70" \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_9" "$ENTRY_5" "$ENTRY_8" "$ENTRY_0" \
@@ -692,7 +690,7 @@ accounts $mode change-confirm \
 
 # --- Pin change, confirm PIN, cancel -----------------------------------------
 
-accounts $mode change-confirm-cancel \
+accounts change-confirm-cancel \
     "long 201 23" "tap 152 141" "tap 86 70" \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_9" "$ENTRY_5" "$ENTRY_8" "$ENTRY_0" \
@@ -700,7 +698,7 @@ accounts $mode change-confirm-cancel \
 
 # --- Pin change, match -------------------------------------------------------
 
-accounts $mode change-match \
+accounts change-match \
     "long 201 23" "tap 152 141" "tap 86 70" \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_9" "$ENTRY_5" "$ENTRY_8" "$ENTRY_0" \
@@ -710,7 +708,7 @@ accounts $mode change-match \
 
 # --- Pin change, match -------------------------------------------------------
 
-accounts $mode change-mismatch \
+accounts change-mismatch \
     "long 201 23" "tap 152 141" "tap 86 70" \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_9" "$ENTRY_5" "$ENTRY_8" "$ENTRY_0" \
@@ -720,7 +718,7 @@ accounts $mode change-mismatch \
 
 # --- Remote ------------------------------------------------------------------
 
-accounts $mode remote "long 200 72" "$ACCOUNTS_REMOTE"
+accounts remote "long 200 72" "$ACCOUNTS_REMOTE"
 
 # --- Remote (reveal) ---------------------------------------------------------
 
@@ -729,17 +727,17 @@ FIELD_PASSWORD=05
 NO="tap 69 256"
 YES="tap 175 256"
 
-accounts $mode rmt-reveal "long 200 72" "$ACCOUNTS_REMOTE" \
+accounts rmt-reveal "long 200 72" "$ACCOUNTS_REMOTE" \
     "rmt $RDOP_REVEAL demo $FIELD_PASSWORD"
 
 # --- Remote (reveal, no) -----------------------------------------------------
 
-accounts $mode rmt-reveal-no "long 200 72" "$ACCOUNTS_REMOTE" \
+accounts rmt-reveal-no "long 200 72" "$ACCOUNTS_REMOTE" \
     "rmt $RDOP_REVEAL demo $FIELD_PASSWORD" "$NO"
 
 # --- Remote (reveal, yes) ----------------------------------------------------
 
-accounts $mode rmt-reveal-yes "long 200 72" "$ACCOUNTS_REMOTE" \
+accounts rmt-reveal-yes "long 200 72" "$ACCOUNTS_REMOTE" \
     "rmt $RDOP_REVEAL demo $FIELD_PASSWORD" "$YES"
 
 # --- Remote (set time, advance by 30 seconds) --------------------------------
@@ -762,93 +760,97 @@ t_bytes()
 	done
 }
 
-accounts $mode rmt-set-time-30s "time $T_150000" \
+accounts rmt-set-time-30s "time $T_150000" \
     "long 200 72" "$ACCOUNTS_REMOTE" \
     "rmt $RDOP_SET_TIME `t_bytes $T_150030`"
 
 # --- Remote (set time, back 3h) ----------------------------------------------
 
-accounts $mode rmt-set-time-3h "time $T_150000" \
+accounts rmt-set-time-3h "time $T_150000" \
     "long 200 72" "$ACCOUNTS_REMOTE" \
     "rmt $RDOP_SET_TIME `t_bytes $T_120000`"
 
 # --- account (HOTP revealed)--------------------------------------------------
 
-if ! page_inner -n run hotp-reveal-twice \
+saved_mode=$mode
+mode=run
+if ! page_inner -n hotp-reveal-twice \
     "random 1" button "$PIN_1" "$PIN_2" "$PIN_3" "$PIN_4" "$PIN_NEXT" \
     "drag 158 243 159 196" "tap 50 221" "tap 38 80"; then
+	mode=$saved_mode
 	cleanup
 else
-	accounts $mode hotp-reveal-twice \
+	mode=$saved_mode
+	accounts hotp-reveal-twice \
 	    "drag 158 243 159 196" "tap 50 221" "tap 38 80"
 fi
 
 # --- New device --------------------------------------------------------------
 
-page -e $mode new-on "random 1" button
+page -e new-on "random 1" button
 
 # --- New device, cancel ------------------------------------------------------
 
-page -e $mode new-cancel "random 1" button \
+page -e new-cancel "random 1" button \
     "$ENTRY_L"
 
 # --- New device, PIN ---------------------------------------------------------
 
-page -e $mode new-pin "random 1" button \
+page -e new-pin "random 1" button \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4"
 
 # --- New device, confirm -----------------------------------------------------
 
-page -e $mode new-confirm "random 1" button \
+page -e new-confirm "random 1" button \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R"
 
 # --- New device, confirmed ---------------------------------------------------
 
-page -e $mode new-confirmed "random 1" button \
+page -e new-confirmed "random 1" button \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R"
 
 # --- New device, enter -------------------------------------------------------
 
-page -e $mode new-enter "random 1" button \
+page -e new-enter "random 1" button \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
     "$ENTRY_5"
 
 # --- New device, mismatch ---------------------------------------------------
 
-page -e $mode new-mismatch "random 1" button \
+page -e new-mismatch "random 1" button \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
     "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_R"
 
 # --- New device, repeat ---------------------------------------------------
 
-page -e $mode new-repeat "random 1" button \
+page -e new-repeat "random 1" button \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
     "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_R" \
     "$ENTRY_5"
 
 ## --- accounts (empty) --------------------------------------------------------
 
-accounts -j "[]" $mode accounts-empty
+accounts -j "[]" accounts-empty
 
 # --- setup master secret -----------------------------------------------------
 
-accounts $mode setup-master "long 201 23" "tap 152 141" "tap 81 168"
+accounts setup-master "long 201 23" "tap 152 141" "tap 81 168"
 
 # --- setup master secret, show pubkey ----------------------------------------
 
-accounts $mode setup-master-pubkey "long 201 23" "tap 152 141" "tap 81 168" \
+accounts setup-master-pubkey "long 201 23" "tap 152 141" "tap 81 168" \
     "tap 128 69"
 
 # --- setup master secret, PIN ------------------------------------------------
 
-accounts $mode setup-master-pin "long 201 23" "tap 152 141" "tap 81 168" \
+accounts setup-master-pin "long 201 23" "tap 152 141" "tap 81 168" \
     "tap 129 119"
 
 # --- setup master secret, show -----------------------------------------------
 
-accounts $mode setup-master-show "long 201 23" "tap 152 141" "tap 81 168" \
+accounts setup-master-show "long 201 23" "tap 152 141" "tap 81 168" \
     "master scramble" "tap 129 119" \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R"
 
@@ -866,16 +868,15 @@ set_master()
 		esac
 	done
 
-	local mode=$1
-	local name=$2
-	shift 2
+	local name=$1
+	shift
 
-	page $opts $mode $name \
+	page $opts $name \
 	    "random 1" button "$PIN_1" "$PIN_2" "$PIN_3" "$PIN_4" "$PIN_NEXT" \
 	    "long 201 23" "tap 152 141" "tap 81 168" "tap 71 172" "$@"
 }
 
-set_master $mode sm-pin
+set_master sm-pin
 
 # --- set-master, 1st ---------------------------------------------------------
 
@@ -891,87 +892,86 @@ sm()
 		esac
 	done
 
-	local mode=$1
-	local name=$2
-	shift 2
+	local name=$1
+	shift
 
-	set_master $opts $mode $name \
+	set_master $opts $name \
 	    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" "$@"
 }
 
 
-sm $mode sm-1
+sm sm-1
 
 # --- set-master, 1st, "p" ----------------------------------------------------
 
-sm $mode sm-1-p "$ENTRY_6"
+sm sm-1-p "$ENTRY_6"
 
 # --- set-master, 1st, "pa" --------------------------------------------------
 
-sm $mode sm-1-pa "$ENTRY_6" "$ENTRY_1"
+sm sm-1-pa "$ENTRY_6" "$ENTRY_1"
 
 # --- set-master, 1st, "pad" --------------------------------------------------
 
-sm $mode sm-1-pad "$ENTRY_6" "$ENTRY_1" "$ENTRY_2"
+sm sm-1-pad "$ENTRY_6" "$ENTRY_1" "$ENTRY_2"
 
 # --- set-master, 1st, "padd" -------------------------------------------------
 
-sm $mode sm-1-padd "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2"
+sm sm-1-padd "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2"
 
 # --- set-master, 2nd ---------------------------------------------------------
 
 FIRST="tap 70 139"
 
-sm $mode sm-2 "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST"
+sm sm-2 "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST"
 
 # --- set-master, 2nd, "p" ----------------------------------------------------
 
 FIRST="tap 70 139"
 
-sm $mode sm-2-p "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
+sm sm-2-p "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
     "$ENTRY_6"
 
 # --- set-master, 2nd, "pi" ---------------------------------------------------
 
-sm $mode sm-2-pi "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
+sm sm-2-pi "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
     "$ENTRY_6" "$ENTRY_4"
 
 # --- set-master, 2nd, "pig" ---------------------------------------------------
 
-sm $mode sm-2-pig "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
+sm sm-2-pig "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
     "$ENTRY_6" "$ENTRY_4" "$ENTRY_4"
 
 # --- set-master, 2nd, "pig", accept ------------------------------------------
 
-sm $mode sm-2-pig-accept "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
+sm sm-2-pig-accept "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
     "$ENTRY_6" "$ENTRY_4" "$ENTRY_4" "$ENTRY_R"
 
 # --- set-master, 3nd ---------------------------------------------------------
 
-sm $mode sm-3 "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
+sm sm-3 "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
     "$ENTRY_6" "$ENTRY_4" "$ENTRY_4" "$ENTRY_R" "$FIRST"
 
 # --- set-master, 3nd, "s" ----------------------------------------------------
 
-sm $mode sm-3-s "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
+sm sm-3-s "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
     "$ENTRY_6" "$ENTRY_4" "$ENTRY_4" "$ENTRY_R" "$FIRST" \
     "$ENTRY_8"
 
 # --- set-master, 3nd, "sh" ---------------------------------------------------
 
-sm $mode sm-3-sh "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
+sm sm-3-sh "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
     "$ENTRY_6" "$ENTRY_4" "$ENTRY_4" "$ENTRY_R" "$FIRST" \
     "$ENTRY_8" "$ENTRY_4"
 
 # --- set-master, 3nd, "shi" --------------------------------------------------
 
-sm $mode sm-3-shi "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
+sm sm-3-shi "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
     "$ENTRY_6" "$ENTRY_4" "$ENTRY_4" "$ENTRY_R" "$FIRST" \
     "$ENTRY_8" "$ENTRY_4" "$ENTRY_4"
 
 # --- set-master, 3nd, "ship" -------------------------------------------------
 
-sm $mode sm-3-ship "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
+sm sm-3-ship "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
     "$ENTRY_6" "$ENTRY_4" "$ENTRY_4" "$ENTRY_R" "$FIRST" \
     "$ENTRY_8" "$ENTRY_4" "$ENTRY_4" "$ENTRY_6"
 
@@ -979,27 +979,27 @@ sm $mode sm-3-ship "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
 
 # "FIRST" here is actually the second entry, since the list moves up
 
-sm $mode sm-4 "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
+sm sm-4 "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
     "$ENTRY_6" "$ENTRY_4" "$ENTRY_4" "$ENTRY_R" "$FIRST" \
     "$ENTRY_8" "$ENTRY_4" "$ENTRY_4" "$ENTRY_6" "$FIRST"
 
 # --- set-master, 4th, "cat"  -------------------------------------------------
 
-sm $mode sm-4-cat "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
+sm sm-4-cat "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
     "$ENTRY_6" "$ENTRY_4" "$ENTRY_4" "$ENTRY_R" "$FIRST" \
     "$ENTRY_8" "$ENTRY_4" "$ENTRY_4" "$ENTRY_6" "$FIRST" \
     "$ENTRY_2" "$ENTRY_1" "$ENTRY_9"
 
 # --- set-master, 4th, "cat", accept  -----------------------------------------
 
-sm $mode sm-4-cat-accept "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
+sm sm-4-cat-accept "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
     "$ENTRY_6" "$ENTRY_4" "$ENTRY_4" "$ENTRY_R" "$FIRST" \
     "$ENTRY_8" "$ENTRY_4" "$ENTRY_4" "$ENTRY_6" "$FIRST" \
     "$ENTRY_2" "$ENTRY_1" "$ENTRY_9" "$ENTRY_R"
 
 # --- set-master, 5th ---------------------------------------------------------
 
-sm $mode sm-5 "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
+sm sm-5 "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
     "$ENTRY_6" "$ENTRY_4" "$ENTRY_4" "$ENTRY_R" "$FIRST" \
     "$ENTRY_8" "$ENTRY_4" "$ENTRY_4" "$ENTRY_6" "$FIRST" \
     "$ENTRY_2" "$ENTRY_1" "$ENTRY_9" "$ENTRY_R" "$FIRST"
@@ -1008,10 +1008,10 @@ sm $mode sm-5 "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
 
 # We already know after the 3rd input that the word is "sword"
 
-page -i $mode sm-5-s "$ENTRY_8"
-page -i $mode sm-5-sw "$ENTRY_0"
-page -i $mode sm-5-swo "$ENTRY_6"
-page -i $mode sm-5-swo-accept "$FIRST"
+page -i sm-5-s "$ENTRY_8"
+page -i sm-5-sw "$ENTRY_0"
+page -i sm-5-swo "$ENTRY_6"
+page -i sm-5-swo-accept "$FIRST"
 
 # -----------------------------------------------------------------------------
 

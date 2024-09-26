@@ -141,6 +141,12 @@ page()
 }
 
 
+add()
+{
+	page -i "$@"
+}
+
+
 usage()
 {
 	cat <<EOF 1>&2
@@ -1008,10 +1014,10 @@ sm sm-5 "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
 
 # We already know after the 3rd input that the word is "sword"
 
-page -i sm-5-s "$ENTRY_8"
-page -i sm-5-sw "$ENTRY_0"
-page -i sm-5-swo "$ENTRY_6"
-page -i sm-5-swo-accept "$FIRST"
+add sm-5-s "$ENTRY_8"
+add sm-5-sw "$ENTRY_0"
+add sm-5-swo "$ENTRY_6"
+add sm-5-swo-accept "$FIRST"
 
 # -----------------------------------------------------------------------------
 

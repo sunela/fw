@@ -15,6 +15,7 @@
 #include "hal.h"
 #include "debug.h"
 #include "timer.h"
+#include "colors.h"
 #include "gfx.h"
 #include "text.h"
 #include "shape.h"
@@ -53,11 +54,11 @@ struct ui_entry_ctx {
 
 
 const struct ui_entry_style ui_entry_default_style = {
-	.input_fg		= GFX_WHITE,
-	.input_valid_bg		= GFX_HEX(0x002060),
-	.input_invalid_bg	= GFX_HEX(0x800000),
-	.title_fg		= GFX_WHITE,
-	.title_bg		= GFX_BLACK,
+	.input_fg		= INPUT_FG,
+	.input_valid_bg		= INPUT_VALID_BG,
+	.input_invalid_bg	= INPUT_INVALID_BG,
+	.title_fg		= INPUT_TITLE_FG,
+	.title_bg		= INPUT_TITLE_BG,
 };
 
 

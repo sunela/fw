@@ -26,6 +26,14 @@
 #define	EVEN_BG			GFX_BLACK
 #define	ODD_BG			GFX_HEX(0x202020)
 
+/* --- Input --------------------------------------------------------------- */
+
+#define	INPUT_FG		GFX_WHITE
+#define	INPUT_VALID_BG		GFX_HEX(0x002060)
+#define	INPUT_INVALID_BG	GFX_HEX(0x800000)
+#define	INPUT_TITLE_FG		GFX_WHITE
+#define	INPUT_TITLE_BG		GFX_BLACK
+
 /* --- Notifications ------------------------------------------------------- */
 
 #define	ERROR_FG	GFX_WHITE

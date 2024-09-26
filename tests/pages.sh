@@ -960,6 +960,35 @@ sm $mode sm-3-ship "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
     "$ENTRY_6" "$ENTRY_4" "$ENTRY_4" "$ENTRY_R" "$FIRST" \
     "$ENTRY_8" "$ENTRY_4" "$ENTRY_4" "$ENTRY_6"
 
+# --- set-master, 4th  --------------------------------------------------------
+
+# "FIRST" here is actually the second entry, since the list moves up
+
+sm $mode sm-4 "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
+    "$ENTRY_6" "$ENTRY_4" "$ENTRY_4" "$ENTRY_R" "$FIRST" \
+    "$ENTRY_8" "$ENTRY_4" "$ENTRY_4" "$ENTRY_6" "$FIRST"
+
+# --- set-master, 4th, "cat"  -------------------------------------------------
+
+sm $mode sm-4-cat "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
+    "$ENTRY_6" "$ENTRY_4" "$ENTRY_4" "$ENTRY_R" "$FIRST" \
+    "$ENTRY_8" "$ENTRY_4" "$ENTRY_4" "$ENTRY_6" "$FIRST" \
+    "$ENTRY_2" "$ENTRY_1" "$ENTRY_9"
+
+# --- set-master, 4th, "cat", accept  -----------------------------------------
+
+sm $mode sm-4-cat-accept "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
+    "$ENTRY_6" "$ENTRY_4" "$ENTRY_4" "$ENTRY_R" "$FIRST" \
+    "$ENTRY_8" "$ENTRY_4" "$ENTRY_4" "$ENTRY_6" "$FIRST" \
+    "$ENTRY_2" "$ENTRY_1" "$ENTRY_9" "$ENTRY_R"
+
+# --- set-master, 5th ---------------------------------------------------------
+
+sm $mode sm-5 "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
+    "$ENTRY_6" "$ENTRY_4" "$ENTRY_4" "$ENTRY_R" "$FIRST" \
+    "$ENTRY_8" "$ENTRY_4" "$ENTRY_4" "$ENTRY_6" "$FIRST" \
+    "$ENTRY_2" "$ENTRY_1" "$ENTRY_9" "$ENTRY_R" "$FIRST"
+
 # -----------------------------------------------------------------------------
 
 if [ "$select" ] && ! $found; then

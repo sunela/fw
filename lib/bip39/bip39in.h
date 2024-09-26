@@ -53,4 +53,15 @@ extern const char *bip39_sets[10];
 
 unsigned bip39_match(const char *s, char *next, unsigned next_size);
 
+/*
+ * bip39_word_to_sets converts the word in "s" to a string of key sets in
+ * "buf". Up to max_len characters plus a terminating NUL are stored. If "s" is
+ * longer, the remaining characters are ignored.
+ *
+ * bip39_word_to_sets returns the length of the string in "buf", or -1 if there
+ * were characters that could not be converted.
+ */
+
+int bip39_word_to_sets(const char *s, char *buf, unsigned max_len);
+
 #endif /* !BIP39IN_H */

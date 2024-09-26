@@ -10,6 +10,7 @@
 #include <string.h>
 #include <assert.h>
 
+#include "util.h"
 #include "hal.h"
 #include "bip39enc.h"
 #include "bip39in.h"
@@ -68,4 +69,23 @@ unsigned bip39_match(const char *s, char *next, unsigned next_size)
 	}
 
 	return n_matches;
+}
+
+
+int bip39_word_to_sets(const char *s, char *buf, unsigned max_len)
+{
+	char *p;
+	unsigned i;
+
+	for (p = buf; *s && p < buf + max_len; s++) {
+		for (i = 0; i != ARRAY_ENTRIES(bip39_sets); i++)
+			if (strchr(bip39_sets[i], *s)) {
+				*p++ = '0' + i;
+				break;
+			}
+		if (i == ARRAY_ENTRIES(bip39_sets))
+			return -1;
+	}
+	*p = 0;
+	return p - buf;
 }

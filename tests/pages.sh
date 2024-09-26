@@ -932,7 +932,47 @@ add sm-5 "$FIRST"
 add sm-5-s "$ENTRY_8"
 add sm-5-sw "$ENTRY_0"
 add sm-5-swo "$ENTRY_6"
-add sm-5-swo-accept "$FIRST"
+#add sm-5-swo-accept "$FIRST"
+
+# --- set-master, 6th to 24th -------------------------------------------------
+
+SECOND="tap 28 166"
+
+add sm-6-duck "$FIRST" "$ENTRY_2" "$ENTRY_9" "$ENTRY_2"
+add sm-7-way "$FIRST" "$ENTRY_0" "$ENTRY_1" "$ENTRY_0" "$ENTRY_R"
+add sm-8-wave "$FIRST" "$ENTRY_0" "$ENTRY_1" "$ENTRY_0" "$ENTRY_3"
+add sm-9-abandon "$FIRST" "$ENTRY_1" "$ENTRY_1" "$ENTRY_1" "$ENTRY_6"
+add sm-10-cluster "$FIRST" "$ENTRY_2" "$ENTRY_5" "$ENTRY_9" "$ENTRY_8"
+add sm-11-effort "$FIRST" "$ENTRY_3" "$ENTRY_3" "$ENTRY_3" "$ENTRY_6"
+add sm-12-giggle "$FIRST" "$ENTRY_4" "$ENTRY_4" "$ENTRY_4" "$ENTRY_4"
+add sm-13-mammal "$FIRST" "$ENTRY_5" "$ENTRY_1" "$ENTRY_5" "$ENTRY_5"
+add sm-14-oppose "$FIRST" "$ENTRY_6" "$ENTRY_6" "$ENTRY_6" "$ENTRY_6"
+add sm-15-rural "$FIRST" "$ENTRY_7" "$ENTRY_9" "$ENTRY_7"
+
+# Note: with "squeeze", the "U" could be auto-completed, but the user would
+# then have to pay attention to any such auto-completion happening, which may
+# not always be easy. So it's better to keep the system more predictable.
+add sm-16-squeeze "$FIRST" "$ENTRY_8" "$ENTRY_7" "$ENTRY_9" "$ENTRY_3"
+
+add sm-17-turtle "$FIRST" "$ENTRY_9" "$ENTRY_9" "$ENTRY_7" "$ENTRY_9"
+add sm-18-wrong "$FIRST" "$ENTRY_0" "$ENTRY_7" "$ENTRY_6"
+add sm-19-orient "$FIRST" "$ENTRY_6" "$ENTRY_7" "$ENTRY_4" "$ENTRY_3"
+add sm-20-toe "$FIRST" "$ENTRY_9" "$ENTRY_6" "$ENTRY_3" "$ENTRY_R"
+add sm-21-unfair "$FIRST" "$ENTRY_9" "$ENTRY_6" "$ENTRY_3" "$ENTRY_1"
+add sm-22-unfold "$FIRST" "$ENTRY_9" "$ENTRY_6" "$ENTRY_3" "$ENTRY_6"
+add sm-23-merit "$FIRST" "$ENTRY_5" "$ENTRY_3" "$ENTRY_7" "$ENTRY_4"
+add sm-24-almost "$SECOND" "$ENTRY_1" "$ENTRY_5" "$ENTRY_5" "$ENTRY_6"
+add sm-24-done "$SECOND"
+
+# bip39 decode paddle pig ship cat sword duck way wave abandon cluster effort giggle mammal oppose rural squeeze turtle wrong orient toe unfair unfold merit almost
+# 9ed4931811edc487be07bf00058d1ab0f86b372f669ceaffd67271ced1da62e0
+
+# --- set-master, verify ------------------------------------------------------
+
+# ENTRY_5 is just a random tap
+
+add sm-verify "$ENTRY_5" "tap 129 119" \
+    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R"
 
 # -----------------------------------------------------------------------------
 

@@ -37,12 +37,15 @@ json()
 page_inner()
 {
 	local erase=false
+	local incremental=false
 	local json=
 	local title=true
 
 	while [ "$1" ]; do
 		case "$1" in
 		-e)	erase=true
+			shift;;
+		-i)	incremental=true
 			shift;;
 		-j)	json=$2
 			shift 2;;
@@ -60,6 +63,18 @@ page_inner()
 		$title && echo $name
 		return
 	fi
+
+	# --- incremental command construction ---
+
+	if $incremental; then
+		eval set - "$last_args" '"$@"'
+	fi
+	last_args=
+	for n in "$@"; do
+		last_args="$last_args '$n'"
+	done
+
+	# --- test selection ---
 
 	[ "$mode" = last ] || [ -z "$select" -o "$name" = "$select" ] || return
 
@@ -988,6 +1003,15 @@ sm $mode sm-5 "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
     "$ENTRY_6" "$ENTRY_4" "$ENTRY_4" "$ENTRY_R" "$FIRST" \
     "$ENTRY_8" "$ENTRY_4" "$ENTRY_4" "$ENTRY_6" "$FIRST" \
     "$ENTRY_2" "$ENTRY_1" "$ENTRY_9" "$ENTRY_R" "$FIRST"
+
+# --- set-master, 5th, "sword" ------------------------------------------------
+
+# We already know after the 3rd input that the word is "sword"
+
+page -i $mode sm-5-s "$ENTRY_8"
+page -i $mode sm-5-sw "$ENTRY_0"
+page -i $mode sm-5-swo "$ENTRY_6"
+page -i $mode sm-5-swo-accept "$FIRST"
 
 # -----------------------------------------------------------------------------
 

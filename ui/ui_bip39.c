@@ -180,10 +180,28 @@ static void ui_bip39_open(void *ctx, void *params)
 }
 
 
+static bool is_terminal(const struct ui_bip39_ctx *c, uint16_t word)
+{
+	unsigned in_len = strlen(c->buf);
+	unsigned w_len = strlen(bip39_words[word]);
+
+	if (w_len == in_len)
+		return 1;
+	if (in_len == BIP39_MAX_SETS && w_len > in_len)
+		return 1;
+	/*
+	 * The caller also needs to keep any matches that return a single
+	 * word.
+	 */
+	return 0;
+}
+
+
 static void ui_bip39_2_open(void *ctx, void *params)
 {
 	struct ui_bip39_2_ctx *c2 = ctx;
 	struct ui_bip39_ctx *c = params;
+	unsigned list_len = 0;
 	unsigned n, i;
 	unsigned h;
 
@@ -196,13 +214,13 @@ static void ui_bip39_2_open(void *ctx, void *params)
 		uint16_t *m = bip39_matches + i;
 
 debug("\tadding %u: %s (%s)\n", i + 1, bip39_words[*m], c->buf);
-		if (strlen(bip39_words[*m]) == strlen(c->buf) ||
-		    (strlen(c->buf) == BIP39_MAX_SETS &&
-		    strlen(bip39_words[*m]) > BIP39_MAX_SETS) ||
-		    n == 1)
+		if (is_terminal(c, *m) || n == 1) {
 			wi_list_add(&c->list, bip39_words[*m], NULL, m);
+			list_len++;
+		}
 	}
 	h = wi_list_end(&c->list);
+	assert(list_len > 0 && list_len <= BIP39_MAX_FINAL_CHOICES);
 	/*
 	 * @@@ ugly: we draw the list just to obtain its height, then erase
 	 * everything and draw it again. Could:
@@ -245,7 +263,6 @@ static void ui_bip39_resume(void *ctx)
 	case S_INPUT:
 		n = bip39_match(c->buf, NULL, 0);
 debug("ui_bip39_resume: %u\n", n);
-		assert(n > 0 && n <= BIP39_MAX_FINAL_CHOICES);
 		c->state = S_CHOICES;
 		ui_call(&ui_bip39_2, c);
 		return;

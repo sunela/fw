@@ -20,6 +20,7 @@
 #include "sha.h"
 #include "bip39enc.h"
 #include "bip39in.h"
+#include "bip39dec.h"
 #include "block.h"
 #include "secrets.h"
 #include "dbcrypt.h"
@@ -335,6 +336,57 @@ static bool do_bip39_enc(const char *arg)
 }
 
 
+static bool do_bip39_dec(const char *arg)
+{
+	uint16_t words[BIP39_MAX_WORDS];
+	uint8_t bytes[BIP39_MAX_BYTES];
+	unsigned n = 0;
+	int got;
+
+	while (*arg) {
+		const char *end;
+		unsigned i;
+
+		end = strchr(arg, ' ');
+		if (!end)
+			end = strchr(arg, 0);
+		for (i = 0; i != BIP39_WORDS; i++) {
+			const char *w = bip39_words[i];
+
+			if (strlen(w) == (unsigned) (end - arg) &&
+			    !strncmp(w, arg, end - arg))
+				break;
+		}
+		if (i == BIP39_WORDS) {
+			fprintf(stderr, "unrecognized word '%.*s'\n",
+			    (int) (end - arg), arg);
+			return 0;
+		}
+		words[n++] = i;
+		if (!*end)
+			break;
+		arg = end + 1;
+	}
+	got = bip39_decode(bytes, BIP39_MAX_BYTES, words, n);
+	switch (got) {
+	case BIP39_DECODE_UNRECOGNIZED:
+		fprintf(stderr, "unrecognized format\n");
+		return 0;
+	case BIP39_DECODE_OVERFLOW:
+		fprintf(stderr, "output buffer overflow\n");
+		return 0;
+	case BIP39_DECODE_CHECKSUM:
+		fprintf(stderr, "checksum error\n");
+		return 0;
+	default:
+		for (int i = 0; i != got; i++)
+			printf("%02x", bytes[i]);
+		printf("\n");
+		return 1;
+	}
+}
+
+
 static void do_bip39_match(const char *arg)
 {
 	char next[10 + 1];
@@ -353,6 +405,7 @@ static void show_help(void)
 {
 	printf("Commands:\n\n"
 "button\t\tpress the button long enough to debounce, then release it\n"
+"bip39 decode WORD ...\n\t\tdecode the words to a hex string\n"
 "bip39 encode HEXSTRING\n\t\tencode the hex string as words\n"
 "bip39 match [KEYS]\n\t\tfind matching words for the key sequence\n"
 "db dummy\tuse a dummy database. This must be the first command in the\n"
@@ -742,6 +795,12 @@ static bool process_cmd(const char *cmd)
 		arg2 = cmd_arg("encode", arg);
 		if (arg2) {
 			if (!do_bip39_enc(arg2))
+				goto fail;
+			return 1;
+		}
+		arg2 = cmd_arg("decode", arg);
+		if (arg2) {
+			if (!do_bip39_dec(arg2))
 				goto fail;
 			return 1;
 		}

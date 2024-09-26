@@ -860,7 +860,13 @@ accounts setup-master-show "long 201 23" "tap 152 141" "tap 81 168" \
     "master scramble" "tap 129 119" \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R"
 
-# --- set master, PIN ---------------------------------------------------------
+# === set master, PIN =========================================================
+
+#
+# Sections that have their title marked with === instead of --- contain
+# incremental sequences (add ...). Be careful when making changes, as they may
+# detail later tests !
+#
 
 set_master()
 {
@@ -884,136 +890,45 @@ set_master()
 
 set_master sm-pin
 
-# --- set-master, 1st ---------------------------------------------------------
+# --- set-master, 1st, "paddle" -----------------------------------------------
 
-sm()
-{
-	local opts=
+add sm-1 "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R"
+add sm-1-p "$ENTRY_6"
+add sm-1-pa "$ENTRY_1"
+add sm-1-pad "$ENTRY_2"
+add sm-1-padd "$ENTRY_2"
 
-	while [ "$1" ]; do
-		case "$1" in
-		-j)	opts="$opts -j $2"
-			shift 2;;
-		*)	break;;
-		esac
-	done
-
-	local name=$1
-	shift
-
-	set_master $opts $name \
-	    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" "$@"
-}
-
-
-sm sm-1
-
-# --- set-master, 1st, "p" ----------------------------------------------------
-
-sm sm-1-p "$ENTRY_6"
-
-# --- set-master, 1st, "pa" --------------------------------------------------
-
-sm sm-1-pa "$ENTRY_6" "$ENTRY_1"
-
-# --- set-master, 1st, "pad" --------------------------------------------------
-
-sm sm-1-pad "$ENTRY_6" "$ENTRY_1" "$ENTRY_2"
-
-# --- set-master, 1st, "padd" -------------------------------------------------
-
-sm sm-1-padd "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2"
-
-# --- set-master, 2nd ---------------------------------------------------------
+# --- set-master, 2nd, "pig" --------------------------------------------------
 
 FIRST="tap 70 139"
 
-sm sm-2 "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST"
-
-# --- set-master, 2nd, "p" ----------------------------------------------------
-
-FIRST="tap 70 139"
-
-sm sm-2-p "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
-    "$ENTRY_6"
-
-# --- set-master, 2nd, "pi" ---------------------------------------------------
-
-sm sm-2-pi "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
-    "$ENTRY_6" "$ENTRY_4"
-
-# --- set-master, 2nd, "pig" ---------------------------------------------------
-
-sm sm-2-pig "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
-    "$ENTRY_6" "$ENTRY_4" "$ENTRY_4"
-
-# --- set-master, 2nd, "pig", accept ------------------------------------------
-
-sm sm-2-pig-accept "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
-    "$ENTRY_6" "$ENTRY_4" "$ENTRY_4" "$ENTRY_R"
-
-# --- set-master, 3nd ---------------------------------------------------------
-
-sm sm-3 "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
-    "$ENTRY_6" "$ENTRY_4" "$ENTRY_4" "$ENTRY_R" "$FIRST"
-
-# --- set-master, 3nd, "s" ----------------------------------------------------
-
-sm sm-3-s "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
-    "$ENTRY_6" "$ENTRY_4" "$ENTRY_4" "$ENTRY_R" "$FIRST" \
-    "$ENTRY_8"
-
-# --- set-master, 3nd, "sh" ---------------------------------------------------
-
-sm sm-3-sh "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
-    "$ENTRY_6" "$ENTRY_4" "$ENTRY_4" "$ENTRY_R" "$FIRST" \
-    "$ENTRY_8" "$ENTRY_4"
-
-# --- set-master, 3nd, "shi" --------------------------------------------------
-
-sm sm-3-shi "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
-    "$ENTRY_6" "$ENTRY_4" "$ENTRY_4" "$ENTRY_R" "$FIRST" \
-    "$ENTRY_8" "$ENTRY_4" "$ENTRY_4"
+add sm-2 "$FIRST"
+add sm-2-p "$ENTRY_6"
+add sm-2-pi "$ENTRY_4"
+add sm-2-pig "$ENTRY_4"
+add sm-2-pig-accept "$ENTRY_R"
 
 # --- set-master, 3nd, "ship" -------------------------------------------------
 
-sm sm-3-ship "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
-    "$ENTRY_6" "$ENTRY_4" "$ENTRY_4" "$ENTRY_R" "$FIRST" \
-    "$ENTRY_8" "$ENTRY_4" "$ENTRY_4" "$ENTRY_6"
-
-# --- set-master, 4th  --------------------------------------------------------
-
-# "FIRST" here is actually the second entry, since the list moves up
-
-sm sm-4 "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
-    "$ENTRY_6" "$ENTRY_4" "$ENTRY_4" "$ENTRY_R" "$FIRST" \
-    "$ENTRY_8" "$ENTRY_4" "$ENTRY_4" "$ENTRY_6" "$FIRST"
+add sm-3 "$FIRST"
+add sm-3-s "$ENTRY_8"
+add sm-3-sh "$ENTRY_4"
+add sm-3-shi "$ENTRY_4"
+add sm-3-ship "$ENTRY_6"
 
 # --- set-master, 4th, "cat"  -------------------------------------------------
 
-sm sm-4-cat "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
-    "$ENTRY_6" "$ENTRY_4" "$ENTRY_4" "$ENTRY_R" "$FIRST" \
-    "$ENTRY_8" "$ENTRY_4" "$ENTRY_4" "$ENTRY_6" "$FIRST" \
-    "$ENTRY_2" "$ENTRY_1" "$ENTRY_9"
+# "FIRST" here is actually the second entry, since the list moves up
 
-# --- set-master, 4th, "cat", accept  -----------------------------------------
-
-sm sm-4-cat-accept "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
-    "$ENTRY_6" "$ENTRY_4" "$ENTRY_4" "$ENTRY_R" "$FIRST" \
-    "$ENTRY_8" "$ENTRY_4" "$ENTRY_4" "$ENTRY_6" "$FIRST" \
-    "$ENTRY_2" "$ENTRY_1" "$ENTRY_9" "$ENTRY_R"
-
-# --- set-master, 5th ---------------------------------------------------------
-
-sm sm-5 "$ENTRY_6" "$ENTRY_1" "$ENTRY_2" "$ENTRY_2" "$FIRST" \
-    "$ENTRY_6" "$ENTRY_4" "$ENTRY_4" "$ENTRY_R" "$FIRST" \
-    "$ENTRY_8" "$ENTRY_4" "$ENTRY_4" "$ENTRY_6" "$FIRST" \
-    "$ENTRY_2" "$ENTRY_1" "$ENTRY_9" "$ENTRY_R" "$FIRST"
+add sm-4 "$FIRST"
+add sm-4-cat "$ENTRY_2" "$ENTRY_1" "$ENTRY_9"
+add sm-4-cat-accept "$ENTRY_R"
 
 # --- set-master, 5th, "sword" ------------------------------------------------
 
 # We already know after the 3rd input that the word is "sword"
 
+add sm-5 "$FIRST"
 add sm-5-s "$ENTRY_8"
 add sm-5-sw "$ENTRY_0"
 add sm-5-swo "$ENTRY_6"

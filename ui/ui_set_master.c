@@ -133,8 +133,10 @@ static void ui_set_master_resume(void *ctx)
 		switch (n) {
 		case BIP39_DECODE_UNRECOGNIZED:
 			ABORT();
+			break;
 		case BIP39_DECODE_OVERFLOW:
 			ABORT();
+			break;
 		case BIP39_DECODE_CHECKSUM:
 			notice(nt_error, "Checksum error");
 			return;

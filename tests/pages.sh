@@ -685,6 +685,7 @@ RDOP_SET_TIME=07
 T_150000=1725462000
 T_150030=`expr $T_150000 + 30`
 T_120000=`expr $T_150000 - 3 \* 3600`
+T_010000=`expr $T_150000 + 10 \* 3600`
 
 t_bytes()
 {
@@ -708,6 +709,12 @@ accounts rmt-set-time-30s "time $T_150000" \
 accounts rmt-set-time-3h "time $T_150000" \
     "long 200 72" "$ACCOUNTS_REMOTE" \
     "rmt $RDOP_SET_TIME `t_bytes $T_120000`"
+
+# --- Remote (set time, advance by 10h) ---------------------------------------
+
+accounts rmt-set-time-10h "time $T_150000" \
+    "long 200 72" "$ACCOUNTS_REMOTE" \
+    "rmt $RDOP_SET_TIME `t_bytes $T_010000`"
 
 # --- account (HOTP revealed)--------------------------------------------------
 

@@ -436,6 +436,7 @@ bool ui_rmt_set_time(time_t new_time)
 	char old[20], new[20], delta[30];
 	time_t t = time_us() / 1000000 + time_offset;
 	int64_t dt, *p;
+	char *n = new;
 
 	if (scripting && !last_ctx)
 		return 1;
@@ -449,10 +450,13 @@ bool ui_rmt_set_time(time_t new_time)
 	dt = new_time - t;
 	format_delta(dt >= 0 ? dt : -dt, delta, sizeof(delta));
 
+	/* if the day is the same, don't show it again */
+	if (!strncmp(old, new, 11))
+		n += 11;
 	p = alloc_size(sizeof(*p));
 	*p = dt;
 	ask_permission(last_ctx, action_set_time, p,
-	    "Change time from %s to %s (%s %s)", old, new, delta,
+	    "Change time from %s to %s (%s %s)", old, n, delta,
 	    dt < 0 ? "earlier" : "later");
 	return 1;
 }

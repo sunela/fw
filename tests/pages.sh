@@ -242,11 +242,7 @@ page pin-bad3 "random 3" button \
 
 # --- four seconds into cooldown  ---------------------------------------------
 
-page cool-4s "random 3" button \
-    "$PIN_2" "$PIN_2" "$PIN_3" "$PIN_4" "$PIN_NEXT" \
-    "$PIN_2" "$PIN_2" "$PIN_3" "$PIN_4" "$PIN_NEXT" \
-    "$PIN_2" "$PIN_2" "$PIN_3" "$PIN_4" "$PIN_NEXT" \
-    "tick 400"
+add cool-4s "tick 400"
 
 # --- accounts ----------------------------------------------------------------
 
@@ -311,7 +307,7 @@ accounts accounts-over-demo "long 45 69"
 
 accounts account-demo-top-over "tap 86 67" "long 201 23"
 
-# ---  accounts overlay add (demo) ---------------------------------------------
+# === accounts overlay add (demo) =============================================
 
 ACCOUNTS_ADD="tap 60 169"
 ACCOUNTS_MOVE="tap 120 168"
@@ -322,40 +318,31 @@ accounts accounts-demo-add "long 45 69" "$ACCOUNTS_ADD"
 
 # ---  accounts overlay add M, level 1 (demo) ---------------------------------
 
-accounts accounts-demo-add-m1 "long 45 69" "$ACCOUNTS_ADD" "tap 200 136"
+add accounts-demo-add-m1 "tap 200 136"
 
 # ---  accounts overlay add M, level 2 (demo) ---------------------------------
 
-accounts accounts-demo-add-m2 "long 45 69" "$ACCOUNTS_ADD" \
-    "tap 200 136" "tap 42 81"
+add accounts-demo-add-m2 "tap 42 81"
 
 # ---  accounts overlay add Me ------------------------------------------------
 
-accounts accounts-demo-add-me "long 45 69" "$ACCOUNTS_ADD" \
-    "tap 200 136" "tap 42 81" "tap 194 83" "tap 119 137"
+add accounts-demo-add-me "tap 194 83" "tap 119 137"
 
 # ---  accounts added Me ------------------------------------------------------
 
-accounts accounts-demo-added-me "long 45 69" "$ACCOUNTS_ADD" \
-    "tap 200 136" "tap 42 81" "tap 194 83" "tap 119 137" "tap 201 247"
+add accounts-demo-added-me "tap 201 247"
 
 # ---  account Me -------------------------------------------------------------
 
-accounts account-me "long 45 69" "$ACCOUNTS_ADD" \
-    "tap 200 136" "tap 42 81" "tap 194 83" "tap 119 137" "tap 201 247" \
-    "tap 23 68"
+add account-me "tap 23 68"
 
 # ---  account Me: fields list ------------------------------------------------
 
-accounts account-me-fields "long 45 69" "$ACCOUNTS_ADD" \
-    "tap 200 136" "tap 42 81" "tap 194 83" "tap 119 137" "tap 201 247" \
-    "tap 23 68" "tap 119 165"
+add account-me-fields "tap 119 165"
 
 # ---  account Me: enter Password ---------------------------------------------
 
-accounts account-me-pw "long 45 69" "$ACCOUNTS_ADD" \
-    "tap 200 136" "tap 42 81" "tap 194 83" "tap 119 137" "tap 201 247" \
-    "tap 23 68" "tap 119 165" "tap 71 167"
+add account-me-pw "tap 71 167"
 
 # ---  account Me: password Secr3t --------------------------------------------
 
@@ -372,20 +359,13 @@ ENTRY_L="tap 43 245"
 ENTRY_0="tap 119 245"
 ENTRY_R="tap 200 245"
 
-accounts account-me-pw-secret "long 45 69" "$ACCOUNTS_ADD" \
-    "tap 200 136" "tap 42 81" "tap 194 83" "tap 119 137" "tap 201 247" \
-    "tap 23 68" "tap 119 165" "tap 71 167" \
+add account-me-pw-secret \
     "$ENTRY_7" "$ENTRY_7" "$ENTRY_3" "$ENTRY_5" "$ENTRY_2" "$ENTRY_6" \
     "$ENTRY_7" "$ENTRY_6" "$ENTRY_3" "$ENTRY_0" "$ENTRY_8" "$ENTRY_4"
 
 # ---  account Me: password added ---------------------------------------------
 
-accounts account-me-pw-added "long 45 69" "$ACCOUNTS_ADD" \
-    "tap 200 136" "tap 42 81" "tap 194 83" "tap 119 137" "tap 201 247" \
-    "tap 23 68" "tap 119 165" "tap 71 167" \
-    "$ENTRY_7" "$ENTRY_7" "$ENTRY_3" "$ENTRY_5" "$ENTRY_2" "$ENTRY_6" \
-    "$ENTRY_7" "$ENTRY_6" "$ENTRY_3" "$ENTRY_0" "$ENTRY_8" "$ENTRY_4" \
-    "$ENTRY_R"
+add account-me-pw-added "$ENTRY_R"
 
 # --- setup -------------------------------------------------------------------
 
@@ -547,35 +527,33 @@ accounts setup-rd "long 201 23" "tap 152 141" \
 
 # --- Move from ---------------------------------------------------------------
 
-accounts move-from "long 200 72" "tap 98 165"
+accounts move-from "long 200 72" "$ACCOUNTS_MOVE"
 
 # --- Moving -----------------------------------------------------------------
 
-accounts moving "long 200 72" "$ACCOUNTS_MOVE" "long 114 166"
+add moving "long 114 166"
 
 # --- Moved -------------------------------------------------------------------
 
-accounts moved "long 200 72" "$ACCOUNTS_MOVE" \
-    "long 114 166" "$ACCOUNTS_MOVE"
+save
+add moved "$ACCOUNTS_MOVE"
+restore
 
 # --- Move cancel -------------------------------------------------------------
 
-accounts move-cancel "long 200 72" "$ACCOUNTS_MOVE" "long 114 166" \
-    "$ACCOUNTS_CANCEL_MOVE"
+add move-cancel "$ACCOUNTS_CANCEL_MOVE"
 
-# --- Edit entry name (demo) --------------------------------------------------
+# === Edit entry name (demo) =================================================
 
 accounts entry-edit "tap 86 67" "long 201 23" "tap 116 141"
 
-# --- Edit entry name (remove "emo") -------------------------------------------
+# --- Edit entry name (remove "emo") ------------------------------------------
 
-accounts entry-edit-d "tap 86 67" "long 201 23" "tap 116 141" \
-    "$ENTRY_L" "$ENTRY_L" "$ENTRY_L"
+add entry-edit-d "$ENTRY_L" "$ENTRY_L" "$ENTRY_L"
 
 # --- Edit entry name ("dummy1", duplicate) -----------------------------------
 
-accounts entry-edit-dummy1 "tap 86 67" "long 201 23" "tap 116 141" \
-    "$ENTRY_L" "$ENTRY_L" "$ENTRY_L" \
+add entry-edit-dummy1 \
     "$ENTRY_8" "$ENTRY_5" \
     "$ENTRY_6" "$ENTRY_4" "$ENTRY_6" "$ENTRY_4" \
     "$ENTRY_9" "$ENTRY_6" \
@@ -583,154 +561,97 @@ accounts entry-edit-dummy1 "tap 86 67" "long 201 23" "tap 116 141" \
 
 # --- Edit entry name ("dummy12", then back, duplicate) -----------------------
 
-accounts entry-edit-dummy12 "tap 86 67" "long 201 23" "tap 116 141" \
-    "$ENTRY_L" "$ENTRY_L" "$ENTRY_L" \
-    "$ENTRY_8" "$ENTRY_5" \
-    "$ENTRY_6" "$ENTRY_4" "$ENTRY_6" "$ENTRY_4" \
-    "$ENTRY_9" "$ENTRY_6" \
-    "$ENTRY_1" "$ENTRY_0" \
+save
+add entry-edit-dummy12 \
     "$ENTRY_2" "$ENTRY_0" \
     "$ENTRY_L"
+restore
 
 # --- Edit entry name ("dummy1xxx" ) ------------------------------------------
 
-accounts entry-edit-dummy1xxx "tap 86 67" "long 201 23" "tap 116 141" \
-    "$ENTRY_L" "$ENTRY_L" "$ENTRY_L" \
-    "$ENTRY_8" "$ENTRY_5" \
-    "$ENTRY_6" "$ENTRY_4" "$ENTRY_6" "$ENTRY_4" \
-    "$ENTRY_9" "$ENTRY_6" \
-    "$ENTRY_1" "$ENTRY_0" \
+add entry-edit-dummy1xxx \
     "$ENTRY_9" "$ENTRY_5" "$ENTRY_9" "$ENTRY_5" "$ENTRY_9" "$ENTRY_5"
 
 # --- Edit entry name ("dummy1xxx123456" ) ------------------------------------
 
-accounts entry-edit-6 \
-    "tap 86 67" "long 201 23" "tap 116 141" \
-    "$ENTRY_L" "$ENTRY_L" "$ENTRY_L" \
-    "$ENTRY_8" "$ENTRY_5" \
-    "$ENTRY_6" "$ENTRY_4" "$ENTRY_6" "$ENTRY_4" \
-    "$ENTRY_9" "$ENTRY_6" \
-    "$ENTRY_1" "$ENTRY_0" \
-    "$ENTRY_9" "$ENTRY_5" "$ENTRY_9" "$ENTRY_5" "$ENTRY_9" "$ENTRY_5" \
+add entry-edit-6 \
     "$ENTRY_1" "$ENTRY_0" "$ENTRY_2" "$ENTRY_0" "$ENTRY_3" "$ENTRY_0" \
     "$ENTRY_4" "$ENTRY_0" "$ENTRY_5" "$ENTRY_0" "$ENTRY_6" "$ENTRY_0"
 
 # --- Edit entry name ("dummy1xxx1234567", maximum length) --------------------
 
-accounts entry-edit-7 \
-    "tap 86 67" "long 201 23" "tap 116 141" \
-    "$ENTRY_L" "$ENTRY_L" "$ENTRY_L" \
-    "$ENTRY_8" "$ENTRY_5" \
-    "$ENTRY_6" "$ENTRY_4" "$ENTRY_6" "$ENTRY_4" \
-    "$ENTRY_9" "$ENTRY_6" \
-    "$ENTRY_1" "$ENTRY_0" \
-    "$ENTRY_9" "$ENTRY_5" "$ENTRY_9" "$ENTRY_5" "$ENTRY_9" "$ENTRY_5" \
-    "$ENTRY_1" "$ENTRY_0" "$ENTRY_2" "$ENTRY_0" "$ENTRY_3" "$ENTRY_0" \
-    "$ENTRY_4" "$ENTRY_0" "$ENTRY_5" "$ENTRY_0" "$ENTRY_6" "$ENTRY_0" \
-    "$ENTRY_7" "$ENTRY_0"
+add entry-edit-7 "$ENTRY_7" "$ENTRY_0"
 
 # --- Edit entry name ("dummy1xxx1234567", no more) ---------------------------
 
-accounts entry-edit-8 \
-    "tap 86 67" "long 201 23" "tap 116 141" \
-    "$ENTRY_L" "$ENTRY_L" "$ENTRY_L" \
-    "$ENTRY_8" "$ENTRY_5" \
-    "$ENTRY_6" "$ENTRY_4" "$ENTRY_6" "$ENTRY_4" \
-    "$ENTRY_9" "$ENTRY_6" \
-    "$ENTRY_1" "$ENTRY_0" \
-    "$ENTRY_9" "$ENTRY_5" "$ENTRY_9" "$ENTRY_5" "$ENTRY_9" "$ENTRY_5" \
-    "$ENTRY_1" "$ENTRY_0" "$ENTRY_2" "$ENTRY_0" "$ENTRY_3" "$ENTRY_0" \
-    "$ENTRY_4" "$ENTRY_0" "$ENTRY_5" "$ENTRY_0" "$ENTRY_6" "$ENTRY_0" \
-    "$ENTRY_7" "$ENTRY_0" "$ENTRY_8" "$ENTRY_0"
+add entry-edit-8 "$ENTRY_8" "$ENTRY_0"
 
-# --- Pin change, old PIN, empty ----------------------------------------------
+# === Pin change, old PIN, empty ==============================================
 
 accounts change-old \
     "long 201 23" "tap 152 141" "tap 86 70"
 
 # --- Pin change, old PIN, cancel ---------------------------------------------
 
-accounts change-old-cancel \
-    "long 201 23" "tap 152 141" "tap 86 70" "$ENTRY_L"
+save
+add change-old-cancel "$ENTRY_L"
+restore
 
 # --- Pin change, old PIN, first digit ----------------------------------------
 
-accounts change-old-1 \
-    "long 201 23" "tap 152 141" "tap 86 70" \
-    "$ENTRY_1"
+add change-old-1 "$ENTRY_1"
 
 # --- Pin change, invalid PIN  ------------------------------------------------
 
-accounts change-invalid \
-    "long 201 23" "tap 152 141" "tap 86 70" \
-    "$ENTRY_1" "$ENTRY_1" "$ENTRY_1" "$ENTRY_1" "$ENTRY_R"
+save
+add change-invalid "$ENTRY_1" "$ENTRY_1" "$ENTRY_1" "$ENTRY_R"
+restore
 
 # --- Pin change, new PIN  ----------------------------------------------------
 
-accounts change-new \
-    "long 201 23" "tap 152 141" "tap 86 70" \
-    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R"
+add change-new "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R"
 
 # --- Pin change, new PIN, cancel  --------------------------------------------
 
-accounts change-new-cancel \
-    "long 201 23" "tap 152 141" "tap 86 70" \
-    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" "$ENTRY_L"
+save
+add change-new-cancel "$ENTRY_L"
+restore
 
 # --- Pin change, new PIN, first digit  ---------------------------------------
 
-accounts change-new-first \
-    "long 201 23" "tap 152 141" "tap 86 70" \
-    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
-    "$ENTRY_1"
+add change-new-first "$ENTRY_1"
 
 # --- Pin change, same PIN  ---------------------------------------------------
 
-accounts change-same \
-    "long 201 23" "tap 152 141" "tap 86 70" \
-    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
-    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R"
+save
+add change-same "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R"
+restore
 
 # --- Pin change, new PIN, all six digits  ------------------------------------
 
-accounts change-new-all \
-    "long 201 23" "tap 152 141" "tap 86 70" \
-    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
-    "$ENTRY_1" "$ENTRY_2" "$ENTRY_9" "$ENTRY_5" "$ENTRY_8" "$ENTRY_0"
+add change-new-all "$ENTRY_2" "$ENTRY_9" "$ENTRY_5" "$ENTRY_8" "$ENTRY_0"
 
 # --- Pin change, confirm PIN -------------------------------------------------
 
-accounts change-confirm \
-    "long 201 23" "tap 152 141" "tap 86 70" \
-    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
-    "$ENTRY_1" "$ENTRY_2" "$ENTRY_9" "$ENTRY_5" "$ENTRY_8" "$ENTRY_0" \
-    "$ENTRY_R"
+add change-confirm "$ENTRY_R"
 
 # --- Pin change, confirm PIN, cancel -----------------------------------------
 
-accounts change-confirm-cancel \
-    "long 201 23" "tap 152 141" "tap 86 70" \
-    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
-    "$ENTRY_1" "$ENTRY_2" "$ENTRY_9" "$ENTRY_5" "$ENTRY_8" "$ENTRY_0" \
-    "$ENTRY_R" "$ENTRY_L"
+save
+add change-confirm-cancel "$ENTRY_L"
+restore
 
 # --- Pin change, match -------------------------------------------------------
 
-accounts change-match \
-    "long 201 23" "tap 152 141" "tap 86 70" \
-    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
-    "$ENTRY_1" "$ENTRY_2" "$ENTRY_9" "$ENTRY_5" "$ENTRY_8" "$ENTRY_0" \
-    "$ENTRY_R" \
+save
+add change-match \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_9" "$ENTRY_5" "$ENTRY_8" "$ENTRY_0" \
     "$ENTRY_R"
+restore
 
-# --- Pin change, match -------------------------------------------------------
+# --- Pin change, mismatch ----------------------------------------------------
 
-accounts change-mismatch \
-    "long 201 23" "tap 152 141" "tap 86 70" \
-    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
-    "$ENTRY_1" "$ENTRY_2" "$ENTRY_9" "$ENTRY_5" "$ENTRY_8" "$ENTRY_0" \
-    "$ENTRY_R" \
+add change-mismatch \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_9" "$ENTRY_6" "$ENTRY_8" "$ENTRY_0" \
     "$ENTRY_R"
 
@@ -812,28 +733,22 @@ page -e new-on "random 1" button
 page -e new-cancel "random 1" button \
     "$ENTRY_L"
 
-# --- New device, PIN ---------------------------------------------------------
+# === New device, PIN =========================================================
 
 page -e new-pin "random 1" button \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4"
 
 # --- New device, confirm -----------------------------------------------------
 
-page -e new-confirm "random 1" button \
-    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R"
+add -e new-confirm "$ENTRY_R"
 
 # --- New device, confirmed ---------------------------------------------------
 
-page -e new-confirmed "random 1" button \
-    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
-    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R"
+add -e new-confirmed "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R"
 
 # --- New device, enter -------------------------------------------------------
 
-page -e new-enter "random 1" button \
-    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
-    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
-    "$ENTRY_5"
+add -e new-enter "$ENTRY_5"
 
 # --- New device, mismatch ---------------------------------------------------
 
@@ -843,10 +758,7 @@ page -e new-mismatch "random 1" button \
 
 # --- New device, repeat ---------------------------------------------------
 
-page -e new-repeat "random 1" button \
-    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
-    "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_R" \
-    "$ENTRY_5"
+add -e new-repeat "$ENTRY_5"
 
 ## --- accounts (empty) --------------------------------------------------------
 
@@ -858,19 +770,22 @@ accounts setup-master "long 201 23" "tap 152 141" "tap 81 168"
 
 # --- setup master secret, show pubkey ----------------------------------------
 
-accounts setup-master-pubkey "long 201 23" "tap 152 141" "tap 81 168" \
-    "tap 128 69"
+save
+add setup-master-pubkey "tap 128 69"
+restore
 
 # --- setup master secret, PIN ------------------------------------------------
 
-accounts setup-master-pin "long 201 23" "tap 152 141" "tap 81 168" \
-    "tap 129 119"
+save
+add setup-master-pin "tap 129 119"
+restore
 
 # --- setup master secret, show -----------------------------------------------
 
-accounts setup-master-show "long 201 23" "tap 152 141" "tap 81 168" \
-    "master scramble" "tap 129 119" \
+save
+add setup-master-show "master scramble" "tap 129 119" \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R"
+restore
 
 # === set master, PIN =========================================================
 

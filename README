@@ -1,9 +1,9 @@
 Sunela Firmware
 ===============
 
-This repository contains the Sunela firmware. Both a version ("fw") that runs
-on the real hardware and a simulator ("sim") that runs under Linux, using SDL,
-are built.
+This repository contains the Sunela firmware. Both a version that runs on the
+real hardware and a simulator ("sim") that runs under Linux, using SDL, are
+built.
 
 Most of the firmware is distributed under the terms of the MIT License. See
 COPYING for more details.
@@ -13,16 +13,8 @@ WARNING
 -------
 
 This firmware is under development and not yet intended for real-life use !
-Among other issues, test coverage is very poor (there aren't even proper
-regression tests), some code needs major cleanup, and "secrets" are not hidden
-at all.
-
-
-Build instructions
-------------------
-
-To do: document setting up the toolchain (we're based on the Bouffalo SDK, but
-there are some issues we need to work around.)
+Among other issues, test coverage is very poor, some code needs major
+cleanup, and "secrets" are not hidden at all.
 
 
 Prerequisites
@@ -31,13 +23,40 @@ Prerequisites
 The following packages are needed (the package names given here are for
 Ubuntu 22.04):
 
-fontconfig		Font configuration utility fc-list:
-fonts-liberation	Liberation fonts:
+fontconfig		Font configuration utility fc-list
+fonts-liberation	Liberation fonts
 jq			Command-line JSON processor
 libgcrypt20-dev		GNU Crypto library
 libsdl2-dev		Simple Directmedia Layer (SDL2)
 otf2bdf			OpenType/TrueType BDF converter otf2bdf
 python3-nacl		PyNaCl
+
+
+Running the simulator
+---------------------
+
+Install the packages listed in the previous section. Then run
+
+make fonts sim
+
+(if you have set up the RISC-V toolchain, below, then you can also just run
+"make", which will build the simulator and a binary for the M1s Dock.)
+
+Start the simulator with
+
+./sim
+
+Press the space button to activate the simulated device. Then use the
+mouse to operate the user interface. The following operations are
+generally available:
+
+- click to press user interface buttons, select items from lists, etc.
+- many pages have an overlay with additional functions. These overlays
+  can be invoked by clicking and holding.
+- clicking and left-swiping usually returns to the previous page.
+- click and drag up and down to scroll.
+- [S] takes a screenshot and stores it in a PNG file
+- [Q] leaves the simulator
 
 
 Running on the Sipeed M1s Dock
@@ -48,18 +67,31 @@ Bouffalo SDK provides the USB stack.
 
 Prerequisites:
 
-Toolchain: riscv64-unknown-elf
-Probable source (for Ubuntu): apt install gcc-riscv64-unknown-elf
+We need a riscv64-unknown-elf toolchain with T-Head extensions. The RISC-V
+toolchain in Ubuntu (gcc-riscv64-unknown-elf) lacks these extensions.
+
+Toolchain with T-Head extensions:
+git clone https://github.com/bouffalolab/toolchain_gcc_t-head_linux
 
 Bouffalo SDK (for BL616, BL618, BL808, and others):
 git clone https://github.com/bouffalolab/bouffalo_sdk.git
 
-Check out the Bouffalo SDK at the same level as the fw/ directory.
+Check out the Bouffalo SDK and the toolchain at the same level as the fw/
+directory, i.e.,
+/some/place/fw/
+/some/place/bouffalo_sdk/
+/some/place/toolchain_gcc_t-head_linux/
+
+Important: add the toolchain to your PATH:
+PATH=$PATH:/some/place/toolchain_gcc_t-head_linux/bin
+
+If you have also installed the riscv64-unknown-elf from Ubuntu, you need to
+put the toolchain with T-Head extensions first, e.g.,
+PATH=/some/place/toolchain_gcc_t-head_linux/bin:$PATH
 
 Build:
 
-cd sdk
-make
+make fonts sdk
 
 Transfer to on-board Flash:
 
@@ -80,7 +112,10 @@ To test the code:
 
 - Connect the right USB port of the M1s to a PC, for power and, optionally, the
   serial console:
+
   picocom -b 2000000 /dev/ttyACM1
+  or
+  make picocom
 
 - reset the M1s by pressing the RST button (under the board)
 

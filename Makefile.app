@@ -108,7 +108,7 @@ sin.inc:	mksintab.pl
 lib/bip39/bip39enc.c: lib/bip39/english.inc
 
 lib/bip39/english.inc: lib/bip39/english.txt Makefile
-		sed 's/.*/"&",/' <$< > $@ || { rm -f $@; exit 1; }
+		$(BUILD) sed 's/.*/"&",/' <$< > $@ || { rm -f $@; exit 1; }
 
 # --- Build version -----------------------------------------------------------
 
@@ -129,5 +129,5 @@ $(OBJDIR)version$(OBJ_SUFFIX): main/version.c | generated_headers
 
 clean::
 		rm -f citrine.inc
-		rm -f sin.inc lib/bip3/english.inc
+		rm -f sin.inc lib/bip39/english.inc
 		$(MAKE) -C font clean

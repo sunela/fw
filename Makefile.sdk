@@ -51,3 +51,4 @@ $(OBJDIR)libsunela.a: $(OBJS_IN_OBJDIR)
 spotless::
 		rm -f $(OBJDIR)libsunela.a
 		rm -rf obj-sdk
+		rm -rf sdk/build

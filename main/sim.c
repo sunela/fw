@@ -203,7 +203,7 @@ static bool process_events(void)
 			if (!screenshot(&main_da, screenshot_name,
 			    screenshot_number))
 				return 1;
-			fprintf(stderr, "screenshut %u\n", screenshot_number);
+			fprintf(stderr, "screenshot %u\n", screenshot_number);
 			screenshot_number++;
 			break;
 		case SDLK_q:

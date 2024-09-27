@@ -47,7 +47,7 @@ int bip39_decode(void *buf, unsigned bytes, const uint16_t *words,
 	while (num_words--) {
 		pending = pending << BIP39_WORD_BITS | *words++;
 		bits += BIP39_WORD_BITS;
-		while (bits >= 8 && (void *) p - buf != ent / 8) {
+		while (bits >= 8 && (unsigned) ((void *) p - buf) != ent / 8) {
 			*p++ = pending >> (bits - 8);
 			bits -= 8;
 		}

@@ -271,7 +271,7 @@ accounts accounts
 
 # --- accounts scrolled up ----------------------------------------------------
 
-accounts accounts-up "drag 158 243 159 180"
+accounts accounts-up "drag 158 243 159 117"
 
 # --- account (demo)-----------------------------------------------------------
 
@@ -279,12 +279,12 @@ accounts account-demo "tap 86 67"
 
 # --- account (HOTP hidden) ---------------------------------------------------
 
-accounts account-hotp "drag 158 243 159 196" "tap 50 221"
+accounts account-hotp "drag 158 243 159 170" "tap 50 221"
 
 # --- account (HOTP revealed)--------------------------------------------------
 
 accounts account-hotp-reveal \
-    "drag 158 243 159 196" "tap 50 221" "tap 38 80"
+    "drag 158 243 159 170" "tap 50 221" "tap 38 80"
 
 # --- account (TOTP)-----------------------------------------------------------
 
@@ -293,7 +293,7 @@ accounts account-hotp-reveal \
 # Code 605617
 
 accounts account-totp \
-    "time 1716272769" "drag 158 243 159 180" "tap 41 241" tick
+    "time 1716272769" "drag 158 243 159 130" "tap 41 241" tick
 
 # --- accounts overlay (top) --------------------------------------------------
 
@@ -439,7 +439,7 @@ accounts account-demo-pw-geheimx "tap 86 67" "long 199 119" \
 
 # The secret is a long base32 string that gets cut off at the screen edge.
 
-accounts account-hotp-secret "drag 158 243 159 196" "tap 50 221" \
+accounts account-hotp-secret "drag 158 243 159 170" "tap 50 221" \
     "long 75 66" "tap 91 173"
 
 # --- account with "comment" field --------------------------------------------
@@ -476,7 +476,7 @@ json <<EOF
 EOF
 
 accounts account-pw2-totp-up-5 \
-    "time 5" "tap 86 67" "drag 158 243 159 196"
+    "time 5" "tap 86 67" "drag 158 243 159 130"
 
 # --- account with 2nd password and TOTP, scrolled up, at 20 s ----------------
 
@@ -486,7 +486,7 @@ json <<EOF
 EOF
 
 accounts account-pw2-totp-up-20 \
-    "time 20" "tap 86 67" "drag 158 243 159 196"
+    "time 20" "tap 86 67" "drag 158 243 159 130"
 
 # --- account with 2nd password and TOTP, scrolled up, at 31 s ----------------
 
@@ -496,7 +496,7 @@ json <<EOF
 EOF
 
 accounts account-pw2-totp-up-31 \
-    "time 31" "tap 86 67" "drag 158 243 159 196"
+    "time 31" "tap 86 67" "drag 158 243 159 130"
 
 # --- delete 2nd password field -----------------------------------------------
 
@@ -523,7 +523,7 @@ accounts setup-version "long 201 23" "tap 152 141" static "tap 81 268"
 # --- setup R&D ---------------------------------------------------------------
 
 accounts setup-rd "long 201 23" "tap 152 141" \
-    "drag 66 200 68 153" "tap 68 219"
+    "drag 66 200 68 103" "tap 68 219"
 
 # --- Move from ---------------------------------------------------------------
 
@@ -722,13 +722,13 @@ saved_mode=$mode
 mode=run
 if ! page_inner -n hotp-reveal-twice \
     "random 1" button "$PIN_1" "$PIN_2" "$PIN_3" "$PIN_4" "$PIN_NEXT" \
-    "drag 158 243 159 196" "tap 50 221" "tap 38 80"; then
+    "drag 158 243 159 170" "tap 50 221" "tap 38 80"; then
 	mode=$saved_mode
 	cleanup
 else
 	mode=$saved_mode
 	accounts hotp-reveal-twice \
-	    "drag 158 243 159 196" "tap 50 221" "tap 38 80"
+	    "drag 158 243 159 170" "tap 50 221" "tap 38 80"
 fi
 
 # --- New device --------------------------------------------------------------

@@ -913,6 +913,16 @@ add sm-24-done "$SECOND"
 add sm-verify "$ENTRY_5" "tap 129 119" \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R"
 
+# === long entry, show ========================================================
+
+accounts long-show "tap 32 270"
+
+# --- long entry, scroll to the left ------------------------------------------
+
+add long-left "drag 220 120 100 120"
+add long-left2 "drag 220 120 110 121"
+add long-left3 "drag 240 120 100 120"
+
 # -----------------------------------------------------------------------------
 
 if [ "$select" ] && ! $found; then

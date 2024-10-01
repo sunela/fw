@@ -33,7 +33,7 @@
 		"id":	"dummy2",
 		"prev":	"dummy1",
 		"user":	"for scrolling",
-		"pw":	"Geheim"
+		"pw":	"fairlyLongPasswordlikePhrase123456789"
 	},
 	{
 		"id":	"HOTP",

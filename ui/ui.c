@@ -274,8 +274,15 @@ void touch_down_event(unsigned x, unsigned y)
 	const struct ui_events *e = current_events();
 
 //	debug("mouse down %u %u\n", x, y);
-	if (x >= GFX_WIDTH || y >= GFX_HEIGHT)
-		return;
+	/*
+	 * We assume any tap is a valid event, even if the coordinates may be
+	 * off. This is important for not getting confused if more events in
+	 * a supposed down state arrive.
+	 */
+	if (x >= GFX_WIDTH)
+		x = GFX_WIDTH - 1;
+	if (y >= GFX_HEIGHT)
+		y = GFX_HEIGHT - 1;
 	if (e && e->touch_down)
 		e->touch_down(current_ctx(), x, y);
 	touch_start_ms = now;

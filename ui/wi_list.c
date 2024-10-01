@@ -313,8 +313,6 @@ debug("scrolling %u up %u scroll_up %u dy %d y0 %u y1 %u th %u\n",
 			left = max_left;
 		e->left = left;
 	}
-	if (!dx && !dy)
-		return 0;
 	draw_list(list);
 	ui_update_display();
 	return 1;
@@ -335,7 +333,7 @@ bool wi_list_moving(struct wi_list *list, unsigned from_x, unsigned from_y,
 		list->scroll_up = list->up;
 		list->scrolling = 1;
 	}
-	if (from_y != to_y || from_y != to_y)
+	if (from_x != to_x || from_y != to_y)
 		list_scroll(list, to_x - from_x, to_y - from_y);
 	return 1;
 }

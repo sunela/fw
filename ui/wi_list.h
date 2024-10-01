@@ -64,11 +64,6 @@ void wi_list_forall(struct wi_list *list,
 
 bool list_is_empty(const struct wi_list *list);
 
-/*
- * Negative dy scrolls up.
- */
-
-bool list_scroll(struct wi_list *list, int dy);
 bool wi_list_moving(struct wi_list *list, unsigned from_x, unsigned from_y,
     unsigned to_x, unsigned to_y, enum ui_swipe swipe);
 bool wi_list_to(struct wi_list *list, unsigned from_x, unsigned from_y,

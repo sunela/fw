@@ -261,7 +261,11 @@ static unsigned draw_list(struct wi_list *list)
 /* --- Vertical scrolling -------------------------------------------------- */
 
 
-bool list_scroll(struct wi_list *list, int dy)
+/*
+ * Negative dy scrolls up.
+ */
+
+static bool list_scroll(struct wi_list *list, int dy)
 {
 	const struct wi_list_style *style = list->style;
 

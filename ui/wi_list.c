@@ -38,7 +38,7 @@
 struct wi_list_entry {
 	const char *first;
 	const char *second;
-	unsigned h_offset;
+	unsigned left;	/* horizontal scrolling */
 	unsigned first_w, second_w;
 	void *user;
 	const struct wi_list_entry_style *style;
@@ -192,13 +192,13 @@ static void do_draw_entry(const struct wi_list *list,
 
 	clip_bb(da, list, bb);
 	gfx_rect(da, bb, entry_style->bg[odd]);
-//debug("w %u %u off %u\n", e->first_w, e->second_w, e->h_offset);
-	text_text(da, e->first_w <= GFX_WIDTH ? 0 : -e->h_offset,
+//debug("w %u %u off %u\n", e->first_w, e->second_w, e->left);
+	text_text(da, e->first_w <= GFX_WIDTH ? 0 : -e->left,
 	    y + opad(list, e),
 	    e->first, list_font(list), GFX_LEFT, GFX_TOP | GFX_MAX,
 	    entry_style->fg[odd]);
 	if (e->second)
-		text_text(da, e->second_w <= GFX_WIDTH ? 0 : -e->h_offset,
+		text_text(da, e->second_w <= GFX_WIDTH ? 0 : -e->left,
 		    y + opad(list, e) + ipad(list, e) + list->text_height,
 		    e->second, list_font(list),
 		    GFX_LEFT, GFX_TOP | GFX_MAX, entry_style->fg[odd]);
@@ -296,25 +296,21 @@ debug("scrolling %u up %u scroll_from %u dy %d y0 %u y1 %u th %u\n",
 	struct wi_list_entry *e = list->scroll_entry;
 
 	if (e) {
-		unsigned max_offset =
+		unsigned width =
 		    e->first_w > e->second_w ? e->first_w : e->second_w;
+		unsigned max_left;
+		int left = list->scroll_left - dx;
 
-		if (max_offset <= GFX_WIDTH)
-			max_offset = 0;
+		if (width <= GFX_WIDTH)
+			max_left = 0;
 		else
-			max_offset -= GFX_WIDTH;
-		if (dx > 0) {
-			if (e->h_offset < (unsigned) dx)
-				e->h_offset = 0;
-			else
-				e->h_offset -= dx;
-		}
-		if (dx < 0) {
-			if (e->h_offset - dx < max_offset)
-				e->h_offset -= dx;
-			else
-				e->h_offset = max_offset;
-		}
+			max_left = width - GFX_WIDTH;
+
+		if (left < 0)
+			left = 0;
+		if (left > (int) max_left)
+			left = max_left;
+		e->left = left;
 	}
 	if (!dx && !dy)
 		return 0;
@@ -334,10 +330,12 @@ bool wi_list_moving(struct wi_list *list, unsigned from_x, unsigned from_y,
 		return 0;
 	if (!list->scrolling) {
 		list->scroll_entry = wi_list_pick(list, from_x, from_y);
+		if (list->scroll_entry)
+			list->scroll_left = list->scroll_entry->left;
 		list->scroll_from = list->up;
 		list->scrolling = 1;
 	}
-	if (from_y != to_y)
+	if (from_y != to_y || from_y != to_y)
 		list_scroll(list, to_x - from_x, to_y - from_y);
 	return 1;
 }
@@ -364,7 +362,7 @@ void wi_list_cancel(struct wi_list *list)
 debug("wi_list_cancel\n");
 	if (list->scrolling) {
 		if (list->scroll_entry)
-			list->scroll_entry->h_offset = 0;
+			list->scroll_entry->left = 0;
 		if (list->scroll_from != list->up || list->scroll_entry) {
 			list->scroll_entry = NULL;
 			list->up = list->scroll_from;
@@ -429,7 +427,7 @@ struct wi_list_entry *wi_list_add(struct wi_list *list,
 	e = alloc_type(struct wi_list_entry);
 	e->first = first ? stralloc(first) : first;
 	e->second = second ? stralloc(second) : second;
-	e->h_offset = 0;
+	e->left = 0;
 	e->first_w = get_w(list, first);
 	e->second_w = get_w(list, second);
 	e->user = user;
@@ -459,7 +457,7 @@ void wi_list_update_entry(struct wi_list *list, struct wi_list_entry *entry,
 	free((void *) entry->first);
 	free((void *) entry->second);
 	entry->first = first ? stralloc(first) : first;
-	entry->h_offset = 0;
+	entry->left = 0;
 	entry->second = second ? stralloc(second) : second;
 	entry->first_w = get_w(list, first);
 	entry->second_w = get_w(list, second);

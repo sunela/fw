@@ -46,6 +46,7 @@ struct wi_list {
 	bool			scrolling;	/* vertical scrolling */
 	unsigned		scroll_from;
 	struct wi_list_entry	*scroll_entry;	/* horizontal scrolling */
+	unsigned		scroll_left;
 };
 
 

@@ -18,7 +18,6 @@
 #include "mbox.h"
 #include "gfx.h"
 #include "shape.h"
-#include "long_text.h"
 #include "text.h"
 #include "pin.h"
 #include "sha.h"
@@ -140,44 +139,6 @@ static bool demo_text(char *const *args, unsigned n_args)
 
 	for (i = 0; i != 3; i++)
 		text_char(&main_da, 100, 50 + 50 * i, fonts[i], '5', GFX_WHITE);
-
-	return 1;
-}
-
-
-/* Horizontally scrolling text */
-
-#define	DEMO_LONG_FONT	mono34
-#define	DEMO_LONG_HEIGHT	32
-#define	DEMO_LONG_HOLD_MS	500
-#define	DEMO_LONG_DELAY_MS	10
-#define	DEMO_LONG_STEP	2
-
-
-static bool demo_long(char *const *args, unsigned n_args)
-{
-	struct long_text lt;
-	unsigned i = 10;
-
-	if (n_args)
-		return 0;
-
-	long_text_setup(&lt, &main_da, 0, (GFX_HEIGHT - DEMO_LONG_HEIGHT) / 2,
-	    GFX_WIDTH, DEMO_LONG_HEIGHT, "THIS IS A SCROLLING TEXT.",
-	    &DEMO_LONG_FONT, GFX_WHITE, GFX_BLUE);
-	while (i) {
-		bool hold;
-
-		t0();
-		hold = long_text_scroll(&lt, &main_da, -DEMO_LONG_STEP);
-		ui_update_display();
-		t1("scroll & update");
-		if (hold) {
-			msleep(DEMO_LONG_HOLD_MS - DEMO_LONG_DELAY_MS);
-			i--;
-		}
-		msleep(DEMO_LONG_DELAY_MS);
-	}
 
 	return 1;
 }
@@ -834,7 +795,8 @@ static const struct demo {
 	{ "composit",	demo_composit,	"" },		// 2
 	{ "poly",	demo_poly,	"" },		// 3
 	{ "text",	demo_text,	"" },		// 4
-	{ "long",	demo_long,	"" },		// 5
+	{ NULL,		NULL,		NULL },		// 5
+		// was used for long (self-scrolling) text
 	{ "vscroll",	demo_vscroll,	"[y0 y1 ytop | tda vsa bfa vsp]" },
 							// 6
 	{ "entry",	demo_entry,	"" },		// 7

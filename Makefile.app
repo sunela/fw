@@ -13,7 +13,7 @@ CFLAGS += -g -Wall -Wextra -Wshadow -Wno-unused-parameter \
 OBJS = ui.o demo.o timer.o debug.o mbox.o rnd.o hmac.o hotp.o base32.o \
     tweetnacl.o \
     fmt.o imath.o bip39enc.o bip39in.o bip39dec.o version.o rmt.o rmt-db.o \
-    basic.o poly.o shape.o long_text.o font.o text.o \
+    basic.o poly.o shape.o font.o text.o \
     dbcrypt.o block.o span.o db.o settings.o pin.o secrets.o \
     ui_off.o ui_pin.o ui_fail.o ui_accounts.o ui_account.o ui_field.o \
     wi_list.o ui_entry.o wi_general_entry.o ui_time.o ui_overlay.o \
@@ -33,7 +33,6 @@ vpath bip39dec.c lib/bip39
 
 vpath basic.c gfx
 vpath poly.c gfx
-vpath long_text.c gfx
 vpath font.c font
 vpath text.c gfx
 vpath shape.c gfx

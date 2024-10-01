@@ -44,7 +44,7 @@ struct wi_list {
 	unsigned		total_height;	/* set by wi_list_end */
 	unsigned		up;		/* distance scrolled up */
 	bool			scrolling;	/* vertical scrolling */
-	unsigned		scroll_from;
+	unsigned		scroll_up;
 	struct wi_list_entry	*scroll_entry;	/* horizontal scrolling */
 	unsigned		scroll_left;
 };

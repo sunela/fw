@@ -275,23 +275,24 @@ static bool list_scroll(struct wi_list *list, int dx, int dy)
 	const struct wi_list_style *style = list->style;
 
 #if 0
-debug("scrolling %u up %u scroll_from %u dy %d y0 %u y1 %u th %u\n",
-    list->scrolling, list->up, list->scroll_from, dy, list->y0, style->y1,
+debug("scrolling %u up %u scroll_up %u dy %d y0 %u y1 %u th %u\n",
+    list->scrolling, list->up, list->scroll_up, dy, list->y0, style->y1,
     list->total_height);
 #endif
-	if (dy > 0) {
-		if (dy > (int) list->up)
-			dy = list->up;
+	int up = list->scroll_up - dy;
+
+	if (up < 0) {
+		up = 0;
 	} else {
-		unsigned visible_h =
-		    list->total_height + OVER_SCROLL - list->up;
+		unsigned list_h = list->total_height + OVER_SCROLL;
 		unsigned win_h = style->y1 - list->y0 + 1;
 
-		if (visible_h < win_h)
-			return 0;
-		if (visible_h + dy < win_h)
-			dy = win_h - visible_h;
+		if (list_h < win_h)
+			up = 0;
+		else if (list_h - win_h < (unsigned) up)
+			up = list_h - win_h;
 	}
+	list->up = up;
 
 	struct wi_list_entry *e = list->scroll_entry;
 
@@ -314,7 +315,6 @@ debug("scrolling %u up %u scroll_from %u dy %d y0 %u y1 %u th %u\n",
 	}
 	if (!dx && !dy)
 		return 0;
-	list->up -= dy;
 	draw_list(list);
 	ui_update_display();
 	return 1;
@@ -332,7 +332,7 @@ bool wi_list_moving(struct wi_list *list, unsigned from_x, unsigned from_y,
 		list->scroll_entry = wi_list_pick(list, from_x, from_y);
 		if (list->scroll_entry)
 			list->scroll_left = list->scroll_entry->left;
-		list->scroll_from = list->up;
+		list->scroll_up = list->up;
 		list->scrolling = 1;
 	}
 	if (from_y != to_y || from_y != to_y)
@@ -363,9 +363,9 @@ debug("wi_list_cancel\n");
 	if (list->scrolling) {
 		if (list->scroll_entry)
 			list->scroll_entry->left = 0;
-		if (list->scroll_from != list->up || list->scroll_entry) {
+		if (list->scroll_up != list->up || list->scroll_entry) {
 			list->scroll_entry = NULL;
-			list->up = list->scroll_from;
+			list->up = list->scroll_up;
 			draw_list(list);
 			ui_update_display();
 		}

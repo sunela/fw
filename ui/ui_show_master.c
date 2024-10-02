@@ -31,7 +31,7 @@ struct ui_show_master_ctx {
 };
 
 static const struct wi_list_style style = {
-	.y0	= 0,
+	.y0	= LIST_Y0,
 	.y1	= GFX_HEIGHT - 1,
 	.entry = {
 		.fg	= { GFX_WHITE, GFX_WHITE },
@@ -112,6 +112,10 @@ static void ui_show_master_2_open(void *ctx, void *params)
 	unsigned n = 0;
 
 	lists[0] = &c->list;
+
+	gfx_rect_xy(&main_da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH, GFX_WHITE);
+        text_text(&main_da, GFX_WIDTH / 2, TOP_H / 2, "Master secret",
+            &FONT_TOP, GFX_CENTER, GFX_CENTER, GFX_WHITE);
 
 	wi_list_begin(&c->list, &style);
 	bip39_encode(&bip, master_secret, sizeof(master_secret));

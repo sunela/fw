@@ -790,6 +790,12 @@ add setup-master-show "master scramble" "tap 129 119" \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R"
 restore
 
+# --- setup master secret, show, back -----------------------------------------
+
+add setup-master-show-back "master scramble" "tap 129 119" \
+    "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
+    "drag 200 100 80 100"
+
 # === set master, PIN =========================================================
 
 #

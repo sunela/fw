@@ -327,9 +327,21 @@ bool wi_list_moving(struct wi_list *list, unsigned from_x, unsigned from_y,
 	if (from_y < list->y0 || from_y > style->y1)
 		return 0;
 	if (!list->scrolling) {
-		list->scroll_entry = wi_list_pick(list, from_x, from_y);
-		if (list->scroll_entry)
-			list->scroll_left = list->scroll_entry->left;
+		struct wi_list_entry *e = wi_list_pick(list, from_x, from_y);
+
+		/*
+		 * Only consider horizontal scrolling if anything needs
+		 * scrolling. This way, things like "left-swipe to go back"
+		 * work most of the time. (Horizontal scrolling takes
+		 * precedence over left-swipe.)
+		 */
+		if (e && (e->first_w > GFX_WIDTH || e->second_w > GFX_WIDTH)) {
+			list->scroll_entry = e;
+			if (e)
+				list->scroll_left = e->left;
+		} else {
+			list->scroll_entry = NULL;
+		}
 		list->scroll_up = list->up;
 		list->scrolling = 1;
 	}

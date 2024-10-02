@@ -444,8 +444,8 @@ static void show_help(void)
 "system COMMAND\trun a shell command\n"
 "tap X Y\t\ttap the touch screen\n"
 "tick\t\tgenerate one timer tick\n"
-"tick N\t\tgenerate N timer ticks\n" 
-"time UNIX-TIME\tset the system time (and hold it until changed)\n" 
+"tick N\t\tgenerate N timer ticks\n"
+"time UNIX-TIME\tset the system time (and hold it until changed)\n"
 "up\t\tstop touching the touch screen\n"
     );
 }
@@ -688,7 +688,6 @@ static bool process_cmd(const char *cmd)
 				goto fail;
 			}
 		}
-		
 		if (!strcmp(op, "open")) {
 			struct dbcrypt *c;
 

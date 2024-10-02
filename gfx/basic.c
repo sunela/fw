@@ -202,7 +202,7 @@ void gfx_disc(struct gfx_drawable *da, int x, int y, unsigned r,
 		    (y + dy >= da->clip.y && y + dy < da->clip.y + da->clip.h))
 			for (dx = -r; dx <= (int) r; dx++) {
 				if (!da->clipping ||
-		    		    (x + dx >= da->clip.x &&
+				    (x + dx >= da->clip.x &&
 				    x + dx < da->clip.x + da->clip.w))
 					if (dx * dx + dy * dy < r2)
 						*p = color;

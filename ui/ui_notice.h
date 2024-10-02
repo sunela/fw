@@ -49,7 +49,7 @@ enum notice_type {
 void vnotice_idle(enum notice_type type, unsigned idle_s, const char *title,
     const char *fmt, va_list ap);
 void notice_idle(enum notice_type type, unsigned idle_s, const char *title,
-     const char *fmt, ...);
+    const char *fmt, ...);
 
 void vnotice(enum notice_type type, const char *fmt, va_list ap);
 void notice(enum notice_type type, const char *fmt, ...);

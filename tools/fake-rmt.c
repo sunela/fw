@@ -75,8 +75,8 @@ void fake_rmt_open(const char *path)
 	addr.sun_family = AF_UNIX;
 	strcpy(addr.sun_path, path);
 
-        if (connect(rmt_s, (const struct sockaddr *) &addr, sizeof(addr)) < 0) {
-                perror(addr.sun_path);
-                exit(1);
-        }
+	if (connect(rmt_s, (const struct sockaddr *) &addr, sizeof(addr)) < 0) {
+		perror(addr.sun_path);
+		exit(1);
+	}
 }

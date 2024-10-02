@@ -155,9 +155,9 @@ def write_new(data, writer, readers):
 
 
 if len(sys.argv) < 2:
-        print("usage:", sys.argv[0], "db.json [writer [reader ...]]",
+	print("usage:", sys.argv[0], "db.json [writer [reader ...]]",
 	    file = sys.stderr)
-        sys.exit(1)
+	sys.exit(1)
 
 s = ""
 with open(sys.argv[1]) as file:
@@ -217,7 +217,7 @@ for e in db:
 		# empty settings record
 		write_new(struct.pack("<BBH", 4, 0, 0) + b,
 		    writer, [ writer.public_key ])
-	
+
 sys.stdout.buffer.write(
     (b'\xff' * (STORAGE_BLOCKS - RESERVED_BLOCKS - len(db) - settings) *
     BLOCK_SIZE))

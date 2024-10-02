@@ -141,7 +141,7 @@ void update_display(struct gfx_drawable *da)
 	dt = t1(NULL);
 	t1("D %u %u + %u %u: %u px (%.3f Mbps)\n",
 	    da->damage.x, da->damage.y, da->damage.w, da->damage.h,
-	     n_pix, n_pix / dt * 16e-6);
+	    n_pix, n_pix / dt * 16e-6);
 #endif /* DEBUG */
 }
 

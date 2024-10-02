@@ -69,7 +69,7 @@ static void clear_input(struct wi_bip39_entry_ctx *c)
 	gfx_rect_xy(&main_da, 0, 0, GFX_WIDTH,
 	    INPUT_PAD_TOP + c->input_max_height + INPUT_PAD_BOTTOM,
 	    ui_entry_valid(in) ? style->input_valid_bg :
-            style->input_invalid_bg);
+	    style->input_invalid_bg);
 }
 
 
@@ -212,8 +212,8 @@ static void wi_bip39_entry_input(void *user)
 
 static void base(unsigned x, unsigned y, gfx_color bg)
 {
-        gfx_rrect_xy(&main_da, x - BUTTON_W / 2, y - BUTTON_H / 2,
-            BUTTON_W, BUTTON_H, BUTTON_R, bg);
+	gfx_rrect_xy(&main_da, x - BUTTON_W / 2, y - BUTTON_H / 2,
+	    BUTTON_W, BUTTON_H, BUTTON_R, bg);
 }
 
 
@@ -274,7 +274,6 @@ static uint16_t wi_bip39_enabled_set(void *user)
 	for (p = next; *p; p++)
 		set |= 1 << (*p - '0');
 	return set;
-		
 }
 
 
@@ -328,7 +327,7 @@ static void wi_bip39_entry_clear_pad(void *user)
 	const unsigned h = 4 * BUTTON_H + 2 * BUTTON_X_GAP;
 
 	gfx_rect_xy(&main_da, 0, GFX_HEIGHT - h - BUTTON_BOTTOM_OFFSET,
-            GFX_WIDTH, h, GFX_BLACK);
+	    GFX_WIDTH, h, GFX_BLACK);
 }
 
 
@@ -382,9 +381,9 @@ static void wi_bip39_entry_init(void *ctx, struct ui_entry_input *input,
 	c->input = input;
 	c->style = style;
 	text_query(0, 0, "",
-            style->input_font ? style->input_font : &DEFAULT_INPUT_FONT,
-            GFX_TOP | GFX_MAX, GFX_TOP | GFX_MAX, &q);
-        c->input_max_height = q.h;
+	    style->input_font ? style->input_font : &DEFAULT_INPUT_FONT,
+	    GFX_TOP | GFX_MAX, GFX_TOP | GFX_MAX, &q);
+	c->input_max_height = q.h;
 }
 
 

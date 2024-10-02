@@ -285,7 +285,7 @@ void rmt_db_poll(void)
 		if (!rmt_end(&rmt_usb))
 			return;
 		state = RDS_IDLE;
-		break;	
+		break;
 	}
 }
 

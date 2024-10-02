@@ -558,7 +558,7 @@ static bool demo_gearsym(char *const *args, unsigned n_args)
 	unsigned tb = 10;
 	unsigned tt = 6;
 	unsigned th = 4;
-	
+
 	switch (n_args) {
 	case 0:
 		break;
@@ -658,7 +658,7 @@ static bool demo_movesym(char *const *args, unsigned n_args)
 	unsigned lw = 8;
 	bool from = 1;
 	int to = 0;
-	
+
 	switch (n_args) {
 	case 0:
 		break;
@@ -838,7 +838,7 @@ void demo(char **args, unsigned n_args)
 	char *end;
 
 	secrets_init();
- 	c = dbcrypt_init(master_secret, sizeof(master_secret));
+	c = dbcrypt_init(master_secret, sizeof(master_secret));
 	db_open(&main_db, c);
 	display_on(1);
 	n = strtoul(args[0], &end, 0);

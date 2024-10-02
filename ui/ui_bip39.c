@@ -24,7 +24,7 @@
 
 
 enum state {
-	S_INPUT		= 0,	
+	S_INPUT		= 0,
 	S_CHOICES	= 1, /* showing remaining choices (bip39_2) */
 };
 

@@ -210,20 +210,20 @@ static void ui_field_edit_open(void *ctx, void *params)
 	switch (p->type) {
 	case ft_user:
 		PARAMS("User name", MAX_STRING_LEN, NULL);
-		copy_string(c->buf, f);	
+		copy_string(c->buf, f);
 		break;
 	case ft_email:
 		PARAMS("E-Mail", MAX_STRING_LEN, NULL);
-		copy_string(c->buf, f);	
+		copy_string(c->buf, f);
 		break;
 	case ft_pw:
 		PARAMS(db_field_find(c->de, ft_pw2) ? "Password 1" : "Password",
 		    MAX_STRING_LEN, NULL);
-		copy_string(c->buf, f);	
+		copy_string(c->buf, f);
 		break;
 	case ft_pw2:
 		PARAMS("Password 2", MAX_STRING_LEN, NULL);
-		copy_string(c->buf, f);	
+		copy_string(c->buf, f);
 		break;
 	case ft_hotp_secret:
 		PARAMS("HOTP Secret", MAX_STRING_LEN, validate_base32);
@@ -240,7 +240,7 @@ static void ui_field_edit_open(void *ctx, void *params)
 		break;
 	case ft_comment:
 		PARAMS("Comment", MAX_STRING_LEN, NULL);
-		copy_string(c->buf, f);	
+		copy_string(c->buf, f);
 		break;
 	default:
 		ABORT();
@@ -261,7 +261,7 @@ static void ui_field_edit_resume(void *ctx)
 
 	ui_field_edit_close(ctx);
 	field_edited(c);
-        progress();
+	progress();
 }
 
 

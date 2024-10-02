@@ -44,7 +44,7 @@ static const struct wi_list_style style = {
 static struct wi_list *lists[1];
 
 static const struct ui_events ui_show_master_2_events = {
-	.touch_to       = swipe_back,
+	.touch_to	= swipe_back,
 	.lists		= lists,
 	.n_lists	= 1,
 };
@@ -114,8 +114,8 @@ static void ui_show_master_2_open(void *ctx, void *params)
 	lists[0] = &c->list;
 
 	gfx_rect_xy(&main_da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH, GFX_WHITE);
-        text_text(&main_da, GFX_WIDTH / 2, TOP_H / 2, "Master secret",
-            &FONT_TOP, GFX_CENTER, GFX_CENTER, GFX_WHITE);
+	text_text(&main_da, GFX_WIDTH / 2, TOP_H / 2, "Master secret",
+	    &FONT_TOP, GFX_CENTER, GFX_CENTER, GFX_WHITE);
 
 	wi_list_begin(&c->list, &style);
 	bip39_encode(&bip, master_secret, sizeof(master_secret));

@@ -64,7 +64,6 @@ int bip39_next_word(struct bip39enc *b)
 			buf = buf << want | ((*b->p >> shift) & mask);
 			b->pos += want;
 			break;
-			
 		}
 //printf("\t\t0x%02x\n", *b->p);
 		buf = buf << left | (*b->p & mask);

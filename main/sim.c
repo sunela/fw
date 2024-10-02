@@ -280,7 +280,6 @@ static void event_loop(void)
 		}
 		if (fake_rmt)
 			fake_rmt_poll();
-			
 	}
 }
 
@@ -423,7 +422,7 @@ int main(int argc, char **argv)
 			if (!run_script(argv + optind, argc - optind))
 				return 1;
 		} else {
-			if (!app_init(argv + optind, i - optind)) 
+			if (!app_init(argv + optind, i - optind))
 				usage(*argv);
 			if (!run_script(argv + i + 1, argc - i - 1))
 				return 1;

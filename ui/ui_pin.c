@@ -34,7 +34,7 @@
 
 
 struct ui_pin_ctx {
-	char buf[MAX_PIN_LEN + 1];	
+	char buf[MAX_PIN_LEN + 1];
 	struct wi_pin_entry_ctx pin_entry_ctx;
 };
 
@@ -109,7 +109,7 @@ static void ui_pin_open(void *ctx, void *params)
 		.maps = &ui_entry_decimal_maps,
 		.entry_ops = &wi_pin_entry_ops,
 		.entry_user = &c->pin_entry_ctx,
-        };
+	};
 
 	wi_pin_entry_setup(&c->pin_entry_ctx, 1, pin_shuffle);
 	memset(c->buf, 0, MAX_PIN_LEN + 1);

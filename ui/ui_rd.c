@@ -90,7 +90,7 @@ static void ui_rd_tap(void *ctx, unsigned x, unsigned y)
 	entry = wi_list_pick(&c->list, x, y);
 	if (!entry)
 		return;
- 	item = wi_list_user(entry);
+	item = wi_list_user(entry);
 
 	switch (item->type) {
 	case rit_bool:

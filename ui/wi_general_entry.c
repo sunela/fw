@@ -143,8 +143,8 @@ static void wi_general_entry_input(void *user)
 
 static void base(unsigned x, unsigned y, gfx_color bg)
 {
-        gfx_rrect_xy(&main_da, x - BUTTON_W / 2, y - BUTTON_H / 2,
-            BUTTON_W, BUTTON_H, BUTTON_R, bg);
+	gfx_rrect_xy(&main_da, x - BUTTON_W / 2, y - BUTTON_H / 2,
+	    BUTTON_W, BUTTON_H, BUTTON_R, bg);
 }
 
 
@@ -181,17 +181,17 @@ static void draw_label(unsigned x, unsigned y, const char *s, bool second)
 	} else {
 		if (second) {
 			/*
-		         * Characters that are hard to recognize if vertically
+			 * Characters that are hard to recognize if vertically
 			 * centered, e.g., minus and underscore would look the
 			 * same. Some lower-case letters also look a little odd
 			 * when centered, but they still are easily
 			 * recognizable, so we probably don't need to do
 			 * anything about them.
 			 */
-		        bool tricky = strchr("'\"`_,.", *s);
+			bool tricky = strchr("'\"`_,.", *s);
 
-		        text_text(&main_da, x, y, s, &FONT_2, GFX_CENTER,
-		            tricky ? GFX_CENTER | GFX_MAX : GFX_CENTER,
+			text_text(&main_da, x, y, s, &FONT_2, GFX_CENTER,
+			    tricky ? GFX_CENTER | GFX_MAX : GFX_CENTER,
 			    GFX_BLACK);
 		} else {
 			text_text(&main_da, x, y + LABEL_CENTER_OFFSET, top,
@@ -248,7 +248,7 @@ static void wi_general_entry_clear_pad(void *user)
 	const unsigned h = 4 * BUTTON_H + 2 * BUTTON_X_GAP;
 
 	gfx_rect_xy(&main_da, 0, GFX_HEIGHT - h - BUTTON_BOTTOM_OFFSET,
-            GFX_WIDTH, h, GFX_BLACK);
+	    GFX_WIDTH, h, GFX_BLACK);
 }
 
 
@@ -283,9 +283,9 @@ static void wi_general_entry_init(void *ctx, struct ui_entry_input *input,
 	c->input = input;
 	c->style = style;
 	text_query(0, 0, "",
-            style->input_font ? style->input_font : &DEFAULT_INPUT_FONT,
-            GFX_TOP | GFX_MAX, GFX_TOP | GFX_MAX, &q);
-        c->input_max_height = q.h;
+	    style->input_font ? style->input_font : &DEFAULT_INPUT_FONT,
+	    GFX_TOP | GFX_MAX, GFX_TOP | GFX_MAX, &q);
+	c->input_max_height = q.h;
 }
 
 

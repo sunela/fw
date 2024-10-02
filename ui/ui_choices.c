@@ -97,13 +97,13 @@ static void ui_choices_resume(void *ctx)
 	struct ui_choices_ctx *c = ctx;
 	struct ui_choices_params params = c->params;
 
-        /*
-         * @@@ once we have vertical scrolling, we'll also need to restore the
-         * position.
-         */
-        ui_choices_close(ctx);
-        ui_choices_open(ctx, &params);
-        progress();
+	/*
+	 * @@@ once we have vertical scrolling, we'll also need to restore the
+	 * position.
+	 */
+	ui_choices_close(ctx);
+	ui_choices_open(ctx, &params);
+	progress();
 }
 
 

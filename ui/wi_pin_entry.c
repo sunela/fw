@@ -152,12 +152,12 @@ static void wi_pin_entry_button(void *user, unsigned col, unsigned row,
 		base(x, y, bg);
 		pin_char(x, y, n);
 		return;
-        }
+	}
 
 	bg = enabled ? up ? SPECIAL_UP_BG : SPECIAL_DOWN_BG :
 	    SPECIAL_DISABLED_BG;
 	if (col == 0) {  // X
-		base(x, y, bg); 
+		base(x, y, bg);
 		if (*in->buf)
 			gfx_equilateral(&main_da, x, y, BUTTON_R * 1.4, -1,
 			    GFX_BLACK);
@@ -166,9 +166,9 @@ static void wi_pin_entry_button(void *user, unsigned col, unsigned row,
 				gfx_power_sym(&main_da, x, y, BUTTON_R * 0.6,
 				    5, GFX_BLACK, bg);
 			else
-		                gfx_diagonal_cross(&main_da, x, y,
+				gfx_diagonal_cross(&main_da, x, y,
 				    BUTTON_R * 0.8, 4, GFX_BLACK);
-	} else {        // >
+	} else {	// >
 		if (*in->buf) {
 			base(x, y, bg);
 			gfx_equilateral(&main_da, x, y, BUTTON_R * 1.4, 1,
@@ -185,7 +185,7 @@ static void wi_pin_entry_clear_pad(void *user)
 	const unsigned h = 3 * BUTTON_Y_SPACING + 2 * BUTTON_R;
 
 	gfx_rect_xy(&main_da, 0, GFX_HEIGHT - h - BUTTON_BOTTOM_OFFSET,
-            GFX_WIDTH, h, GFX_BLACK);
+	    GFX_WIDTH, h, GFX_BLACK);
 }
 
 

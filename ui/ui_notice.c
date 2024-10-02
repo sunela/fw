@@ -58,11 +58,11 @@ static void ui_notice_to(void *ctx, unsigned from_x, unsigned from_y,
 {
 	const struct ui_notice_ctx *c = ctx;
 
-        if (swipe == us_left) {
+	if (swipe == us_left) {
 		if (c->next)
 			ui_switch(c->next, c->next_params);
 		else
-                	ui_return();
+			ui_return();
 	}
 }
 
@@ -88,7 +88,7 @@ static void ui_notice_open(void *ctx, void *params)
 	if (p->title) {
 		gfx_rect_xy(&main_da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH,
 		    GFX_WHITE);
-	        text_text(&main_da, GFX_WIDTH / 2, TOP_H / 2, p->title,
+		text_text(&main_da, GFX_WIDTH / 2, TOP_H / 2, p->title,
 		    &FONT_TOP, GFX_CENTER, GFX_CENTER, GFX_WHITE);
 		yc = (GFX_HEIGHT + TOP_H + TOP_LINE_WIDTH) / 2;
 	} else {
@@ -140,7 +140,7 @@ static void vnotice_common(enum notice_type type, unsigned idle_s,
 		.idle_s		= idle_s,
 		.next		= next,
 		.next_params	= next_params,
-        };
+	};
 
 	params.s = vformat_alloc(fmt, ap);
 	switch (type) {

@@ -20,7 +20,6 @@ struct dbcrypt;
 const void *dbcrypt_pubkey(const struct dbcrypt *c);
 
 /*
- * 
  * "Content" is all the encrypted data, including status, payload, hash, and
  * reserved bytes.
  *

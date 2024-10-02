@@ -284,7 +284,6 @@ bool db_entry_defer_update(struct db_entry *de, bool defer)
 		if (!update_entry(de, new))
 			return 0;
 	}
-		
 	de->defer = defer;
 	return 1;
 }
@@ -808,8 +807,8 @@ bool db_open_progress(struct db *db, const struct dbcrypt *c,
 			break;
 		case bt_erased:
 			span_add(&db->erased, i, 1);
-                        db->stats.erased++;
-                        break;
+			db->stats.erased++;
+			break;
 		case bt_invalid:
 			db->stats.invalid++;
 			break;

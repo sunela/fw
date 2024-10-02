@@ -402,7 +402,7 @@ void touch_up_event(void)
 		progress();
 		to_event(touch_start_x, touch_start_y,
 		    touch_last_x, touch_last_y);
-	} else 	{
+	} else {
 		if (touch_dragging) {
 			cancel_event();
 		} else {

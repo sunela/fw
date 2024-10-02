@@ -34,7 +34,7 @@ static void ui_setup_open(void *ctx, void *params)
 		{ "Master secret",	&ui_choices,
 		    (void *) &choice_params_l2 },
 		{ "Storage",		&ui_storage,	NULL },
-		{ "Version", 		&ui_version,	NULL },
+		{ "Version",		&ui_version,	NULL },
 		{ "R&D",		&ui_rd,		NULL }
 	};
 	static const struct ui_choices_params choice_params = {

@@ -148,12 +148,12 @@ static void do_action_reveal(struct ui_rmt_ctx *c, const char *s)
 	}
 
 	gfx_clear(&main_da, GFX_BLACK);
-	h = text_format(&main_da, 0, 0, GFX_WIDTH, 0, 0, s, 
+	h = text_format(&main_da, 0, 0, GFX_WIDTH, 0, 0, s,
 	    &TEXT_FONT, GFX_CENTER, GFX_YELLOW);
 	if (h > GFX_HEIGHT)
 		h = GFX_HEIGHT;
 	y = (GFX_HEIGHT - h) / 2;
-	text_format(&main_da, 0, y, GFX_WIDTH, GFX_HEIGHT - y, 0, s, 
+	text_format(&main_da, 0, y, GFX_WIDTH, GFX_HEIGHT - y, 0, s,
 	    &TEXT_FONT, GFX_CENTER, GFX_YELLOW);
 	last_ctx->revealing = 1;
 	ui_update_display();
@@ -401,11 +401,11 @@ static void format_time(time_t t, char *buf, unsigned size)
 	assert(size >= 10 + 1 + 8 + 1);
 
 	gmtime_r(&t, &tm);
-        format(add_char, &p, "%04d-%02d-%02d",
-            tm.tm_year + 1900, tm.tm_mon, tm.tm_mday);
+	format(add_char, &p, "%04d-%02d-%02d",
+	    tm.tm_year + 1900, tm.tm_mon, tm.tm_mday);
 	*p++ = ' ';
 	format(add_char, &p, "%02d:%02d:%02d",
-            tm.tm_hour, tm.tm_min, tm.tm_sec);
+	    tm.tm_hour, tm.tm_min, tm.tm_sec);
 	assert(p - buf == 10 + 1 + 8);
 }
 

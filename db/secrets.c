@@ -34,7 +34,7 @@
  * device_secret is a secret stored in the device such that it cannot be
  * retrieved by an attacker and that it does not get leaked.
  *
- * master_pattern is a secret pattern obtained by hashing the device secret 
+ * master_pattern is a secret pattern obtained by hashing the device secret
  * with the PIN.
  *
  * master_key is a secret key obtained by XOR-ing the master pattern with a
@@ -56,7 +56,7 @@ static uint8_t master_pattern[MASTER_SECRET_BYTES];
 /*
  * Variables and operations:
  *
- * pin	 	the PIN, as little-endian 32-bit integer, padded with 0xff
+ * pin		the PIN, as little-endian 32-bit integer, padded with 0xff
  * device_secret
  *		secret 32-byte string
  * a + b	concatenation of a and b
@@ -81,7 +81,7 @@ static void hash(uint8_t *out, ...)
 
 		if (!p)
 			break;
-		size = va_arg(ap, unsigned);	
+		size = va_arg(ap, unsigned);
 		hexdump("\tIN =", p, size);
 		sha256_hash(p, size);
 	}
@@ -183,7 +183,6 @@ static int pad_block = -1;
 
 static bool apply_pad(uint8_t *secret, int last_seq, uint16_t seq,
     const uint8_t *pads, unsigned size, const uint8_t *id)
-    
 {
 	const uint8_t *end = pads + size;
 	const uint8_t *p;
@@ -362,7 +361,7 @@ bool secrets_setup(uint8_t *secret, int *block, uint32_t pin)
 debug("PAD: found %u seq %u\n", found, pad_seq);
 	memset(pad_id, 0, sizeof(pad_id));
 	memset(master_pattern, 0, sizeof(master_pattern));
-	
+
 	return found;
 }
 
@@ -390,7 +389,7 @@ bool secrets_new(uint32_t pin)
 	 */
 	for (n = 0; n < PAD_BLOCKS; n += storage_erase_size())
 		if (!storage_erase_blocks(n, storage_erase_size()))
-	                debug("could not erase %u\n", n);
+			debug("could not erase %u\n", n);
 
 	/*
 	 * @@@ For later: optionally generate existing master secret from
@@ -409,12 +408,11 @@ bool secrets_new(uint32_t pin)
 	if (!storage_write_block(io_buf, pad_block)) {
 		debug("storage_write_block (0) failed\n");
 		return 0;
-        }
+	}
 
 	have_pad = 1;
 
 	return 1;
-	
 }
 
 

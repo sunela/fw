@@ -24,7 +24,7 @@ uint32_t isqrt(uint32_t n)
 	uint32_t x = n;		// X_(n+1)
 	uint32_t c = 0;		// c_n
 
-   	// d_n which starts at the highest power of four <= n
+	// d_n which starts at the highest power of four <= n
 	uint32_t d = 1 << 30;	// The second-to-top bit is set.
 				// Same as ((unsigned) INT32_MAX + 1) / 2.
 	while (d > n)

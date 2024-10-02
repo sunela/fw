@@ -110,7 +110,7 @@ static void ui_account_tick(void *ctx)
 	int64_t this_tick = time_us() / 1000000;
 
 	if (c->last_tick == this_tick)
-                return;
+		return;
 	c->last_tick = this_tick;
 	/*
 	 * @@@ we update every second for the "time left" display. The code
@@ -253,7 +253,7 @@ static int validate_name_change(void *user, const char *s)
 	 * We don't use "s" but instead c->buf. Not very pretty, but it keeps
 	 * things simple.
 	 */
-        return db_iterate(&main_db, name_is_different, c);
+	return db_iterate(&main_db, name_is_different, c);
 }
 
 
@@ -450,7 +450,7 @@ static void ui_account_long(void *ctx, unsigned x, unsigned y)
 	struct ui_account_ctx *c = ctx;
 
 	if (y < LIST_Y0) {
-                account_overlay(c);
+		account_overlay(c);
 	} else {
 		struct wi_list_entry *entry = wi_list_pick(&c->list, x, y);
 

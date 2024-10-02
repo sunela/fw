@@ -193,7 +193,7 @@ static void long_top(void *ctx, unsigned x, unsigned y)
 	static struct ui_overlay_params prm = {
 		.buttons	= buttons,
 		.n_buttons	= 2,
-        };
+	};
 	unsigned i;
 
 	for (i = 0; i != prm.n_buttons; i++)
@@ -222,7 +222,7 @@ static void ui_accounts_long(void *ctx, unsigned x, unsigned y)
 	static struct ui_overlay_params prm = {
 		.buttons	= buttons,
 		.n_buttons	= 6,
-        };
+	};
 	const struct wi_list_entry *entry = wi_list_pick(&c->list, x, y);
 	unsigned i;
 

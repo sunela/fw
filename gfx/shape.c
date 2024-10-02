@@ -100,8 +100,8 @@ void gfx_rrect_xy(struct gfx_drawable *da, unsigned x, unsigned y, unsigned w,
 	if (2 * r > w)
 		r = w / 2;
 	for (dx = 0; dx != 2; dx++)
-                for (dy = 0; dy != 2; dy++)
-                        gfx_disc(da,
+		for (dy = 0; dy != 2; dy++)
+			gfx_disc(da,
 			    x + dx * (w - 1) * dx + r * (1 - dx * 2),
 			    y + dy * (h - 1) * dy + r * (1 - dy * 2), r, color);
 	gfx_rect_xy(da, x + r, y, w - 2 * r, r, color);
@@ -306,7 +306,6 @@ void gfx_gear_sym(struct gfx_drawable *da, unsigned x, unsigned y,
 		-tt / 2,	ro + th,
 		tt / 2,		ro + th,
 		tb / 2,		rb,
-		
 	};
 	unsigned o, i;
 

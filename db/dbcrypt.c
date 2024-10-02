@@ -220,7 +220,7 @@ static int db_decrypt_payload(void *content, unsigned size, const void *block,
 
 	t0();
 	if (crypto_secretbox_open(out_buf, in_buf, mlen, nonce, rk)) {
-                debug("crypto_secretbox failed\n");
+		debug("crypto_secretbox failed\n");
 		goto cleanup;
 	}
 	t1("db_decrypt:crypto_secretbox_open\n");
@@ -261,7 +261,7 @@ static int db_try_decrypt(void *content, unsigned size, const void *block,
 
 	t0();
 	if (crypto_stream_xor(out_buf, in_buf,
-            crypto_secretbox_ZEROBYTES + crypto_secretbox_KEYBYTES, nonce2,
+	    crypto_secretbox_ZEROBYTES + crypto_secretbox_KEYBYTES, nonce2,
 	    shared)) {
 		debug("crypto_stream_xor failed\b");
 		goto cleanup;

@@ -13,10 +13,10 @@
 
 
 #define	SHA1_HASH_BYTES		20	/* 160 bits */
-#define	SHA1_BLOCK_BYTES	64      /* 512 bits */
+#define	SHA1_BLOCK_BYTES	64	/* 512 bits */
 
 #define	SHA256_HASH_BYTES	32	/* 256 bits */
-#define	SHA256_BLOCK_BYTES	64      /* 512 bits */
+#define	SHA256_BLOCK_BYTES	64	/* 512 bits */
 
 
 void sha1_begin(void);

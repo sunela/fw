@@ -85,7 +85,7 @@ uint32_t rnd(uint32_t range)
 	uint64_t tmp;
 
 	rnd_bytes(&tmp, sizeof(tmp));
-        return tmp % range;
+	return tmp % range;
 }
 
 

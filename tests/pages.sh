@@ -423,10 +423,6 @@ accounts account-demo-pw-deleted "tap 86 67" "long 199 119" \
 
 accounts account-demo-bottom-over "tap 86 67" "long 107 194"
 
-# --- account overlay (bottom) ------------------------------------------------
-
-accounts account-demo-bottom-over "tap 86 67" "long 107 194"
-
 # --- account edit password (Geheimx) -----------------------------------------
 
 # Adding an "x" to "Geheim" makes the text too long for centering, but doesn't

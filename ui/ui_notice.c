@@ -16,6 +16,7 @@
 #include "colors.h"
 #include "shape.h"
 #include "text.h"
+#include "style.h"
 #include "ui.h"
 #include "ui_notice.h"
 
@@ -79,19 +80,28 @@ static void ui_notice_open(void *ctx, void *params)
 	unsigned r = p->r ? p->r : DEFAULT_BOX_R;
 	unsigned margin = p->margin ? p->margin : r;
 	const struct font *font = style->font ? style->font : &DEFAULT_FONT;
-	unsigned h;
+	unsigned yc, h;
 
 	c->next = p->next;
 	c->next_params = p->next_params;
+
+	if (p->title) {
+		gfx_rect_xy(&main_da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH,
+		    GFX_WHITE);
+	        text_text(&main_da, GFX_WIDTH / 2, TOP_H / 2, p->title,
+		    &FONT_TOP, GFX_CENTER, GFX_CENTER, GFX_WHITE);
+		yc = (GFX_HEIGHT + TOP_H + TOP_LINE_WIDTH) / 2;
+	} else {
+		yc = GFX_HEIGHT / 2;
+	}
+
 	assert(w > 2 * margin);
 	h = text_format(NULL, 0, 0, w - 2 * margin, 0, 0, p->s,
 	    font, style->x_align, style->fg);
-	gfx_rrect_xy(&main_da, (GFX_WIDTH - w) / 2,
-	    (GFX_HEIGHT - h) / 2 - margin,
+	gfx_rrect_xy(&main_da, (GFX_WIDTH - w) / 2, yc - h / 2 - margin,
 	    w, h + 2 * margin, r, style->bg);
-	text_format(&main_da, (GFX_WIDTH - w) / 2 + margin,
-	    (GFX_HEIGHT - h) / 2, w - 2 * margin, h, 0, p->s,
-	    font, style->x_align, style->fg);
+	text_format(&main_da, (GFX_WIDTH - w) / 2 + margin, yc - h / 2,
+	    w - 2 * margin, h, 0, p->s, font, style->x_align, style->fg);
 	set_idle(p->idle_s ? p->idle_s : IDLE_NOTICE_S);
 }
 
@@ -116,7 +126,7 @@ const struct ui ui_notice = {
 
 
 static void vnotice_common(enum notice_type type, unsigned idle_s,
-    const char *fmt, va_list ap,
+    const char *title, const char *fmt, va_list ap,
     void (*chain)(const struct ui *ui, void *params), const struct ui *next,
     void *next_params)
 {
@@ -125,6 +135,7 @@ static void vnotice_common(enum notice_type type, unsigned idle_s,
 		.x_align	= GFX_CENTER,
 	};
 	struct ui_notice_params params = {
+		.title		= title,
 		.style		= &style,
 		.idle_s		= idle_s,
 		.next		= next,
@@ -157,26 +168,27 @@ static void vnotice_common(enum notice_type type, unsigned idle_s,
 }
 
 
-void vnotice_idle(enum notice_type type, unsigned idle_s, const char *fmt,
-    va_list ap)
+void vnotice_idle(enum notice_type type, unsigned idle_s, const char *title,
+    const char *fmt, va_list ap)
 {
-	vnotice_common(type, idle_s, fmt, ap, ui_switch, NULL, NULL);
+	vnotice_common(type, idle_s, title, fmt, ap, ui_switch, NULL, NULL);
 }
 
 
-void notice_idle(enum notice_type type, unsigned idle_s, const char *fmt, ...)
+void notice_idle(enum notice_type type, unsigned idle_s, const char *title,
+    const char *fmt, ...)
 {
 	va_list ap;
 
 	va_start(ap, fmt);
-	vnotice_idle(type, idle_s, fmt, ap);
+	vnotice_idle(type, idle_s, title, fmt, ap);
 	va_end(ap);
 }
 
 
 void vnotice(enum notice_type type, const char *fmt, va_list ap)
 {
-	vnotice_common(type, 0, fmt, ap, ui_switch, NULL, NULL);
+	vnotice_common(type, 0, NULL, fmt, ap, ui_switch, NULL, NULL);
 }
 
 
@@ -192,7 +204,7 @@ void notice(enum notice_type type, const char *fmt, ...)
 
 void vnotice_call(enum notice_type type, const char *fmt, va_list ap)
 {
-	vnotice_common(type, 0, fmt, ap, ui_call, NULL, NULL);
+	vnotice_common(type, 0, NULL, fmt, ap, ui_call, NULL, NULL);
 }
 
 
@@ -209,7 +221,7 @@ void notice_call(enum notice_type type, const char *fmt, ...)
 void vnotice_switch(const struct ui *next, void *params, enum notice_type type,
     const char *fmt, va_list ap)
 {
-	vnotice_common(type, 0, fmt, ap, ui_switch, next, params);
+	vnotice_common(type, 0, NULL, fmt, ap, ui_switch, next, params);
 }
 
 

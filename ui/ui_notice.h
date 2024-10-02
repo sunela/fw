@@ -21,10 +21,11 @@ struct ui_notice_style {
 
 struct ui_notice_params {
 	const char *s;
-	unsigned w;	/* 0 for default width */
-	unsigned r;	/* 0 for default radius */
-	unsigned margin; /* 0 for radius */
-	unsigned idle_s; /* 0 for IDLE_NOTICE_S */
+	const char *title;	/* NULL if none */
+	unsigned w;		/* 0 for default width */
+	unsigned r;		/* 0 for default radius */
+	unsigned margin;	/* 0 for radius */
+	unsigned idle_s;	/* 0 for IDLE_NOTICE_S */
 	const struct ui_notice_style *style;
 	const struct ui *next;	/* NULL for return */
 	void *next_params;
@@ -45,13 +46,17 @@ enum notice_type {
  * destination "next".
  */
 
-void vnotice_idle(enum notice_type type, unsigned idle_s, const char *fmt,
-    va_list ap);
-void notice_idle(enum notice_type type, unsigned idle_s, const char *fmt, ...);
+void vnotice_idle(enum notice_type type, unsigned idle_s, const char *title,
+    const char *fmt, va_list ap);
+void notice_idle(enum notice_type type, unsigned idle_s, const char *title,
+     const char *fmt, ...);
+
 void vnotice(enum notice_type type, const char *fmt, va_list ap);
 void notice(enum notice_type type, const char *fmt, ...);
+
 void vnotice_call(enum notice_type type, const char *fmt, va_list ap);
 void notice_call(enum notice_type type, const char *fmt, ...);
+
 void vnotice_switch(const struct ui *next, void *params, enum notice_type type,
     const char *fmt, va_list ap);
 void notice_switch(const struct ui *next, void *params, enum notice_type type,

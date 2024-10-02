@@ -25,7 +25,7 @@ static void ui_show_pubkey_open(void *ctx, void *params)
 
 	base32_encode(buf, sizeof(buf), dbcrypt_pubkey(main_db.c),
 	    crypto_box_PUBLICKEYBYTES);
-	notice_idle(nt_info, IDLE_PUBKEY_S, "%s", buf);
+	notice_idle(nt_info, IDLE_PUBKEY_S, "Public key", "%s", buf);
 }
 
 

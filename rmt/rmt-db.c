@@ -223,6 +223,7 @@ void rmt_db_poll(void)
 				case ft_end:
 				case ft_id:
 				case ft_prev:
+				case ft_dir:	// @@@ decide handling later
 					break;
 				case ft_user:
 				case ft_email:

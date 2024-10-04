@@ -497,6 +497,7 @@ static void ui_account_open(void *ctx, void *params)
 		switch (f->type) {
 		case ft_id:
 		case ft_prev:
+		case ft_dir:
 			break;
 		case ft_user:
 			add_string(c, "User", f->data, f->len, f);

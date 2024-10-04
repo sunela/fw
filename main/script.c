@@ -95,6 +95,9 @@ static void dump_entry(const struct db *db, const struct db_entry *de,
 		case ft_pw2:
 			printf("pw2");
 			break;
+		case ft_dir:
+			printf("dir");
+			break;
 		default:
 			printf("%u", f->type);
 			break;

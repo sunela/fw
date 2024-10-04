@@ -32,7 +32,7 @@ PSRAM_NOINIT uint8_t payload_buf[STORAGE_BLOCK_SIZE];
 
 struct db main_db;
 const enum field_type order2ft[] = {
-    ft_end, ft_id, ft_prev, ft_user, ft_email, ft_pw, ft_pw2,
+    ft_end, ft_id, ft_prev, ft_dir, ft_user, ft_email, ft_pw, ft_pw2,
     ft_hotp_secret, ft_hotp_counter, ft_totp_secret, ft_comment };
 uint8_t ft2order[ARRAY_ENTRIES(order2ft)];
 const unsigned field_types = sizeof(ft2order);
@@ -646,6 +646,11 @@ bool db_iterate(struct db *db, bool (*fn)(void *user, struct db_entry *de),
 
 bool db_is_dir(const struct db_entry *de)
 {
+	const struct db_field *f;
+
+	for (f = de->fields; f; f = f->next)
+		if (f->type == ft_dir)
+			return 1;
 	return !!de->children;
 }
 

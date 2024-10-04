@@ -43,6 +43,7 @@ enum __attribute__((__packed__)) field_type {
 	ft_totp_secret	= 8,
 	ft_comment	= 9,
 	ft_pw2		= 10,
+	ft_dir		= 11,
 };
 
 /*

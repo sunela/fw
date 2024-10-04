@@ -481,7 +481,6 @@ static void ui_account_open(void *ctx, void *params)
 	struct db_field *f, *f2;
 	unsigned i;
 
-	lists[0] = &c->list;
 	c->selected_account = de;
 	c->resume_action = NULL;
 	c->last_tick = -1;
@@ -535,8 +534,12 @@ static void ui_account_open(void *ctx, void *params)
 	}
 	wi_list_end(&c->list);
 
-	if (list_is_empty(&c->list))
+	if (list_is_empty(&c->list)) {
 		button_draw_add(GFX_WIDTH / 2, (GFX_HEIGHT + LIST_Y0) / 2);
+		lists[0] = NULL;
+	} else {
+		lists[0] = &c->list;
+	}
 
 	set_idle(IDLE_ACCOUNT_S);
 }

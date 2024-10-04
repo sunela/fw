@@ -11,7 +11,7 @@
 
 /* ================ USB common Configuration ================ */
 
-#include "../sys/debug.h"
+#include "../../sys/debug.h"
 
 #define CONFIG_USB_PRINTF(...) debug(__VA_ARGS__)
 

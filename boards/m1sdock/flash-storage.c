@@ -11,8 +11,8 @@
 
 #include "bflb_flash.h"
 
-#include "../sys/debug.h"
-#include "../db/storage.h"
+#include "../../sys/debug.h"
+#include "../../db/storage.h"
 
 
 /*

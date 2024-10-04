@@ -12,9 +12,9 @@
 #include "board.h"
 
 #define	SDK_MAIN
-#include "../lib/fmt.h"
-#include "../hal.h"
-#include "../sdk-hal.h"
+#include "../../lib/fmt.h"
+#include "../../hal.h"
+#include "../../sdk-hal.h"
 
 
 void sunela_usb_init(void);

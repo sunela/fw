@@ -33,6 +33,9 @@ debug = False
 
 
 def encode(key, code, v):
+	if key == "id" and isinstance(v, list):
+		s = '\000'.join(v)
+		return struct.pack("BB", code, len(s)) + s.encode()
 	if key == "id" or key == "prev" or key == "user" or key == "email" or \
 	    key == "pw" or key == "pw2" or key == "comment":
 		return struct.pack("BB", code, len(v)) + v.encode()

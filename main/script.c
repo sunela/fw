@@ -38,82 +38,107 @@
 /* --- Debugging dump ------------------------------------------------------ */
 
 
-void dump_db(const struct db *db, bool pointers)
+static void indent(unsigned level)
 {
-	const struct db_entry *de;
+	while (level--)
+		putchar('\t');
+}
+
+
+static void dump_entry(const struct db *db, const struct db_entry *de,
+    unsigned level, bool pointers)
+{
 	const struct db_field *f;
 
-	for (de = db->entries; de; de = de->next) {
+	indent(level);
+	if (pointers)
+		printf("%p ", de);
+	printf("%s@%u:0x%04x ", de->name, de->block, de->seq);
+	printf("%s", de->db == db ? "db" : "DB MISMATCH");
+	if (pointers)
+		printf("%p\n", de->db);
+	else
+		printf("\n");
+	for (f = de->fields; f; f = f->next) {
+		indent(level);
+		printf("    ");
 		if (pointers)
-			printf("%p ", de);
-		printf("%s@%u:0x%04x ", de->name, de->block, de->seq);
-		printf("%s", de->db == db ? "db" : "DB MISMATCH");
-		if (pointers)
-			printf("%p\n", de->db);
-		else
-			printf("\n");
-		for (f = de->fields; f; f = f->next) {
-			printf("\t");
-			if (pointers)
-				printf("%p ", f);
-			switch (f->type) {
-			case ft_id:
-				printf("id");
-				break;
-			case ft_prev:
-				printf("prev");
-				break;
-			case ft_user:
-				printf("user");
-				break;
-			case ft_email:
-				printf("email");
-				break;
-			case ft_pw:
-				printf("pw");
-				break;
-			case ft_hotp_secret:
-				printf("hotp_secret");
-				break;
-			case ft_hotp_counter:
-				printf("hotp_counter");
-				break;
-			case ft_totp_secret:
-				printf("totp_secret");
-				break;
-			case ft_comment:
-				printf("Comment");
-				break;
-			case ft_pw2:
-				printf("pw2");
-				break;
-			default:
-				printf("%u", f->type);
-				break;
-			}
-			if (pointers)
-				printf(" %p+", f->data);
-			else
-				printf(" ");
-			printf("%u", f->len);
-			if (f->data) {
-				const uint8_t *s;
-
-				for (s = f->data; s != f->data + f->len; s++)
-					if (*s < 32 || *s > 126)
-						break;
-				if (s == f->data + f->len) {
-					printf(" \"%.*s\"",
-					    f->len, (const char *) f->data);
-				} else {
-					for (s = f->data;
-					    s != f->data + f->len; s++)
-						printf(" %02x", *s);
-				}
-			}
-			printf("\n");
+			printf("%p ", f);
+		switch (f->type) {
+		case ft_id:
+			printf("id");
+			break;
+		case ft_prev:
+			printf("prev");
+			break;
+		case ft_user:
+			printf("user");
+			break;
+		case ft_email:
+			printf("email");
+			break;
+		case ft_pw:
+			printf("pw");
+			break;
+		case ft_hotp_secret:
+			printf("hotp_secret");
+			break;
+		case ft_hotp_counter:
+			printf("hotp_counter");
+			break;
+		case ft_totp_secret:
+			printf("totp_secret");
+			break;
+		case ft_comment:
+			printf("Comment");
+			break;
+		case ft_pw2:
+			printf("pw2");
+			break;
+		default:
+			printf("%u", f->type);
+			break;
 		}
+		if (pointers)
+			printf(" %p+", f->data);
+		else
+			printf(" ");
+		printf("%u", f->len);
+		if (f->data) {
+			const uint8_t *s;
+
+			for (s = f->data; s != f->data + f->len; s++)
+				if (*s < 32 || *s > 126)
+					break;
+			if (s == f->data + f->len) {
+				printf(" \"%.*s\"",
+				    f->len, (const char *) f->data);
+			} else {
+				for (s = f->data;
+				    s != f->data + f->len; s++)
+					printf(" %02x", *s);
+			}
+		}
+		printf("\n");
 	}
+}
+
+
+static void dump_dir(const struct db *db, const struct db_entry *dir,
+    unsigned level, bool pointers)
+{
+	while (dir) {
+		dump_entry(db, dir, level, pointers);
+		if (dir->children)
+			dump_dir(db, dir->children, level + 1, pointers);
+		dir = dir->next;
+	}
+}
+
+
+void dump_db(const struct db *db, bool pointers)
+{
+	dump_dir(db, db->entries, 0, pointers);
 }
 
 
@@ -198,19 +223,30 @@ static struct db_entry *find_entry(const char *name)
 }
 
 
-static void dump_db_short(const struct db *db)
+static void dump_dir_short(const struct db_entry *dir, unsigned level)
 {
-	const struct db_entry *de;
 	const struct db_field *f;
+	unsigned i;
 
-	for (de = db->entries; de; de = de->next) {
-		for (f = de->fields; f; f = f->next)
+	while (dir) {
+		for (i = 0; i != level; i++)
+			putchar('\t');
+		for (f = dir->fields; f; f = f->next)
 			if (f->type == ft_prev)
 				break;
-		printf("%s %.*s\n", de->name,
+		printf("%s %.*s\n", dir->name,
 		    f ? f->len : 1,
 		    f ? (char *) f->data : "-");
+		if (dir->children)
+			dump_dir_short(dir->children, level + 1);
+		dir = dir->next;
 	}
+}
+
+
+static void dump_db_short(const struct db *db)
+{
+	dump_dir_short(db->entries, 0);
 }
 
 

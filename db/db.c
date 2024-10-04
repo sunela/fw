@@ -336,26 +336,16 @@ bool db_entry_defer_update(struct db_entry *de, bool defer)
  * topological sorting.
  */
 
-static struct db_entry *new_entry(struct db *db, const char *name,
-    const char *prev)
+static struct db_entry *new_entry(struct db *db, const char *name)
 {
 	struct db_entry *de, **anchor;
-//	struct db_entry *e = NULL;
 
 	de = alloc_type(struct db_entry);
 	memset(de, 0, sizeof(*de));
 	de->db = db;
-//	if (prev)
-//		for (e = db->entries; e; e = e->next)
-//			if (!strcmp(e->name, prev))
-//				break;
-//	if (e) {
-//		anchor = &e->next;
-//	} else {
-		for (anchor = &db->entries; *anchor; anchor = &(*anchor)->next)
-			if (strcmp((*anchor)->name, name) > 0)
-				break;
-//	}
+	for (anchor = &db->entries; *anchor; anchor = &(*anchor)->next)
+		if (strcmp((*anchor)->name, name) > 0)
+			break;
 	de->next = *anchor;
 	*anchor = de;
 	return de;
@@ -371,7 +361,7 @@ struct db_entry *db_new_entry(struct db *db, const char *name)
 	if (new < 0)
 		return NULL;
 	db->generation++;
-	de = new_entry(db, name, NULL);
+	de = new_entry(db, name);
 	de->name = stralloc(name);
 	de->block = new;
 	rnd_bytes(&de->seq, sizeof(de->seq));
@@ -394,7 +384,7 @@ struct db_entry *db_dummy_entry(struct db *db, const char *name,
 	struct db_entry *de;
 
 	db->generation++;
-	de = new_entry(db, name, NULL);
+	de = new_entry(db, name);
 	de->name = stralloc(name);
 	de->block = -1;
 	de->defer = 1;
@@ -746,20 +736,8 @@ static bool process_payload(struct db *db, unsigned block, uint16_t seq,
 			return 1;
 		free_fields(de);
 	} else {
-		char *prev = NULL;
-
-		while (1) {
-			q = tlv_item(&p, end, &type, &len);
-			if (!q)
-				break;
-			if (type == ft_prev) {
-				prev = alloc_string(q, len);
-				break;
-			}
-		}
-		de = new_entry(db, name, prev);
+		de = new_entry(db, name);
 		de->name = name;
-		free(prev);
 	}
 	de->block = block;
 	de->seq = seq;

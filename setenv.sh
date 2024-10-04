@@ -9,7 +9,7 @@
 # BOARD: M1S_DOCK
 [ -z "${BOARD}" ] && BOARD=M1S_DOCK
 
-if [ "${BOARD}" == "M1S_DOCK" ]; then
+if [ "${BOARD}" = "M1S_DOCK" ]; then
 	ln -sf Makefile.bl808 Makefile.sdk
 	rm -f sdk
 	ln -s boards/m1sdock sdk

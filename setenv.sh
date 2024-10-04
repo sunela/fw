@@ -11,5 +11,6 @@
 
 if [ "${BOARD}" == "M1S_DOCK" ]; then
 	ln -sf Makefile.bl808 Makefile.sdk
-	ln -sf boards/m1sdock sdk
+	rm -f sdk
+	ln -s boards/m1sdock sdk
 fi

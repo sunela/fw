@@ -168,3 +168,36 @@ total 2048 invalid 0 data 1
 erased 2037 deleted 1 empty 0
 D8 X9 D10
 EOF
+
+# --- Replace obsolete entry, base --------------------------------------------
+
+json <<EOF
+[ { "id":"a" }, { "id":"b" } ]
+EOF
+
+run update-obsolete-base "db open" "db dump" <<EOF
+a -
+b -
+EOF
+
+# --- Replace obsolete entry, no change ---------------------------------------
+
+json <<EOF
+[ { "id":"a" }, { "id":"b" }, { "id":"a" } ]
+EOF
+
+run update-obsolete-same "db open" "db dump" <<EOF
+a -
+b -
+EOF
+
+# --- Replace obsolete entry, order changes -----------------------------------
+
+json <<EOF
+[ { "id":"a" }, { "id":"b" }, { "id":"a", "prev":"b" } ]
+EOF
+
+run update-obsolete-reorder "db open" "db dump" <<EOF
+b -
+a b
+EOF

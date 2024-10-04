@@ -11,6 +11,7 @@
 
 #include "hal.h"
 #include "gfx.h"
+#include "shape.h"
 #include "text.h"
 #include "wi_list.h"
 #include "ui_overlay.h"
@@ -42,6 +43,7 @@ static const struct wi_list_style style = {
 };
 
 static struct wi_list_entry_style style_null_target;
+static struct wi_list_entry_style style_dir;
 static struct wi_list *lists[1];
 
 
@@ -260,6 +262,21 @@ static void ui_accounts_long(void *ctx, unsigned x, unsigned y)
 }
 
 
+/* --- Folder icon --------------------------------------------------------- */
+
+
+static void render_folder(const struct wi_list *list,
+    const struct wi_list_entry *entry, struct gfx_drawable *da,
+    const struct gfx_rect *bb, bool odd)
+{
+	unsigned w = bb->h / 2;
+	unsigned h = bb->h / 3;
+
+	gfx_folder(da, bb->x + bb->w - w, bb->y + (bb->h - h) / 2 - h / 5, w, h,
+	    w / 2, h / 5, h / 9, style.entry.fg[odd]);
+}
+
+
 /* --- Open/close ---------------------------------------------------------- */
 
 
@@ -268,9 +285,15 @@ static bool add_account(void *user, struct db_entry *de)
 	struct ui_accounts_ctx *c = user;
 	struct wi_list_entry *e;
 
-	e = wi_list_add(&c->list, de->name, NULL, de);
-	if (moving && (de == moving || moving->next == de))
-		wi_list_entry_style(&c->list, e, &style_null_target);
+	if (db_is_dir(de)) {
+		e = wi_list_add_width(&c->list, de->name, NULL,
+		    GFX_WIDTH - style_dir.min_h, de);
+		wi_list_entry_style(&c->list, e, &style_dir);
+	} else {
+		e = wi_list_add(&c->list, de->name, NULL, de);
+		if (moving && (de == moving || moving->next == de))
+			wi_list_entry_style(&c->list, e, &style_null_target);
+	}
 	return 1;
 }
 
@@ -281,6 +304,8 @@ static void ui_accounts_open(void *ctx, void *params)
 	const char *pwd;
 	style_null_target = style.entry;
 	style_null_target.fg[0] = style_null_target.fg[1] = NULL_TARGET_COLOR;
+	style_dir = style.entry;
+	style_dir.render = render_folder;
 
 	lists[0] = &c->list;
 	c->resume_action = NULL;

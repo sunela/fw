@@ -23,6 +23,7 @@
 
 #define	NULL_TARGET_COLOR	GFX_HEX(0x808080)
 
+
 struct ui_accounts_ctx {
 	void (*resume_action)(struct ui_accounts_ctx *c);
 	struct wi_list list;
@@ -103,6 +104,7 @@ static void ui_accounts_tap(void *ctx, unsigned x, unsigned y)
 {
 	struct ui_accounts_ctx *c = ctx;
 	const struct wi_list_entry *entry;
+	struct db_entry *de;
 
 	if (list_is_empty(&c->list)) {
 		if (button_in(GFX_WIDTH / 2, (GFX_HEIGHT + LIST_Y0) / 2, x, y))
@@ -113,7 +115,13 @@ static void ui_accounts_tap(void *ctx, unsigned x, unsigned y)
 	entry = wi_list_pick(&c->list, x, y);
 	if (!entry)
 		return;
-	ui_call(&ui_account, wi_list_user(entry));
+	de = wi_list_user(entry);
+	if (db_is_dir(de)) {
+		db_chdir(&main_db, de);
+		ui_switch(&ui_accounts, NULL);
+	} else {
+		ui_call(&ui_account, de);
+	}
 }
 
 
@@ -270,15 +278,16 @@ static bool add_account(void *user, struct db_entry *de)
 static void ui_accounts_open(void *ctx, void *params)
 {
 	struct ui_accounts_ctx *c = ctx;
-
+	const char *pwd;
 	style_null_target = style.entry;
 	style_null_target.fg[0] = style_null_target.fg[1] = NULL_TARGET_COLOR;
 
 	lists[0] = &c->list;
 	c->resume_action = NULL;
 
+	pwd = db_pwd(&main_db);
 	gfx_rect_xy(&main_da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH, GFX_WHITE);
-	text_text(&main_da, GFX_WIDTH / 2, TOP_H / 2, "Accounts",
+	text_text(&main_da, GFX_WIDTH / 2, TOP_H / 2, pwd ? pwd : "Accounts",
 	    &FONT_TOP, GFX_CENTER, GFX_CENTER, GFX_WHITE);
 
 	wi_list_begin(&c->list, &style);

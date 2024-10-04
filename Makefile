@@ -43,30 +43,8 @@ empty-db:
 
 # --- Flashing ----------------------------------------------------------------
 
-COMX = /dev/ttyACM1
-
-SDK = $(shell pwd)/../bouffalo_sdk/
-FLASH_CUBE = $(SDK)/tools/bflb_tools/bouffalo_flash_cube/BLFlashCommand-ubuntu
-FLASH = $(FLASH_CUBE)  --interface uart --baudrate 2000000 --port=$(COMX) \
-	--chipname bl808 --cpu_id m0 --flash
-REGION_ALL = --start 0x0 --len 0x1000000
-REGION_DB = --start 0x800000 --len 0x200000
-
-flash:
-	$(MAKE) -C sdk flash COMX=$(COMX)
-
-upload:	$(shell pwd)/dummy.db
-	$(FLASH) --write $(REGION_DB) --file $<
-# --config=sdk/flash_prog_cfg.ini \
-
-download:
-	$(FLASH) --read $(REGION_DB) --file $(shell pwd)/flash.db
-
-download-all:
-	$(FLASH) --read $(REGION_ALL) --file $(shell pwd)/all.bin
-
-erase:
-	$(FLASH) --erase --whole_chip
+flash upload download download-all erase:
+	$(MAKE) -C sdk $@
 
 # --- BL808 console -----------------------------------------------------------
 
@@ -83,13 +61,8 @@ picocom:
 # For convenience: invoke gdb on the target (SDK) executable
 # E.g., for  info line *0x...
 
-gdb:
-	riscv64-unknown-elf-gdb sdk/build/build_out/sunela_bl808_m0.elf
-
-# idem, for nm
-
-nm:
-	riscv64-unknown-elf-nm sdk/build/build_out/sunela_bl808_m0.elf
+gdb nm:
+	$(MAKE) -C sdk $@
 
 # --- Testing -----------------------------------------------------------------
 

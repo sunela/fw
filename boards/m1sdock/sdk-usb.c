@@ -7,8 +7,8 @@
 
 #include "usbd_core.h"
 
-#include "../sys/debug.h"
-#include "../sdk-hal.h"
+#include "../../sys/debug.h"
+#include "../../sdk-hal.h"
 
 #include "sdk-usb.h"
 

@@ -49,5 +49,24 @@
 		"prev":	"HOTP",
 		"totp_secret":
 			"GZ4FORKTNBVFGQTFJJGEIRDOKY======"
+	},
+	{
+		"id":	[ "Zebra", "Capensis" ]
+	},
+	{
+		"id":	[ "Zebra", "Grevyi" ]
+	},
+	{
+		"id":	[ "Zebra", "Quagga" ]
+	},
+	{
+		"id":	[ "Zebra", "Quagga", "Boehmi" ]
+	},
+	{
+		"id":	[ "Zebra", "Quagga", "Selousi" ]
+	},
+	{
+		"id":	"Zebra",
+		"prev":	"TOTP"
 	}
 ]

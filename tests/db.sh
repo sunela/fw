@@ -201,3 +201,91 @@ run update-obsolete-reorder "db open" "db dump" <<EOF
 b -
 a b
 EOF
+
+# --- Directory: one entry ----------------------------------------------------
+
+json <<EOF
+[ { "id":"a" }, { "id":["b", "c"] } ]
+EOF
+
+run dir-1 "db open" "db dump" <<EOF
+a -
+b -
+	c -
+EOF
+
+# --- Directory: two entries --------------------------------------------------
+
+json <<EOF
+[ { "id":"a" }, { "id":["b", "c"] }, { "id":["b", "d"] } ]
+EOF
+
+run dir-2 "db open" "db dump" <<EOF
+a -
+b -
+	c -
+	d -
+EOF
+
+# --- Directory: two directories ----------------------------------------------
+
+json <<EOF
+[ { "id":"a" }, { "id":["b", "c"] }, { "id":["c", "d"] } ]
+EOF
+
+run dir-1-1 "db open" "db dump" <<EOF
+a -
+b -
+	c -
+c -
+	d -
+EOF
+
+# --- Directory: two directories, add to 1st ----------------------------------
+
+json <<EOF
+[ { "id":"a" }, { "id":["b", "c"] }, { "id":["c", "d"] }, { "id":["b", "d"] } ]
+EOF
+
+run dir-2-1 "db open" "db dump" <<EOF
+a -
+b -
+	c -
+	d -
+c -
+	d -
+EOF
+
+# --- Directory: two directories, add to 1st, then 2nd ------------------------
+
+json <<EOF
+[ { "id":"a" }, { "id":["b", "c"] }, { "id":["c", "d"] }, { "id":["b", "d"] },
+  { "id":["c", "x"] } ]
+EOF
+
+run dir-2-2 "db open" "db dump" <<EOF
+a -
+b -
+	c -
+	d -
+c -
+	d -
+	x -
+EOF
+
+# --- Directory: two directories, add to 2nd, then 1st ------------------------
+
+json <<EOF
+[ { "id":"a" }, { "id":["b", "c"] }, { "id":["c", "d"] }, { "id":["c", "a"] },
+  { "id":["b", "x"] } ]
+EOF
+
+run dir-2-2b "db open" "db dump" <<EOF
+a -
+b -
+	c -
+	x -
+c -
+	a -
+	d -
+EOF

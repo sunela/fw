@@ -172,6 +172,19 @@ void ui_accounts_cancel_move(void)
 }
 
 
+/* --- Swipe --------------------------------------------------------------- */
+
+
+static void ui_accounts_to(void *ctx, unsigned from_x, unsigned from_y,
+    unsigned to_x, unsigned to_y, enum ui_swipe swipe)
+{
+	if (swipe != us_left)
+		return;
+	db_chdir(&main_db, db_dir_parent(&main_db));
+	ui_switch(&ui_accounts, NULL);
+}
+
+
 /* --- Long press event ---------------------------------------------------- */
 
 
@@ -356,6 +369,7 @@ static void ui_accounts_resume(void *ctx)
 static const struct ui_events ui_accounts_events = {
 	.touch_tap	= ui_accounts_tap,
 	.touch_long	= ui_accounts_long,
+	.touch_to	= ui_accounts_to,
 	.lists		= lists,
 	.n_lists	= 1,
 };

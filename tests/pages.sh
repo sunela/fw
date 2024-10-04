@@ -931,6 +931,15 @@ add long-left "drag 220 120 100 120"
 add long-left2 "drag 220 120 110 121"
 add long-left3 "drag 240 120 100 120"
 
+# === directories, scroll up ==================================================
+
+accounts dir-up "drag 158 279 159 0"
+add dir-zebra "tap 93 204"
+add dir-quagga "tap 70 171"
+add dir-quagga-back "drag 200 100 50 100"
+add dir-quagga-back2 "drag 200 100 50 120"
+add dir-quagga-back3 "drag 200 100 50 80"
+
 # -----------------------------------------------------------------------------
 
 if [ "$select" ] && ! $found; then

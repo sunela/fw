@@ -36,11 +36,12 @@
 
 
 struct wi_list_entry {
-	const char *first;
-	const char *second;
-	unsigned left;	/* horizontal scrolling */
-	unsigned first_w, second_w;
-	void *user;
+	const char	*first;
+	const char	*second;
+	unsigned	left;	/* horizontal scrolling */
+	unsigned	first_w, second_w;
+	unsigned	text_width;
+	void		*user;
 	const struct wi_list_entry_style *style;
 	struct wi_list_entry *next;
 };
@@ -189,22 +190,30 @@ static void do_draw_entry(const struct wi_list *list,
     const struct gfx_rect *bb, unsigned y, bool odd)
 {
 	const struct wi_list_entry_style *entry_style = e->style;
+	struct gfx_rect text_bb = *bb;
 
 	clip_bb(da, list, bb);
 	gfx_rect(da, bb, entry_style->bg[odd]);
+	gfx_clip(da, NULL);
 //debug("w %u %u off %u\n", e->first_w, e->second_w, e->left);
-	text_text(da, e->first_w <= GFX_WIDTH ? 0 : -e->left,
+
+	text_bb.w = e->text_width;
+	clip_bb(da, list, &text_bb);
+	text_text(da, e->first_w <= e->text_width ? 0 : -e->left,
 	    y + opad(list, e),
 	    e->first, list_font(list), GFX_LEFT, GFX_TOP | GFX_MAX,
 	    entry_style->fg[odd]);
 	if (e->second)
-		text_text(da, e->second_w <= GFX_WIDTH ? 0 : -e->left,
+		text_text(da, e->second_w <= e->text_width ? 0 : -e->left,
 		    y + opad(list, e) + ipad(list, e) + list->text_height,
 		    e->second, list_font(list),
 		    GFX_LEFT, GFX_TOP | GFX_MAX, entry_style->fg[odd]);
-	if (entry_style->render)
-		entry_style->render(list, e, da, bb, odd);
 	gfx_clip(da, NULL);
+	if (entry_style->render) {
+		clip_bb(da, list, bb);
+		entry_style->render(list, e, da, bb, odd);
+		gfx_clip(da, NULL);
+	}
 }
 
 
@@ -302,10 +311,10 @@ debug("scrolling %u up %u scroll_up %u dy %d y0 %u y1 %u th %u\n",
 		unsigned max_left;
 		int left = list->scroll_left - dx;
 
-		if (width <= GFX_WIDTH)
+		if (width <= e->text_width)
 			max_left = 0;
 		else
-			max_left = width - GFX_WIDTH;
+			max_left = width - e->text_width;
 
 		if (left < 0)
 			left = 0;
@@ -335,7 +344,8 @@ bool wi_list_moving(struct wi_list *list, unsigned from_x, unsigned from_y,
 		 * work most of the time. (Horizontal scrolling takes
 		 * precedence over left-swipe.)
 		 */
-		if (e && (e->first_w > GFX_WIDTH || e->second_w > GFX_WIDTH)) {
+		if (e && (e->first_w > e->text_width ||
+		    e->second_w > e->text_width)) {
 			list->scroll_entry = e;
 			if (e)
 				list->scroll_left = e->left;
@@ -428,8 +438,8 @@ static unsigned get_w(const struct wi_list *list, const char *s)
 }
 
 
-struct wi_list_entry *wi_list_add(struct wi_list *list,
-    const char *first, const char *second, void *user)
+struct wi_list_entry *wi_list_add_width(struct wi_list *list,
+    const char *first, const char *second, unsigned width, void *user)
 {
 	struct wi_list_entry *e;
 
@@ -440,12 +450,20 @@ struct wi_list_entry *wi_list_add(struct wi_list *list,
 	e->left = 0;
 	e->first_w = get_w(list, first);
 	e->second_w = get_w(list, second);
+	e->text_width = width;
 	e->user = user;
 	e->style = &list->style->entry;
 	e->next = NULL;
 	*list->anchor = e;
 	list->anchor = &e->next;
 	return e;
+}
+
+
+struct wi_list_entry *wi_list_add(struct wi_list *list,
+    const char *first, const char *second, void *user)
+{
+	return wi_list_add_width(list, first, second, GFX_WIDTH, user);
 }
 
 

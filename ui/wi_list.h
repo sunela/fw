@@ -75,6 +75,8 @@ void wi_list_cancel(struct wi_list *list);
 void wi_list_y0(struct wi_list *list, unsigned y0);
 
 void wi_list_begin(struct wi_list *ctx, const struct wi_list_style *style);
+struct wi_list_entry *wi_list_add_width(struct wi_list *ctx,
+    const char *first, const char *second, unsigned width, void *user);
 struct wi_list_entry *wi_list_add(struct wi_list *ctx,
     const char *first, const char *second, void *user);
 void wi_list_update_entry(struct wi_list *list, struct wi_list_entry *entry,

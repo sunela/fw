@@ -226,6 +226,7 @@ static bool write_entry(const struct db_entry *de)
 	const struct db_field *f;
 	bool ok;
 
+	assert(de->block);
 	memset(payload_buf, 0, sizeof(payload_buf));
 	for (f = de->fields; f; f = f->next) {
 		if ((const void *) p + f->len + 2 > end) {
@@ -336,14 +337,16 @@ bool db_entry_defer_update(struct db_entry *de, bool defer)
  * topological sorting.
  */
 
-static struct db_entry *new_entry(struct db *db, const char *name)
+static struct db_entry *new_entry(struct db *db, struct db_entry *dir,
+    const char *name)
 {
 	struct db_entry *de, **anchor;
 
 	de = alloc_type(struct db_entry);
 	memset(de, 0, sizeof(*de));
 	de->db = db;
-	for (anchor = &db->entries; *anchor; anchor = &(*anchor)->next)
+	for (anchor = dir ? &dir->children : &db->entries; *anchor;
+	    anchor = &(*anchor)->next)
 		if (strcmp((*anchor)->name, name) > 0)
 			break;
 	de->next = *anchor;
@@ -361,7 +364,7 @@ struct db_entry *db_new_entry(struct db *db, const char *name)
 	if (new < 0)
 		return NULL;
 	db->generation++;
-	de = new_entry(db, name);
+	de = new_entry(db, db->dir, name);
 	de->name = stralloc(name);
 	de->block = new;
 	rnd_bytes(&de->seq, sizeof(de->seq));
@@ -384,7 +387,7 @@ struct db_entry *db_dummy_entry(struct db *db, const char *name,
 	struct db_entry *de;
 
 	db->generation++;
-	de = new_entry(db, name);
+	de = new_entry(db, db->dir, name);
 	de->name = stralloc(name);
 	de->block = -1;
 	de->defer = 1;
@@ -629,12 +632,62 @@ bool db_iterate(struct db *db, bool (*fn)(void *user, struct db_entry *de),
 {
 	struct db_entry *de, *next;
 
-	for (de = db->entries; de; de = next) {
+	for (de = db->dir ? db->dir->children : db->entries; de; de = next) {
 		next = de->next;
 		if (!fn(user, de))
 			return 0;
 	}
 	return 1;
+}
+
+
+/* --- Directory operations ------------------------------------------------ */
+
+
+bool db_is_dir(const struct db_entry *de)
+{
+	return !!de->children;
+}
+
+
+void db_chdir(struct db *db, struct db_entry *de)
+{
+	db->dir = de;
+}
+
+
+/*
+ * @@@ We return NULL in two cases:
+ * 1) if the parent is the root directory, and
+ * 2) if we don't find "de" in the tree.
+ * The latter should be a fatal error.
+ */
+
+static struct db_entry *find_parent(const struct db *db,
+    struct db_entry *dir, const struct db_entry *de)
+{
+	struct db_entry *e, *parent;
+
+	for (e = dir ? dir->children : db->entries; e; e = e->next) {
+		if (e == de)
+			return dir;
+		parent = find_parent(db, e, db->dir);
+		if (parent)
+			return parent;
+	}
+	return NULL;
+}
+
+
+struct db_entry *db_dir_parent(const struct db *db)
+{
+	return find_parent(db, NULL, db->dir);
+}
+
+
+const char *db_pwd(const struct db *db)
+{
+	return db->dir ? db->dir->name : NULL;
 }
 
 
@@ -722,21 +775,58 @@ static bool process_payload(struct db *db, unsigned block, uint16_t seq,
 	q = tlv_item(&p, end, &type, &len);
 	if (!q || type != ft_id)
 		return 0;
+
+	struct db_entry *dir = NULL;
+
+	while (1) {
+		const char *z;
+
+		z = memchr(q, 0, len);
+		if (!z)
+			break;
+
+		unsigned dir_len = z - (const char *) q;
+		struct db_entry **a;
+
+		for (a = dir ? &dir->children : &db->entries; *a;
+		    a = &(*a)->next)
+			if (!strcmp(q, (*a)->name))
+				break;
+		if (!*a) {
+			/*
+			 * virtual entry with block = 0
+			 */
+			de = alloc_type(struct db_entry);
+			memset(de, 0, sizeof(*de));
+			de->name = alloc_string(q, dir_len);
+			de->db = db;
+			*a = de;
+		}
+		dir = *a;
+		len -= dir_len + 1;
+		q = z + 1;
+	}
+
 	name = alloc_string(q, len);
-	for (de = db->entries; de; de = de->next)
+	for (de = dir ? dir->children : db->entries; de; de = de->next)
 		if (!strcmp(de->name, name))
 			break;
 	if (de) {
 		free(name);
-		/*
-		 * @@@ We lose blocks here. Should either have an "obsolete"
-		 * type or consider it as "empty".
-		 */
-		if (((seq + 0x10000 - de->seq) & 0xffff) >= 0x8000)
-			return 1;
-		free_fields(de);
+		if (de->block) {
+			/*
+			 * @@@ We lose blocks here. Should either have an
+			 * "obsolete" type or consider it as "empty".
+		 	*/
+			if (((seq + 0x10000 - de->seq) & 0xffff) >= 0x8000)
+				return 1;
+			free_fields(de);
+		} else {
+			assert(!de->fields);
+			assert(!de->seq);
+		}
 	} else {
-		de = new_entry(db, name);
+		de = new_entry(db, dir, name);
 		de->name = name;
 	}
 	de->block = block;
@@ -760,6 +850,7 @@ void db_open_empty(struct db *db, const struct dbcrypt *c)
 	db->stats.total = storage_blocks();
 	db->entries = NULL;
 	db->settings_block = -1;
+	db->dir = NULL;
 }
 
 
@@ -817,6 +908,7 @@ bool db_open_progress(struct db *db, const struct dbcrypt *c,
 		progress(user, i, i);
 	memset(payload_buf, 0, sizeof(payload_buf));
 	db_tsort(db);
+	db->dir = NULL;
 	return 1;
 }
 

@@ -70,10 +70,11 @@ struct db_entry {
 	struct db	*db;
 	char		*name;
 	uint16_t	seq;
-	unsigned	block;
-	bool		defer;	/* defer writing changes to storage */
+	unsigned	block;		/* 0 if entry is virtual */
+	bool		defer;		/* defer writing changes to storage */
 	struct db_field	*fields;
 	struct db_entry	*next;
+	struct db_entry	*children;	/* NULL if not a directory */
 };
 
 struct db_stats {
@@ -97,6 +98,7 @@ struct db {
 	struct db_span *deleted;
 	struct db_span *empty;
 	struct db_entry	*entries;
+	struct db_entry *dir;	/* NULL for the root directory */
 	int settings_block;
 };
 
@@ -164,6 +166,16 @@ void db_move_before(struct db_entry *e, const struct db_entry *before);
 bool db_delete_entry(struct db_entry *de);
 bool db_iterate(struct db *db, bool (*fn)(void *user, struct db_entry *de),
     void *user);
+
+bool db_is_dir(const struct db_entry *de);
+void db_chdir(struct db *db, struct db_entry *de);
+struct db_entry *db_dir_parent(const struct db *db);
+
+/*
+ * db_pwd returns NULL if we are at the top-level directory, or the name of the
+ * of the directory entry. It does NOT return the whole path.
+ */
+const char *db_pwd(const struct db *db);
 
 bool db_update_settings(struct db *db, uint16_t seq,
     const void *payload, unsigned length);

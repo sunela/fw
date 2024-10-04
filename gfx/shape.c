@@ -442,3 +442,20 @@ void gfx_pc_comm_sym(struct gfx_drawable *da, unsigned x, unsigned y,
 	rrect_centered(da, cx, cy, side * 0.3, side * 0.4, ro, color);
 	rrect_centered(da, cx, cy, side * 0.2, side * 0.3, side * 0.07, bg);
 }
+
+
+/* --- Folder -------------------------------------------------------------- */
+
+
+void gfx_folder(struct gfx_drawable *da, unsigned x, unsigned y,
+    unsigned w, unsigned h, unsigned rider_w, unsigned rider_h, unsigned r,
+    gfx_color color)
+{
+	unsigned i;
+
+	gfx_rrect_xy(da, x, y, rider_w, h, r, color);
+	gfx_rrect_xy(da, x, y + rider_h, w, h - rider_h, r, color);
+	for (i = 0; i != rider_h; i++)
+		gfx_rect_xy(da, x + rider_w - r, y + i, i + r, 1, color);
+
+}

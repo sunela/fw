@@ -108,6 +108,9 @@ void gfx_move_sym(struct gfx_drawable *da, unsigned x, unsigned y,
 void gfx_pc_comm_sym(struct gfx_drawable *da, unsigned x, unsigned y,
     unsigned side, gfx_color color, gfx_color bg);
 
+void gfx_folder(struct gfx_drawable *da, unsigned x, unsigned y,
+    unsigned w, unsigned h, unsigned rider_w, unsigned rider_h, unsigned r,
+    gfx_color color);
 
 /* --- Other UI items ------------------------------------------------------ */
 

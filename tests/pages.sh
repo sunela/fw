@@ -336,6 +336,12 @@ add accounts-demo-added-me "tap 201 247"
 
 add account-me "tap 23 68"
 
+# ---  account Me, verify that short swipe has no effect ----------------------
+
+save
+add account-me-short-swipe "drag 100 100 90 90"
+restore
+
 # ---  account Me: fields list ------------------------------------------------
 
 add account-me-fields "tap 119 165"

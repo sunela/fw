@@ -232,7 +232,7 @@ static void changed_account_name(struct ui_account_ctx *c)
 {
 	if (!*c->buf || !strcmp(c->buf, c->selected_account->name))
 		return;
-	db_change_field(c->selected_account, ft_id, c->buf, strlen(c->buf));
+	db_rename(c->selected_account, c->buf);
 	/* @@@ handle errors */
 }
 

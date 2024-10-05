@@ -265,7 +265,7 @@ static bool update_entry(struct db_entry *de, unsigned new)
 		return 0;
 	}
 	// @@@ complain if block_delete fails ?
-	if (block_delete(old)) {
+	if (old && block_delete(old)) {
 		span_add(&db->deleted, old, 1);
 		db->stats.data--;
 		db->stats.deleted++;
@@ -746,6 +746,37 @@ bool db_update_settings(struct db *db, uint16_t seq,
 }
 
 
+/* --- Fix remaining virtual entries --------------------------------------- */
+
+
+/*
+ * The database may contain some anomalies we fix here:
+ * - entries in a directory for which no entry exists, or
+ * - directory entries without the ft_dir field.
+ * In both cases, we add an ft_dir field, so that other parts of the system do
+ * not get confused about the status of an entry. (E.g., after deleting all
+ * entries in a directory, it would look like an account record without fields
+ * if it didn't have an ft_dir field.)
+ */
+
+static void fix_virtual(struct db_entry *dir)
+{
+	struct db_entry *e;
+
+	for (e = dir; e; e = e->next) {
+		fix_virtual(e->children);
+		if (db_field_find(e, ft_dir))
+			continue;
+		/*
+		 * @@@ note: we do not assign a block here. This only happens
+		 * if we make changes to the directory entry.
+		 */
+		if (e->children || !e->block)
+			add_field(e, ft_dir, NULL, 0);
+	}
+}
+
+
 /* --- Open/close the account database ------------------------------------- */
 
 
@@ -931,6 +962,7 @@ bool db_open_progress(struct db *db, const struct dbcrypt *c,
 		progress(user, i, i);
 	memset(payload_buf, 0, sizeof(payload_buf));
 	db_tsort(db);
+	fix_virtual(db->entries);
 	db->dir = NULL;
 	return 1;
 }

@@ -603,13 +603,31 @@ if (debugging)
 /* --- Database entries: deletion ------------------------------------------ */
 
 
+static struct db_entry **find_anchor(struct db_entry **anchor,
+    const struct db_entry *de)
+{
+	struct db_entry **found;
+
+	while (*anchor) {
+		if (*anchor == de)
+			return anchor;
+		if ((*anchor)->children) {
+			found = find_anchor(&(*anchor)->children, de);
+			if (found)
+				return found;
+		}
+		anchor = &(*anchor)->next;
+	}
+	return NULL;
+}
+
+
 bool db_delete_entry(struct db_entry *de)
 {
 	struct db *db = de->db;
 	struct db_entry **anchor;
 
-	for (anchor = &db->entries; *anchor != de;
-	    anchor = &(*anchor)->next);
+	anchor = find_anchor(&db->entries, de);
 	*anchor = de->next;
 
 	db_tsort(db);

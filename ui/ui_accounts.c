@@ -15,6 +15,7 @@
 #include "text.h"
 #include "wi_list.h"
 #include "ui_overlay.h"
+#include "ui_confirm.h"
 #include "ui_entry.h"
 #include "db.h"
 #include "style.h"
@@ -187,6 +188,63 @@ static void ui_accounts_to(void *ctx, unsigned from_x, unsigned from_y,
 }
 
 
+/* --- Edit the directory name --------------------------------------------- */
+
+
+/*
+ * @@@ ui_account.c has almost identical code for editing the name of account
+ * entries.
+ */
+
+static void changed_dir_name(struct ui_accounts_ctx *c)
+{
+	if (!*c->buf || !strcmp(c->buf, db_pwd(&main_db)))
+                return;
+	db_rename(main_db.dir, c->buf);
+	/* @@@ handle errors */
+}
+
+
+static bool dir_name_is_different(void *user, struct db_entry *de)
+{
+	struct ui_accounts_ctx *c = user;
+
+	return de == main_db.dir || strcmp(de->name, c->buf);
+}
+
+
+static int validate_dir_name_change(void *user, const char *s)
+{
+	struct ui_accounts_ctx *c = user;
+
+	/*
+	 * We don't use "s" but instead c->buf. Not very pretty, but it keeps
+	 * things simple.
+	 */
+	return db_iterate(&main_db, dir_name_is_different, c);
+}
+
+
+static void edit_dir_name(void *user)
+{
+	struct ui_accounts_ctx *c = user;
+
+	struct ui_entry_params params = {
+		.input = {
+			.buf		= c->buf,
+			.max_len	= sizeof(c->buf) - 1,
+			.validate	= validate_dir_name_change,
+			.user		= c,
+			.title		= "Directory name",
+		},
+	};
+
+	strcpy(c->buf, db_pwd(&main_db));
+	c->resume_action = changed_dir_name;
+	ui_switch(&ui_entry, &params);
+}
+
+
 /* --- Long press event ---------------------------------------------------- */
 
 
@@ -202,6 +260,34 @@ static void enter_setup(void *user)
 }
 
 
+static void confirm_dir_deletion(void *user, bool confirm)
+{
+        if (confirm) {
+		struct db_entry *parent = db_dir_parent(&main_db);
+
+		db_delete_entry(main_db.dir);
+		main_db.dir = parent;
+		ui_accounts_cancel_move();
+		ui_switch(&ui_accounts, NULL);
+	}
+}
+
+
+static void delete_dir(void *user)
+{
+	struct ui_accounts_ctx *c = user;
+
+	struct ui_confirm_params prm = {
+		.action	= "remove",
+		.name	= db_pwd(&main_db),
+		.fn	= confirm_dir_deletion,
+		.user	= c,
+        };
+
+	ui_switch(&ui_confirm, &prm);
+}
+
+
 static void remote_control(void *user)
 {
 	ui_switch(&ui_rmt, NULL);
@@ -214,13 +300,16 @@ static void long_top(void *ctx, unsigned x, unsigned y)
 	static struct ui_overlay_button buttons[] = {
 		{ ui_overlay_sym_power,	power_off, NULL },
 		{ ui_overlay_sym_setup,	enter_setup, NULL },
+		{ ui_overlay_sym_edit, edit_dir_name, NULL },
+		{ ui_overlay_sym_delete, delete_dir, NULL },
 	};
 	static struct ui_overlay_params prm = {
 		.buttons	= buttons,
-		.n_buttons	= 2,
+		/* .n_buttons is set below */
 	};
 	unsigned i;
 
+	prm.n_buttons = db_pwd(&main_db) ? main_db.dir->children ? 3 : 4 : 2;
 	for (i = 0; i != prm.n_buttons; i++)
 		buttons[i].user = ctx;
 	ui_call(&ui_overlay, &prm);
@@ -240,7 +329,7 @@ static void ui_accounts_long(void *ctx, unsigned x, unsigned y)
 		{ ui_overlay_sym_power,	power_off, NULL },
 		{ ui_overlay_sym_setup,	enter_setup, NULL },
 		{ ui_overlay_sym_pc_comm, remote_control, NULL },
-		{ ui_overlay_sym_add,	new_account, NULL },
+		{ ui_overlay_sym_add, new_account, NULL },
 		{ ui_overlay_sym_move_from, move_from, NULL, },
 		{ NULL, move_cancel, NULL },
 	};

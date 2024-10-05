@@ -320,7 +320,6 @@ static void ui_accounts_open(void *ctx, void *params)
 	style_dir = style.entry;
 	style_dir.render = render_folder;
 
-	lists[0] = &c->list;
 	c->resume_action = NULL;
 
 	pwd = db_pwd(&main_db);
@@ -332,8 +331,12 @@ static void ui_accounts_open(void *ctx, void *params)
 	db_iterate(&main_db, add_account, c);
 	wi_list_end(&c->list);
 
-	if (list_is_empty(&c->list))
+	if (list_is_empty(&c->list)) {
 		button_draw_add(GFX_WIDTH / 2, (GFX_HEIGHT + LIST_Y0) / 2);
+		lists[0] = NULL;
+	} else {
+		lists[0] = &c->list;
+	}
 
 	set_idle(IDLE_ACCOUNTS_S);
 }

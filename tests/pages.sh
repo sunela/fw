@@ -759,19 +759,23 @@ add -e new-confirmed "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R"
 
 add -e new-enter "$ENTRY_5"
 
-# --- New device, mismatch ---------------------------------------------------
+# --- New device, mismatch ----------------------------------------------------
 
 page -e new-mismatch "random 1" button \
     "$ENTRY_1" "$ENTRY_2" "$ENTRY_3" "$ENTRY_4" "$ENTRY_R" \
     "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_0" "$ENTRY_R"
 
-# --- New device, repeat ---------------------------------------------------
+# --- New device, repeat ------------------------------------------------------
 
 add -e new-repeat "$ENTRY_5"
 
-## --- accounts (empty) --------------------------------------------------------
+# --- accounts (empty) --------------------------------------------------------
 
 accounts -j "[]" accounts-empty
+
+# --- anncounts (empty), short swipe has no effect ----------------------------
+
+accounts -j "[]" accounts-empty-short-swipe "drag 100 100 90 90"
 
 # --- setup master secret -----------------------------------------------------
 

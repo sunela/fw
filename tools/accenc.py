@@ -26,8 +26,12 @@ PAD_BLOCKS = 8		# blocks reserved for pads
 RESERVED_BLOCKS = PAD_BLOCKS
 
 
-keys = ( "id", "prev", "user", "email", "pw", "hotp_secret", "hotp_counter",
-    "totp_secret", "comment", "pw2" )
+#
+# Sequence in "keys" must be the same as in "enum field_type" in db/db.h
+#
+
+keys = ( "id", "prev", "user", "email", "pw", "hotp_secret",
+    "hotp_counter", "totp_secret", "comment", "pw2", "dir" )
 
 debug = False
 
@@ -36,8 +40,8 @@ def encode(key, code, v):
 	if key == "id" and isinstance(v, list):
 		s = '\000'.join(v)
 		return struct.pack("BB", code, len(s)) + s.encode()
-	if key == "id" or key == "prev" or key == "user" or key == "email" or \
-	    key == "pw" or key == "pw2" or key == "comment":
+	if key == "id" or key == "prev" or key == "dir" or key == "user" or \
+	    key == "email" or key == "pw" or key == "pw2" or key == "comment":
 		return struct.pack("BB", code, len(v)) + v.encode()
 	if key == "hotp_secret" or key == "totp_secret":
 		s = base64.b32decode(v)

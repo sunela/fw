@@ -938,13 +938,51 @@ add long-left3 "drag 240 120 100 120"
 # === directories, scroll up ==================================================
 
 accounts dir-up "drag 158 279 159 0"
+
+# --- directories, go down the hierarchy ... ----------------------------------
+
 add dir-zebra "tap 93 204"
 add dir-quagga "tap 70 171"
+
+# --- ... and back up again ---------------------------------------------------
+
 add dir-quagga-back "drag 200 100 50 100"
 add dir-quagga-back2 "drag 200 100 50 120"
 add dir-quagga-back3 "drag 200 100 50 80"
 
-# -----------------------------------------------------------------------------
+# === directories, delete accounts ============================================
+
+TOP_OVER='"long 111 17"'
+DELETE='"long 111 17" "tap 181 140" "drag 52 194 194 204"'
+
+accounts dir-zebra-again "drag 158 279 159 0" "tap 93 204"
+
+save
+eval add dir-zebra-not-empty $TOP_OVER
+restore
+
+eval add dir-del-selousi '"tap 70 171"' '"tap 114 118"' $DELETE
+eval add dir-del-bohemi '"tap 115 70"' $DELETE
+
+# --- directories, delete 2nd level subdirectory ------------------------------
+
+eval add dir-del-quagga $DELETE
+
+# --- directories, delete more accounts ---------------------------------------
+
+eval add dir-del-capensis '"tap 115 70"' $DELETE
+
+save
+eval add dir-zebra-still-not-empty $TOP_OVER
+restore
+
+eval add dir-del-grevyi '"tap 115 70"' $DELETE
+
+# --- directories, delete 1st level subdirectory ------------------------------
+
+eval add dir-del-zebra $DELETE '"drag 158 279 159 0"'
+
+# =============================================================================
 
 if [ "$select" ] && ! $found; then
 	echo "$select: not found" 1>&2

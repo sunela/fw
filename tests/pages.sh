@@ -41,6 +41,7 @@ page_inner()
 	local json=
 	local title=true
 
+	keep=false
 	while [ "$1" ]; do
 		case "$1" in
 		-e)	erase=true
@@ -49,6 +50,8 @@ page_inner()
 			shift;;
 		-j)	json=$2
 			shift 2;;
+		-k)	keep=true
+			shift;;
 		-n)	title=false
 			shift;;
 		*)	break;;
@@ -136,7 +139,7 @@ page()
 {
 	page_inner "$@"
 	local rc=$?
-	cleanup
+	$keep || cleanup
 	return $rc
 }
 
@@ -941,7 +944,16 @@ accounts dir-up "drag 158 279 159 0"
 
 # --- directories, go down the hierarchy ... ----------------------------------
 
-add dir-zebra "tap 93 204"
+zebra()
+{
+	local name=$1
+
+	shift
+	accounts $name "drag 158 279 159 0" "tap 93 204" "$@"
+}
+
+
+zebra dir-zebra
 add dir-quagga "tap 70 171"
 
 # --- ... and back up again ---------------------------------------------------
@@ -955,13 +967,9 @@ add dir-quagga-back3 "drag 200 100 50 80"
 TOP_OVER='"long 111 17"'
 DELETE='"long 111 17" "tap 181 140" "drag 52 194 194 204"'
 
-accounts dir-zebra-again "drag 158 279 159 0" "tap 93 204"
+eval zebra dir-zebra-not-empty $TOP_OVER
 
-save
-eval add dir-zebra-not-empty $TOP_OVER
-restore
-
-eval add dir-del-selousi '"tap 70 171"' '"tap 114 118"' $DELETE
+eval zebra dir-del-selousi '"tap 70 171"' '"tap 114 118"' $DELETE
 eval add dir-del-bohemi '"tap 115 70"' $DELETE
 
 # --- directories, delete 2nd level subdirectory ------------------------------
@@ -981,6 +989,37 @@ eval add dir-del-grevyi '"tap 115 70"' $DELETE
 # --- directories, delete 1st level subdirectory ------------------------------
 
 eval add dir-del-zebra $DELETE '"drag 158 279 159 0"'
+
+# === directories, rename =====================================================
+
+eval zebra dir-zebra-zeb $TOP_OVER '"tap 177 140"' \
+    '"$ENTRY_L"' '"$ENTRY_L"' '"$ENTRY_R"'
+
+saved_mode=$mode
+mode=run
+if ! add -n -k dir-zeb; then
+	mode=$saved_mode
+	cleanup
+else
+	mode=$saved_mode
+	eval zebra dir-zeb
+fi
+
+# --- Rename entry in directory -----------------------------------------------
+
+eval zebra dir-grevyi-grey '"tap 79 120"' $TOP_OVER '"tap 120 138"' \
+    '"$ENTRY_L"' '"$ENTRY_L"' '"$ENTRY_L"' '"$ENTRY_9"' '"$ENTRY_6"' \
+    '"$ENTRY_R"'
+
+saves_mode=$mode
+mode=run
+if ! add -n -k dir-grey; then
+	mode=$saved_mode
+	cleanup
+else
+	mode=$saved_mode
+	eval zebra dir-grey
+fi
 
 # =============================================================================
 

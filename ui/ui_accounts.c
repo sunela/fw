@@ -23,6 +23,8 @@
 
 
 #define	NULL_TARGET_COLOR	GFX_HEX(0x808080)
+#define	TITLE_ROOT_FG		GFX_WHITE
+#define	TITLE_SUB_FG		GFX_YELLOW
 
 
 struct ui_accounts_ctx {
@@ -325,7 +327,8 @@ static void ui_accounts_open(void *ctx, void *params)
 	pwd = db_pwd(&main_db);
 	gfx_rect_xy(&main_da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH, GFX_WHITE);
 	text_text(&main_da, GFX_WIDTH / 2, TOP_H / 2, pwd ? pwd : "Accounts",
-	    &FONT_TOP, GFX_CENTER, GFX_CENTER, GFX_WHITE);
+	    &FONT_TOP, GFX_CENTER, GFX_CENTER,
+	    db_pwd(&main_db) ? TITLE_SUB_FG : TITLE_ROOT_FG);
 
 	wi_list_begin(&c->list, &style);
 	db_iterate(&main_db, add_account, c);

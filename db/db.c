@@ -5,6 +5,7 @@
  * A copy of the license can be found in the file LICENSE.MIT
  */
 
+#define	_GNU_SOURCE	/* for memrchr */
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -136,9 +137,9 @@ bool db_change_field(struct db_entry *de, enum field_type type,
 	struct db_field *f;
 	int new = -1;
 
-if (debugging)
-  printf("db_change_field: %s.%u -> \"%.*s\"\n",
-    de->name, type, size, (char *) data);
+	if (debugging)
+		printf("db_change_field: %s.%u -> \"%.*s\"\n",
+		    de->name, type, size, (char *) data);
 	if (!de->defer) {
 		new = get_erased_block(db);
 		if (new < 0)
@@ -164,9 +165,20 @@ if (debugging)
 	switch (type) {
 	case ft_id:
 		free(de->name);
-		de->name = alloc_size(size + 1);
-		memcpy(de->name, data, size);
-		de->name[size] = 0;
+
+		const void *z = memrchr(data, 0, size);
+
+		if (z) {
+			unsigned name_len = size - (z + 1 - data);
+
+			de->name = alloc_size(name_len + 1);
+			memcpy(de->name, z + 1, name_len);
+			de->name[name_len] = 0;
+		} else {
+			de->name = alloc_size(size + 1);
+			memcpy(de->name, data, size);
+			de->name[size] = 0;
+		}
 		db_tsort(db);
 		break;
 	case ft_prev:
@@ -202,6 +214,81 @@ bool db_delete_field(struct db_entry *de, struct db_field *f)
 		db->generation++;
 
 	return de->defer || update_entry(de, new);
+}
+
+
+static bool patch_one(struct db_entry *de, const char *new_prefix,
+    unsigned new_prefix_len, unsigned old_prefix_len)
+{
+	const struct db_field *id = de->fields;
+	bool ok;
+
+	assert(id->type == ft_id);
+	assert(id->len >= old_prefix_len);
+	if (id->len == old_prefix_len) {
+		ok = db_change_field(de, ft_id, new_prefix, new_prefix_len);
+	} else {
+		unsigned new_len =
+		    id->len - old_prefix_len + new_prefix_len;
+		char *tmp;
+
+		assert(!((const uint8_t *) id->data)[old_prefix_len]);
+		tmp = alloc_size(new_len);
+		memcpy(tmp, new_prefix, new_prefix_len);
+		memcpy(tmp + new_prefix_len, id->data + old_prefix_len,
+		    id->len - old_prefix_len);
+		ok = db_change_field(de, ft_id, tmp, new_len);
+		free(tmp);
+	}
+	return ok;
+}
+
+
+static bool patch_recursive(struct db_entry *de, const char *new_prefix,
+    unsigned new_prefix_len, unsigned old_prefix_len)
+{
+	struct db_entry *e;
+
+#if 0
+	const struct db_field *id = de->fields;
+
+	debug("patch_recursive %s: %.*s -> %.*s,  %u -> %u\n",
+	    de->name, id->len, (const char *) id->data, new_prefix_len,
+	    new_prefix, old_prefix_len, new_prefix_len);
+#endif
+	if (!patch_one(de, new_prefix, new_prefix_len, old_prefix_len))
+		return 0;
+	for (e = de->children; e; e = e->next)
+		if (!patch_recursive(e, new_prefix, new_prefix_len,
+		    old_prefix_len))
+			return 0;
+	return 1;
+}
+
+
+bool db_rename(struct db_entry *de, const char *name)
+{
+	const struct db_field *id = de->fields;
+	unsigned name_len = strlen(name);
+	const void *z;
+	bool ok;
+
+	assert(id->type == ft_id);
+	z = memrchr(id->data, 0, id->len);
+	if (!z)
+		return patch_recursive(de, name, name_len, id->len);
+
+	unsigned pos = z - id->data + 1;
+	unsigned new_len = pos + name_len;
+	char *tmp = alloc_size(new_len);
+
+	assert(pos > 1);
+	assert(id->len > pos);
+	memcpy(tmp, id->data, pos);
+	memcpy(tmp + pos, name, new_len);
+	ok = patch_recursive(de, tmp, new_len, id->len);
+	free(tmp);
+	return ok;
 }
 
 

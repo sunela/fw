@@ -124,6 +124,7 @@ struct db_field *db_field_find(const struct db_entry *de, enum field_type type);
 bool db_change_field(struct db_entry *de, enum field_type type,
     const void *data, unsigned size);
 bool db_delete_field(struct db_entry *de, struct db_field *f);
+bool db_rename(struct db_entry *de, const char *name);
 
 /*
  * db_entry_defer_update(..., 1) disables writing changes to the entry back to

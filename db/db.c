@@ -455,7 +455,25 @@ struct db_entry *db_new_entry(struct db *db, const char *name)
 	de->name = stralloc(name);
 	de->block = new;
 	rnd_bytes(&de->seq, sizeof(de->seq));
-	add_field(de, ft_id, name, strlen(name));
+
+	unsigned name_len = strlen(name);
+	const struct db_entry *parent = db->dir;
+
+	if (parent) {
+		struct db_field *id = parent->fields;
+		unsigned path_len = id->len + 1 + name_len;
+		char *tmp = alloc_size(path_len);
+
+		assert(id->type == ft_id);
+		memcpy(tmp, id->data, id->len);
+		tmp[id->len] = 0;
+		memcpy(tmp + id->len + 1, name, name_len);
+		add_field(de, ft_id, tmp, path_len);
+		free(tmp);
+	} else {
+		add_field(de, ft_id, name, name_len);
+	}
+
 	db_tsort(db);
 	if (write_entry(de))
 		return de;

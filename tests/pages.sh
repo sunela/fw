@@ -257,6 +257,8 @@ accounts()
 		case "$1" in
 		-j)	opts="$opts -j $2"
 			shift 2;;
+		-k)	opts="$opts -k"
+			shift;;
 		*)	break;;
 		esac
 	done
@@ -946,10 +948,20 @@ accounts dir-up "drag 158 279 159 0"
 
 zebra()
 {
-	local name=$1
+	local opts=
 
+	while [ "$1" ]; do
+		case "$1" in
+		-k)	opts="$opts -k"
+			shift;;
+		*)	break;;
+		esac
+	done
+
+	local name=$1
 	shift
-	accounts $name "drag 158 279 159 0" "tap 93 204" "$@"
+
+	accounts $opts $name "drag 158 279 159 0" "tap 93 204" "$@"
 }
 
 
@@ -1011,7 +1023,7 @@ eval zebra dir-grevyi-grey '"tap 79 120"' $TOP_OVER '"tap 120 138"' \
     '"$ENTRY_L"' '"$ENTRY_L"' '"$ENTRY_L"' '"$ENTRY_9"' '"$ENTRY_6"' \
     '"$ENTRY_R"'
 
-saves_mode=$mode
+saved_mode=$mode
 mode=run
 if ! add -n -k dir-grey; then
 	mode=$saved_mode
@@ -1019,6 +1031,21 @@ if ! add -n -k dir-grey; then
 else
 	mode=$saved_mode
 	eval zebra dir-grey
+fi
+
+# === directories, add entry in directory =====================================
+
+zebra zebra-add "long 125 126" "tap 52 162" \
+    "$ENTRY_9" "$ENTRY_2" "$ENTRY_R"
+
+saved_mode=$mode
+mode=run
+if ! add -n -k zebra-add-load; then
+	mode=$saved_mode
+	cleanup
+else
+	mode=$saved_mode
+	zebra zebra-add-load
 fi
 
 # =============================================================================

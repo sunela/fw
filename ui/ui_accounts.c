@@ -50,10 +50,10 @@ static struct wi_list_entry_style style_dir;
 static struct wi_list *lists[1];
 
 
-/* --- New account --------------------------------------------------------- */
+/* --- New entry ----------------------------------------------------------- */
 
 
-static void new_account_name(struct ui_accounts_ctx *c)
+static void new_entry_name(struct ui_accounts_ctx *c)
 {
 	if (!*c->buf)
 		return;
@@ -70,35 +70,35 @@ static bool name_is_different(void *user, struct db_entry *de)
 }
 
 
-static int validate_new_account(void *user, const char *s)
+static int validate_new_entry(void *user, const char *s)
 {
 	return db_iterate(&main_db, name_is_different, (void *) s);
 }
 
 
-static void make_new_account(struct ui_accounts_ctx *c,
+static void make_new_entry(struct ui_accounts_ctx *c,
     void (*call)(const struct ui *ui, void *user))
 {
 	struct ui_entry_params params = {
 		.input = {
 			.buf		= c->buf,
 			.max_len	= sizeof(c->buf) - 1,
-			.validate	= validate_new_account,
-			.title		= "New account",
+			.validate	= validate_new_entry,
+			.title		= "New entry",
 		},
 	};
 
 	*c->buf = 0;
-	c->resume_action = new_account_name;
+	c->resume_action = new_entry_name;
 	call(&ui_entry, &params);
 }
 
 
-static void new_account(void *user)
+static void new_entry(void *user)
 {
 	struct ui_accounts_ctx *c = user;
 
-	make_new_account(c, ui_switch);
+	make_new_entry(c, ui_switch);
 }
 
 
@@ -113,7 +113,7 @@ static void ui_accounts_tap(void *ctx, unsigned x, unsigned y)
 
 	if (list_is_empty(&c->list)) {
 		if (button_in(GFX_WIDTH / 2, (GFX_HEIGHT + LIST_Y0) / 2, x, y))
-			make_new_account(c, ui_call);
+			make_new_entry(c, ui_call);
 		return;
 	}
 
@@ -329,7 +329,7 @@ static void ui_accounts_long(void *ctx, unsigned x, unsigned y)
 		{ ui_overlay_sym_power,	power_off, NULL },
 		{ ui_overlay_sym_setup,	enter_setup, NULL },
 		{ ui_overlay_sym_pc_comm, remote_control, NULL },
-		{ ui_overlay_sym_add, new_account, NULL },
+		{ ui_overlay_sym_add, new_entry, NULL },
 		{ ui_overlay_sym_move_from, move_from, NULL, },
 		{ NULL, move_cancel, NULL },
 	};

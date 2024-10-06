@@ -593,11 +593,12 @@ static bool demo_overlay(char *const *args, unsigned n_args)
 		{ ui_overlay_sym_edit,		NULL, NULL },
 		{ ui_overlay_sym_setup,		NULL, NULL },
 		{ ui_overlay_sym_pc_comm,	NULL, NULL, },
+		{ ui_overlay_sym_folder,	NULL, NULL, },
 		{ NULL }
 	};
 	struct ui_overlay_params prm = {
 		.buttons	= buttons,
-		.n_buttons	= 8,
+		.n_buttons	= 9,
 	};
 
 	switch (n_args) {

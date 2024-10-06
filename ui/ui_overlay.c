@@ -91,7 +91,7 @@ static void draw_button(struct gfx_drawable *da,
 	gfx_rrect_xy(da, x - style->size / 2, y - style->size / 2,
 	    style->size, style->size, DEFAULT_BUTTON_R, style->button_bg);
 	if (b->draw)
-		b->draw(da, p, x, y, b->user);
+		b->draw(da, p, x, y);
 }
 
 
@@ -120,7 +120,7 @@ void button_draw_add(unsigned x, unsigned y)
 
 
 void ui_overlay_sym_power(struct gfx_drawable *da,
-    const struct ui_overlay_params *params, unsigned x, unsigned y, void *user)
+    const struct ui_overlay_params *params, unsigned x, unsigned y)
 {
 	const struct ui_overlay_style *style =
 	    params->style ? params->style : &default_style;
@@ -131,7 +131,7 @@ void ui_overlay_sym_power(struct gfx_drawable *da,
 
 
 void ui_overlay_sym_delete(struct gfx_drawable *da,
-    const struct ui_overlay_params *params, unsigned x, unsigned y, void *user)
+    const struct ui_overlay_params *params, unsigned x, unsigned y)
 {
 	const struct ui_overlay_style *style =
 	    params->style ? params->style : &default_style;
@@ -142,7 +142,7 @@ void ui_overlay_sym_delete(struct gfx_drawable *da,
 
 
 void ui_overlay_sym_add(struct gfx_drawable *da,
-    const struct ui_overlay_params *params, unsigned x, unsigned y, void *user)
+    const struct ui_overlay_params *params, unsigned x, unsigned y)
 {
 	const struct ui_overlay_style *style =
 	    params->style ? params->style : &default_style;
@@ -154,7 +154,7 @@ void ui_overlay_sym_add(struct gfx_drawable *da,
 
 
 void ui_overlay_sym_back(struct gfx_drawable *da,
-    const struct ui_overlay_params *params, unsigned x, unsigned y, void *user)
+    const struct ui_overlay_params *params, unsigned x, unsigned y)
 {
 	const struct ui_overlay_style *style =
 	    params->style ? params->style : &default_style;
@@ -165,7 +165,7 @@ void ui_overlay_sym_back(struct gfx_drawable *da,
 
 
 void ui_overlay_sym_next(struct gfx_drawable *da,
-    const struct ui_overlay_params *params, unsigned x, unsigned y, void *user)
+    const struct ui_overlay_params *params, unsigned x, unsigned y)
 {
 	const struct ui_overlay_style *style =
 	    params->style ? params->style : &default_style;
@@ -176,7 +176,7 @@ void ui_overlay_sym_next(struct gfx_drawable *da,
 
 
 void ui_overlay_sym_edit(struct gfx_drawable *da,
-    const struct ui_overlay_params *params, unsigned x, unsigned y, void *user)
+    const struct ui_overlay_params *params, unsigned x, unsigned y)
 {
 	const struct ui_overlay_style *style =
 	    params->style ? params->style : &default_style;
@@ -194,7 +194,7 @@ void ui_overlay_sym_edit(struct gfx_drawable *da,
 
 
 void ui_overlay_sym_setup(struct gfx_drawable *da,
-    const struct ui_overlay_params *params, unsigned x, unsigned y, void *user)
+    const struct ui_overlay_params *params, unsigned x, unsigned y)
 {
 	const struct ui_overlay_style *style =
 	    params->style ? params->style : &default_style;
@@ -222,28 +222,28 @@ static void sym_move(struct gfx_drawable *da,
 
 
 void ui_overlay_sym_move_from(struct gfx_drawable *da,
-    const struct ui_overlay_params *params, unsigned x, unsigned y, void *user)
+    const struct ui_overlay_params *params, unsigned x, unsigned y)
 {
 	sym_move(da, params, x, y, 1, 0);
 }
 
 
 void ui_overlay_sym_move_to(struct gfx_drawable *da,
-    const struct ui_overlay_params *params, unsigned x, unsigned y, void *user)
+    const struct ui_overlay_params *params, unsigned x, unsigned y)
 {
 	sym_move(da, params, x, y, 0, 1);
 }
 
 
 void ui_overlay_sym_move_cancel(struct gfx_drawable *da,
-    const struct ui_overlay_params *params, unsigned x, unsigned y, void *user)
+    const struct ui_overlay_params *params, unsigned x, unsigned y)
 {
 	sym_move(da, params, x, y, 1, -1);
 }
 
 
 void ui_overlay_sym_pc_comm(struct gfx_drawable *da,
-    const struct ui_overlay_params *params, unsigned x, unsigned y, void *user)
+    const struct ui_overlay_params *params, unsigned x, unsigned y)
 {
 	const struct ui_overlay_style *style =
 	    params->style ? params->style : &default_style;
@@ -254,7 +254,7 @@ void ui_overlay_sym_pc_comm(struct gfx_drawable *da,
 
 
 void ui_overlay_sym_folder(struct gfx_drawable *da,
-    const struct ui_overlay_params *params, unsigned x, unsigned y, void *user)
+    const struct ui_overlay_params *params, unsigned x, unsigned y)
 {
 	const struct ui_overlay_style *style =
 	    params->style ? params->style : &default_style;

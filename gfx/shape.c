@@ -457,5 +457,16 @@ void gfx_folder(struct gfx_drawable *da, unsigned x, unsigned y,
 	gfx_rrect_xy(da, x, y + rider_h, w, h - rider_h, r, color);
 	for (i = 0; i != rider_h; i++)
 		gfx_rect_xy(da, x + rider_w - r, y + i, i + r, 1, color);
+}
 
+
+void gfx_folder_outline(struct gfx_drawable *da, unsigned x, unsigned y,
+    unsigned w, unsigned h, unsigned rider_w, unsigned rider_h, unsigned r,
+    unsigned lw, gfx_color color, gfx_color bg)
+{
+	unsigned ri = lw > r ? 0 : r - lw;
+
+	gfx_folder(da, x, y, w, h, rider_w, rider_h, r, color);
+	gfx_folder(da, x + lw, y + lw, w - 2 * lw, h - 2 * lw,
+	    rider_w - 1.414 * lw, rider_h, ri, bg);
 }

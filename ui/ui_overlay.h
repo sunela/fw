@@ -35,6 +35,9 @@ struct ui_overlay_params {
 };
 
 
+extern const struct ui_overlay_style ui_overlay_default_style;
+
+
 bool button_in(unsigned cx, unsigned cy, unsigned, unsigned y);
 void button_draw_add(unsigned x, unsigned y);
 

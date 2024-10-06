@@ -64,10 +64,7 @@ struct button_ref {
 };
 
 
-static struct button_ref refs[MAX_BUTTONS];
-
-
-static const struct ui_overlay_style default_style = {
+const struct ui_overlay_style ui_overlay_default_style = {
 	.size		= 50,
 	.button_r	= 12,
 	.gap		= 12,
@@ -75,6 +72,7 @@ static const struct ui_overlay_style default_style = {
 	.button_bg	= GFX_WHITE,
 };
 
+static struct button_ref refs[MAX_BUTTONS];
 static struct timer t_overlay_idle;
 
 
@@ -86,7 +84,7 @@ static void draw_button(struct gfx_drawable *da,
     const struct ui_overlay_button *b, int x, int y)
 {
 	const struct ui_overlay_style *style =
-	    p->style ? p->style : &default_style;
+	    p->style ? p->style : &ui_overlay_default_style;
 
 	gfx_rrect_xy(da, x - style->size / 2, y - style->size / 2,
 	    style->size, style->size, DEFAULT_BUTTON_R, style->button_bg);
@@ -100,7 +98,8 @@ static void draw_button(struct gfx_drawable *da,
 
 bool button_in(unsigned cx, unsigned cy, unsigned x, unsigned y)
 {
-	unsigned r = (default_style.size + default_style.gap) / 2;
+	const struct ui_overlay_style *style = &ui_overlay_default_style;
+	unsigned r = (style->size + style->gap) / 2;
 
 	return x >= cx - r && x <= cx + r && y >= cy - r && y <= cy + r;
 }
@@ -293,7 +292,7 @@ static void ui_overlay_open(void *ctx, void *params)
 	const struct ui_overlay_params *p = params;
 	const struct ui_overlay_button *b = p->buttons;
 	const struct ui_overlay_style *style =
-	    p->style ? p->style : &default_style;
+	    p->style ? p->style : &ui_overlay_default_style;
 	struct button_ref *ref = refs;
 	unsigned nx, ny;
 	unsigned ix, iy;

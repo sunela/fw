@@ -376,8 +376,9 @@ static void render_folder(const struct wi_list *list,
 	unsigned w = bb->h / 2;
 	unsigned h = bb->h / 3;
 
-	gfx_folder(da, bb->x + bb->w - w, bb->y + (bb->h - h) / 2 - h / 5, w, h,
-	    w / 2, h / 5, h / 9, style.entry.fg[odd]);
+	gfx_folder_outline(da, bb->x + bb->w - w - 1,
+	    bb->y + (bb->h - h) / 2 - h / 5, w, h,
+	    w / 2, h / 5, h / 9, 3, style.entry.fg[odd], style.entry.bg[odd]);
 }
 
 
@@ -391,7 +392,7 @@ static bool add_account(void *user, struct db_entry *de)
 
 	if (db_is_dir(de)) {
 		e = wi_list_add_width(&c->list, de->name, NULL,
-		    GFX_WIDTH - style_dir.min_h, de);
+		    GFX_WIDTH - style_dir.min_h - 2, de);
 		wi_list_entry_style(&c->list, e, &style_dir);
 	} else {
 		e = wi_list_add(&c->list, de->name, NULL, de);

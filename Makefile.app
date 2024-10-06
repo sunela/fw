@@ -20,7 +20,7 @@ OBJS = ui.o demo.o timer.o debug.o mbox.o rnd.o hmac.o hotp.o base32.o \
     ui_confirm.o ui_setup.o ui_storage.o ui_version.o ui_rd.o ui_notice.o \
     ui_pin_change.o wi_pin_entry.o ui_rmt.o ui_new.o ui_choices.o \
     ui_show_master.o ui_show_pubkey.o ui_set_master.o ui_bip39.o \
-    wi_bip39_entry.o
+    wi_bip39_entry.o wi_icons.o
 
 include Makefile.c-common
 
@@ -83,11 +83,13 @@ vpath ui_show_pubkey.c ui
 vpath ui_set_master.c ui
 vpath ui_bip39.c ui
 
+vpath demo.c ui
+
 vpath wi_list.c ui
 vpath wi_general_entry.c ui
 vpath wi_pin_entry.c ui
 vpath wi_bip39_entry.c ui
-vpath demo.c ui
+vpath wi_icons.c ui
 
 vpath citrine.jpg logo
 vpath mksintab.pl lib

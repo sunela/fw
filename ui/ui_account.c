@@ -416,6 +416,17 @@ static void delete_field(void *user)
 }
 
 
+static void make_directory(void *user)
+{
+	struct ui_account_ctx *c = user;
+
+	db_mkdir(c->selected_account);
+	db_chdir(&main_db, c->selected_account);
+	c->selected_account = 0;
+	ui_return();
+}
+
+
 static void fields_overlay(struct ui_account_ctx *c, struct db_field *f)
 {
 	static struct ui_overlay_button buttons[] = {
@@ -431,12 +442,20 @@ static void fields_overlay(struct ui_account_ctx *c, struct db_field *f)
 	struct db_entry *de = c->selected_account;
 	unsigned i;
 
-	if (ui_field_more(de)) {
-		buttons[1].draw = ui_overlay_sym_add;
-		prm.n_buttons = f ? 4 : 2;
+	if (!db_is_account(de)) {
+		buttons[2].draw = ui_overlay_sym_folder;
+		buttons[2].fn = make_directory;
+		prm.n_buttons = 3;
 	} else {
-		buttons[1].draw = NULL;
-		prm.n_buttons = f ? 4 : 1;
+		buttons[2].draw = ui_overlay_sym_edit;
+		buttons[2].fn = edit_field;
+		if (ui_field_more(de)) {
+			buttons[1].draw = ui_overlay_sym_add;
+			prm.n_buttons = f ? 4 : 2;
+		} else {
+			buttons[1].draw = NULL;
+			prm.n_buttons = f ? 4 : 1;
+		}
 	}
 	c->field_ref = f;
 	for (i = 0; i != prm.n_buttons; i++)

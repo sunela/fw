@@ -169,7 +169,16 @@ bool db_delete_entry(struct db_entry *de);
 bool db_iterate(struct db *db, bool (*fn)(void *user, struct db_entry *de),
     void *user);
 
+/*
+ * db_is_dir and db_is_account return 1 if "de" is a directory or account.
+ * They return 0 if it is clearly the other, or if it can still be either
+ * account or directory.
+ */
 bool db_is_dir(const struct db_entry *de);
+bool db_is_account(const struct db_entry *de);
+
+void db_mkdir(struct db_entry *de);
+
 void db_chdir(struct db *db, struct db_entry *de);
 struct db_entry *db_dir_parent(const struct db *db);
 

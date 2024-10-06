@@ -778,6 +778,34 @@ bool db_is_dir(const struct db_entry *de)
 }
 
 
+bool db_is_account(const struct db_entry *de)
+{
+	const struct db_field *f;
+
+	if (de->children)
+		return 0;
+	for (f = de->fields; f; f = f->next)
+		switch (f->type) {
+		case ft_id:
+		case ft_prev:
+			break;
+		case ft_dir:
+			return 0;
+		default:
+			return 1;
+		}
+	return 0;
+}
+
+
+void db_mkdir(struct db_entry *de)
+{
+	assert(!db_is_dir(de));
+	assert(!db_is_account(de));
+	add_field(de, ft_dir, NULL, 0);
+}
+
+
 void db_chdir(struct db *db, struct db_entry *de)
 {
 	db->dir = de;

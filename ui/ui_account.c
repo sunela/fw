@@ -22,6 +22,7 @@
 #include "text.h"
 #include "db.h"
 #include "wi_list.h"
+#include "wi_icons.h"
 #include "ui_overlay.h"
 #include "ui_confirm.h"
 #include "ui_entry.h"
@@ -62,6 +63,20 @@ static const struct wi_list_style style = {
 };
 
 static struct wi_list *lists[1];
+
+
+/* --- Turn entry into a directory ----------------------------------------- */
+
+
+static void make_directory(void *user)
+{
+	struct ui_account_ctx *c = user;
+
+	db_mkdir(c->selected_account);
+	db_chdir(&main_db, c->selected_account);
+	c->selected_account = 0;
+	ui_return();
+}
 
 
 /* --- Extra account rendering --------------------------------------------- */
@@ -174,8 +189,23 @@ static void ui_account_tap(void *ctx, unsigned x, unsigned y)
 	uint32_t code;
 
 	if (list_is_empty(&c->list)) {
-		if (button_in(GFX_WIDTH / 2, (GFX_HEIGHT + LIST_Y0) / 2, x, y))
+		int i;
+
+		i = wi_icons_select(x, y,
+		    GFX_WIDTH / 2, (GFX_HEIGHT + LIST_Y0) / 2, NULL,
+		    db_is_account(c->selected_account) ? 1 : 2);
+		switch (i) {
+		case 0:
 			ui_call(&ui_field_add, c->selected_account);
+			break;
+		case 1:
+			make_directory(c);
+			break;
+		case -1:
+			break;
+		default:
+			ABORT();
+		}
 		return;
 	}
 
@@ -416,17 +446,6 @@ static void delete_field(void *user)
 }
 
 
-static void make_directory(void *user)
-{
-	struct ui_account_ctx *c = user;
-
-	db_mkdir(c->selected_account);
-	db_chdir(&main_db, c->selected_account);
-	c->selected_account = 0;
-	ui_return();
-}
-
-
 static void fields_overlay(struct ui_account_ctx *c, struct db_field *f)
 {
 	static struct ui_overlay_button buttons[] = {
@@ -555,7 +574,14 @@ static void ui_account_open(void *ctx, void *params)
 	wi_list_end(&c->list);
 
 	if (list_is_empty(&c->list)) {
-		button_draw_add(GFX_WIDTH / 2, (GFX_HEIGHT + LIST_Y0) / 2);
+		wi_icons_draw_fn fn[] = {
+			ui_overlay_sym_add,
+		    	ui_overlay_sym_folder,
+		};
+
+		wi_icons_draw(&main_da, GFX_WIDTH / 2,
+		    (GFX_HEIGHT + LIST_Y0) / 2, NULL,
+		    fn, db_is_account(c->selected_account) ? 1 : 2);
 		lists[0] = NULL;
 	} else {
 		lists[0] = &c->list;

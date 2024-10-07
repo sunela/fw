@@ -121,7 +121,7 @@ static void add_field(struct db_entry *de, enum field_type type,
 	f = alloc_type(struct db_field);
 	f->type = type;
 	f->len = len;
-	f->data = alloc_size(len);
+	f->data = len ? alloc_size(len) : NULL;
 	memcpy(f->data, data, len);
 	f->next = *anchor;
 	*anchor = f;

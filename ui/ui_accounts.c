@@ -369,16 +369,45 @@ static void ui_accounts_long(void *ctx, unsigned x, unsigned y)
 /* --- Folder icon --------------------------------------------------------- */
 
 
+static void draw_folder(struct gfx_drawable *da, unsigned x, unsigned y,
+    unsigned w, int8_t align_x, int8_t align_y, gfx_color fg, gfx_color bg)
+{
+	unsigned h = w * 2 / 3;
+
+	switch (align_x) {
+	case GFX_LEFT:
+		break;
+	case GFX_RIGHT:
+		x -= w - 1;
+		break;
+	default:
+		ABORT();
+	}
+	switch (align_y) {
+	case GFX_TOP:
+		break;
+	case GFX_CENTER:
+		y -= h / 2 + h / 5;
+		break;
+	case GFX_BOTTOM:
+		y -= h - 1;
+		break;
+	default:
+		ABORT();
+	}
+	gfx_folder_outline(da, x, y, w, h,
+	    w / 2, h / 5, h / 9, 3,	// rider_w, rider_h, r, lw
+	    fg, bg);
+}
+
+
 static void render_folder(const struct wi_list *list,
     const struct wi_list_entry *entry, struct gfx_drawable *da,
     const struct gfx_rect *bb, bool odd)
 {
-	unsigned w = bb->h / 2;
-	unsigned h = bb->h / 3;
-
-	gfx_folder_outline(da, bb->x + bb->w - w - 1,
-	    bb->y + (bb->h - h) / 2 - h / 5, w, h,
-	    w / 2, h / 5, h / 9, 3, style.entry.fg[odd], style.entry.bg[odd]);
+	// leave a 1 px margin on the right
+	draw_folder(da, bb->x + bb->w - 1 - 1, bb->y + bb->h / 2, bb->h / 2,
+	    GFX_RIGHT, GFX_CENTER, style.entry.fg[odd], style.entry.bg[odd]);
 }
 
 
@@ -403,6 +432,9 @@ static bool add_account(void *user, struct db_entry *de)
 }
 
 
+#define	TOP_CORNER_X	10
+
+
 static void ui_accounts_open(void *ctx, void *params)
 {
 	struct ui_accounts_ctx *c = ctx;
@@ -416,9 +448,16 @@ static void ui_accounts_open(void *ctx, void *params)
 
 	pwd = db_pwd(&main_db);
 	gfx_rect_xy(&main_da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH, GFX_WHITE);
-	text_text(&main_da, GFX_WIDTH / 2, TOP_H / 2, pwd ? pwd : "Accounts",
-	    &FONT_TOP, GFX_CENTER, GFX_CENTER,
-	    db_pwd(&main_db) ? TITLE_SUB_FG : TITLE_ROOT_FG);
+	if (pwd) {
+		text_text(&main_da, (GFX_WIDTH - TOP_CORNER_X - TOP_H) / 2,
+		    TOP_H / 2, pwd,
+		    &FONT_TOP, GFX_CENTER, GFX_CENTER, TITLE_SUB_FG);
+		draw_folder(&main_da, GFX_WIDTH - TOP_CORNER_X - 1, TOP_H / 2,
+		    TOP_H / 2, GFX_RIGHT, GFX_CENTER, TITLE_SUB_FG, GFX_BLACK);
+	} else {
+		text_text(&main_da, GFX_WIDTH / 2, TOP_H / 2, "Accounts",
+		    &FONT_TOP, GFX_CENTER, GFX_CENTER, TITLE_ROOT_FG);
+	}
 
 	wi_list_begin(&c->list, &style);
 	db_iterate(&main_db, add_account, c);

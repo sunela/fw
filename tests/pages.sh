@@ -116,11 +116,17 @@ sys.stdout.buffer.write(b"\xff" * 1024 * 2048);' >"$dir/_db" || exit
 	last)	return;;
 	show)	display "$dir/_tmp.ppm";;
 	run)	;;
-	test)	convert $reproducible "$dir/_tmp.ppm" "$dir/_tmp.png"
+	test|delta)
+		convert $reproducible "$dir/_tmp.ppm" "$dir/_tmp.png"
 		[ "`md5sum <\"$dir/$name.png\"`" = \
 		  "`md5sum <\"$dir/_tmp.png\"`" ] || {
 			compare "$dir/$name.png" "$dir/_tmp.png" - |
-			    display
+			   if [ "$mode" = delta ]; then
+				montage "$dir/$name.png" - "$dir/_tmp.ppm" \
+				   -geometry +4+0 - | display
+			   else
+				display
+			   fi
 			$all || exit
 		}
 		rm -f "$dir/_tmp.png";;
@@ -165,12 +171,13 @@ restore()
 usage()
 {
 	cat <<EOF 1>&2
-usage: $0 [-a] [--gdb] [-v] [-x] [run|show|interact|last|test|store|names
+usage: $0 [-a] [--gdb] [-v] [-x] [run|show|delta|interact|last|test|store|names
           [page-name]]
 
--a  applies to "test": run all test cases and show the ones where differences
-    are detected. Without -a, "test" stops after the first difference. The exit
-    code is non-zero if the last test run produced a difference.
+-a  applies to "test" and "delta": run all test cases and show the ones where
+    differences are detected. Without -a, "test" stops after the first
+    difference. The exit code is non-zero if the last test run produced a
+   difference.
 --gdb
     run the simulator under gdb
 -v  enable debug output of the simulator
@@ -204,11 +211,11 @@ while [ "$1" ]; do
 done
 
 case "$1" in
-run|show|test|store|last|names)
+run|show|delta|test|store|last|names)
 	mode=$1;;
 inter|interact)
 	mode=interact;;
-"")	mode=test;;
+"")	mode=delta;;
 *)	usage;;
 esac
 

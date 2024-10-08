@@ -28,15 +28,18 @@
 #define	TITLE_ROOT_FG		GFX_WHITE
 #define	TITLE_SUB_FG		GFX_YELLOW
 
+#define	TOP_CORNER_X	10
+
 
 struct ui_accounts_ctx {
 	void (*resume_action)(struct ui_accounts_ctx *c);
+	struct wi_list title;
 	struct wi_list list;
 	char buf[MAX_NAME_LEN + 1];
 };
 
 
-static const struct wi_list_style style = {
+static const struct wi_list_style style_list = {
 	.y0	= LIST_Y0,
 	.y1	= GFX_HEIGHT - 1,
 	.entry = {
@@ -46,9 +49,26 @@ static const struct wi_list_style style = {
 	}
 };
 
+static void render_folder(const struct wi_list *list,
+    const struct wi_list_entry *entry, struct gfx_drawable *da,
+    const struct gfx_rect *bb, bool odd);
+
+static const struct wi_list_style style_title_sub = {
+	.y0	= 0,
+	.y1	= TOP_H - 1,
+	.font	= &FONT_TOP,
+	.no_over_scroll = 1,
+	.entry = {
+		.fg	= { TITLE_SUB_FG, TITLE_SUB_FG },
+		.bg	= { GFX_BLACK, GFX_BLACK },
+		.min_h	= TOP_H,
+		.render	= render_folder,
+	}
+};
+
 static struct wi_list_entry_style style_null_target;
 static struct wi_list_entry_style style_dir;
-static struct wi_list *lists[1];
+static struct wi_list *lists[2];
 
 
 /* --- New entry ----------------------------------------------------------- */
@@ -410,9 +430,19 @@ static void render_folder(const struct wi_list *list,
     const struct wi_list_entry *entry, struct gfx_drawable *da,
     const struct gfx_rect *bb, bool odd)
 {
-	// leave a 1 px margin on the right
-	draw_folder(da, bb->x + bb->w - 1 - 1, bb->y + bb->h / 2, bb->h / 2,
-	    GFX_RIGHT, GFX_CENTER, style.entry.fg[odd], style.entry.bg[odd]);
+	unsigned x = bb->x + bb->w - 1;
+	const struct wi_list_style *style;
+
+	/* NULL if we're in the title */
+	if (wi_list_user(entry)) {
+		x--; // leave a 1 px margin on the right
+		style = &style_list;
+	} else {
+		x -= TOP_CORNER_X;
+		style = &style_title_sub;
+	}
+	draw_folder(da, x, bb->y + bb->h / 2, bb->h / 2,
+	    GFX_RIGHT, GFX_CENTER, style->entry.fg[odd], style->entry.bg[odd]);
 }
 
 
@@ -437,34 +467,54 @@ static bool add_account(void *user, struct db_entry *de)
 }
 
 
-#define	TOP_CORNER_X	10
-
-
 static void ui_accounts_open(void *ctx, void *params)
 {
 	struct ui_accounts_ctx *c = ctx;
 	const char *pwd;
-	style_null_target = style.entry;
+	style_null_target = style_list.entry;
 	style_null_target.fg[0] = style_null_target.fg[1] = NULL_TARGET_COLOR;
-	style_dir = style.entry;
+	style_dir = style_list.entry;
 	style_dir.render = render_folder;
 
 	c->resume_action = NULL;
+	lists[1] = NULL;
 
 	pwd = db_pwd(&main_db);
 	gfx_rect_xy(&main_da, 0, TOP_H, GFX_WIDTH, TOP_LINE_WIDTH, GFX_WHITE);
 	if (pwd) {
-		text_text(&main_da, (GFX_WIDTH - TOP_CORNER_X - TOP_H) / 2,
-		    TOP_H / 2, pwd,
-		    &FONT_TOP, GFX_CENTER, GFX_CENTER, TITLE_SUB_FG);
-		draw_folder(&main_da, GFX_WIDTH - TOP_CORNER_X - 1, TOP_H / 2,
-		    TOP_H / 2, GFX_RIGHT, GFX_CENTER, TITLE_SUB_FG, GFX_BLACK);
+		struct text_query q;
+		int max_w = GFX_WIDTH - TOP_CORNER_X - TOP_H;
+
+		/*
+		 * The maximum name length (16 characters) just fits with the
+		 * screen width. But if we have a directory, the folder icon
+		 * reduces the width, and there is no longer sufficient space
+		 * for a maximum-length name.
+		 *
+		 * With scrolling, we make this work. We currently have
+	 	 * scrolling only in lists, so we draw the title as a list.
+		 */
+
+		text_query(0, 0, pwd, &FONT_TOP, GFX_RIGHT, GFX_TOP, &q);
+		if (q.w <= max_w) {
+			text_text(&main_da, max_w / 2, TOP_H / 2, pwd,
+			    &FONT_TOP, GFX_CENTER, GFX_CENTER, TITLE_SUB_FG);
+			draw_folder(&main_da, GFX_WIDTH - TOP_CORNER_X - 1,
+			    TOP_H / 2, TOP_H / 2, GFX_RIGHT, GFX_CENTER,
+			    TITLE_SUB_FG, GFX_BLACK);
+		} else {
+			wi_list_begin(&c->title, &style_title_sub);
+			wi_list_add_width(&c->title, pwd, NULL, max_w, NULL);
+				// "user" is boolean here, any non-NULL will do
+			wi_list_end(&c->title);
+			lists[1] = &c->title;
+		}
 	} else {
 		text_text(&main_da, GFX_WIDTH / 2, TOP_H / 2, "Accounts",
 		    &FONT_TOP, GFX_CENTER, GFX_CENTER, TITLE_ROOT_FG);
 	}
 
-	wi_list_begin(&c->list, &style);
+	wi_list_begin(&c->list, &style_list);
 	db_iterate(&main_db, add_account, c);
 	wi_list_end(&c->list);
 
@@ -516,7 +566,7 @@ static const struct ui_events ui_accounts_events = {
 	.touch_long	= ui_accounts_long,
 	.touch_to	= ui_accounts_to,
 	.lists		= lists,
-	.n_lists	= 1,
+	.n_lists	= 2,
 };
 
 const struct ui ui_accounts = {

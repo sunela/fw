@@ -293,9 +293,11 @@ debug("scrolling %u up %u scroll_up %u dy %d y0 %u y1 %u th %u\n",
 	if (up < 0) {
 		up = 0;
 	} else {
-		unsigned list_h = list->total_height + OVER_SCROLL;
+		unsigned list_h = list->total_height;
 		unsigned win_h = style->y1 - list->y0 + 1;
 
+		if (!style->no_over_scroll)
+			list_h += OVER_SCROLL;
 		if (list_h < win_h)
 			up = 0;
 		else if (list_h - win_h < (unsigned) up)

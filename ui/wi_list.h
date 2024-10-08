@@ -31,6 +31,7 @@ struct wi_list_style {
 	unsigned		y0, y1;	/* display area for the list */
 	unsigned		opad;	/* padding at top and bottom (0 -> 1) */
 	unsigned		ipad;	/* padding between lines (0 -> 1)*/
+	unsigned		no_over_scroll; /* suppress over-scroll */
 	const struct font *font;/* NULL for default */
 	struct wi_list_entry_style entry;
 };

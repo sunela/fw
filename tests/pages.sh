@@ -1056,6 +1056,15 @@ else
 	zebra zebra-add-load
 fi
 
+# === directories, long name ==================================================
+
+json <<EOF
+[ { "id":"AbcdeFghijKlmnoP", "dir":"" } ]
+EOF
+
+accounts -k dir-long "tap 119 69"
+add dir-long-scroll "drag 200 10 100 10"
+
 # =============================================================================
 
 if [ "$select" ] && ! $found; then

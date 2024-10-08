@@ -83,45 +83,6 @@ static struct button_ref refs[MAX_BUTTONS];
 static struct timer t_overlay_idle;
 
 
-/* --- Draw a button with symbol ------------------------------------------- */
-
-
-static void draw_button(struct gfx_drawable *da,
-    const struct ui_overlay_params *p,
-    const struct ui_overlay_button *b, int x, int y)
-{
-	const struct ui_overlay_style *style =
-	    p->style ? p->style : &ui_overlay_default_style;
-
-	gfx_rrect_xy(da, x - style->size / 2, y - style->size / 2,
-	    style->size, style->size, DEFAULT_BUTTON_R, style->button_bg);
-	if (b->draw)
-		b->draw(da, style, x, y);
-}
-
-
-/* --- Lend some buttons to other pages ------------------------------------ */
-
-
-bool button_in(unsigned cx, unsigned cy, unsigned x, unsigned y)
-{
-	const struct ui_overlay_style *style = &ui_overlay_default_style;
-	unsigned r = (style->size + style->gap) / 2;
-
-	return x >= cx - r && x <= cx + r && y >= cy - r && y <= cy + r;
-}
-
-
-void button_draw_add(unsigned x, unsigned y)
-{
-	static const struct ui_overlay_params params;
-	static const struct ui_overlay_button button =
-	    { .draw = ui_overlay_sym_add };
-
-	draw_button(&main_da, &params, &button, x, y);
-}
-
-
 /* --- Wrappers for common symbols ----------------------------------------- */
 
 

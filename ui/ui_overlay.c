@@ -61,7 +61,7 @@
 
 struct ui_overlay_ctx {
 	unsigned	n_buttons;
-	const struct ui_overlay_style *style;
+	const struct wi_icons_style *style;
 };
 
 struct button_ref {
@@ -71,7 +71,7 @@ struct button_ref {
 };
 
 
-const struct ui_overlay_style ui_overlay_default_style = {
+const struct wi_icons_style ui_overlay_default_style = {
 	.size		= 50,
 	.button_r	= 12,
 	.gap		= 12,
@@ -87,7 +87,7 @@ static struct timer t_overlay_idle;
 
 
 void ui_overlay_sym_power(struct gfx_drawable *da,
-    const struct ui_overlay_style *style, unsigned x, unsigned y)
+    const struct wi_icons_style *style, unsigned x, unsigned y)
 {
 	gfx_power_sym(da, x, y, style->size * 0.3, style->size * 0.1,
 	    style->button_fg, style->button_bg);
@@ -95,7 +95,7 @@ void ui_overlay_sym_power(struct gfx_drawable *da,
 
 
 void ui_overlay_sym_delete(struct gfx_drawable *da,
-    const struct ui_overlay_style *style, unsigned x, unsigned y)
+    const struct wi_icons_style *style, unsigned x, unsigned y)
 {
 	gfx_diagonal_cross(da, x, y, style->size * 0.4, style->size * 0.1,
 	    style->button_fg);
@@ -103,7 +103,7 @@ void ui_overlay_sym_delete(struct gfx_drawable *da,
 
 
 void ui_overlay_sym_add(struct gfx_drawable *da,
-    const struct ui_overlay_style *style, unsigned x, unsigned y)
+    const struct wi_icons_style *style, unsigned x, unsigned y)
 {
 	unsigned side = style->size * 0.7;
 
@@ -113,7 +113,7 @@ void ui_overlay_sym_add(struct gfx_drawable *da,
 
 
 void ui_overlay_sym_back(struct gfx_drawable *da,
-    const struct ui_overlay_style *style, unsigned x, unsigned y)
+    const struct wi_icons_style *style, unsigned x, unsigned y)
 {
 	gfx_equilateral(da, x + style->size * 0.05, y, style->size * 0.7,
 	    -1, style->button_fg);
@@ -121,7 +121,7 @@ void ui_overlay_sym_back(struct gfx_drawable *da,
 
 
 void ui_overlay_sym_next(struct gfx_drawable *da,
-    const struct ui_overlay_style *style, unsigned x, unsigned y)
+    const struct wi_icons_style *style, unsigned x, unsigned y)
 {
 	gfx_equilateral(da, x - style->size * 0.05, y, style->size * 0.7,
 	    1, style->button_fg);
@@ -129,7 +129,7 @@ void ui_overlay_sym_next(struct gfx_drawable *da,
 
 
 void ui_overlay_sym_edit(struct gfx_drawable *da,
-    const struct ui_overlay_style *style, unsigned x, unsigned y)
+    const struct wi_icons_style *style, unsigned x, unsigned y)
 {
 	unsigned side;
 
@@ -145,7 +145,7 @@ void ui_overlay_sym_edit(struct gfx_drawable *da,
 
 
 void ui_overlay_sym_setup(struct gfx_drawable *da,
-    const struct ui_overlay_style *style, unsigned x, unsigned y)
+    const struct wi_icons_style *style, unsigned x, unsigned y)
 {
 	gfx_gear_sym(da, x, y,
 	    style->size * 0.3, style->size * 0.1,	// ro ri
@@ -156,7 +156,7 @@ void ui_overlay_sym_setup(struct gfx_drawable *da,
 
 
 static void sym_move(struct gfx_drawable *da,
-    const struct ui_overlay_style *style, unsigned x, unsigned y,
+    const struct wi_icons_style *style, unsigned x, unsigned y,
     bool from, int to)
 {
 	gfx_move_sym(da, x, y,
@@ -167,28 +167,28 @@ static void sym_move(struct gfx_drawable *da,
 
 
 void ui_overlay_sym_move_from(struct gfx_drawable *da,
-    const struct ui_overlay_style *style, unsigned x, unsigned y)
+    const struct wi_icons_style *style, unsigned x, unsigned y)
 {
 	sym_move(da, style, x, y, 1, 0);
 }
 
 
 void ui_overlay_sym_move_to(struct gfx_drawable *da,
-    const struct ui_overlay_style *style, unsigned x, unsigned y)
+    const struct wi_icons_style *style, unsigned x, unsigned y)
 {
 	sym_move(da, style, x, y, 0, 1);
 }
 
 
 void ui_overlay_sym_move_cancel(struct gfx_drawable *da,
-    const struct ui_overlay_style *style, unsigned x, unsigned y)
+    const struct wi_icons_style *style, unsigned x, unsigned y)
 {
 	sym_move(da, style, x, y, 1, -1);
 }
 
 
 void ui_overlay_sym_pc_comm(struct gfx_drawable *da,
-    const struct ui_overlay_style *style, unsigned x, unsigned y)
+    const struct wi_icons_style *style, unsigned x, unsigned y)
 {
 	gfx_pc_comm_sym(da, x, y, style->size * 0.8,
 	    style->button_fg, style->button_bg);
@@ -196,7 +196,7 @@ void ui_overlay_sym_pc_comm(struct gfx_drawable *da,
 
 
 void ui_overlay_sym_folder(struct gfx_drawable *da,
-    const struct ui_overlay_style *style, unsigned x, unsigned y)
+    const struct wi_icons_style *style, unsigned x, unsigned y)
 {
 	unsigned w = style->size * 0.7;
 	unsigned h = style->size * 0.5;

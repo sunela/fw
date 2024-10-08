@@ -9,58 +9,50 @@
 #define	UI_OVERLAY_H
 
 #include "gfx.h"
+#include "wi_icons.h"
 
-
-struct ui_overlay_style;
 
 struct ui_overlay_button {
 	void (*draw)(struct gfx_drawable *da,
-	    const struct ui_overlay_style *style,
+	    const struct wi_icons_style *style,
 	    unsigned x, unsigned y);
 	void (*fn)(void *user);
 	void *user;
 };
 
-struct ui_overlay_style {
-	unsigned size;		/* button size (square) */
-	unsigned button_r;	/* corner radius */
-	unsigned gap;		/* horizontal/vertical gap between buttons */
-	gfx_color button_fg, button_bg;
-};
-
 struct ui_overlay_params {
 	const struct ui_overlay_button *buttons;
 	unsigned n_buttons;
-	const struct ui_overlay_style *style;	/* NULL for default */
+	const struct wi_icons_style *style;	/* NULL for default */
 };
 
 
-extern const struct ui_overlay_style ui_overlay_default_style;
+extern const struct wi_icons_style ui_overlay_default_style;
 
 
 void ui_overlay_sym_power(struct gfx_drawable *da,
-    const struct ui_overlay_style *style, unsigned x, unsigned y);
+    const struct wi_icons_style *style, unsigned x, unsigned y);
 void ui_overlay_sym_delete(struct gfx_drawable *da,
-    const struct ui_overlay_style *style, unsigned x, unsigned y);
+    const struct wi_icons_style *style, unsigned x, unsigned y);
 void ui_overlay_sym_add(struct gfx_drawable *da,
-    const struct ui_overlay_style *style, unsigned x, unsigned y);
+    const struct wi_icons_style *style, unsigned x, unsigned y);
 void ui_overlay_sym_back(struct gfx_drawable *da,
-    const struct ui_overlay_style *style, unsigned x, unsigned y);
+    const struct wi_icons_style *style, unsigned x, unsigned y);
 void ui_overlay_sym_next(struct gfx_drawable *da,
-    const struct ui_overlay_style *style, unsigned x, unsigned y);
+    const struct wi_icons_style *style, unsigned x, unsigned y);
 void ui_overlay_sym_edit(struct gfx_drawable *da,
-    const struct ui_overlay_style *style, unsigned x, unsigned y);
+    const struct wi_icons_style *style, unsigned x, unsigned y);
 void ui_overlay_sym_setup(struct gfx_drawable *da,
-    const struct ui_overlay_style *style, unsigned x, unsigned y);
+    const struct wi_icons_style *style, unsigned x, unsigned y);
 void ui_overlay_sym_move_from(struct gfx_drawable *da,
-    const struct ui_overlay_style *style, unsigned x, unsigned y);
+    const struct wi_icons_style *style, unsigned x, unsigned y);
 void ui_overlay_sym_move_to(struct gfx_drawable *da,
-    const struct ui_overlay_style *style, unsigned x, unsigned y);
+    const struct wi_icons_style *style, unsigned x, unsigned y);
 void ui_overlay_sym_move_cancel(struct gfx_drawable *da,
-    const struct ui_overlay_style *style, unsigned x, unsigned y);
+    const struct wi_icons_style *style, unsigned x, unsigned y);
 void ui_overlay_sym_pc_comm(struct gfx_drawable *da,
-    const struct ui_overlay_style *style, unsigned x, unsigned y);
+    const struct wi_icons_style *style, unsigned x, unsigned y);
 void ui_overlay_sym_folder(struct gfx_drawable *da,
-    const struct ui_overlay_style *style, unsigned x, unsigned y);
+    const struct wi_icons_style *style, unsigned x, unsigned y);
 
 #endif /* !UI_OVERLAY_H */

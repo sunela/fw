@@ -9,18 +9,17 @@
 #define	WI_ICONS_H
 
 #include "gfx.h"
-#include "ui_overlay.h"
 
-/*
- * @@@ For now, we use "struct ui_overlay_style". Later, we can define the
- * style here, and change the ui_overlay API accordingly.
- */
 
-#include "ui_overlay.h"
-
+struct wi_icons_style {
+	unsigned size;		/* button size (square) */
+	unsigned button_r;	/* corner radius */
+	unsigned gap;		/* horizontal/vertical gap between buttons */
+	gfx_color button_fg, button_bg;
+};
 
 typedef void (*wi_icons_draw_fn)(struct gfx_drawable *da,
-    const struct ui_overlay_style *style, unsigned x, unsigned y);
+    const struct wi_icons_style *style, unsigned x, unsigned y);
 
 
 /*
@@ -33,11 +32,11 @@ typedef void (*wi_icons_draw_fn)(struct gfx_drawable *da,
  */
 
 void wi_icons_draw_access(struct gfx_drawable *da, unsigned cx, unsigned cy,
-    const struct ui_overlay_style *style, 
+    const struct wi_icons_style *style, 
     wi_icons_draw_fn access(void *user, unsigned i), void *user,
     unsigned n_icons);
 void wi_icons_draw(struct gfx_drawable *da, unsigned cx, unsigned cy,
-    const struct ui_overlay_style *style, const wi_icons_draw_fn *icons,
+    const struct wi_icons_style *style, const wi_icons_draw_fn *icons,
     unsigned n_icons);
 
 /*
@@ -48,6 +47,6 @@ void wi_icons_draw(struct gfx_drawable *da, unsigned cx, unsigned cy,
  */
 
 int wi_icons_select(unsigned x, unsigned y, unsigned cx, unsigned cy,
-    const struct ui_overlay_style *style, unsigned n_icons);
+    const struct wi_icons_style *style, unsigned n_icons);
 
 #endif /* !WI_ICONS_H */

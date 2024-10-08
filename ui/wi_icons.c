@@ -18,21 +18,21 @@
 /* --- Helper functions ---------------------------------------------------- */
 
 
-static unsigned coord(const struct ui_overlay_style *style,
+static unsigned coord(const struct wi_icons_style *style,
     unsigned c, unsigned i, unsigned n)
 {
 	return c - ((n - 1) / 2.0 - i) * (style->size + style->gap);
 }
 
 
-static unsigned xi(const struct ui_overlay_style *style,
+static unsigned xi(const struct wi_icons_style *style,
     unsigned cx, unsigned i, unsigned n)
 {
 	return coord(style, cx, i, n);
 }
 
 
-static unsigned yi(const struct ui_overlay_style *style,
+static unsigned yi(const struct wi_icons_style *style,
     unsigned cy, unsigned i, unsigned n)
 {
 	return coord(style, cy, i, n);
@@ -73,7 +73,7 @@ static void n_list_to_array(unsigned n, unsigned *nx, unsigned *ny)
 
 
 void wi_icons_draw_access(struct gfx_drawable *da, unsigned cx, unsigned cy,
-    const struct ui_overlay_style *style,
+    const struct wi_icons_style *style,
     wi_icons_draw_fn access(void *user, unsigned i), void *user,
     unsigned n_icons)
 {
@@ -114,7 +114,7 @@ static wi_icons_draw_fn ith_fn(void *user, unsigned i)
 
 
 void wi_icons_draw(struct gfx_drawable *da, unsigned cx, unsigned cy,
-    const struct ui_overlay_style *style, const wi_icons_draw_fn *icons,
+    const struct wi_icons_style *style, const wi_icons_draw_fn *icons,
     unsigned n_icons)
 {
 	wi_icons_draw_access(da, cx, cy, style, ith_fn, (void *) icons,
@@ -126,7 +126,7 @@ void wi_icons_draw(struct gfx_drawable *da, unsigned cx, unsigned cy,
 
 
 int wi_icons_select(unsigned x, unsigned y, unsigned cx, unsigned cy,
-    const struct ui_overlay_style *style, unsigned n_icons)
+    const struct wi_icons_style *style, unsigned n_icons)
 {
 	if (!style)
 		style = &ui_overlay_default_style;

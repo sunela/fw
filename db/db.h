@@ -29,6 +29,25 @@
 /*
  * Use of "packed":
  * https://stackoverflow.com/q/4879286/11496135
+ *
+ * To add a new field,
+ * - add it here, to "enum field_type"
+ * - add it to tools/accenc.py:keys, in the same order as in "enum field_type"
+ * - add it to db/db.c:order2ft
+ * - define now to encode it in tools/accenc.py:encode
+ * - define how to dump it in main/script.c:dump_entry
+ * - add it to rmt/rmt-db.c:rmt_db_poll, case RDS_RES:RDOP_SHOW
+ * - consider adding it to webui/main,js:SUNELA_... and field_name
+ * - if the field is shown in the fields list,
+ *   - add it to ui/ui_account.c:delete_field
+ *   - add it to ui/ui_account.c:ui_account_open
+ *   - in to ui/ui_field.c, add it to ui_field_add_open, ui_field_edit_open,
+ *     field_edited. and possible ui_field_more
+ * - if the field can be revealed,
+ *   - add it to rmt/rmt-db.c:rmt_db_poll, case RDS_IDLE:RDOP_REVEAL
+ *   - add it to ui/ui_rmt.c:ui_rmt_reveal
+ *   - add it to tools/io.c:reveal
+ *   - add it to webui/main.js:field_convert.hidden
  */
 
 enum __attribute__((__packed__)) field_type {

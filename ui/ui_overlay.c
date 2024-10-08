@@ -42,6 +42,7 @@
  */
 
 #include <stddef.h>
+#include <string.h>
 
 #include "hal.h"
 #include "debug.h"
@@ -49,6 +50,7 @@
 #include "gfx.h"
 #include "shape.h"
 #include "ui.h"
+#include "wi_icons.h"
 #include "ui_overlay.h"
 
 
@@ -56,6 +58,11 @@
 
 #define	DEFAULT_BUTTON_R	12
 
+
+struct ui_overlay_ctx {
+	unsigned	n_buttons;
+	const struct ui_overlay_style *style;
+};
 
 struct button_ref {
 	void (*fn)(void *user);	/* skip if NULL */
@@ -253,17 +260,19 @@ void ui_overlay_sym_folder(struct gfx_drawable *da,
 
 static void ui_overlay_tap(void *ctx, unsigned x, unsigned y)
 {
+	const struct ui_overlay_ctx *c = ctx;
 	const struct button_ref *ref;
+	int i;
 
-	for (ref = refs; ref != refs + MAX_BUTTONS; ref++) {
-		if (!ref->fn)
-			continue;
-		if ((int) x < ref->bb.x || (int) x >= ref->bb.x + ref->bb.w)
-			continue;
-		if ((int) y < ref->bb.y || (int) y >= ref->bb.y + ref->bb.h)
-			continue;
-		ref->fn(ref->user);
-		return;
+	i = wi_icons_select(x, y, GFX_WIDTH / 2, GFX_HEIGHT / 2,
+	    c->style, c->n_buttons);
+	if (i >= 0) {
+		assert(i <= MAX_BUTTONS);
+		ref = refs + i;
+		if (ref->fn) {
+			ref->fn(ref->user);
+			return;
+		}
 	}
 	ui_return();
 }
@@ -287,76 +296,31 @@ static void overlay_idle(void *user)
 /* --- Open/close ---------------------------------------------------------- */
 
 
+static wi_icons_draw_fn ith_draw_fn(void *user, unsigned i)
+{
+	const struct ui_overlay_button *b = user;
+
+	return b[i].draw;
+}
+
+
 static void ui_overlay_open(void *ctx, void *params)
 {
+	struct ui_overlay_ctx *c = ctx;
 	const struct ui_overlay_params *p = params;
 	const struct ui_overlay_button *b = p->buttons;
-	const struct ui_overlay_style *style =
-	    p->style ? p->style : &ui_overlay_default_style;
-	struct button_ref *ref = refs;
-	unsigned nx, ny;
-	unsigned ix, iy;
+	unsigned i;
+
+	c->n_buttons = p->n_buttons;
+	c->style = p->style ? p->style : &ui_overlay_default_style;
 
 	gfx_clear(&main_da, GFX_BLACK);
-
-	switch (p->n_buttons) {
-	case 1:
-		nx = 1;
-		ny = 1;
-		break;
-	case 2:
-		nx = 2;
-		ny = 1;
-		break;
-	case 3:
-		nx = 3;
-		ny = 1;
-		break;
-	case 4:
-		nx = 2;
-		ny = 2;
-		break;
-	case 5:
-	case 6:
-		nx = 3;
-		ny = 2;
-		break;
-	case 7:
-	case 8:
-	case 9:
-		nx = 3;
-		ny = 3;
-		break;
-	default:
-		ABORT();
-	}
-	for (iy = 0; iy != ny; iy++)
-		for (ix = 0; ix != nx; ix++) {
-			unsigned x = GFX_WIDTH / 2 -
-			    ((nx - 1) / 2.0 - ix) * (style->size + style->gap);
-			unsigned y = GFX_HEIGHT / 2 -
-			    ((ny - 1) / 2.0 - iy) * (style->size + style->gap);
-
-			if (b == p->buttons + p->n_buttons)
-				break;
-			if (b->draw) {
-				draw_button(&main_da, p, b, x, y);
-				ref->fn = b->fn;
-				ref->user = b->user;
-				ref->bb.x =
-				    x - style->size / 2 - style->gap / 2;
-				ref->bb.y =
-				    y - style->size / 2 - style->gap / 2;
-				ref->bb.w = ref->bb.h =
-				    style->size + style->gap;
-				ref++;
-			}
-			b++;
-		}
-
-	while (ref != refs + MAX_BUTTONS) {
-		ref->fn = NULL;
-		ref++;
+	wi_icons_draw_access(&main_da, GFX_WIDTH / 2, GFX_HEIGHT / 2, c->style,
+	    ith_draw_fn, (void *) b, p->n_buttons);
+	memset(refs, 0, sizeof(refs));
+	for (i = 0; i != p->n_buttons; i++) {
+		refs[i].fn = b[i].fn;
+		refs[i].user = b[i].user;
 	}
 
 	timer_init(&t_overlay_idle);
@@ -385,6 +349,7 @@ static const struct ui_events ui_overlay_events = {
 
 const struct ui ui_overlay = {
 	.name		= "overlay",
+	.ctx_size	= sizeof(struct ui_overlay_ctx),
 	.open		= ui_overlay_open,
 	.close		= ui_overlay_close,
 	.events		= &ui_overlay_events,

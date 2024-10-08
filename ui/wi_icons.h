@@ -26,8 +26,16 @@ typedef void (*wi_icons_draw_fn)(struct gfx_drawable *da,
 /*
  * "icons" is the list of icon-drawing functions. Entries can be NULL, in which
  * case nothing in drawn. If style is NULL, a default style is used.
+ *
+ * wi_icons_draw operates on an array while wi_icons_draw_access uses an access
+ * function, e.g., if the function pointer is stored in a structure containing
+ * additional informatiion.
  */
 
+void wi_icons_draw_access(struct gfx_drawable *da, unsigned cx, unsigned cy,
+    const struct ui_overlay_style *style, 
+    wi_icons_draw_fn access(void *user, unsigned i), void *user,
+    unsigned n_icons);
 void wi_icons_draw(struct gfx_drawable *da, unsigned cx, unsigned cy,
     const struct ui_overlay_style *style, const wi_icons_draw_fn *icons,
     unsigned n_icons);

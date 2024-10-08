@@ -984,30 +984,31 @@ add dir-quagga-back3 "drag 200 100 50 80"
 # === directories, delete accounts ============================================
 
 TOP_OVER='"long 111 17"'
-DELETE='"long 111 17" "tap 181 140" "drag 52 194 194 204"'
+DELETE_ACC='"long 111 17" "tap 181 140" "drag 52 194 194 204"'
+DELETE_DIR='"long 111 17" "tap 151 170" "drag 52 194 194 204"'
 
 eval zebra dir-zebra-not-empty $TOP_OVER
 
-eval zebra dir-del-selousi '"tap 70 171"' '"tap 114 118"' $DELETE
-eval add dir-del-bohemi '"tap 115 70"' $DELETE
+eval zebra dir-del-selousi '"tap 70 171"' '"tap 114 118"' $DELETE_ACC
+eval add dir-del-bohemi '"tap 115 70"' $DELETE_ACC
 
 # --- directories, delete 2nd level subdirectory ------------------------------
 
-eval add dir-del-quagga $DELETE
+eval add dir-del-quagga $DELETE_DIR
 
 # --- directories, delete more accounts ---------------------------------------
 
-eval add dir-del-capensis '"tap 115 70"' $DELETE
+eval add dir-del-capensis '"tap 115 70"' $DELETE_ACC
 
 save
 eval add dir-zebra-still-not-empty $TOP_OVER
 restore
 
-eval add dir-del-grevyi '"tap 115 70"' $DELETE
+eval add dir-del-grevyi '"tap 115 70"' $DELETE_ACC
 
 # --- directories, delete 1st level subdirectory ------------------------------
 
-eval add dir-del-zebra $DELETE '"drag 158 279 159 0"'
+eval add dir-del-zebra $DELETE_DIR '"drag 158 279 159 0"'
 
 # === directories, rename =====================================================
 

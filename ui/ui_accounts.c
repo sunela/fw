@@ -14,6 +14,7 @@
 #include "shape.h"
 #include "text.h"
 #include "wi_list.h"
+#include "wi_icons.h"
 #include "ui_overlay.h"
 #include "ui_confirm.h"
 #include "ui_entry.h"
@@ -112,7 +113,11 @@ static void ui_accounts_tap(void *ctx, unsigned x, unsigned y)
 	struct db_entry *de;
 
 	if (list_is_empty(&c->list)) {
-		if (button_in(GFX_WIDTH / 2, (GFX_HEIGHT + LIST_Y0) / 2, x, y))
+		int i;
+
+		 i = wi_icons_select(x, y,
+                    GFX_WIDTH / 2, (GFX_HEIGHT + LIST_Y0) / 2, NULL, 1);
+		if (i == 0)
 			make_new_entry(c, ui_call);
 		return;
 	}
@@ -464,7 +469,12 @@ static void ui_accounts_open(void *ctx, void *params)
 	wi_list_end(&c->list);
 
 	if (list_is_empty(&c->list)) {
-		button_draw_add(GFX_WIDTH / 2, (GFX_HEIGHT + LIST_Y0) / 2);
+		wi_icons_draw_fn fn[] = {
+			ui_overlay_sym_add,
+		};
+
+		wi_icons_draw(&main_da, GFX_WIDTH / 2,
+                    (GFX_HEIGHT + LIST_Y0) / 2, NULL, fn, 1);
 		lists[0] = NULL;
 	} else {
 		lists[0] = &c->list;

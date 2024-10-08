@@ -354,6 +354,24 @@ save
 add account-me-short-swipe "drag 100 100 90 90"
 restore
 
+# ---  account Me, turn into directory ----------------------------------------
+
+save
+add mkdir-me "tap 145 158"
+restore
+
+save
+saved_mode=$mode
+mode=run
+if ! add -n -k mkdir-me-load "tap 145 158"; then
+	mode=$saved_mode
+	cleanup
+else
+	mode=$saved_mode
+	accounts mkdir-me-load
+fi
+restore
+
 # ---  account Me: fields list ------------------------------------------------
 
 add account-me-fields "tap 119 165"

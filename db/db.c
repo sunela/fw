@@ -802,7 +802,7 @@ void db_mkdir(struct db_entry *de)
 {
 	assert(!db_is_dir(de));
 	assert(!db_is_account(de));
-	add_field(de, ft_dir, NULL, 0);
+	db_change_field(de, ft_dir, NULL, 0);
 }
 
 

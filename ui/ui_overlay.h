@@ -27,9 +27,6 @@ struct ui_overlay_params {
 };
 
 
-extern const struct wi_icons_style ui_overlay_default_style;
-
-
 void ui_overlay_sym_power(struct gfx_drawable *da,
     const struct wi_icons_style *style, unsigned x, unsigned y);
 void ui_overlay_sym_delete(struct gfx_drawable *da,

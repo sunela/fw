@@ -8,11 +8,19 @@
 #include "hal.h"
 #include "gfx.h"
 #include "shape.h"
-#include "ui_overlay.h"
 #include "wi_icons.h"
 
 
 #define	DEFAULT_BUTTON_R	12
+
+
+static const struct wi_icons_style wi_icons_default_style = {
+	.size		= 50,
+	.button_r	= 12,
+	.gap		= 12,
+	.button_fg	= GFX_BLACK,
+	.button_bg	= GFX_WHITE,
+};
 
 
 /* --- Helper functions ---------------------------------------------------- */
@@ -80,7 +88,7 @@ void wi_icons_draw_access(struct gfx_drawable *da, unsigned cx, unsigned cy,
 	unsigned nx, ny, i, ix, iy;
 
 	if (!style)
-		style = &ui_overlay_default_style;
+		style = &wi_icons_default_style;
 	n_list_to_array(n_icons, &nx, &ny);
 	i = 0;
 	for (iy = 0; iy != ny; iy++)
@@ -129,7 +137,7 @@ int wi_icons_select(unsigned x, unsigned y, unsigned cx, unsigned cy,
     const struct wi_icons_style *style, unsigned n_icons)
 {
 	if (!style)
-		style = &ui_overlay_default_style;
+		style = &wi_icons_default_style;
 
 	int d = (style->size + style->gap) / 2;
 	unsigned nx, ny, i, ix, iy;

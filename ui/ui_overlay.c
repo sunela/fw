@@ -71,14 +71,6 @@ struct button_ref {
 };
 
 
-const struct wi_icons_style ui_overlay_default_style = {
-	.size		= 50,
-	.button_r	= 12,
-	.gap		= 12,
-	.button_fg	= GFX_BLACK,
-	.button_bg	= GFX_WHITE,
-};
-
 static struct button_ref refs[MAX_BUTTONS];
 static struct timer t_overlay_idle;
 
@@ -273,7 +265,7 @@ static void ui_overlay_open(void *ctx, void *params)
 	unsigned i;
 
 	c->n_buttons = p->n_buttons;
-	c->style = p->style ? p->style : &ui_overlay_default_style;
+	c->style = p->style;
 
 	gfx_clear(&main_da, GFX_BLACK);
 	wi_icons_draw_access(&main_da, GFX_WIDTH / 2, GFX_HEIGHT / 2, c->style,

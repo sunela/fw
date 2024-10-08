@@ -24,6 +24,7 @@
 
 enum rd_item_type {
 	rit_bool,
+	rit_action,
 };
 
 struct rd_item {
@@ -31,6 +32,7 @@ struct rd_item {
 	enum rd_item_type type;
 	union {
 		bool *bool_var;
+		void (*action)(void);
 	} u;
 };
 
@@ -57,6 +59,20 @@ static const struct wi_list_style style = {
 static struct wi_list *lists[1];
 
 
+/* --- Actions ------------------------------------------------------------- */
+
+
+#ifndef SIM
+
+static void run_wfi(void)
+{
+	debug("Running wfi\n");
+	asm("wfi");
+}
+
+#endif /* !SIM */
+
+
 /* --- Rendering the setting  ---------------------------------------------- */
 
 
@@ -71,6 +87,8 @@ static void render_rd(const struct wi_list *l,
 		gfx_checkbox(d, bb->x + bb->w - 1 - bb->h / 2,
 		    bb->y + bb->h / 2, bb->h / 2, 2, *item->u.bool_var,
 		    LIST_FG, odd ? ODD_BG : EVEN_BG);
+		break;
+	case rit_action:
 		break;
 	default:
 		ABORT();
@@ -97,6 +115,9 @@ static void ui_rd_tap(void *ctx, unsigned x, unsigned y)
 		*item->u.bool_var = !*item->u.bool_var;
 		wi_list_render_entry(&c->list, entry);
 		settings_update(); // @@@ check for errors
+		break;
+	case rit_action:
+		item->u.action();
 		break;
 	default:
 		ABORT();
@@ -151,6 +172,10 @@ static void ui_rd_open(void *ctx, void *params)
 		    { .bool_var = &settings.crosshair }},
 		{ "Strict RMT",	rit_bool,
 		    { .bool_var = &settings.strict_rmt}},
+#ifndef SIM
+		{ "Execute wfi (hang)", rit_action,
+		    { .action = run_wfi }},
+#endif
 	};
 	struct ui_rd_ctx *c = ctx;
 	const struct rd_item *item;

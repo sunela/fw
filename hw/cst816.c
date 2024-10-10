@@ -10,6 +10,10 @@
  * https://github.com/lupyuen/hynitron_i2c_cst0xxse/blob/master/cst0xx_core.c
  * Analysis and Rust code:
  * https://www.pcbway.com/blog/Activities/Building_a_Rust_Driver_for_PineTime_s_Touch_Controller.html
+ * Registers (in Chinese):
+ * https://www.waveshare.com/w/upload/c/c2/CST816S_register_declaration.pdf
+ * Registers (translated from the above to English):
+ * https://github.com/fbiego/CST816S
  */
 
 #include <stdbool.h>
@@ -24,8 +28,14 @@
 #define	CST816_HEADER_SIZE	3
 #define	CST816_EVENT_SIZE	6
 #define	CST816_REG_0		0	/* first register to read */
-#define	CST816_REGS \
+#define	CST816_EVENT_REGS \
 	(CST816_HEADER_SIZE + CST816_MAX_EVENTS * CST816_EVENT_SIZE)
+#define	CST816_IRQ_CTRL		0xfa
+#define	CST816_EN_TEST			(1 << 7)
+#define	CST816_EN_TOUCH			(1 << 6)
+#define	CST816_EN_CHANGE		(1 << 5)
+#define	CST816_EN_MOTION		(1 << 4)
+#define	CST816_EN_LONG_PRESS		(1 << 0)
 
 
 static unsigned cst816_i2c;
@@ -35,10 +45,10 @@ static unsigned cst816_int_pin;
 
 void cst816_read(struct cst816_touch *t)
 {
-	uint8_t buf[CST816_REGS];
+	uint8_t buf[CST816_EVENT_REGS];
 	unsigned n, i;
 
-	i2c_read(cst816_i2c, cst816_addr, CST816_REG_0, buf, CST816_REGS);
+	i2c_read(cst816_i2c, cst816_addr, CST816_REG_0, buf, CST816_EVENT_REGS);
 	t->gesture = buf[1];
 	n = buf[2] & 0xf;
 	n = n < CST816_MAX_EVENTS ? n : CST816_MAX_EVENTS;

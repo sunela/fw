@@ -55,3 +55,32 @@ void gpio_cfg_fn(unsigned pin, enum GPIO_FN fn)
 	cfg |= GPIO_ADD(FN, fn);
 	GPIO_CFG(pin) = cfg;
 }
+
+
+void gpio_cfg_int(unsigned pin, enum GPIO_INT_MODE mode)
+{
+	uint32_t cfg;
+
+	cfg = GPIO_CFG(pin);
+	if (mode < 0) {
+		cfg |= GPIO_ADD(INT_MASK, 1);
+	} else {
+		cfg &= GPIO_DEL(INT_MASK) & GPIO_DEL(INT_MODE);
+		cfg |= GPIO_ADD(INT_MODE, mode);
+	}
+	GPIO_CFG(pin) = cfg;
+}
+
+
+void gpio_int_clr(unsigned pin)
+{
+	uint32_t cfg;
+
+	cfg = GPIO_CFG(pin);
+	cfg &= GPIO_DEL(INT_CLR);
+	GPIO_CFG(pin) = cfg;
+	cfg |= GPIO_ADD(INT_CLR, 1);
+	GPIO_CFG(pin) = cfg;
+	cfg &= GPIO_DEL(INT_CLR);
+	GPIO_CFG(pin) = cfg;
+}

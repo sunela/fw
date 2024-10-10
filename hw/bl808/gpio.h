@@ -31,7 +31,7 @@ enum GPIO_MODE {
 #define	GPIO_MASK_INT_MASK	(1 << 22)
 #define	GPIO_MASK_INT_STAT	(1 << 21)
 #define	GPIO_MASK_INT_CLR	(1 << 20)
-#define	GPIO_MASK_INT_MODE	(1 << 16)
+#define	GPIO_MASK_INT_MODE	(15 << 16)
 enum GPIO_INT_MODE {
 	GPIO_INT_MODE_FALL	= 0,	/* synchronous */
 	GPIO_INT_MODE_RISE	= 1,
@@ -96,6 +96,8 @@ void gpio_cfg_off(unsigned pin);
 void gpio_cfg_in(unsigned pin, enum GPIO_PULL pull);
 void gpio_cfg_out(unsigned pin, bool on, int drive);
 void gpio_cfg_fn(unsigned pin, enum GPIO_FN fn);
+void gpio_cfg_int(unsigned pin, enum GPIO_INT_MODE mode);
+void gpio_int_clr(unsigned pin);
 
 
 static inline bool gpio_in(unsigned pin)
@@ -128,6 +130,12 @@ static inline void gpio_out(unsigned pin, bool on)
 		gpio_set(pin);
 	else
 		gpio_clr(pin);
+}
+
+
+static inline bool gpio_int_stat(unsigned pin)
+{
+	return GPIO_CFG(pin) & GPIO_MASK_INT_STAT;
 }
 
 #endif /* !GPIO_H */

@@ -24,6 +24,7 @@
 #include "hal.h"
 #include "sdk-hal.h"
 #include "debug.h"
+#include "gpio.h"
 #include "timer.h"
 #include "db.h"
 #include "gfx.h"
@@ -53,7 +54,7 @@ static void process_touch(void)
 	mdelay(1);
 #if DEBUG
 	if (t.events)
-		debug("\t%u %u %u\n", e->action, e->x, e->y);
+		debug("\t(%u) %u %u %u\n", t.events, e->action, e->x, e->y);
 	else
 		debug("\tUP\n");
 #endif /* DEBUG */
@@ -76,29 +77,22 @@ static void process_touch(void)
 }
 
 
-/*
- * @@@ why do we need to sample on both interrupt edges ?
- */
-
 static void event_loop(void)
 {
 	static unsigned uptime = 1;
-	static int last_touch = 0;
 	static bool button_down = 0;
 
 	while (1) {
-		bool on;
-
 		if (button_down != !gpio_in(BUTTON_R)) {
 			button_down = !button_down;
 			debug("BUTTON (%u)\n", button_down);
 			button_event(button_down);
 		}
 
-		on = !cst816_poll();
-		if (on != last_touch)
+		if (gpio_int_stat(TOUCH_INT)) {
+			gpio_int_clr(TOUCH_INT);
 			process_touch();
-		last_touch = on;
+		}
 
 		timer_tick(uptime);
 		if (!(uptime & 7))
@@ -174,6 +168,10 @@ void sdk_main(void)
 	st7789_init(LCD_SPI, LCD_RST, LCD_DnC, GFX_WIDTH, GFX_HEIGHT, 0, 20);
 	st7789_on();
 
+	/*
+	 * INT_STAT is only set if INT_MASK is zero.
+	 */
+	gpio_cfg_int(TOUCH_INT, GPIO_INT_MODE_FALL);
 	cst816_init(TOUCH_I2C, TOUCH_I2C_ADDR, TOUCH_INT);
 
 	db_init();

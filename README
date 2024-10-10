@@ -25,6 +25,7 @@ Ubuntu 22.04):
 
 fontconfig		Font configuration utility fc-list
 fonts-liberation	Liberation fonts
+imagemagick		Image manipulation programs
 jq			Command-line JSON processor
 libgcrypt20-dev		GNU Crypto library
 libsdl2-dev		Simple Directmedia Layer (SDL2)

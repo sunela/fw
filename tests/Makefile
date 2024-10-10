@@ -10,6 +10,9 @@
 # try to unify them, at least a little.
 #
 
+.PHONY:	all over overview dup duplicates
+
+
 all:
 	./pages.sh
 	./tsort.sh
@@ -17,3 +20,9 @@ all:
 	./rmt.sh
 	./db.sh
 	./bip39.sh
+
+over overview:
+	montage -label '%t' `./pages.sh names | sed 's/$$/.png/'` - | display
+
+dup duplicates:
+	./pages.sh names | sort | uniq -d

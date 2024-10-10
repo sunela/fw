@@ -68,8 +68,8 @@ bool ui_field_more(const struct db_entry *de)
 
 	/*
 	 * All other fields must be checked before ft_hotp_secret and
-	 * ft_totp_secret, * since the latter two are mutually exclusive, and
-	 * the logic changes.
+	 * ft_totp_secret, since the latter two are mutually exclusive, and the
+	 * logic changes.
 	 */
 
 	if (db_field_find(de, ft_hotp_secret))

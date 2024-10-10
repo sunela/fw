@@ -260,7 +260,7 @@ static void edit_dir_name(void *user)
 			.max_len	= sizeof(c->buf) - 1,
 			.validate	= validate_dir_name_change,
 			.user		= c,
-			.title		= "Directory name",
+			.title		= "Folder name",
 		},
 	};
 

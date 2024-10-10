@@ -1083,6 +1083,19 @@ EOF
 accounts -k dir-long "tap 119 69"
 add dir-long-scroll "drag 200 10 100 10"
 
+# === new directory, empty entry (X) ==========================================
+
+accounts dir-empty-entry "long 100 100"  "tap 58 174" \
+    "$ENTRY_9" "$ENTRY_2" "$ENTRY_R"
+
+# --- new directory, empty directory entry ------------------------------------
+
+add dir-empty-dir "tap 72 69" "tap 147 162"
+
+# --- new directory, empty name -----------------------------------------------
+
+add dir-empty-name "long 100 10" "tap 88 170" "$ENTRY_L"
+
 # =============================================================================
 
 if [ "$select" ] && ! $found; then

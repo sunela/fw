@@ -594,7 +594,6 @@ static bool demo_overlay(char *const *args, unsigned n_args)
 		{ ui_overlay_sym_setup,		NULL, NULL },
 		{ ui_overlay_sym_pc_comm,	NULL, NULL, },
 		{ ui_overlay_sym_folder,	NULL, NULL, },
-		{ NULL }
 	};
 	struct ui_overlay_params prm = {
 		.buttons	= buttons,
@@ -622,7 +621,7 @@ static bool demo_overlay2(char *const *args, unsigned n_args)
 		{ ui_overlay_sym_move_from,	NULL, NULL },
 		{ ui_overlay_sym_move_to,	NULL, NULL },
 		{ ui_overlay_sym_move_cancel,	NULL, NULL },
-		{ NULL, },
+		{ ui_overlay_sym_account,	NULL, NULL },
 		{ NULL, },
 		{ NULL, },
 		{ NULL, },
@@ -631,7 +630,7 @@ static bool demo_overlay2(char *const *args, unsigned n_args)
 	};
 	struct ui_overlay_params prm = {
 		.buttons	= buttons,
-		.n_buttons	= 3,
+		.n_buttons	= 4,
 	};
 
 	switch (n_args) {

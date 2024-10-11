@@ -123,6 +123,20 @@ static void new_entry(void *user)
 }
 
 
+/* --- Turn entry into account --------------------------------------------- */
+
+
+static void make_account(void *user)
+{
+	struct db_entry *de = main_db.dir;
+	struct db_entry *parent = db_dir_parent(&main_db);
+
+	db_mkentry(de);
+	db_chdir(&main_db, parent);
+	ui_call(&ui_account, de);
+}
+
+
 /* --- Tap event ----------------------------------------------------------- */
 
 
@@ -136,9 +150,20 @@ static void ui_accounts_tap(void *ctx, unsigned x, unsigned y)
 		int i;
 
 		 i = wi_icons_select(x, y,
-                    GFX_WIDTH / 2, (GFX_HEIGHT + LIST_Y0) / 2, NULL, 1);
-		if (i == 0)
+                    GFX_WIDTH / 2, (GFX_HEIGHT + LIST_Y0) / 2, NULL,
+		    main_db.dir && db_is_dir(main_db.dir) ? 2 : 1);
+		switch (i) {
+		case 0:
 			make_new_entry(c, ui_call);
+			break;
+		case 1:
+			make_account(c);
+			break;
+		case -1:
+			break;
+		default:
+			ABORT();
+		}
 		return;
 	}
 
@@ -321,7 +346,6 @@ static void remote_control(void *user)
 
 static void long_top(void *ctx, unsigned x, unsigned y)
 {
-	/* @@@ future: if in sub-folder, edit folder name */
 	static struct ui_overlay_button buttons[] = {
 		{ ui_overlay_sym_power,	power_off, NULL },
 		{ ui_overlay_sym_setup,	enter_setup, NULL },
@@ -350,6 +374,10 @@ static void ui_accounts_long(void *ctx, unsigned x, unsigned y)
 		return;
 	}
 
+	/*
+	 * @@@ For symmetry, should also have sym_account here, if we're in an
+	 * empty directory.
+	 */
 	static struct ui_overlay_button buttons[] = {
 		{ ui_overlay_sym_power,	power_off, NULL },
 		{ ui_overlay_sym_setup,	enter_setup, NULL },
@@ -521,10 +549,12 @@ static void ui_accounts_open(void *ctx, void *params)
 	if (list_is_empty(&c->list)) {
 		wi_icons_draw_fn fn[] = {
 			ui_overlay_sym_add,
+			ui_overlay_sym_account,
 		};
 
 		wi_icons_draw(&main_da, GFX_WIDTH / 2,
-                    (GFX_HEIGHT + LIST_Y0) / 2, NULL, fn, 1);
+                    (GFX_HEIGHT + LIST_Y0) / 2, NULL, fn,
+		    main_db.dir && db_is_dir(main_db.dir) ? 2 : 1);
 		lists[0] = NULL;
 	} else {
 		lists[0] = &c->list;

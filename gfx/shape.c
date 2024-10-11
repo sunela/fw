@@ -470,3 +470,25 @@ void gfx_folder_outline_sym(struct gfx_drawable *da, unsigned x, unsigned y,
 	gfx_folder_sym(da, x + lw, y + lw, w - 2 * lw, h - 2 * lw,
 	    rider_w - 1.414 * lw, rider_h, ri, bg);
 }
+
+
+/* --- Account ------------------------------------------------------------- */
+
+
+void gfx_account_sym(struct gfx_drawable *da, unsigned x, unsigned y,
+    unsigned r_head, unsigned r_body, unsigned lw, gfx_color fg, gfx_color bg)
+{
+	struct gfx_rect clip = {
+		.x	= x - r_body,
+		.y	= y - 2 * r_head,
+		.w	= 2 * r_body + 1,
+		.h	= 2 * r_head + r_body,
+	};
+
+	gfx_clip(da, &clip);
+	gfx_disc(da, x, y - r_head, r_head, fg);
+	gfx_disc(da, x, y - r_head, r_head - lw, bg);
+	gfx_disc(da, x, y + r_body, r_body, fg);
+	gfx_disc(da, x, y + r_body, r_body - lw, bg);
+	gfx_clip(da, NULL);
+}

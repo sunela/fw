@@ -199,6 +199,18 @@ void ui_overlay_sym_folder(struct gfx_drawable *da,
 }
 
 
+void ui_overlay_sym_account(struct gfx_drawable *da,
+    const struct wi_icons_style *style, unsigned x, unsigned y)
+{
+	unsigned rh = style->size / 5;
+	unsigned rb = style->size / 3;
+	unsigned cy = y + (2 * rh - rb) / 2;
+
+	gfx_account_sym(da, x, cy, rh, rb, 4,
+	    style->button_fg, style->button_bg);
+}
+
+
 /* --- Event handling ------------------------------------------------------ */
 
 

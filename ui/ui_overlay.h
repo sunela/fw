@@ -51,5 +51,7 @@ void ui_overlay_sym_pc_comm(struct gfx_drawable *da,
     const struct wi_icons_style *style, unsigned x, unsigned y);
 void ui_overlay_sym_folder(struct gfx_drawable *da,
     const struct wi_icons_style *style, unsigned x, unsigned y);
+void ui_overlay_sym_account(struct gfx_drawable *da,
+    const struct wi_icons_style *style, unsigned x, unsigned y);
 
 #endif /* !UI_OVERLAY_H */

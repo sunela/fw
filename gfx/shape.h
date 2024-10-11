@@ -116,6 +116,9 @@ void gfx_folder_outline_sym(struct gfx_drawable *da, unsigned x, unsigned y,
     unsigned w, unsigned h, unsigned rider_w, unsigned rider_h, unsigned r,
     unsigned lw, gfx_color color, gfx_color bg);
 
+void gfx_account_sym(struct gfx_drawable *da, unsigned x, unsigned y,
+    unsigned r_head, unsigned r_body, unsigned lw, gfx_color fg, gfx_color bg);
+
 /* --- Other UI items ------------------------------------------------------ */
 
 

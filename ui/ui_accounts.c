@@ -420,7 +420,7 @@ static void draw_folder(struct gfx_drawable *da, unsigned x, unsigned y,
 	default:
 		ABORT();
 	}
-	gfx_folder_outline(da, x, y, w, h,
+	gfx_folder_outline_sym(da, x, y, w, h,
 	    w / 2, h / 5, h / 9, 3,	// rider_w, rider_h, r, lw
 	    fg, bg);
 }

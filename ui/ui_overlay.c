@@ -193,18 +193,9 @@ void ui_overlay_sym_folder(struct gfx_drawable *da,
 	unsigned w = style->size * 0.7;
 	unsigned h = style->size * 0.5;
 	unsigned lw = 4;
-#if 0
-	unsigned ro = h / 9;
-	int ri = ro - lw;
 
-	gfx_folder(da, x - w / 2, y - h / 2, w, h, w / 2, h / 5, ro,
-	    style->button_fg);
-	gfx_folder(da, x - w / 2 + lw, y - h / 2 + lw, w - 2 * lw, h - 2 * lw,
-	    w / 2 - 1.414 * lw, h / 5, ri < 0 ? 0 : ri,
-	    style->button_bg);
-#endif
-	gfx_folder_outline(da, x - w / 2, y - h / 2, w, h, w / 2, h / 5, h / 9,
-	    lw, style->button_fg, style->button_bg);
+	gfx_folder_outline_sym(da, x - w / 2, y - h / 2, w, h,
+	    w / 2, h / 5, h / 9, lw, style->button_fg, style->button_bg);
 }
 
 

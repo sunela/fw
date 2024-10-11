@@ -383,8 +383,8 @@ static void ui_accounts_long(void *ctx, unsigned x, unsigned y)
 		{ ui_overlay_sym_setup,	enter_setup, NULL },
 		{ ui_overlay_sym_pc_comm, remote_control, NULL },
 		{ ui_overlay_sym_add, new_entry, NULL },
-		{ ui_overlay_sym_move_from, move_from, NULL, },
-		{ NULL, move_cancel, NULL },
+		{ NULL, NULL, NULL, },	/* [4] and [5] are assigned below */
+		{ NULL, NULL, NULL },
 	};
 	static struct ui_overlay_params prm = {
 		.buttons	= buttons,
@@ -402,8 +402,10 @@ static void ui_accounts_long(void *ctx, unsigned x, unsigned y)
 			buttons[4].user = wi_list_user(entry);
 		} else {
 			buttons[4].draw = NULL;
+			buttons[4].fn = NULL;
 		}
 		buttons[5].draw = ui_overlay_sym_move_cancel;
+		buttons[5].fn = move_cancel;
 	} else {
 		if (entry) {
 			buttons[4].draw = ui_overlay_sym_move_from;
@@ -411,8 +413,10 @@ static void ui_accounts_long(void *ctx, unsigned x, unsigned y)
 			buttons[4].user = wi_list_user(entry);
 		} else {
 			buttons[4].draw = NULL;
+			buttons[4].fn = NULL;
 		}
 		buttons[5].draw = NULL;
+		buttons[5].fn = NULL;
 	}
 
 	ui_call(&ui_overlay, &prm);

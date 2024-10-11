@@ -450,8 +450,8 @@ static void fields_overlay(struct ui_account_ctx *c, struct db_field *f)
 {
 	static struct ui_overlay_button buttons[] = {
 		{ ui_overlay_sym_power,	power_off, NULL },
-		{ ui_overlay_sym_add,	add_field, NULL },
-		{ ui_overlay_sym_edit,	edit_field, NULL },
+		{ NULL,	NULL, NULL }, /* [1] and [2] are assigned below */
+		{ NULL,	NULL, NULL },
 		{ ui_overlay_sym_delete, delete_field, NULL },
 	};
 	static struct ui_overlay_params prm = {
@@ -462,6 +462,8 @@ static void fields_overlay(struct ui_account_ctx *c, struct db_field *f)
 	unsigned i;
 
 	if (!db_is_account(de)) {
+		buttons[1].draw = ui_overlay_sym_add;
+		buttons[1].fn = add_field;
 		buttons[2].draw = ui_overlay_sym_folder;
 		buttons[2].fn = make_directory;
 		prm.n_buttons = 3;
@@ -470,9 +472,11 @@ static void fields_overlay(struct ui_account_ctx *c, struct db_field *f)
 		buttons[2].fn = edit_field;
 		if (ui_field_more(de)) {
 			buttons[1].draw = ui_overlay_sym_add;
+			buttons[1].fn = add_field;
 			prm.n_buttons = f ? 4 : 2;
 		} else {
 			buttons[1].draw = NULL;
+			buttons[1].fn = NULL;
 			prm.n_buttons = f ? 4 : 1;
 		}
 	}

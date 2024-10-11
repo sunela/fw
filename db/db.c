@@ -806,6 +806,14 @@ void db_mkdir(struct db_entry *de)
 }
 
 
+void db_mkentry(struct db_entry *de)
+{
+	assert(db_is_dir(de));
+	assert(!de->children);
+	db_delete_field(de, db_field_find(de, ft_dir));
+}
+
+
 void db_chdir(struct db *db, struct db_entry *de)
 {
 	db->dir = de;

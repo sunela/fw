@@ -196,7 +196,12 @@ bool db_iterate(struct db *db, bool (*fn)(void *user, struct db_entry *de),
 bool db_is_dir(const struct db_entry *de);
 bool db_is_account(const struct db_entry *de);
 
+/*
+ * db_mkdir turns an empty entry into a directory. db_mkentry turns an empty
+ * directory into an empty entry.
+ */
 void db_mkdir(struct db_entry *de);
+void db_mkentry(struct db_entry *de);
 
 void db_chdir(struct db *db, struct db_entry *de);
 struct db_entry *db_dir_parent(const struct db *db);

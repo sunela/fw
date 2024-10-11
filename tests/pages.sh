@@ -1094,7 +1094,13 @@ add dir-empty-dir "tap 72 69" "tap 147 162"
 
 # --- new directory, empty name -----------------------------------------------
 
+save
 add dir-empty-name "long 100 10" "tap 88 170" "$ENTRY_L"
+restore
+
+# --- new directory, empty, fields overlay ------------------------------------
+
+add dir-empty-over "long 100 200"
 
 # =============================================================================
 

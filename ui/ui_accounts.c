@@ -374,10 +374,6 @@ static void ui_accounts_long(void *ctx, unsigned x, unsigned y)
 		return;
 	}
 
-	/*
-	 * @@@ For symmetry, should also have sym_account here, if we're in an
-	 * empty directory.
-	 */
 	static struct ui_overlay_button buttons[] = {
 		{ ui_overlay_sym_power,	power_off, NULL },
 		{ ui_overlay_sym_setup,	enter_setup, NULL },
@@ -412,8 +408,14 @@ static void ui_accounts_long(void *ctx, unsigned x, unsigned y)
 			buttons[4].fn = move_from;
 			buttons[4].user = wi_list_user(entry);
 		} else {
-			buttons[4].draw = NULL;
-			buttons[4].fn = NULL;
+			if (main_db.dir && !main_db.dir->children &&
+			    db_is_dir(main_db.dir)) {
+				buttons[4].draw = ui_overlay_sym_account;
+				buttons[4].fn = make_account;
+			} else {
+				buttons[4].draw = NULL;
+				buttons[4].fn = NULL;
+			}
 		}
 		buttons[5].draw = NULL;
 		buttons[5].fn = NULL;

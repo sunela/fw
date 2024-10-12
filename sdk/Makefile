@@ -4,16 +4,29 @@ BL_SDK_BASE = $(TOP)/../bouffalo_sdk
 export BL_SDK_BASE
 export TOP
 
-CHIP = bl808
-BOARD = bl808dk
-CPU_ID = m0
+CHIP_m1s = bl808
+BOARD_m1s = bl808dk
+CPU_ID_m1s = m0
+ELF_m1s = sunela_bl808_m0.elf
+LD_m1s = bl808_flash_m0.ld
+
+CHIP_m0p = bl618
+BOARD_m0p = bl618dk
+CPU_ID_m0p =
+ELF_m1s = sunela_bl618.elf
+LD_m0p = bl618_flash.ld
+
+CHIP = $(CHIP_$(TARGET))
+BOARD = $(BOARD_$(TARGET))
+CPU_ID = $(CPU_ID_$(TARGET))
+
 CROSS_COMPILE = riscv64-unknown-elf-
 
 # Note: COMX may change if there are other USB-serial devices or if enumeration
 # happens while something is still using ACM0 or ACM1.
 COMX = /dev/ttyACM1
 
-SDK_LD = $(BL_SDK_BASE)/bsp/board/bl808dk/bl808_flash_m0.ld
+SDK_LD = $(BL_SDK_BASE)/bsp/board/$(BOARD)/$(LD_$(TARGET))
 
 # add custom cmake definition
 #cmake_definition+=-Dxxx=sss
@@ -27,6 +40,6 @@ include $(BL_SDK_BASE)/project.build
 .PHONY:	redo
 
 redo:
-	rm -f build/build_out/sunela_bl808_m0.elf
-	sed '/^StackSize/s/0x0400/0x2000/' $(SDK_LD) >sunela.ld
+	rm -f build/build_out/$(ELF_$(TARGET))
+	sed '/^StackSize/s/0x0400/0x2000/' $(SDK_LD) >sunela-$(TARGET).ld
 	$(MAKE)

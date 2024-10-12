@@ -68,7 +68,7 @@ void rnd_bytes(void *buf, unsigned size)
 #else /* SIM */
 
 
-#include "bl808/trng.h"
+#include "bouffalo/trng.h"
 
 
 void rnd_bytes(void *buf, unsigned size)

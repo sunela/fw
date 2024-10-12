@@ -1,5 +1,5 @@
 /*
- * i2c.c - Driver for BL808 I2C
+ * i2c.c - Driver for BL618/BL808 I2C
  *
  * This work is licensed under the terms of the MIT License.
  * A copy of the license can be found in the file LICENSE.MIT
@@ -29,6 +29,8 @@
 #include "gpio.h"
 #include "i2c.h"
 
+
+/* BL618 has only I2C0 and I2C1. */
 
 #define	I2C_BASE(i2c) \
 	((i2c) == 0 ? mmio_m0_base + 0xa300 : \

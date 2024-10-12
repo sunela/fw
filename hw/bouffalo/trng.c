@@ -1,13 +1,13 @@
 /*
- * trng.h - Driver for BL808 True Random Number Generator
+ * trng.c - Driver for BL618/BL808 True Random Number Generator
  *
  * This work is licensed under the terms of the MIT License.
  * A copy of the license can be found in the file LICENSE.MIT
  */
 
 /*
- * @@@ The BL808 TRNG stretches the entropy using successive hashing of the
- * random value. There are two ways to prevent/reduce such stretching:
+ * @@@ The BL618/BL808 TRNG stretches the entropy using successive hashing of
+ * the random value. There are two ways to prevent/reduce such stretching:
  * 1) By forcing re-seeding. The code below tries to do this, but we don't know
  *    if it actually works.
  * 2) By reducing the number of random numbers produced before automatically

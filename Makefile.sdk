@@ -13,22 +13,20 @@ CFLAGS += -march=rv32imafcpzpsfoperand_xtheade -mabi=ilp32f -mtune=e907
 CFLAGS += -fno-builtin
 
 CFLAGS += -imultilib rv64imafdc_zfh_xtheadc/lp64d
-#CFLAGS += -iprefix /home/bl808/toolchain_gcc_t-head_linux/bin/../lib/gcc/riscv64-unknown-elf/10.2.0/
-#CFLAGS += -isysroot /home/bl808/toolchain_gcc_t-head_linux/bin/../riscv64-unknown-elf
 
 include Makefile.app
 
-CFLAGS += -Ihw -Ihw/bl808 -DSDK
+CFLAGS += -Ihw -Ihw/bouffalo -DSDK
 OBJS += sdk.o shared.o realmem.o gpio.o spi.o i2c.o trng.o sha.o \
 	st7789.o backlight.o cst816.o usb-hal.o
 
 
-vpath realmem.c hw/bl808
-vpath gpio.c hw/bl808
-vpath spi.c hw/bl808
-vpath i2c.c hw/bl808
-vpath trng.c hw/bl808
-vpath sha.c hw/bl808
+vpath realmem.c hw/bouffalo
+vpath gpio.c hw/bouffalo
+vpath spi.c hw/bouffalo
+vpath i2c.c hw/bouffalo
+vpath trng.c hw/bouffalo
+vpath sha.c hw/bouffalo
 
 vpath st7789.c hw
 vpath backlight.c hw

@@ -68,7 +68,7 @@ download-all:
 erase:
 	$(FLASH) --erase --whole_chip
 
-# --- BL808 console -----------------------------------------------------------
+# --- BL618/BL808 console -----------------------------------------------------
 
 CONSOLE = /dev/ttyACM1
 

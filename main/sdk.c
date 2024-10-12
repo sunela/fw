@@ -13,10 +13,10 @@
 #include <assert.h>
 
 #include "hw/board.h"
-#include "hw/bl808/mmio.h"
-#include "hw/bl808/gpio.h"
-#include "hw/bl808/spi.h"
-#include "hw/bl808/i2c.h"
+#include "hw/bouffalo/mmio.h"
+#include "hw/bouffalo/gpio.h"
+#include "hw/bouffalo/spi.h"
+#include "hw/bouffalo/i2c.h"
 #include "hw/st7789.h"
 #include "hw/cst816.h"
 #include "hw/backlight.h"

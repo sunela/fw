@@ -1,5 +1,5 @@
 /*
- * gpio.h - Driver for BL808 General-purpose IO
+ * gpio.h - Driver for BL618/BL808 General-purpose IO
  *
  * This work is licensed under the terms of the MIT License.
  * A copy of the license can be found in the file LICENSE.MIT
@@ -15,7 +15,7 @@
 #include "mmio.h"
 
 
-/* BL808 RM, 4.7.1 */
+/* BL618 RM, 4.8.5; BL808 RM, 4.7.1 */
 
 #define	GPIO_MASK_MODE	(3 << 30)
 enum GPIO_MODE {

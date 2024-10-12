@@ -1,5 +1,5 @@
 /*
- * gpio.c - Driver for BL808 General-purpose IO
+ * gpio.c - Driver for BL618/BL808 General-purpose IO
  *
  * This work is licensed under the terms of the MIT License.
  * A copy of the license can be found in the file LICENSE.MIT

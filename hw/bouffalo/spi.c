@@ -1,5 +1,5 @@
 /*
- * spi.c - TX-only SPI0 driver for BL808
+ * spi.c - TX-only SPI0 driver for BL618/BL808
  *
  * This work is licensed under the terms of the MIT License.
  * A copy of the license can be found in the file LICENSE.MIT
@@ -22,6 +22,8 @@
 #include "clk.h"
 #include "spi.h"
 
+
+/* BL618 has only SPI0 */
 
 #define	SPI_BASE(spi) \
 	((spi) ? mmio_d0_base + 0x8000 : mmio_m0_base + 0xa200)

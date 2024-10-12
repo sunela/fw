@@ -16,13 +16,9 @@
 
 
 /*
- * 16 MB Flash (M1s). We reserve the first half for the SDK and use the second
- * half for data storage. Of the storage area, we use - at least for now - two
- * partitions of 1 MB each.
+ * FLASH_STORAGE_BASE and FLASH_STORAGE_SIZE are defined by the Makefiles, and
+ * passed a command-line #defines.
  */
-
-#define	FLASH_STORAGE_BASE	(8 * 1024 * 1024)
-#define	FLASH_STORAGE_SIZE	(2 * 1024 * 1024)
 
 /*
  * @@@ the W25Q128JVEJQ Flash in M1s has 4 kB sectors, so each "block" erase

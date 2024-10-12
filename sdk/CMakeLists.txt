@@ -10,6 +10,8 @@ target_sources(app PRIVATE sdk-usb.c flash-storage.c)
 target_link_libraries(app libsunela.a -L$ENV{TOP}/obj-sdk/)
 sdk_set_main_file(sdk-main.c)
 #sdk_set_linker_script(bl808_flash_${CPU_ID}.ld)
+sdk_add_compile_definitions(-DFLASH_STORAGE_BASE=$ENV{FLASH_STORAGE_BASE})
+sdk_add_compile_definitions(-DFLASH_STORAGE_SIZE=$ENV{FLASH_STORAGE_SIZE})
 sdk_set_linker_script(sunela.ld)
 
 project(sunela)

@@ -9,16 +9,19 @@ BOARD_m1s = bl808dk
 CPU_ID_m1s = m0
 ELF_m1s = sunela_bl808_m0.elf
 LD_m1s = bl808_flash_m0.ld
+TARGET_CFLAGS_m1s =
 
 CHIP_m0p = bl618
 BOARD_m0p = bl618dk
 CPU_ID_m0p =
 ELF_m1s = sunela_bl618.elf
 LD_m0p = bl618_flash.ld
+TARGET_CFLAGS_m0p = -DCONFIG_BOARD_FLASH_INIT_SKIP
 
 CHIP = $(CHIP_$(TARGET))
 BOARD = $(BOARD_$(TARGET))
 CPU_ID = $(CPU_ID_$(TARGET))
+export TARGET_CFLAGS = $(TARGET_CFLAGS_$(TARGET))
 
 CROSS_COMPILE = riscv64-unknown-elf-
 

@@ -48,6 +48,7 @@
 /* --- Display module: backlight ------------------------------------------- */
 
 #define LCD_BL		11	/* IO11_LCD_BL_PWM */
+#define	LCD_BL_INVERTED	0
 
 /* --- Display module: touch screen ---------------------------------------- */
 

@@ -16,16 +16,18 @@
 
 
 static unsigned backlight_pin;
+static bool backlight_inverted;
 
 
 void backlight_on(bool on)
 {
-	gpio_out(backlight_pin, on);
+	gpio_out(backlight_pin, on ^ backlight_inverted);
 }
 
 
-void backlight_init(unsigned pin)
+void backlight_init(unsigned pin, bool inverted)
 {
 	backlight_pin = pin;
-	gpio_cfg_out(pin, 0, 0);
+	backlight_inverted = inverted;
+	gpio_cfg_out(pin, inverted, 0);
 }

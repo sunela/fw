@@ -12,6 +12,11 @@
 
 
 void backlight_on(bool on);
-void backlight_init(unsigned pin);
+
+/*
+ * If inverted, the backlight is on when the pin is "1". Otherwise, it is lit
+ * when the pin is "0".
+ */
+void backlight_init(unsigned pin, bool inverted);
 
 #endif /* !BACKLIGHT_H */

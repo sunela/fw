@@ -161,7 +161,7 @@ void sdk_main(void)
 
 	spi_init(LCD_MOSI, LCD_SCLK, LCD_CS, 15);
 	i2c_init(0, I2C0_SDA, I2C0_SCL, 100);
-	backlight_init(LCD_BL);
+	backlight_init(LCD_BL, LCD_BL_INVERTED);
 
 	// @@@ no on-off control yet
 	st7789_on();

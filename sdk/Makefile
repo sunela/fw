@@ -21,7 +21,7 @@ TARGET_CFLAGS_m1s =
 CHIP_m0p = bl616
 BOARD_m0p = bl616dk
 CPU_ID_m0p =
-ELF_m1s = sunela_bl616.elf
+ELF_m0p = sunela_bl616.elf
 LD_m0p = bl616_flash.ld
 TARGET_CFLAGS_m0p = -DCONFIG_BOARD_FLASH_INIT_SKIP
 

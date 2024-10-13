@@ -23,7 +23,9 @@ volatile void *mmio_d0_base;
 void mmio_init(void)
 {
 	mmio_m0_base = (volatile void *) 0x20000000;
+#ifdef TARGET_m1s
 	mmio_d0_base = (volatile void *) 0x30000000;
+#endif
 }
 
 

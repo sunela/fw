@@ -1,5 +1,5 @@
 /*
- * board.h - Board definitions
+ * target-m1s.h - Board definitions: Sipeed M1s Dock
  *
  * This work is licensed under the terms of the MIT License.
  * A copy of the license can be found in the file LICENSE.MIT
@@ -12,8 +12,8 @@
  * - ATECC608 Secure Element on I2C
  */
 
-#ifndef BOARD_H
-#define	BOARD_H
+#ifndef TARGET_M1S_H
+#define	TARGET_M1S_H
 
 /* --- LED ----------------------------------------------------------------- */
 
@@ -69,4 +69,4 @@
 #define ATECC_I2C	0
 #define ATECC_ADDR	0x60
 
-#endif /* !BOARD_H */
+#endif /* !TARGET_M1S_H */

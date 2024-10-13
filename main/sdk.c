@@ -12,7 +12,7 @@
 #include <unistd.h>
 #include <assert.h>
 
-#include "hw/board.h"
+#include TARGET_H
 #include "hw/bouffalo/mmio.h"
 #include "hw/bouffalo/gpio.h"
 #include "hw/bouffalo/spi.h"

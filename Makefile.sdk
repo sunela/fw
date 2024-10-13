@@ -15,7 +15,9 @@ CFLAGS += -imultilib rv64imafdc_zfh_xtheadc/lp64d
 
 include Makefile.app
 
-CFLAGS += -Ihw -Ihw/bouffalo -DSDK -DTARGET_H='"hw/target-$(TARGET).h"'
+CFLAGS += -Ihw -Ihw/bouffalo -DSDK \
+	  -DTARGET_H='"hw/target-$(TARGET).h"' \
+	  -DTARGET_$(TARGET)
 OBJS += sdk.o shared.o realmem.o gpio.o spi.o i2c.o trng.o sha.o \
 	st7789.o backlight.o cst816.o usb-hal.o
 

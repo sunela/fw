@@ -8,6 +8,11 @@
 TARGETS = sim sdk
 export TARGET = m1s
 
+TARGET_NAME_sim = Sim
+TARGET_NAME_m1s = M1s
+TARGET_NAME_m0p = M0P
+export TARGET_NAME = $(TARGET_NAME_$(TARGET))
+
 FONTS = mono14.font mono18.font mono24.font mono34.font mono36.font mono58.font
 
 .PHONY:	all sim sdk fonts db empty-db gdb nm clean spotless test tests

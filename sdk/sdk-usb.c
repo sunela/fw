@@ -13,6 +13,13 @@
 #include "sdk-usb.h"
 
 
+#define	STRINGIFY2(s)	#s
+#define	STRINGIFY(s)	STRINGIFY2(s)
+#define	NAME_LEN	(sizeof(STRINGIFY(TARGET_NAME)) - 1)
+/* Padding ("xxxxxxxx") avoids accessing undefined data. */
+#define	NAME_I(i)	STRINGIFY(TARGET_NAME "xxxxxxxx")[i], 0
+
+
 /* --- Descriptors --------------------------------------------------------- */
 
 /*
@@ -62,7 +69,7 @@ static const uint8_t device_descriptor[] = {
 		'l', 0,
 		'a', 0,
 	/* String #2 */
-		26,
+		2 + 2 * (7 + NAME_LEN),
 		USB_DESCRIPTOR_TYPE_STRING,
 		'S', 0,
 		'u', 0,
@@ -71,11 +78,19 @@ static const uint8_t device_descriptor[] = {
 		'l', 0,
 		'a', 0,
 		' ', 0,
-		'B', 0,
-		'L', 0,
-		'8', 0,
-		'0', 0,
-		'8', 0,
+		/*
+		 * components/usb/cherryusb/core/usbd_core.c:
+		 * usbd_desc_register() doesn't know the size of the array
+		 * we're passing, so any noise at the end is ignored.
+		 */
+		NAME_I(0),
+		NAME_I(1),
+		NAME_I(2),
+		NAME_I(3),
+		NAME_I(4),
+		NAME_I(5),
+		NAME_I(6),
+		NAME_I(7),
 };
 
 

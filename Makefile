@@ -75,13 +75,13 @@ export FLASH_STORAGE_SIZE = $(FLASH_STORAGE_SIZE_$(TARGET))
 CHIPNAME = $(CHIPNAME_$(TARGET))
 
 SDK = $(shell pwd)/../bouffalo_sdk/
-FLASH = $(BL_FLASH_PROGRAM)  --interface uart --baudrate 2000000 \
+FLASH = $(BL_FLASH_PROGRAM) --interface uart --baudrate 2000000 \
 	--port=$(COMX) --chipname $(CHIPNAME)--cpu_id m0 --flash
 REGION_ALL = --start 0x0 --len $(FLASH_TOTAL_SIZE)
 REGION_DB = --start $(FLASH_STORAGE_BASE) --len $(FLASH_STORAGE_SIZE)
 
 flash:
-	$(MAKE) -C sdk flash COMX=$(COMX)
+	$(MAKE) -C sdk flash COMX=$(COMX) BL_FLASH_PROGRAM=$(BL_FLASH_PROGRAM)
 
 upload:	$(shell pwd)/dummy.db
 	$(FLASH) --write $(REGION_DB) --file $<

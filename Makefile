@@ -50,6 +50,8 @@ empty-db:
 # --- Flashing ----------------------------------------------------------------
 
 COMX = /dev/ttyACM1
+BL_FLASH_PROGRAM ?= \
+    $(SDK)/tools/bflb_tools/bouffalo_flash_cube/BLFlashCommand-ubuntu
 
 #
 # 16 MB (M1s) or 8 MB (M0p) Flash. We reserve the first half for the firmware
@@ -73,9 +75,8 @@ export FLASH_STORAGE_SIZE = $(FLASH_STORAGE_SIZE_$(TARGET))
 CHIPNAME = $(CHIPNAME_$(TARGET))
 
 SDK = $(shell pwd)/../bouffalo_sdk/
-FLASH_CUBE = $(SDK)/tools/bflb_tools/bouffalo_flash_cube/BLFlashCommand-ubuntu
-FLASH = $(FLASH_CUBE)  --interface uart --baudrate 2000000 --port=$(COMX) \
-	--chipname $(CHIPNAME)--cpu_id m0 --flash
+FLASH = $(BL_FLASH_PROGRAM)  --interface uart --baudrate 2000000 \
+	--port=$(COMX) --chipname $(CHIPNAME)--cpu_id m0 --flash
 REGION_ALL = --start 0x0 --len $(FLASH_TOTAL_SIZE)
 REGION_DB = --start $(FLASH_STORAGE_BASE) --len $(FLASH_STORAGE_SIZE)
 

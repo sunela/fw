@@ -60,19 +60,22 @@ COMX = /dev/ttyACM1
 FLASH_TOTAL_SIZE_m1s =	 0x01000000	# 16 MB
 FLASH_STORAGE_BASE_m1s = 0x00800000	#  8 MB
 FLASH_STORAGE_SIZE_m1s = 0x00200000	#  2 MB
+CHIPNAME_m1s = bl808
 
 FLASH_TOTAL_SIZE_m0p =	 0x00800000	#  8 MB
 FLASH_STORAGE_BASE_m0p = 0x00400000	#  4 MB
 FLASH_STORAGE_SIZE_m0p = 0x00200000	#  2 MB
+CHIPNAME_m0p = bl616
 
 export FLASH_TOTAL_SIZE = $(FLASH_TOTAL_SIZE_$(TARGET))
 export FLASH_STORAGE_BASE = $(FLASH_STORAGE_BASE_$(TARGET))
 export FLASH_STORAGE_SIZE = $(FLASH_STORAGE_SIZE_$(TARGET))
+CHIPNAME = $(CHIPNAME_$(TARGET))
 
 SDK = $(shell pwd)/../bouffalo_sdk/
 FLASH_CUBE = $(SDK)/tools/bflb_tools/bouffalo_flash_cube/BLFlashCommand-ubuntu
 FLASH = $(FLASH_CUBE)  --interface uart --baudrate 2000000 --port=$(COMX) \
-	--chipname bl808 --cpu_id m0 --flash
+	--chipname $(CHIPNAME)--cpu_id m0 --flash
 REGION_ALL = --start 0x0 --len $(FLASH_TOTAL_SIZE)
 REGION_DB = --start $(FLASH_STORAGE_BASE) --len $(FLASH_STORAGE_SIZE)
 
@@ -104,16 +107,22 @@ picocom:
 
 # --- Debugging ---------------------------------------------------------------
 
+# @@@ ELF_xxx duplicate definitions in sdk/Makefile
+
+ELF_m1s = sunela_bl808_m0.elf
+ELF_m0p = sunela_bl616.elf
+ELF_FILE = sdk/build/build_out/$(ELF_$(TARGET))
+
 # For convenience: invoke gdb on the target (SDK) executable
 # E.g., for  info line *0x...
 
 gdb:
-	riscv64-unknown-elf-gdb sdk/build/build_out/sunela_bl808_m0.elf
+	riscv64-unknown-elf-gdb $(ELF_FILE)
 
 # idem, for nm
 
 nm:
-	riscv64-unknown-elf-nm sdk/build/build_out/sunela_bl808_m0.elf
+	riscv64-unknown-elf-nm $(ELF_FILE)
 
 # --- Testing -----------------------------------------------------------------
 

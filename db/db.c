@@ -159,7 +159,7 @@ bool db_change_field(struct db_entry *de, enum field_type type,
 		*anchor = f;
 	}
 	f->len = size;
-	f->data = alloc_size(size);
+	f->data = size ? alloc_size(size) : NULL;
 	memcpy(f->data, data, size);
 
 	switch (type) {

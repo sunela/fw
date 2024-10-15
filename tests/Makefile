@@ -16,6 +16,7 @@
 all:
 	./pages.sh
 	./tsort.sh
+	./dir.sh
 	./move.sh
 	./rmt.sh
 	./db.sh

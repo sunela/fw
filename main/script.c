@@ -262,6 +262,16 @@ static void dump_rmt(const char *s, void *data, unsigned len)
 }
 
 
+static void dummy_ls(void)
+{
+	const struct db_entry *e;
+
+	for (e = main_db.dir ? main_db.dir->children : main_db.entries; e;
+	    e = e->next)
+		printf("%s\n", e->name);
+}
+
+
 static void rmt(const char *s)
 {
 	uint8_t buf[100]; /* @@@ */
@@ -449,6 +459,7 @@ static void show_help(void)
 "bip39 match [KEYS]\n\t\tfind matching words for the key sequence\n"
 "db dummy\tuse a dummy database. This must be the first command in the\n"
 "\t\tscript.\n"
+"db ls\t\tlist the entries of the current directory\n"
 "db add NAME [PREV]\n\t\tadd an entry to the dummy database\n"
 "db move NAME [BEFORE]\n\t\tmove an entry before another (to the bottom, if\n"
 "\t\tBEFORE is omitted)\n"
@@ -697,6 +708,10 @@ static bool process_cmd(const char *cmd)
 		}
 		if (!strcmp(op, "dump") && args == 1) {
 			dump_db_short(&main_db);
+			return 1;
+		}
+		if (!strcmp(op, "ls") && args == 1) {
+			dummy_ls();
 			return 1;
 		}
 		if (!strcmp(op, "add"))

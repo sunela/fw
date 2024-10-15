@@ -272,6 +272,35 @@ static void dummy_ls(void)
 }
 
 
+static void dummy_pwd(void)
+{
+	const char *pwd = db_pwd(&main_db);
+
+	printf("%s\n", pwd ? pwd : "(top)");
+}
+
+
+static void dummy_cd(const char *name)
+{
+	if (name) {
+		struct db_entry *e;
+
+		for (e = main_db.dir ? main_db.dir->children : main_db.entries;
+		    e; e = e->next)
+			if (!strcmp(e->name, name))
+				break;
+		if (e) {
+			db_chdir(&main_db, e);
+		} else {
+			fprintf(stderr, "\"%s\" not found\n", name);
+			exit(1);
+		}
+	} else {
+		db_chdir(&main_db, db_dir_parent(&main_db));
+	}
+}
+
+
 static void rmt(const char *s)
 {
 	uint8_t buf[100]; /* @@@ */
@@ -460,6 +489,8 @@ static void show_help(void)
 "db dummy\tuse a dummy database. This must be the first command in the\n"
 "\t\tscript.\n"
 "db ls\t\tlist the entries of the current directory\n"
+"db pwd\t\tshow the name of the current directory (not the whole path)\n"
+"db cd [NAME]\tchange to a subdirectory, or, if omitted, go up\n"
 "db add NAME [PREV]\n\t\tadd an entry to the dummy database\n"
 "db move NAME [BEFORE]\n\t\tmove an entry before another (to the bottom, if\n"
 "\t\tBEFORE is omitted)\n"
@@ -713,6 +744,22 @@ static bool process_cmd(const char *cmd)
 		if (!strcmp(op, "ls") && args == 1) {
 			dummy_ls();
 			return 1;
+		}
+		if (!strcmp(op, "pwd") && args == 1) {
+			dummy_pwd();
+			return 1;
+		}
+		if (!strcmp(op, "cd")) {
+			switch (args) {
+			case 1:
+				dummy_cd(NULL);
+				return 1;
+			case 2:
+				dummy_cd(name);
+				return 1;
+			default:
+				goto fail;
+			}
 		}
 		if (!strcmp(op, "add"))
 			switch (args) {

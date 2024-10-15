@@ -1,4 +1,3 @@
-
 #!/bin/sh
 #
 # rmt.sh - Test the remote protocol

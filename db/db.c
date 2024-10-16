@@ -634,23 +634,24 @@ void db_move_after(struct db_entry *e, const struct db_entry *after)
 	struct db_entry *e2;
 	struct db_field *f = db_field_find(e, ft_prev);
 
+	assert(!after || e->db == after->db);
 	if (after) {
-if (debugging)
-  printf("move_after: %s -> %s\n", e->name, after->name);
+		if (debugging)
+			printf("move_after: %s -> %s\n", e->name, after->name);
 	} else {
-if (debugging)
-  printf("move_after: %s -> TOP\n", e->name);
+		if (debugging)
+			printf("move_after: %s -> TOP\n", e->name);
 	}
 
 	/* @@@ is this the right place to handle moving after itself ? */
 	if (e == after) {
-if (debugging)
-  printf("to self\n");
+		if (debugging)
+			printf("to self\n");
 		return;
 	}
 
-if (debugging)
-  printf("followers:\n");
+	if (debugging)
+		printf("followers:\n");
 	/*
 	 * db_change_field and db_delete_entry sort the database, so we just
 	 * restart to be safe.
@@ -671,18 +672,18 @@ again:
 			goto again;
 		}
 
-if (debugging)
-  printf("followers2:\n");
+	if (debugging)
+		printf("followers2:\n");
 again2:
-	for (e2 = db->entries; e2; e2 = e2->next)
-{
-if (debugging)
-  printf("\t%s: %p =? %p, (%s) %u\n", e2->name, e2, e, e->name, is_prev(e, e2));
+	for (e2 = db->entries; e2; e2 = e2->next) {
+		if (debugging)
+			printf("\t%s: %p =? %p, (%s) %u\n",
+			    e2->name, e2, e, e->name, is_prev(e, e2));
 		if (e2 != e && is_prev(after, e2)) {
 			db_change_field(e2, ft_prev, e->name, strlen(e->name));
 			goto again2;
 		}
-}
+	}
 
 	if (after) {
 		db_change_field(e, ft_prev, after->name,
@@ -701,18 +702,20 @@ void db_move_before(struct db_entry *e, const struct db_entry *before)
 	struct db *db = e->db;
 	const struct db_entry *prev;
 
+	assert(!before || e->db == before->db);
 	if (before == db->entries) {
 		prev = NULL;
 	} else if (before) {
-if (debugging)
-  printf("move_before: %s -> %s\n", e->name, before->name);
+		if (debugging)
+			printf("move_before: %s -> %s\n",
+			    e->name, before->name);
 		for (prev = db->entries; prev; prev = prev->next)
 			if (prev->next == before)
 				break;
 		assert(prev);
 	} else {
-if (debugging)
-  printf("move_before: %s -> END\n", e->name);
+		if (debugging)
+			printf("move_before: %s -> END\n", e->name);
 		for (prev = db->entries; prev && prev->next; prev = prev->next);
 	}
 	db_move_after(e, prev);

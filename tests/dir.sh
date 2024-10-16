@@ -123,6 +123,18 @@ b
 c
 EOF
 
+# --- Root directory with subdirectory, sort, list root -----------------------
+
+json <<EOF
+[ { "id":"a" }, { "id":"b" }, { "id":["c","1"] }, { "id":["c","2"] } ]
+EOF
+
+run root-sub-sort "db open" "db sort" "db ls" <<EOF
+a
+b
+c
+EOF
+
 # --- Root directory with subdirectory, pwd in sub ----------------------------
 
 json <<EOF
@@ -144,6 +156,17 @@ run sub "db open" "db cd c" "db ls" <<EOF
 2
 EOF
 
+# --- Root directory with subdirectory, sort, list sub ------------------------
+
+json <<EOF
+[ { "id":"a" }, { "id":"b" }, { "id":["c","1"] }, { "id":["c","2"] } ]
+EOF
+
+run sub "db open" "db sort" "db cd c" "db ls" <<EOF
+1
+2
+EOF
+
 # --- Root directory with subdirectory, go to sub then back -------------------
 
 json <<EOF
@@ -155,3 +178,141 @@ c
 (top)
 EOF
 
+# --- Add entry to root directory, no prev ------------------------------------
+
+json <<EOF
+[ { "id":"a" }, { "id":"c" }, { "id":["e","1"] }, { "id":["e","3"] } ]
+EOF
+
+run top-add "db open" "db add b" "db dump" <<EOF
+a -
+b -
+c -
+e -
+	1 -
+	3 -
+EOF
+
+# --- Add entry to root directory, no prev, sort ------------------------------
+
+json <<EOF
+[ { "id":"a" }, { "id":"c" }, { "id":["e","1"] }, { "id":["e","3"] } ]
+EOF
+
+run top-add-sort "db open" "db add b" "db sort" "db dump" <<EOF
+a -
+b -
+c -
+e -
+	1 -
+	3 -
+EOF
+
+# --- Add entry to subdirectory, no prev --------------------------------------
+
+json <<EOF
+[ { "id":"a" }, { "id":"c" }, { "id":["e","1"] }, { "id":["e","3"] } ]
+EOF
+
+run sub-add "db open" "db cd e" "db add 2" "db dump" <<EOF
+a -
+c -
+e -
+	1 -
+	2 -
+	3 -
+EOF
+
+# --- Add entry to subdirectory, no prev, sort --------------------------------
+
+json <<EOF
+[ { "id":"a" }, { "id":"c" }, { "id":["e","1"] }, { "id":["e","3"] } ]
+EOF
+
+run sub-add-sort "db open" "db cd e" "db add 2" "db sort" "db dump" <<EOF
+a -
+c -
+e -
+	1 -
+	2 -
+	3 -
+EOF
+
+# --- Add entry to root directory, with prev ----------------------------------
+
+json <<EOF
+[ { "id":"a" }, { "id":"c" }, { "id":["e","1"] }, { "id":["e","3"] } ]
+EOF
+
+run top-add-prev "db open" "db add b c" "db dump" <<EOF
+a -
+b c
+c -
+e -
+	1 -
+	3 -
+EOF
+
+# --- Add entry to root directory, with prev, sort ----------------------------
+
+json <<EOF
+[ { "id":"a" }, { "id":"c" }, { "id":["e","1"] }, { "id":["e","3"] } ]
+EOF
+
+#
+# The order we obtain is not the most intuitive result, but it is valid.
+#
+
+run top-add-prev-sort "db open" "db add b c" "db sort" "db dump" <<EOF
+a -
+c -
+e -
+	1 -
+	3 -
+b c
+EOF
+
+# --- Add entry to subdirectory, with prev ------------------------------------
+
+json <<EOF
+[ { "id":"a" }, { "id":"c" }, { "id":["e","1"] }, { "id":["e","3"] } ]
+EOF
+
+run sub-add-prev "db open" "db cd e" "db add 2 1" "db dump" <<EOF
+a -
+c -
+e -
+	1 -
+	2 1
+	3 -
+EOF
+
+# --- Add entry to subdirectory, with prev (1), sort --------------------------
+
+json <<EOF
+[ { "id":"a" }, { "id":"c" }, { "id":["e","1"] }, { "id":["e","3"] } ]
+EOF
+
+run sub-add-prev-sort "db open" "db cd e" "db add 2 1" "db sort" "db dump" <<EOF
+a -
+c -
+e -
+	1 -
+	2 1
+	3 -
+EOF
+
+# --- Add entry to subdirectory, with prev (3), sort --------------------------
+
+json <<EOF
+[ { "id":"a" }, { "id":"c" }, { "id":["e","1"] }, { "id":["e","3"] } ]
+EOF
+
+run sub-add-prev-sort "db open" "db cd e" "db add 2 3" "db sort" "db dump" <<EOF
+a -
+c -
+e -
+	1 -
+	3 -
+	2 3
+EOF

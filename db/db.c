@@ -513,11 +513,16 @@ static unsigned tsort_dir(struct db_entry **anchor)
 		struct db_entry *out;
 	} *tmp, *t, *t2;
 	struct db_entry *e, *e2;
+	unsigned total = 0;
 	unsigned n = 0;
 	unsigned i;
 
-	for (e = *anchor; e; e = e->next)
+	for (e = *anchor; e; e = e->next) {
+		if (e->children)
+			total += tsort_dir(&e->children);
+		total++;
 		n++;
+	}
 	if (!n)
 		return 0;
 
@@ -586,7 +591,7 @@ static unsigned tsort_dir(struct db_entry **anchor)
 
 	free(tmp);
 
-	return n;
+	return total;
 }
 
 

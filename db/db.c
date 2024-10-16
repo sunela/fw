@@ -505,7 +505,7 @@ struct db_entry *db_dummy_entry(struct db *db, const char *name,
 /* --- Database entries: sorting ------------------------------------------- */
 
 
-unsigned db_tsort(struct db *db)
+static unsigned tsort_dir(struct db_entry **anchor)
 {
 	struct tmp {
 		struct db_entry *in;
@@ -516,16 +516,14 @@ unsigned db_tsort(struct db *db)
 	unsigned n = 0;
 	unsigned i;
 
-	for (e = db->entries; e; e = e->next)
+	for (e = *anchor; e; e = e->next)
 		n++;
 	if (!n)
 		return 0;
 
-	db->generation++;
-
 	/* allocate temporary variables */
 	tmp = t = alloc_type_n(struct tmp, n);
-	for (e = db->entries; e; e = e->next) {
+	for (e = *anchor; e; e = e->next) {
 		struct db_field *f;
 
 		t->in = e;
@@ -534,7 +532,7 @@ unsigned db_tsort(struct db *db)
 			if (f->type == ft_prev)
 				break;
 		if (f)
-			for (e2 = db->entries; e2; e2 = e2->next)
+			for (e2 = *anchor; e2; e2 = e2->next)
 				if (f->len == strlen(e2->name) &&
 				    !memcmp(f->data, e2->name, f->len)) {
 					t->prev = e2;
@@ -582,12 +580,23 @@ unsigned db_tsort(struct db *db)
 	assert(i == n);
 
 	/* apply new order */
-	db->entries = tmp[0].out;
+	*anchor = tmp[0].out;
 	for (t = tmp; t != tmp + n; t++)
 		t->out->next = t + 1 == tmp + n ? NULL : t[1].out;
 
 	free(tmp);
 
+	return n;
+}
+
+
+unsigned db_tsort(struct db *db)
+{
+	unsigned n;
+
+	n = tsort_dir(&db->entries);
+	if (n)
+		db->generation++;
 	return n;
 }
 

@@ -35,6 +35,9 @@
 #include "debug.h"
 
 
+static struct db_entry *moving = NULL;
+
+
 /* --- Debugging dump ------------------------------------------------------ */
 
 
@@ -218,7 +221,8 @@ static struct db_entry *find_entry(const char *name)
 {
 	struct db_entry *e;
 
-	for (e = main_db.entries; e; e = e->next)
+	for (e = main_db.dir ? main_db.dir->children : main_db.entries; e;
+	    e = e->next)
 		if (!strcmp(e->name, name))
 			return e;
 	fprintf(stderr, "entry \"%s\" not found\n", name);
@@ -492,8 +496,11 @@ static void show_help(void)
 "db pwd\t\tshow the name of the current directory (not the whole path)\n"
 "db cd [NAME]\tchange to a subdirectory, or, if omitted, go up\n"
 "db add NAME [PREV]\n\t\tadd an entry to the dummy database\n"
+"db mkdir NAME [PREV]\n\t\tlike \"db add\", but make a directory entry\n"
 "db move NAME [BEFORE]\n\t\tmove an entry before another (to the bottom, if\n"
 "\t\tBEFORE is omitted)\n"
+"db move-from NAME\n\t\tfirst half of \"db move\"\n"
+"db move-to [BEFORE]\n\t\tsecond half of \"db move\"\n"
 "db dump\t\tprint the content of the database\n"
 "db sort\t\tsort the database\n"
 "db open\t\topen the database\n"
@@ -772,6 +779,21 @@ static bool process_cmd(const char *cmd)
 			default:
 				goto fail;
 			}
+		if (!strcmp(op, "mkdir"))
+			switch (args) {
+				struct db_entry *de;
+
+			case 2:
+				de = db_dummy_entry(&main_db, name, NULL);
+				db_mkdir(de);
+				return 1;
+			case 3:
+				de = db_dummy_entry(&main_db, name, prev);
+				db_mkdir(de);
+				return 1;
+			default:
+				goto fail;
+			}
 		if (!strcmp(op, "move")) {
 			struct db_entry *a, *b;
 
@@ -788,6 +810,28 @@ static bool process_cmd(const char *cmd)
 			default:
 				goto fail;
 			}
+		}
+		if (!strcmp(op, "move-from") && args == 2) {
+			assert(!moving);
+			moving = find_entry(name);
+			return 1;
+		}
+		if (!strcmp(op, "move-before") && args == 2) {
+			struct db_entry *before = NULL;
+
+			assert(moving);
+			switch (args) {
+			case 2:
+				before = find_entry(name);
+				/* fall through */
+			case 1:
+				db_move_before(moving, before);
+				return 1;
+			default:
+				goto fail;
+			}
+			moving = find_entry(name);
+			return 1;
 		}
 		if (!strcmp(op, "open")) {
 			struct dbcrypt *c;

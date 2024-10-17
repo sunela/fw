@@ -28,6 +28,11 @@ run()
 	for n in "$@"; do
 		s="$s '$n'"
 	done
+	if $gdb; then
+		eval gdb --args $s </dev/tty
+		exit
+	fi
+
 	if ! eval $s 2>&1 >_out; then
 		echo "FAILED" 1>&2
 		exit 1
@@ -59,7 +64,7 @@ empty()
 
 usage()
 {
-	echo "usage: $0 [-x]" 1>&2
+	echo "usage: $0 [--gdb] [-x]" 1>&2
 	exit 1
 }
 
@@ -68,8 +73,11 @@ self=`which "$0"`
 dir=`dirname "$self"`
 top=$dir/..
 
+gdb=false
+
 while [ "$1" ]; do
 	case "$1" in
+	--gdb)	gdb=true;;
 	-x)	set -x;;
 	-*)	usage;;
 	*)	break;;

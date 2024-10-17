@@ -540,7 +540,7 @@ struct db_entry *db_dummy_entry(struct db *db, const char *name,
 	de->name = stralloc(name);
 	de->block = -1;
 	de->defer = 1;
-	id_to_cwd(main_db.dir, de, add_field);
+	id_to_cwd(db->dir, de, add_field);
 
 	if (prev)
 		add_field(de, ft_prev, prev, strlen(prev));
@@ -993,8 +993,10 @@ static void fix_virtual(struct db_entry *dir)
 		 * @@@ note: we do not assign a block here. This only happens
 		 * if we make changes to the directory entry.
 		 */
-		if (e->children || !e->block)
+		if (e->children || !e->block) {
 			add_field(e, ft_dir, NULL, 0);
+			id_to_cwd(dir, e, add_field);
+		}
 	}
 }
 

@@ -106,10 +106,33 @@ static void free_entry(struct db_entry *de)
 }
 
 
+/*
+ * @@@ We return NULL in two cases:
+ * 1) if the parent is the root directory, and
+ * 2) if we don't find "de" in the tree.
+ * The latter should be a fatal error.
+ */
+
+static struct db_entry *find_parent(const struct db *db,
+    struct db_entry *dir, const struct db_entry *de)
+{
+	struct db_entry *e, *parent;
+
+	for (e = dir ? dir->children : db->entries; e; e = e->next) {
+		if (e == de)
+			return dir;
+		parent = find_parent(db, e, de);
+		if (parent)
+			return parent;
+	}
+	return NULL;
+}
+
+
 /* --- Fields of database entries ------------------------------------------ */
 
 
-static void add_field(struct db_entry *de, enum field_type type,
+static bool add_field(struct db_entry *de, enum field_type type,
     const void *data, unsigned len)
 {
 	struct db_field **anchor;
@@ -126,6 +149,7 @@ static void add_field(struct db_entry *de, enum field_type type,
 	f->next = *anchor;
 	*anchor = f;
 	de->db->generation++;
+	return 1;
 }
 
 
@@ -166,17 +190,23 @@ bool db_change_field(struct db_entry *de, enum field_type type,
 	case ft_id:
 		free(de->name);
 
-		const void *z = memrchr(data, 0, size);
+		/*
+		 * It is safe for the caller to use de->name as "data" in the
+		 * call to db_change_field, since the new content is copied
+		 * before the free(3) above. We must use f->data (and not
+		 * "data") to avoid accessing deallocated memory.
+		 */
+		const void *z = memrchr(f->data, 0, size);
 
 		if (z) {
-			unsigned name_len = size - (z + 1 - data);
+			unsigned name_len = size - (z + 1 - f->data);
 
 			de->name = alloc_size(name_len + 1);
 			memcpy(de->name, z + 1, name_len);
 			de->name[name_len] = 0;
 		} else {
 			de->name = alloc_size(size + 1);
-			memcpy(de->name, data, size);
+			memcpy(de->name, f->data, size);
 			de->name[size] = 0;
 		}
 		db_tsort(db);
@@ -442,6 +472,36 @@ static struct db_entry *new_entry(struct db *db, struct db_entry *dir,
 }
 
 
+static bool id_to_cwd(struct db_entry *parent, struct db_entry *de,
+    bool (*fn)(struct db_entry *de, enum field_type type,
+    const void *data, unsigned len))
+{
+	unsigned name_len = strlen(de->name);
+	bool ok;
+
+	if (parent) {
+		struct db_field *id = parent->fields;
+		unsigned path_len = id->len + 1 + name_len;
+		char *tmp = alloc_size(path_len);
+
+		assert(id);
+		assert(id->type == ft_id);
+		memcpy(tmp, id->data, id->len);
+		tmp[id->len] = 0;
+		memcpy(tmp + id->len + 1, de->name, name_len);
+		ok = fn(de, ft_id, tmp, path_len);
+		free(tmp);
+	} else {
+		/*
+		 * db_change_field copies the new id before deallocating the 
+		 * old name.
+		 */
+		ok = fn(de, ft_id, de->name, name_len);
+	}
+	return ok;
+}
+
+
 struct db_entry *db_new_entry(struct db *db, const char *name)
 {
 	struct db_entry *de;
@@ -456,23 +516,7 @@ struct db_entry *db_new_entry(struct db *db, const char *name)
 	de->block = new;
 	rnd_bytes(&de->seq, sizeof(de->seq));
 
-	unsigned name_len = strlen(name);
-	const struct db_entry *parent = db->dir;
-
-	if (parent) {
-		struct db_field *id = parent->fields;
-		unsigned path_len = id->len + 1 + name_len;
-		char *tmp = alloc_size(path_len);
-
-		assert(id->type == ft_id);
-		memcpy(tmp, id->data, id->len);
-		tmp[id->len] = 0;
-		memcpy(tmp + id->len + 1, name, name_len);
-		add_field(de, ft_id, tmp, path_len);
-		free(tmp);
-	} else {
-		add_field(de, ft_id, name, name_len);
-	}
+	id_to_cwd(db->dir, de, add_field);
 
 	db_tsort(db);
 	if (write_entry(de))
@@ -496,6 +540,8 @@ struct db_entry *db_dummy_entry(struct db *db, const char *name,
 	de->name = stralloc(name);
 	de->block = -1;
 	de->defer = 1;
+	id_to_cwd(main_db.dir, de, add_field);
+
 	if (prev)
 		add_field(de, ft_prev, prev, strlen(prev));
 	return de;
@@ -628,9 +674,46 @@ static bool is_prev(const struct db_entry *prev, const struct db_entry *e)
 }
 
 
+static void tree_move(struct db_entry *dir, struct db_entry *e)
+{
+	struct db *db = e->db;
+	struct db_entry **new_anchor;
+	struct db_entry **old_anchor;
+	struct db_entry *parent;
+
+	for (new_anchor = dir ? &dir->children : &db->entries; *new_anchor;
+	    new_anchor = &(*new_anchor)->next)
+		if (*new_anchor == e)
+			return;
+
+	parent = find_parent(e->db, NULL, e);
+	for (old_anchor = parent ? &parent->children : &db->entries;
+	    *old_anchor; old_anchor = &(*old_anchor)->next)
+		if (*old_anchor == e)
+			break;
+	assert(*old_anchor);
+	
+	*old_anchor = e->next;
+	e->next = *new_anchor;
+	*new_anchor = e;
+
+	/*
+	 * @@@ db_delete_field this runs tsort, so we should not run it again
+	 * after returning.
+	 */
+	if (*old_anchor) {
+		struct db_field *f = db_field_find(*old_anchor, ft_prev);
+
+		if (f)
+			db_delete_field(*old_anchor, f);
+	}
+}
+
+
 void db_move_after(struct db_entry *e, const struct db_entry *after)
 {
 	struct db *db = e->db;
+	struct db_entry *dir = db->dir ? db->dir->children : db->entries;
 	struct db_entry *e2;
 	struct db_field *f = db_field_find(e, ft_prev);
 
@@ -658,7 +741,7 @@ void db_move_after(struct db_entry *e, const struct db_entry *after)
 	 */
 again:
 	f = db_field_find(e, ft_prev);
-	for (e2 = db->entries; e2; e2 = e2->next)
+	for (e2 = dir; e2; e2 = e2->next)
 		if (e2 != e && is_prev(e, e2)) {
 			if (f) {
 				db_change_field(e2, ft_prev, f->data, f->len);
@@ -675,7 +758,7 @@ again:
 	if (debugging)
 		printf("followers2:\n");
 again2:
-	for (e2 = db->entries; e2; e2 = e2->next) {
+	for (e2 = dir; e2; e2 = e2->next) {
 		if (debugging)
 			printf("\t%s: %p =? %p, (%s) %u\n",
 			    e2->name, e2, e, e->name, is_prev(e, e2));
@@ -693,6 +776,9 @@ again2:
 			db_delete_field(e, f);
 	}
 
+	id_to_cwd(db->dir, e, db_change_field);
+	tree_move(db->dir, e);
+
 	db_tsort(db);
 }
 
@@ -700,23 +786,24 @@ again2:
 void db_move_before(struct db_entry *e, const struct db_entry *before)
 {
 	struct db *db = e->db;
+	struct db_entry *dir = db->dir ? db->dir->children : db->entries;
 	const struct db_entry *prev;
 
 	assert(!before || e->db == before->db);
-	if (before == db->entries) {
+	if (before == dir) {
 		prev = NULL;
 	} else if (before) {
 		if (debugging)
 			printf("move_before: %s -> %s\n",
 			    e->name, before->name);
-		for (prev = db->entries; prev; prev = prev->next)
+		for (prev = dir; prev; prev = prev->next)
 			if (prev->next == before)
 				break;
 		assert(prev);
 	} else {
 		if (debugging)
 			printf("move_before: %s -> END\n", e->name);
-		for (prev = db->entries; prev && prev->next; prev = prev->next);
+		for (prev = dir; prev && prev->next; prev = prev->next);
 	}
 	db_move_after(e, prev);
 }
@@ -834,29 +921,6 @@ void db_mkentry(struct db_entry *de)
 void db_chdir(struct db *db, struct db_entry *de)
 {
 	db->dir = de;
-}
-
-
-/*
- * @@@ We return NULL in two cases:
- * 1) if the parent is the root directory, and
- * 2) if we don't find "de" in the tree.
- * The latter should be a fatal error.
- */
-
-static struct db_entry *find_parent(const struct db *db,
-    struct db_entry *dir, const struct db_entry *de)
-{
-	struct db_entry *e, *parent;
-
-	for (e = dir ? dir->children : db->entries; e; e = e->next) {
-		if (e == de)
-			return dir;
-		parent = find_parent(db, e, db->dir);
-		if (parent)
-			return parent;
-	}
-	return NULL;
 }
 
 

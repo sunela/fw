@@ -164,20 +164,23 @@ bool db_entry_defer_update(struct db_entry *de, bool defer);
 struct db_entry *db_new_entry(struct db *db, const char *name);
 
 /*
- * Adjusts "prev" fields in the database such that entry "e" is sorted after
- * entry "after":
+ * db_move_after adjusts "prev" fields in the database such that entry "e" is
+ * sorted after entry "after":
  * - the "prev" field of "e" is set up point to "after"
  * - all "prev" fields pointing to "e" are changed to the value of "e"'s "prev"
  *   field
  * - all "prev" fields pointing to "after" are changed to point to "e"
  * If "after" is NULL, the entry is inserted at the beginning of the database.
+ *
+ * The entry is moved to the current directory (e->db->dir) of the database.
+ * If "prev" is not NULL, it must be in this directory.
  */
 
 void db_move_after(struct db_entry *e, const struct db_entry *after);
 
 /*
- * Adjusts "prev" fields in the database such that entry "e" is sorted before
- * entry "after", or at the end of the list if "after" is NULL.
+ * db_move_before adjusts "prev" fields in the database such that entry "e" is
+ * sorted before entry "after", or at the end of the list if "after" is NULL.
  *
  * See "move_after" for details.
  */

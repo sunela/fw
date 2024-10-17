@@ -24,6 +24,10 @@ run()
 	for n in "$@"; do
 		s="$s 'db $n'"
 	done
+	if $gdb; then
+		eval gdb --args $s "'db sort' 'db dump'" </dev/tty
+		exit
+	fi
 	if ! eval $s "'db sort' 'db dump'" 2>&1 >_out; then
 		echo "FAILED" 1>&2
 		exit 1
@@ -42,13 +46,16 @@ run()
 
 usage()
 {
-	echo "usage: $0 [-x]" 1>&2
+	echo "usage: $0 [--gdb] [-x]" 1>&2
 	exit 1
 }
 
 
+gdb=false
+
 while [ "$1" ]; do
 	case "$1" in
+	--gdb)	gdb=true;;
 	-x)	set -x;;
 	-*)	usage;;
 	*)	break;;
@@ -147,3 +154,40 @@ b a
 c b
 EOF
 
+# --- abc(de), test setup  ----------------------------------------------------
+
+SETUP="'add a' 'add b a' 'mkdir c b' 'cd c' 'add d' 'add e d'"
+
+eval run "'abc(de)'" "$SETUP" <<EOF
+a -
+b a
+c b
+	d -
+	e d
+EOF
+
+# --- a:bc(dea) ---------------------------------------------------------------
+
+SETUP="'add a' 'add b a' 'mkdir c b' 'cd c' 'add d' 'add e d'"
+
+eval run "'a:bc(dea)'" "$SETUP" cd \
+    "'move-from a'" "'cd c'" move-before   <<EOF
+b -
+c b
+	d -
+	e d
+	a e
+EOF
+
+# --- d:abdc(e) ---------------------------------------------------------------
+
+SETUP="'add a' 'add b a' 'mkdir c b' 'cd c' 'add d' 'add e d'"
+
+eval run "'d:abdc(e)'" "$SETUP" cd \
+    "'cd c'" "'move-from d'" cd "'move-before c'"   <<EOF
+a -
+b a
+d b
+c d
+	e -
+EOF

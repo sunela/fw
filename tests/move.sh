@@ -21,6 +21,11 @@ run()
 	shift
 	echo -n "$title: " 1>&2
 
+	if [ "$select" -a "$select" != "$title" ]; then
+		echo skipped 1>&2
+		return
+	fi
+
 	for n in "$@"; do
 		s="$s 'db $n'"
 	done
@@ -29,24 +34,26 @@ run()
 		exit
 	fi
 	if ! eval $s "'db sort' 'db dump'" 2>&1 >_out; then
-		echo "FAILED" 1>&2
+		echo FAILED 1>&2
 		exit 1
 	else
 		if diff -u - _out >_diff; then
-			echo "PASSED" 1>&2
+			echo PASSED 1>&2
 			rm -f _diff
 		else
-			echo "FAILED" 1>&2
+			echo FAILED 1>&2
 			cat _diff 1>&2
 			exit 1
 		fi
 	fi
+
+	[ "$select" ] && exit
 }
 
 
 usage()
 {
-	echo "usage: $0 [--gdb] [-x]" 1>&2
+	echo "usage: $0 [--gdb] [-x] [test-name]" 1>&2
 	exit 1
 }
 
@@ -63,7 +70,8 @@ while [ "$1" ]; do
 	shift
 done
 
-[ "$1" ] && usage
+select=$1
+[ "$2" ] && usage
 
 
 # --- c:acb (partial, doesn't work) -------------------------------------------
@@ -191,3 +199,10 @@ d b
 c d
 	e -
 EOF
+
+# -----------------------------------------------------------------------------
+
+if [ "$select" ]; then
+	echo "$select: not found" 1>&2
+	exit 1
+fi

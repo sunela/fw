@@ -500,7 +500,7 @@ static void show_help(void)
 "db move NAME [BEFORE]\n\t\tmove an entry before another (to the bottom, if\n"
 "\t\tBEFORE is omitted)\n"
 "db move-from NAME\n\t\tfirst half of \"db move\"\n"
-"db move-to [BEFORE]\n\t\tsecond half of \"db move\"\n"
+"db move-before [BEFORE]\n\t\tsecond half of \"db move\"\n"
 "db dump\t\tprint the content of the database\n"
 "db sort\t\tsort the database\n"
 "db open\t\topen the database\n"
@@ -816,7 +816,7 @@ static bool process_cmd(const char *cmd)
 			moving = find_entry(name);
 			return 1;
 		}
-		if (!strcmp(op, "move-before") && args == 2) {
+		if (!strcmp(op, "move-before")) {
 			struct db_entry *before = NULL;
 
 			assert(moving);

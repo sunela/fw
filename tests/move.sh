@@ -273,7 +273,7 @@ EOF
 
 eval run -f "move-to-child" "$SETUP" cd cd \
     "'move-from c'" "'cd c'" "'cd d'" pwd move-before <<EOF
-\`!is_descendent(e, db->dir)' failed.
+\`!db_is_descendent(e, db->dir)' failed.
 EOF
 
 # -----------------------------------------------------------------------------

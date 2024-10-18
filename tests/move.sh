@@ -6,15 +6,28 @@
 # A copy of the license can be found in the file LICENSE.MIT
 #
 
+usage_run()
+{
+	echo "usage: $0 [-D] [-f] title [command ...]" 1>&2
+	exit 1
+}
+
+
 run()
 {
 	local debug=
+	local fail=false
 
-	if [ "$1" = -D ]; then
-		debug=-D
+	while [ "$1" ]; do
+		case "$1" in
+		-D)	debug=-D;;
+		-f)	fail=true;;
+		-*)	usage_run;;
+		*)	break;;
+		esac
 		shift
-	fi
-
+	done
+	
 	local title=$1
 	local s="../sim $debug -q -C 'db dummy'"
 
@@ -33,18 +46,22 @@ run()
 		eval gdb --args $s "'db sort' 'db dump'" </dev/tty
 		exit
 	fi
-	if ! eval $s "'db sort' 'db dump'" 2>&1 >_out; then
-		echo FAILED 1>&2
-		exit 1
-	else
-		if diff -u - _out >_diff; then
-			echo PASSED 1>&2
-			rm -f _diff
+	# @@@ should also fail if fail=true but the command had exit status 0.
+	if ! eval $s "'db sort' 'db dump'" >_out 2>&1; then
+		if $fail; then
+			sed -i 's/^.*Assertion //;/^Aborted/d' _out
 		else
 			echo FAILED 1>&2
-			cat _diff 1>&2
 			exit 1
 		fi
+	fi
+	if diff -u - _out >_diff; then
+		echo PASSED 1>&2
+		rm -f _diff
+	else
+		echo FAILED 1>&2
+		cat _diff 1>&2
+		exit 1
 	fi
 
 	[ "$select" ] && exit
@@ -162,7 +179,12 @@ b a
 c b
 EOF
 
-# --- abc(de), test setup  ----------------------------------------------------
+# === abc(de), test setup =====================================================
+
+#
+# Sections with a === separator introduce a new SETUP sequence at the
+# beginning, then may use it in several tests.
+#
 
 SETUP="'add a' 'add b a' 'mkdir c b' 'cd c' 'add d' 'add e d'"
 
@@ -176,8 +198,6 @@ EOF
 
 # --- a:bc(dea) ---------------------------------------------------------------
 
-SETUP="'add a' 'add b a' 'mkdir c b' 'cd c' 'add d' 'add e d'"
-
 eval run "'a:bc(dea)'" "$SETUP" cd \
     "'move-from a'" "'cd c'" move-before <<EOF
 b -
@@ -188,8 +208,6 @@ c b
 EOF
 
 # --- a:bc(dae) ---------------------------------------------------------------
-
-SETUP="'add a' 'add b a' 'mkdir c b' 'cd c' 'add d' 'add e d'"
 
 eval run "'a:bc(dae)'" "$SETUP" cd \
     "'move-from a'" "'cd c'" "'move-before e'" <<EOF
@@ -202,8 +220,6 @@ EOF
 
 # --- a:bc(ade) ---------------------------------------------------------------
 
-SETUP="'add a' 'add b a' 'mkdir c b' 'cd c' 'add d' 'add e d'"
-
 eval run "'a:bc(ade)'" "$SETUP" cd \
     "'move-from a'" "'cd c'" "'move-before d'" <<EOF
 b -
@@ -215,10 +231,8 @@ EOF
 
 # --- d:abdc(e) ---------------------------------------------------------------
 
-SETUP="'add a' 'add b a' 'mkdir c b' 'cd c' 'add d' 'add e d'"
-
 eval run "'d:abdc(e)'" "$SETUP" cd \
-    "'cd c'" "'move-from d'" cd "'move-before c'"   <<EOF
+    "'cd c'" "'move-from d'" cd "'move-before c'" <<EOF
 a -
 b a
 d b
@@ -228,15 +242,38 @@ EOF
 
 # --- d:abc(e)d ---------------------------------------------------------------
 
-SETUP="'add a' 'add b a' 'mkdir c b' 'cd c' 'add d' 'add e d'"
-
 eval run "'d:abc(e)d'" "$SETUP" cd \
-    "'cd c'" "'move-from d'" cd move-before   <<EOF
+    "'cd c'" "'move-from d'" cd move-before <<EOF
 a -
 b a
 c b
 	e -
 d c
+EOF
+
+# --- cannot move directory into itself ---------------------------------------
+
+eval run -f "move-itself" "$SETUP" cd \
+    "'move-from c'" "'cd c'" move-before <<EOF
+\`e != db->dir' failed.
+EOF
+
+# === ac(d(e)), test setup ====================================================
+
+SETUP="'add a' 'mkdir c a' 'cd c' 'mkdir d' 'cd d' 'add e'"
+ 
+eval run "'ac(d(e))'" "$SETUP" <<EOF
+a -
+c a
+	d -
+		e -
+EOF
+
+# --- cannot move directory into child ----------------------------------------
+
+eval run -f "move-to-child" "$SETUP" cd cd \
+    "'move-from c'" "'cd c'" "'cd d'" pwd move-before <<EOF
+\`!is_descendent(e, db->dir)' failed.
 EOF
 
 # -----------------------------------------------------------------------------

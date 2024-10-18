@@ -192,6 +192,13 @@ bool db_iterate(struct db *db, bool (*fn)(void *user, struct db_entry *de),
     void *user);
 
 /*
+ * db_is_descendent returns "true" if "de" is a descendent of "dir", Note that
+ * it returns "false" if dir == de. For directory moves, this condition thus
+ * has to be checked separately.
+ */
+bool db_is_descendent(const struct db_entry *dir, const struct db_entry *de);
+
+/*
  * db_is_dir and db_is_account return 1 if "de" is a directory or account.
  * They return 0 if it is clearly the other, or if it can still be either
  * account or directory.

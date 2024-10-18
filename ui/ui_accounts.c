@@ -365,6 +365,14 @@ static void long_top(void *ctx, unsigned x, unsigned y)
 }
 
 
+static bool move_prohibited(const struct db_entry *e)
+{
+	if (e->db->dir == e)
+		return 1;
+	return db_is_descendent(e, e->db->dir);
+}
+
+
 static void ui_accounts_long(void *ctx, unsigned x, unsigned y)
 {
 	struct ui_accounts_ctx *c = ctx;
@@ -392,9 +400,14 @@ static void ui_accounts_long(void *ctx, unsigned x, unsigned y)
 	for (i = 0; i != prm.n_buttons; i++)
 		buttons[i].user = ctx;
 	if (moving) {
-		buttons[4].draw = ui_overlay_sym_move_to;
-		buttons[4].fn = move_to;
-		buttons[4].user = entry ? wi_list_user(entry) : NULL;
+		if (move_prohibited(moving)) {
+			buttons[4].draw = NULL;
+			buttons[4].fn = NULL;
+		} else {
+			buttons[4].draw = ui_overlay_sym_move_to;
+			buttons[4].fn = move_to;
+			buttons[4].user = entry ? wi_list_user(entry) : NULL;
+		}
 		buttons[5].draw = ui_overlay_sym_move_cancel;
 		buttons[5].fn = move_cancel;
 	} else {
@@ -484,7 +497,8 @@ static bool add_account(void *user, struct db_entry *de)
 	struct wi_list_entry *e;
 	bool no_target;
 
-	no_target = moving && (de == moving || moving->next == de);
+	no_target = moving &&
+	    (de == moving || moving->next == de || move_prohibited(moving));
 	if (db_is_dir(de)) {
 		e = wi_list_add_width(&c->list, de->name, NULL,
 		    GFX_WIDTH - style_dir.min_h - 2, de);

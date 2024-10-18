@@ -129,6 +129,20 @@ static struct db_entry *find_parent(const struct db *db,
 }
 
 
+static bool is_descendent(const struct db_entry *dir, const struct db_entry *de)
+{
+	const struct db_entry *e;
+
+	for (e = dir ? dir->children : dir->db->entries; e; e = e->next) {
+		if (e == de)
+			return 1;
+		if (e->children && is_descendent(e->children, de))
+			return 1;
+	}
+	return 0;
+}
+
+
 /* --- Fields of database entries ------------------------------------------ */
 
 
@@ -716,6 +730,9 @@ void db_move_after(struct db_entry *e, const struct db_entry *after)
 	struct db_entry *dir = db->dir ? db->dir->children : db->entries;
 	struct db_entry *e2;
 	struct db_field *f = db_field_find(e, ft_prev);
+
+	assert(e != db->dir);
+	assert(!is_descendent(e, db->dir));
 
 	assert(!after || e->db == after->db);
 	if (after) {

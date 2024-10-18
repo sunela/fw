@@ -24,9 +24,9 @@
 #include "ui_accounts.h"
 
 
-#define	NULL_TARGET_COLOR	GFX_HEX(0x808080)
-#define	TITLE_ROOT_FG		GFX_WHITE
-#define	TITLE_SUB_FG		GFX_YELLOW
+#define	NO_TARGET_COLOR	GFX_HEX(0x808080)
+#define	TITLE_ROOT_FG	GFX_WHITE
+#define	TITLE_SUB_FG	GFX_YELLOW
 
 #define	TOP_CORNER_X	10
 
@@ -66,8 +66,8 @@ static const struct wi_list_style style_title_sub = {
 	}
 };
 
-static struct wi_list_entry_style style_null_target;
-static struct wi_list_entry_style style_dir;
+static struct wi_list_entry_style style_no_target;
+static struct wi_list_entry_style style_dir, style_dir_no_target;
 static struct wi_list *lists[2];
 
 
@@ -392,14 +392,9 @@ static void ui_accounts_long(void *ctx, unsigned x, unsigned y)
 	for (i = 0; i != prm.n_buttons; i++)
 		buttons[i].user = ctx;
 	if (moving) {
-		if (entry) {
-			buttons[4].draw = ui_overlay_sym_move_to;
-			buttons[4].fn = move_to;
-			buttons[4].user = wi_list_user(entry);
-		} else {
-			buttons[4].draw = NULL;
-			buttons[4].fn = NULL;
-		}
+		buttons[4].draw = ui_overlay_sym_move_to;
+		buttons[4].fn = move_to;
+		buttons[4].user = entry ? wi_list_user(entry) : NULL;
 		buttons[5].draw = ui_overlay_sym_move_cancel;
 		buttons[5].fn = move_cancel;
 	} else {
@@ -487,15 +482,18 @@ static bool add_account(void *user, struct db_entry *de)
 {
 	struct ui_accounts_ctx *c = user;
 	struct wi_list_entry *e;
+	bool no_target;
 
+	no_target = moving && (de == moving || moving->next == de);
 	if (db_is_dir(de)) {
 		e = wi_list_add_width(&c->list, de->name, NULL,
 		    GFX_WIDTH - style_dir.min_h - 2, de);
-		wi_list_entry_style(&c->list, e, &style_dir);
+		wi_list_entry_style(&c->list, e,
+		    no_target ? &style_dir_no_target : &style_dir);
 	} else {
 		e = wi_list_add(&c->list, de->name, NULL, de);
-		if (moving && (de == moving || moving->next == de))
-			wi_list_entry_style(&c->list, e, &style_null_target);
+		if (no_target)
+			wi_list_entry_style(&c->list, e, &style_no_target);
 	}
 	return 1;
 }
@@ -505,10 +503,12 @@ static void ui_accounts_open(void *ctx, void *params)
 {
 	struct ui_accounts_ctx *c = ctx;
 	const char *pwd;
-	style_null_target = style_list.entry;
-	style_null_target.fg[0] = style_null_target.fg[1] = NULL_TARGET_COLOR;
+	style_no_target = style_list.entry;
+	style_no_target.fg[0] = style_no_target.fg[1] = NO_TARGET_COLOR;
 	style_dir = style_list.entry;
 	style_dir.render = render_folder;
+	style_dir_no_target = style_dir;
+	style_dir_no_target.fg[0] = style_dir_no_target.fg[1] = NO_TARGET_COLOR;
 
 	c->resume_action = NULL;
 	lists[1] = NULL;

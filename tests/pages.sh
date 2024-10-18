@@ -34,6 +34,22 @@ json()
 }
 
 
+page_inner_usage()
+{
+	cat <<EOF
+usage: $0 [-e] [-i] [-j JSON] [-k] [-n] name [commands]
+
+-e  use an account database consisting only of erased blocks
+-i  incrementally build upon the previous test
+-j JSON
+    use the JSON string for the account database
+-k  keep the database file after the test
+-n  no title - suppress printing the title
+EOF
+	exit 1
+}
+
+
 page_inner()
 {
 	local erase=false
@@ -54,6 +70,7 @@ page_inner()
 			shift;;
 		-n)	title=false
 			shift;;
+		-*)	page_inner_usage;;
 		*)	break;;
 		esac
 	done

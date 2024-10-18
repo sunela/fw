@@ -37,12 +37,14 @@ json()
 page_inner_usage()
 {
 	cat <<EOF
-usage: $0 [-e] [-i] [-j JSON] [-k] [-n] name [commands]
+usage: $0 [-e] [-i] [-j JSON|FILE] [-k] [-n] name [commands]
 
 -e  use an account database consisting only of erased blocks
 -i  incrementally build upon the previous test
 -j JSON
     use the JSON string for the account database
+-j FILE
+    initialize the account database from the specified JSON file
 -k  keep the database file after the test
 -n  no title - suppress printing the title
 EOF
@@ -55,6 +57,7 @@ page_inner()
 	local erase=false
 	local incremental=false
 	local json=
+	local json_file=$top/accounts.json
 	local title=true
 
 	keep=false
@@ -64,7 +67,11 @@ page_inner()
 			shift;;
 		-i)	incremental=true
 			shift;;
-		-j)	json=$2
+		-j)	if [ -r "$2" ]; then
+				json_file=$2
+			else
+				json=$2
+			fi
 			shift 2;;
 		-k)	keep=true
 			shift;;
@@ -109,7 +116,7 @@ sys.stdout.buffer.write(b"\xff" * 1024 * 2048);' >"$dir/_db" || exit
 			    "$top/tools/accenc.py" /dev/stdin $PK >"$dir/_db" ||
 			    exit
 		else
-			"$top/tools/accenc.py" "$top/accounts.json" $PK \
+			"$top/tools/accenc.py" "$json_file" $PK \
 			    >"$dir/_db" || exit
 		fi
 	fi

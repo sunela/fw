@@ -179,12 +179,38 @@ EOF
 SETUP="'add a' 'add b a' 'mkdir c b' 'cd c' 'add d' 'add e d'"
 
 eval run "'a:bc(dea)'" "$SETUP" cd \
-    "'move-from a'" "'cd c'" move-before   <<EOF
+    "'move-from a'" "'cd c'" move-before <<EOF
 b -
 c b
 	d -
 	e d
 	a e
+EOF
+
+# --- a:bc(dae) ---------------------------------------------------------------
+
+SETUP="'add a' 'add b a' 'mkdir c b' 'cd c' 'add d' 'add e d'"
+
+eval run "'a:bc(dae)'" "$SETUP" cd \
+    "'move-from a'" "'cd c'" "'move-before e'" <<EOF
+b -
+c b
+	d -
+	a d
+	e a
+EOF
+
+# --- a:bc(ade) ---------------------------------------------------------------
+
+SETUP="'add a' 'add b a' 'mkdir c b' 'cd c' 'add d' 'add e d'"
+
+eval run "'a:bc(ade)'" "$SETUP" cd \
+    "'move-from a'" "'cd c'" "'move-before d'" <<EOF
+b -
+c b
+	a -
+	d a
+	e d
 EOF
 
 # --- d:abdc(e) ---------------------------------------------------------------
@@ -198,6 +224,19 @@ b a
 d b
 c d
 	e -
+EOF
+
+# --- d:abc(e)d ---------------------------------------------------------------
+
+SETUP="'add a' 'add b a' 'mkdir c b' 'cd c' 'add d' 'add e d'"
+
+eval run "'d:abc(e)d'" "$SETUP" cd \
+    "'cd c'" "'move-from d'" cd move-before   <<EOF
+a -
+b a
+c b
+	e -
+d c
 EOF
 
 # -----------------------------------------------------------------------------

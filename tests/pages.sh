@@ -1126,6 +1126,67 @@ restore
 
 add dir-empty-over "long 100 200"
 
+# === moving with subdirectories, accounts screens ============================
+
+LIST_1="80 82"
+LIST_2="80 124"
+LIST_3="80 169"
+LIST_4="80 200"
+BACK="drag 172 164 55 164"
+MOVE="tap 129 168"	# from/to
+
+#
+# Directory tree structure:
+#
+# a
+# b
+# c/
+#   d
+#   e/
+#     f
+#     a
+#
+
+accounts -j dirs.json sub-top
+add -j dirs.json sub-lvl1 "tap $LIST_3"
+add -j dirs.json sub-lvl2 "tap $LIST_2"
+
+# --- move c/e/f to c/ --------------------------------------------------------
+
+add -j dirs.json sub-f-c "long $LIST_1" "$MOVE" "$BACK"
+
+save
+add -j dirs.json sub-f-c-1st "long $LIST_1" "$MOVE"
+restore
+
+save
+add -j dirs.json sub-f-c-2nd "long $LIST_2" "$MOVE"
+restore
+
+save
+add -j dirs.json sub-f-c-3rd "long $LIST_3" "$MOVE"
+restore
+
+# --- move c/e/f to top-level -------------------------------------------------
+
+add -j dirs.json sub-f-top "$BACK"
+
+save
+add -j dirs.json sub-f-top-1st "long $LIST_1" "$MOVE"
+restore
+
+save
+add -j dirs.json sub-f-top-2nd "long $LIST_2" "$MOVE"
+restore
+
+save
+add -j dirs.json sub-f-top-3rd "long $LIST_3" "$MOVE"
+restore
+
+save
+add -j dirs.json sub-f-top-4th "long $LIST_4" "$MOVE"
+restore
+
 # =============================================================================
 
 if [ "$select" ] && ! $found; then

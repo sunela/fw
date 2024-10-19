@@ -1241,6 +1241,24 @@ add -j dirs.json sub-a-top "$BACK" "$BACK"
 add -j dirs.json sub-a-top-to "long $LIST_1"
 add -j dirs.json sub-a-top-try "$MOVE"
 
+# === try to move c to c/ or c/e/ =============================================
+
+accounts -j dirs.json sub-c-from "long $LIST_3" "$MOVE"
+add -j dirs.json sub-c-c "tap $LIST_3"
+add -j dirs.json sub-c-c-to "long $LIST_2"
+add -j dirs.json sub-c-c-try "$MOVE"
+
+add -j dirs.json sub-c-e "tap $LIST_2"
+add -j dirs.json sub-c-e-to "long $LIST_1"
+add -j dirs.json sub-c-e-try "$MOVE"
+
+# === try to move c/e to c/e/ =================================================
+
+accounts -j dirs.json sub-e-from "tap $LIST_3" "long $LIST_2" "$MOVE"
+add -j dirs.json sub-e-e "tap $LIST_2"
+add -j dirs.json sub-e-e-to "long $LIST_1"
+add -j dirs.json sub-e-e-try "$MOVE"
+
 # =============================================================================
 
 if [ "$select" ] && ! $found; then

@@ -1229,6 +1229,7 @@ restore
 accounts -j dirs.json sub-a-e-from "long $LIST_1" "$MOVE"
 add -j dirs.json sub-a-e "tap $LIST_3" "tap $LIST_2"
 add -j dirs.json sub-a-e-to "long $LIST_1"
+add -j dirs.json sub-a-e-try "$MOVE"
 
 # --- try to move c/e/a to the top-level directory ----------------------------
 
@@ -1238,6 +1239,7 @@ accounts -j dirs.json sub-a-top-from "tap $LIST_3" "tap $LIST_2" \
     "long $LIST_2" "$MOVE"
 add -j dirs.json sub-a-top "$BACK" "$BACK"
 add -j dirs.json sub-a-top-to "long $LIST_1"
+add -j dirs.json sub-a-top-try "$MOVE"
 
 # =============================================================================
 

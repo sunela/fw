@@ -365,11 +365,19 @@ static void long_top(void *ctx, unsigned x, unsigned y)
 }
 
 
-static bool move_prohibited(const struct db_entry *e)
+static bool move_prohibited(const struct db_entry *de)
 {
-	if (e->db->dir == e)
+	const struct db *db = de->db;
+	const struct db_entry *e;
+
+	if (db->dir == de)
 		return 1;
-	return db_is_descendent(e, e->db->dir);
+	if (db_is_descendent(de, db->dir))
+		return 1;
+	for (e = db->dir ? db->dir->children : db->entries; e; e = e->next)
+		if (e != de && !strcmp(de->name, e->name))
+			return 1;
+	return 0;
 }
 
 

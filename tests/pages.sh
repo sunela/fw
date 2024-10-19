@@ -1187,6 +1187,58 @@ save
 add -j dirs.json sub-f-top-4th "long $LIST_4" "$MOVE"
 restore
 
+# === move c/d to c/e/ ========================================================
+
+accounts -j dirs.json sub-d-e-from "tap $LIST_3" "long $LIST_1" "$MOVE"
+add -j dirs.json sub-d-e "tap $LIST_2"
+
+save
+add -j dirs.json sub-d-e-1st "long $LIST_1" "$MOVE"
+restore
+
+save
+add -j dirs.json sub-d-e-2nd "long $LIST_2" "$MOVE"
+restore
+
+save
+add -j dirs.json sub-d-e-3rd "long $LIST_3" "$MOVE"
+restore
+
+# === move b to c/e/ ==========================================================
+
+accounts -j dirs.json sub-b-e-from "long $LIST_2" "$MOVE"
+add -j dirs.json sub-b-e "tap $LIST_3" "tap $LIST_2"
+
+save
+add -j dirs.json sub-b-e-1st "long $LIST_1" "$MOVE"
+restore
+
+save
+add -j dirs.json sub-b-e-2nd "long $LIST_2" "$MOVE"
+restore
+
+save
+add -j dirs.json sub-b-e-3rd "long $LIST_3" "$MOVE"
+restore
+
+# === try to move a to c/e/ ===================================================
+
+# Since there is already an entry "a" in c/e/, this would produce a duplicate
+# name.
+
+accounts -j dirs.json sub-a-e-from "long $LIST_1" "$MOVE"
+add -j dirs.json sub-a-e "tap $LIST_3" "tap $LIST_2"
+add -j dirs.json sub-a-e-to "long $LIST_1"
+
+# --- try to move c/e/a to the top-level directory ----------------------------
+
+# Again, the two "a" would clash.
+
+accounts -j dirs.json sub-a-top-from "tap $LIST_3" "tap $LIST_2" \
+    "long $LIST_2" "$MOVE"
+add -j dirs.json sub-a-top "$BACK" "$BACK"
+add -j dirs.json sub-a-top-to "long $LIST_1"
+
 # =============================================================================
 
 if [ "$select" ] && ! $found; then

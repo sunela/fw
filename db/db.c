@@ -688,6 +688,21 @@ static bool is_prev(const struct db_entry *prev, const struct db_entry *e)
 }
 
 
+static bool tree_id_update(const struct db *db, struct db_entry *dir)
+{
+	struct db_entry *e;
+	bool ok = 1;
+
+	for (e = dir ? dir->children : db->entries; e; e = e->next) {
+		if (!id_to_cwd(dir, e, db_change_field))
+			ok = 0;
+		if (!tree_id_update(db, dir->children))
+			ok = 0;
+	}
+	return ok;
+}
+
+
 static void tree_move(struct db_entry *dir, struct db_entry *e)
 {
 	struct db *db = e->db;
@@ -794,6 +809,7 @@ again2:
 	}
 
 	id_to_cwd(db->dir, e, db_change_field);
+	tree_id_update(db, e);
 	tree_move(db->dir, e);
 
 	db_tsort(db);

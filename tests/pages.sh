@@ -1324,6 +1324,23 @@ add -j dirs.json sub-e-e "tap $LIST_2"
 add -j dirs.json sub-e-e-to "long $LIST_1"
 add -j dirs.json sub-e-e-try "$MOVE"
 
+# === move directory c/e to the top-level directory ===========================
+
+accounts -j dirs.json sub-e-top-from "tap $LIST_3" "long $LIST_2" "$MOVE"
+add -j dirs.json sub-e-top "$BACK"
+
+save
+add -j dirs.json sub-e-top-1st "long $LIST_1" "$MOVE"
+add -j dirs.json sub-e-top-1st-in "tap $LIST_1"
+reload -j dirs.json sub-e-top-1st-in "tap $LIST_1"
+restore
+
+save
+add -j dirs.json sub-e-top-2nd "long $LIST_2" "$MOVE"
+add -j dirs.json sub-e-top-2nd-in "tap $LIST_2"
+reload -j dirs.json sub-e-top-2nd-in "tap $LIST_2"
+restore
+
 # =============================================================================
 
 if [ "$select" ] && ! $found; then

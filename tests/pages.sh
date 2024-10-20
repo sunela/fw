@@ -37,7 +37,7 @@ json()
 page_inner_usage()
 {
 	cat <<EOF
-usage: $0 [-e] [-i] [-j JSON|FILE] [-k] [-n] name [commands]
+usage: $0 [-e] [-i] [-j JSON|FILE] [-k] [-n] [-r PNG] name [commands]
 
 -e  use an account database consisting only of erased blocks
 -i  incrementally build upon the previous test
@@ -47,6 +47,8 @@ usage: $0 [-e] [-i] [-j JSON|FILE] [-k] [-n] name [commands]
     initialize the account database from the specified JSON file
 -k  keep the database file after the test
 -n  no title - suppress printing the title
+-r PNG
+    use the specified PNG file as image reference (default: name.png)
 EOF
 	exit 1
 }
@@ -59,6 +61,7 @@ page_inner()
 	local json=
 	local json_file=$top/accounts.json
 	local title=true
+	local reference=
 
 	keep=false
 	while [ "$1" ]; do
@@ -77,12 +80,15 @@ page_inner()
 			shift;;
 		-n)	title=false
 			shift;;
+		-r)	reference=$2
+			shift 2;;
 		-*)	page_inner_usage;;
 		*)	break;;
 		esac
 	done
 
 	local name=$1
+	: ${reference:=$name.png}
 	shift
 
 	if [ "$mode" = names ]; then
@@ -93,7 +99,7 @@ page_inner()
 	# --- incremental command construction ---
 
 	if $incremental; then
-		eval set - "$last_args" '"$@"'
+		eval set -- "$last_args" '"$@"'
 	fi
 	last_args=
 	for n in "$@"; do
@@ -142,11 +148,11 @@ sys.stdout.buffer.write(b"\xff" * 1024 * 2048);' >"$dir/_db" || exit
 	run)	;;
 	test|delta)
 		convert $reproducible "$dir/_tmp.ppm" "$dir/_tmp.png"
-		[ "`md5sum <\"$dir/$name.png\"`" = \
+		[ "`md5sum <\"$dir/$reference\"`" = \
 		  "`md5sum <\"$dir/_tmp.png\"`" ] || {
-			compare "$dir/$name.png" "$dir/_tmp.png" - |
+			compare "$dir/$reference" "$dir/_tmp.png" - |
 			   if [ "$mode" = delta ]; then
-				montage "$dir/$name.png" - "$dir/_tmp.ppm" \
+				montage "$dir/$reference" - "$dir/_tmp.ppm" \
 				   -geometry +4+0 - | display
 			   else
 				display
@@ -154,7 +160,8 @@ sys.stdout.buffer.write(b"\xff" * 1024 * 2048);' >"$dir/_db" || exit
 			$all || exit
 		}
 		rm -f "$dir/_tmp.png";;
-	store)	convert $reproducible "$dir/_tmp.ppm" "$dir/$name.png" || exit;;
+	store)	convert $reproducible "$dir/_tmp.ppm" "$dir/$reference" ||
+		    exit;;
 	esac
 }
 
@@ -290,6 +297,8 @@ accounts()
 			shift 2;;
 		-k)	opts="$opts -k"
 			shift;;
+		-r)	opts="$opts -r $2"
+			shift 2;;
 		*)	break;;
 		esac
 	done
@@ -1126,7 +1135,7 @@ restore
 
 add dir-empty-over "long 100 200"
 
-# === moving with subdirectories, accounts screens ============================
+# === Common definitions and functions for directory operations ===============
 
 LIST_1="80 82"
 LIST_2="80 124"
@@ -1134,6 +1143,45 @@ LIST_3="80 169"
 LIST_4="80 200"
 BACK="drag 172 164 55 164"
 MOVE="tap 129 168"	# from/to
+
+
+#
+# Reload repeats the session from the last test, then quite, starts again, and
+# runs a new session on the database retained from the first run.
+#
+# We reuse the image stored by the last test, which gives us an automatic
+# verification that things were restored properly, and also avoids having to
+# keep a duplicate. "reload" won't work if this image was not stored.
+# Unfortunately, using the same image limits what can be explored with
+# "reload", and we may want to consider a different approach later.
+#
+
+reload()
+{
+	local opts=
+
+	while [ "$1" ]; do
+		case "$1" in
+		-j)	opts="$opts -j $2"
+			shift 2;;
+		*)	break;;
+		esac
+	done
+
+	local name=$1
+	local saved_mode=$mode
+	shift
+
+	mode=run
+	if ! add -n -k $opts $name-reload; then
+		mode=$saved_mode
+		cleanup
+	else
+		mode=$saved_mode
+		accounts -r $name.png $name-reload "$@"
+	fi
+}
+
 
 #
 # Directory tree structure:
@@ -1147,6 +1195,8 @@ MOVE="tap 129 168"	# from/to
 #     a
 #
 
+# === moving with subdirectories, accounts screens ============================
+
 accounts -j dirs.json sub-top
 add -j dirs.json sub-lvl1 "tap $LIST_3"
 add -j dirs.json sub-lvl2 "tap $LIST_2"
@@ -1156,15 +1206,18 @@ add -j dirs.json sub-lvl2 "tap $LIST_2"
 add -j dirs.json sub-f-c "long $LIST_1" "$MOVE" "$BACK"
 
 save
-add -j dirs.json sub-f-c-1st "long $LIST_1" "$MOVE"
+add -k -j dirs.json sub-f-c-1st "long $LIST_1" "$MOVE"
+reload -j dirs.json sub-f-c-1st "tap $LIST_3"
 restore
 
 save
 add -j dirs.json sub-f-c-2nd "long $LIST_2" "$MOVE"
+reload -j dirs.json sub-f-c-2nd "tap $LIST_3"
 restore
 
 save
 add -j dirs.json sub-f-c-3rd "long $LIST_3" "$MOVE"
+reload -j dirs.json sub-f-c-3rd "tap $LIST_3"
 restore
 
 # --- move c/e/f to top-level -------------------------------------------------
@@ -1173,18 +1226,22 @@ add -j dirs.json sub-f-top "$BACK"
 
 save
 add -j dirs.json sub-f-top-1st "long $LIST_1" "$MOVE"
+reload -j dirs.json sub-f-top-1st
 restore
 
 save
 add -j dirs.json sub-f-top-2nd "long $LIST_2" "$MOVE"
+reload -j dirs.json sub-f-top-2nd
 restore
 
 save
 add -j dirs.json sub-f-top-3rd "long $LIST_3" "$MOVE"
+reload -j dirs.json sub-f-top-3rd
 restore
 
 save
 add -j dirs.json sub-f-top-4th "long $LIST_4" "$MOVE"
+reload -j dirs.json sub-f-top-4th
 restore
 
 # === move c/d to c/e/ ========================================================
@@ -1194,14 +1251,19 @@ add -j dirs.json sub-d-e "tap $LIST_2"
 
 save
 add -j dirs.json sub-d-e-1st "long $LIST_1" "$MOVE"
+# Note: the selection in c/ changes from 2nd to 1st, since we moved the first
+# entry.
+reload -j dirs.json sub-d-e-1st "tap $LIST_3" "tap $LIST_1"
 restore
 
 save
 add -j dirs.json sub-d-e-2nd "long $LIST_2" "$MOVE"
+reload -j dirs.json sub-d-e-2nd "tap $LIST_3" "tap $LIST_1"
 restore
 
 save
 add -j dirs.json sub-d-e-3rd "long $LIST_3" "$MOVE"
+reload -j dirs.json sub-d-e-3rd "tap $LIST_3" "tap $LIST_1"
 restore
 
 # === move b to c/e/ ==========================================================
@@ -1211,14 +1273,17 @@ add -j dirs.json sub-b-e "tap $LIST_3" "tap $LIST_2"
 
 save
 add -j dirs.json sub-b-e-1st "long $LIST_1" "$MOVE"
+reload -j dirs.json sub-b-e-1st "tap $LIST_2" "tap $LIST_2"
 restore
 
 save
 add -j dirs.json sub-b-e-2nd "long $LIST_2" "$MOVE"
+reload -j dirs.json sub-b-e-2nd "tap $LIST_2" "tap $LIST_2"
 restore
 
 save
 add -j dirs.json sub-b-e-3rd "long $LIST_3" "$MOVE"
+reload -j dirs.json sub-b-e-3rd "tap $LIST_2" "tap $LIST_2"
 restore
 
 # === try to move a to c/e/ ===================================================

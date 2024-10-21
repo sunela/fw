@@ -68,13 +68,10 @@ enum __attribute__((__packed__)) field_type {
 /*
  * Encodings:
  *
- * ID, prev:
- *   Now: <non-NUL characters>
- *   Later: (<non-NUL characters> NUL)+ <non-NUL characters>
- * User, E-Mail, Password:
- * <non-NUL characters>
- * HOTP-Secret, HOTP-Counter, TOTP-Secret:
- * <bytes>
+ * ID, prev: (<non-NUL characters> NUL)+ <non-NUL characters>
+ * Prev: <non-NUL characters>
+ * User, E-Mail, Password: <non-NUL characters>
+ * HOTP-Secret, HOTP-Counter, TOTP-Secret: <bytes>
  */
 
 struct db_field {

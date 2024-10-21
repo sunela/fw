@@ -11,9 +11,17 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "assert.h"
+
+
+/*
+ * The SDK does not allow malloc(0). We therefore add the "assert" below to
+ * catch such mallocs already in the simulator.
+ */
 
 #define alloc_size(s)					\
     ({  void *alloc_size_tmp = malloc(s);		\
+	assert((s) > 0);					\
 	if (!alloc_size_tmp) {				\
 		perror("malloc");			\
 		exit(1);				\

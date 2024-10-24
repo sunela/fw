@@ -1,0 +1,374 @@
+#!/bin/sh
+#
+# Common - Common functions and definitions for UI tests
+#
+# This work is licensed under the terms of the MIT License.
+# A copy of the license can be found in the file LICENSE.MIT
+#
+
+#
+# We generate PPM because its easy, and store as PNG because it's
+# space-efficient.
+#
+
+
+#
+# Image comparison:
+# https://stackoverflow.com/q/5132749/11496135
+#
+
+#
+# Make PNG reproducible:
+# https://superuser.com/a/1220703
+#
+reproducible="-define png:exclude-chunks=date,time"
+
+
+PK=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA====
+
+
+json()
+{
+	"$top/tools/accenc.py" /dev/stdin $PK >"$dir/_db" ||
+	    { rm -f "$dir/_dn"; exit 1; }
+}
+
+
+page_inner_usage()
+{
+	cat <<EOF
+usage: $0 [-e] [-i] [-j JSON|FILE] [-k] [-n] [-r PNG] name [commands]
+
+-e  use an account database consisting only of erased blocks
+-i  incrementally build upon the previous test
+-j JSON
+    use the JSON string for the account database
+-j FILE
+    initialize the account database from the specified JSON file
+-k  keep the database file after the test
+-n  no title - suppress printing the title
+-r PNG
+    use the specified PNG file as image reference (default: name.png)
+EOF
+	exit 1
+}
+
+
+page_inner()
+{
+	local erase=false
+	local incremental=false
+	local json=
+	local json_file=$top/accounts.json
+	local title=true
+	local reference=
+
+	keep=false
+	while [ "$1" ]; do
+		case "$1" in
+		-e)	erase=true
+			shift;;
+		-i)	incremental=true
+			shift;;
+		-j)	if [ -r "$2" ]; then
+				json_file=$2
+			else
+				json=$2
+			fi
+			shift 2;;
+		-k)	keep=true
+			shift;;
+		-n)	title=false
+			shift;;
+		-r)	reference=$2
+			shift 2;;
+		-*)	page_inner_usage;;
+		*)	break;;
+		esac
+	done
+
+	local name=$1
+	: ${reference:=$name.png}
+	shift
+
+	if [ "$mode" = names ]; then
+		$title && echo $name
+		return
+	fi
+
+	# --- incremental command construction ---
+
+	if $incremental; then
+		eval set -- "$last_args" '"$@"'
+	fi
+	last_args=
+	for n in "$@"; do
+		last_args="$last_args '$n'"
+	done
+
+	# --- test selection ---
+
+	[ "$mode" = last ] || [ -z "$select" -o "$name" = "$select" ] || return
+
+	$title && echo === $name ===
+	found=true
+
+	if [ ! -r "$dir/_db" ]; then
+		if $erase; then
+			python3 -c 'import sys
+sys.stdout.buffer.write(b"\xff" * 1024 * 2048);' >"$dir/_db" || exit
+		elif [ "$json" ]; then
+			echo "$json" |
+			    "$top/tools/accenc.py" /dev/stdin $PK >"$dir/_db" ||
+			    exit
+		else
+			"$top/tools/accenc.py" "$json_file" $PK \
+			    >"$dir/_db" || exit
+		fi
+	fi
+	if $gdb; then
+		if [ "$mode" = interact ]; then
+			interact=interact
+		else
+			interact=
+		fi
+		gdb --args $top/sim $quiet -d "$dir/_db" -C "$@" $interact
+		exit
+	elif [ "$mode" = interact ]; then
+		$top/sim $quiet -d "$dir/_db" -C "$@" interact
+		exit
+	else
+		$top/sim $quiet -d "$dir/_db" -C "$@" "screen $dir/_tmp.ppm" ||
+		    exit
+	fi
+
+	case "$mode" in
+	last)	return;;
+	show)	display "$dir/_tmp.ppm";;
+	run)	;;
+	test|delta)
+		convert $reproducible "$dir/_tmp.ppm" "$dir/_tmp.png"
+		[ "`md5sum <\"$dir/$reference\"`" = \
+		  "`md5sum <\"$dir/_tmp.png\"`" ] || {
+			compare "$dir/$reference" "$dir/_tmp.png" - |
+			   if [ "$mode" = delta ]; then
+				montage "$dir/$reference" - "$dir/_tmp.ppm" \
+				   -geometry +4+0 - | display
+			   else
+				display
+			   fi
+			$all || exit
+		}
+		rm -f "$dir/_tmp.png";;
+	store)	convert $reproducible "$dir/_tmp.ppm" "$dir/$reference" ||
+		    exit;;
+	esac
+}
+
+
+cleanup()
+{
+	rm -f "$dir/_tmp.ppm" "$dir/_db"
+}
+
+
+page()
+{
+	page_inner "$@"
+	local rc=$?
+	$keep || cleanup
+	return $rc
+}
+
+
+add()
+{
+	page -i "$@"
+}
+
+
+save()
+{
+	saved_args=$last_args
+}
+
+
+restore()
+{
+	last_args=$saved_args
+}
+
+
+usage()
+{
+	cat <<EOF 1>&2
+usage: $0 [-a] [--gdb] [-v] [-x]
+          [run|show|delta|interact|last|test|store|names [page-name]]
+
+-a  applies to "test" and "delta": run all test cases and show the ones where
+    differences are detected. Without -a, "test" stops after the first
+    difference. The exit code is non-zero if the last test run produced a
+   difference.
+--gdb
+    run the simulator under gdb
+-v  enable debug output of the simulator
+-x  set shell command tracing with set -x
+EOF
+	exit 1
+}
+
+
+self=`which "$0"`
+dir=`dirname "$self"`
+top=$dir/..
+
+all=false
+gdb=false
+quiet=-q
+
+while [ "$1" ]; do
+	case "$1" in
+	-a)	all=true;;
+	--gdb)	gdb=true;;
+	-v)	quiet=;;
+	-x)	set -x;;
+	-*)	usage;;
+	*)	break;;
+	esac
+	shift
+done
+
+case "$1" in
+run|show|delta|test|store|last|names)
+	mode=$1;;
+inter|interact)
+	mode=interact;;
+"")	mode=delta;;
+*)	usage;;
+esac
+
+select=$2
+found=false
+
+rm -f "$dir/_db"
+
+accounts()
+{
+	local opts=
+
+	while [ "$1" ]; do
+		case "$1" in
+		-j)	opts="$opts -j $2"
+			shift 2;;
+		-k)	opts="$opts -k"
+			shift;;
+		-r)	opts="$opts -r $2"
+			shift 2;;
+		*)	break;;
+		esac
+	done
+
+	local name=$1
+	shift
+
+	page $opts $name \
+	    "random 1" button "$PIN_1" "$PIN_2" "$PIN_3" "$PIN_4" \
+	    "$PIN_NEXT" "$@"
+}
+
+
+# --- PIN keypad --------------------------------------------------------------
+
+PIN_1="tap 123 71"
+PIN_2="tap 49 135"
+PIN_3="tap 130 252"
+PIN_4="tap 125 135"
+PIN_NEXT="tap 191 252"
+
+# --- Text entry --------------------------------------------------------------
+
+ENTRY_1="tap 43 84"
+ENTRY_2="tap 119 84"
+ENTRY_3="tap 200 84"
+ENTRY_4="tap 43 137"
+ENTRY_5="tap 119 137"
+ENTRY_6="tap 200 137"
+ENTRY_7="tap 43 191"
+ENTRY_8="tap 119 191"
+ENTRY_9="tap 200 191"
+ENTRY_L="tap 43 245"
+ENTRY_0="tap 119 245"
+ENTRY_R="tap 200 245"
+
+
+#
+# Reload repeats the session from the last test, then quite, starts again, and
+# runs a new session on the database retained from the first run.
+#
+# We reuse the image stored by the last test, which gives us an automatic
+# verification that things were restored properly, and also avoids having to
+# keep a duplicate. "reload" won't work if this image was not stored.
+# Unfortunately, using the same image limits what can be explored with
+# "reload", and we may want to consider a different approach later.
+#
+
+reload()
+{
+	local opts=
+
+	while [ "$1" ]; do
+		case "$1" in
+		-j)	opts="$opts -j $2"
+			shift 2;;
+		*)	break;;
+		esac
+	done
+
+	local name=$1
+	local saved_mode=$mode
+	shift
+
+	mode=run
+	if ! add -n -k $opts $name-reload; then
+		mode=$saved_mode
+		cleanup
+	else
+		mode=$saved_mode
+		accounts -r $name.png $name-reload "$@"
+	fi
+}
+
+
+atend()
+{
+	if [ "$select" ] && ! $found; then
+		echo "$select: not found" 1>&2
+		exit 1
+	fi
+	[ "$1" = last ] && display "$dir/_tmp.ppm"
+	exit 0
+}
+
+#
+# Tentative naming convention:
+#
+# - page: page which, together with an optional qualifier, uniquely defines
+#   where and in what context we are, e.g., account, setup
+#   Here, overlays don't count as pages;
+# - page-qualifier: if there are different pages of a type, e.g., account-HOTP
+# - item-on-page: if we reference a specific item on the page, e.g.,
+#   accounts-demo-...
+# - sub-page: if we invoke a sub-page on a main page, but are still in the
+#   process of reaching a new page, e.g., accounts-top-over
+#   If we are at an overlay, use "over". If we have progressed past an overlay,
+#   use the option selected (or consider this a new page), e.g., "add" would be
+#   somewhere > Overlay > Add, because what happens may depend on "somewhere",
+#   but we reduce ... > Setup to just "setup", because it's the same
+#   everywhere.
+#   Can also be used to indicate a point in a sequence, e.g.,
+#   accounts-demo-added-me, where we are interested in what the accounts list
+#   looks like after having added "Me".
+# - context at this point, e.g., m2 for text entry with the two letters "Me"
+#
+# This is probably too complicated. Revisit the naming issue later.
+#
